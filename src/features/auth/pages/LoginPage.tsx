@@ -12,7 +12,7 @@ import { setCredentials } from '../authSlice';
 import { useAppDispatch } from '@/hooks';
 
 const STATIC_USERS = [
-  { email: 'admin@npc.qa', password: 'admin123', role: 'ADMIN' },
+  { email: 'admin@sbr.com', password: 'admin123', role: 'ADMIN' },
   { email: 'analyst@npc.qa', password: 'analyst123', role: 'ANALYST' },
   { email: 'viewer@npc.qa', password: 'viewer123', role: 'VIEWER' },
 ];
