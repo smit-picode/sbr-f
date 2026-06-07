@@ -14,6 +14,7 @@ import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
@@ -22,6 +23,7 @@ function is400(error: unknown): boolean {
 export function ContactsListPage() {
   const [filters, setFilters] = useState<ContactFilters>(CONTACT_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrContact | null>(null);
+  const { t } = useTranslation();
 
   // Debounce search field
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -50,8 +52,8 @@ export function ContactsListPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Contacts"
-        description="Business contacts associated with registered establishments"
+        title={t('pages.contacts.title')}
+        description={t('pages.contacts.description')}
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Users className="h-4 w-4" />
@@ -64,7 +66,7 @@ export function ContactsListPage() {
         <SearchInput
           value={filters.search ?? ''}
           onChange={(v) => handleFilterChange({ search: v, page: 1 })}
-          placeholder="Search by name, email, or phone..."
+          placeholder={t('filters.searchByContact')}
         />
       </div>
 

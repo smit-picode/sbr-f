@@ -2,7 +2,7 @@ export interface AuditLog {
   ID: number;
   TABLE_NAME: string;
   RECORD_ID: number;
-  COMMENT: string;
+  REASON: string;
   CHANGED_BY: string;
   APPROVED_BY: string | null;
   CREATED_AT: string;

@@ -1,0 +1,86 @@
+import type { Translations } from './en';
+
+export const ar: Translations = {
+  nav: {
+    establishments: 'المنشآت',
+    contacts: 'جهات الاتصال',
+    addresses: 'العناوين',
+    auditLog: 'سجل التدقيق',
+  },
+  pageBanner: {
+    '/frame': 'سجل الأعمال الإحصائي',
+    '/contacts': 'إدارة جهات الاتصال',
+    '/addresses': 'إدارة العناوين',
+    '/audit-log': 'سجل التدقيق',
+  },
+  pages: {
+    frame: {
+      title: 'المنشآت',
+      description: 'سجل الأعمال الإحصائي — سجلات المنشآت',
+    },
+    contacts: {
+      title: 'جهات الاتصال',
+      description: 'جهات الاتصال التجارية المرتبطة بالمنشآت المسجلة',
+    },
+    addresses: {
+      title: 'العناوين',
+      description: 'سجلات العناوين الفيزيائية المرتبطة بالمنشآت المسجلة',
+    },
+    auditLog: {
+      title: 'سجل التدقيق',
+      description: 'تتبع جميع تغييرات البيانات عبر المنشآت وجهات الاتصال والعناوين',
+    },
+  },
+  filters: {
+    searchByName: 'البحث بالاسم...',
+    searchByContact: 'البحث بالاسم أو البريد الإلكتروني أو الهاتف...',
+    searchByAddress: 'البحث بالمنطقة أو الشارع أو QARS...',
+    filterByRecordId: 'تصفية برقم السجل...',
+    status: 'الحالة',
+    sector: 'القطاع',
+    source: 'المصدر',
+    allTables: 'جميع الجداول',
+    reset: 'إعادة تعيين',
+  },
+  table: {
+    showing: 'عرض',
+    to: 'إلى',
+    of: 'من',
+    records: 'سجلات',
+    rowsPerPage: 'صفوف في الصفحة:',
+    page: 'صفحة',
+    noRecords: 'لا توجد سجلات',
+    noRecordsDesc: 'حاول تعديل معايير البحث أو التصفية.',
+    loadError: 'حدث خطأ',
+    loadErrorDesc: 'فشل تحميل البيانات. يرجى المحاولة مرة أخرى.',
+    retry: 'إعادة المحاولة',
+    loading: 'جاري التحميل...',
+  },
+  actions: {
+    edit: 'تعديل',
+    cancel: 'إلغاء',
+    saveChanges: 'حفظ التغييرات',
+    confirmSave: 'تأكيد وحفظ',
+    saving: 'جاري الحفظ...',
+    signOut: 'تسجيل الخروج',
+    profile: 'الملف الشخصي',
+  },
+  comment: {
+    title: 'إضافة تعليق على التغيير',
+    description: 'قدّم سببًا أو وصفًا لهذا التغيير. سيتم تخزينه في سجل التدقيق.',
+    label: 'التعليق',
+    required: 'التعليق مطلوب قبل الحفظ.',
+    placeholder: 'مثال: تم تصحيح اسم المنشأة بناءً على الرخصة التجارية...',
+  },
+  login: {
+    title: 'تسجيل الدخول',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    signIn: 'دخول',
+    signingIn: 'جاري الدخول...',
+    branding: 'سجل الأعمال الإحصائي',
+    brandingSub: 'المجلس الأعلى للتخطيط',
+    brandingCountry: 'دولة قطر',
+    copyright: 'المجلس الأعلى للتخطيط — قطر',
+  },
+};

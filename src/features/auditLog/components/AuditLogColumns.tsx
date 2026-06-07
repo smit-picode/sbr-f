@@ -39,8 +39,8 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
     ),
   },
   {
-    accessorKey: 'COMMENT',
-    header: 'Comment',
+    accessorKey: 'REASON',
+    header: 'Reason',
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700">{getValue<string>() || '—'}</span>
     ),

@@ -14,10 +14,12 @@ import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function AddressesListPage() {
   const [filters, setFilters] = useState<AddressFilters>(ADDRESS_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrAddress | null>(null);
+  const { t } = useTranslation();
 
   // Debounce search field
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -44,8 +46,8 @@ export function AddressesListPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Addresses"
-        description="Physical address records linked to registered establishments"
+        title={t('pages.addresses.title')}
+        description={t('pages.addresses.description')}
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <MapPin className="h-4 w-4" />
@@ -58,7 +60,7 @@ export function AddressesListPage() {
         <SearchInput
           value={filters.search ?? ''}
           onChange={(v) => handleFilterChange({ search: v, page: 1 })}
-          placeholder="Search by zone, street, or QARS..."
+          placeholder={t('filters.searchByAddress')}
         />
       </div>
 

@@ -14,6 +14,7 @@ import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { Building2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
@@ -22,6 +23,7 @@ function is400(error: unknown): boolean {
 export function FrameListPage() {
   const [filters, setFilters] = useState<FrameFilters>(FRAME_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrFrame | null>(null);
+  const { t } = useTranslation();
 
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -57,8 +59,8 @@ export function FrameListPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Establishments"
-        description="Statistical Business Register — Establishment records"
+        title={t('pages.frame.title')}
+        description={t('pages.frame.description')}
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Building2 className="h-4 w-4" />

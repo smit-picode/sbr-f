@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  Building2,
   Users,
   MapPin,
   ClipboardList,
@@ -16,10 +15,10 @@ import {
 import { cn } from '@/lib/utils';
 import { NAVIGATION, type NavItem } from '@/constants/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Logo } from '@/components/common/Logo';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
-  Building2,
   Users,
   MapPin,
   ClipboardList,
@@ -84,25 +83,10 @@ export function Sidebar() {
         <div
           className={cn(
             'flex items-center h-14 px-4 border-b border-slate-800 shrink-0',
-            collapsed ? 'justify-center' : 'justify-between'
+            collapsed ? 'justify-center' : 'gap-2'
           )}
         >
-          {!collapsed && (
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded bg-blue-600 flex items-center justify-center">
-                <Building2 className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white leading-none">SBR</p>
-                <p className="text-[10px] text-slate-400 leading-none mt-0.5">NPC Qatar</p>
-              </div>
-            </div>
-          )}
-          {collapsed && (
-            <div className="h-7 w-7 rounded bg-blue-600 flex items-center justify-center">
-              <Building2 className="h-4 w-4 text-white" />
-            </div>
-          )}
+          <Logo size="sm" showText={!collapsed} />
         </div>
 
         {/* Navigation */}

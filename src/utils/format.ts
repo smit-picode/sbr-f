@@ -1,7 +1,7 @@
 export function formatDate(value: string | null | undefined): string {
   if (!value) return '—';
   try {
-    return new Date(value).toLocaleDateString('en-US', {
+    return new Date(value).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'short',
       day: '2-digit',
@@ -13,7 +13,7 @@ export function formatDate(value: string | null | undefined): string {
 
 export function formatNumber(value: number | null | undefined): string {
   if (value == null) return '—';
-  return value.toLocaleString('en-US');
+  return value.toLocaleString('en-GB');
 }
 
 export function nullableText(value: string | null | undefined): string {

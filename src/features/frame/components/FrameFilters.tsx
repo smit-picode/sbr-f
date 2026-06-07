@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
 import type { FrameFilters } from '@/types';
 import { EST_STATUS_OPTIONS, SECTOR_OPTIONS, SOURCE_CODE_OPTIONS } from '@/constants';
+import { useTranslation } from 'react-i18next';
 
 interface FrameFiltersProps {
   filters: FrameFilters;
@@ -15,17 +16,19 @@ interface FrameFiltersProps {
 }
 
 export function FrameFiltersBar({ filters, onFilterChange, onReset, isDefault = false }: FrameFiltersProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
       <SearchInput
         value={filters.search ?? ''}
         onChange={(v) => onFilterChange({ search: v, page: 1 })}
-        placeholder="Search by name..."
+        placeholder={t('filters.searchByName')}
       />
 
       <Select value={filters.estStatus ?? ''} onValueChange={(v) => onFilterChange({ estStatus: v, page: 1 })}>
         <SelectTrigger className="w-36">
-          <SelectValue placeholder="Status" />
+          <SelectValue placeholder={t('filters.status')} />
         </SelectTrigger>
         <SelectContent>
           {EST_STATUS_OPTIONS.map((opt) => (
@@ -38,7 +41,7 @@ export function FrameFiltersBar({ filters, onFilterChange, onReset, isDefault = 
 
       <Select value={filters.sectorId ?? ''} onValueChange={(v) => onFilterChange({ sectorId: v, page: 1 })}>
         <SelectTrigger className="w-44">
-          <SelectValue placeholder="Sector" />
+          <SelectValue placeholder={t('filters.sector')} />
         </SelectTrigger>
         <SelectContent>
           {SECTOR_OPTIONS.map((opt) => (
@@ -51,7 +54,7 @@ export function FrameFiltersBar({ filters, onFilterChange, onReset, isDefault = 
 
       <Select value={filters.sourceCode ?? ''} onValueChange={(v) => onFilterChange({ sourceCode: v, page: 1 })}>
         <SelectTrigger className="w-36">
-          <SelectValue placeholder="Source" />
+          <SelectValue placeholder={t('filters.source')} />
         </SelectTrigger>
         <SelectContent>
           {SOURCE_CODE_OPTIONS.map((opt) => (
@@ -71,7 +74,7 @@ export function FrameFiltersBar({ filters, onFilterChange, onReset, isDefault = 
           className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
         >
           <RotateCcw className="h-3.5 w-3.5" />
-          Reset
+          {t('filters.reset')}
         </Button>
       </div>
     </div>

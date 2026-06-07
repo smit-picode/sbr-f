@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { NAVIGATION } from '@/constants/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
+import { useLanguage } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +18,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Logo } from '@/components/common/Logo';
+
+const NAV_KEY_MAP: Record<string, string> = {
+  '/frame':     'nav.establishments',
+  '/contacts':  'nav.contacts',
+  '/addresses': 'nav.addresses',
+  '/audit-log': 'nav.auditLog',
+};
 
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
+  const { toggleLanguage, isArabic } = useLanguage();
+  const { t } = useTranslation();
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'U';
 
   function handleLogout() {
@@ -33,41 +45,7 @@ export function TopNav() {
     <header className="h-14 bg-white border-b border-slate-200 flex items-center px-6 gap-6 shrink-0 z-10">
       {/* Logo */}
       <Link href="/frame" className="flex items-center gap-2.5 shrink-0">
-        <div className="h-8 w-8 flex items-center justify-center">
-          <svg viewBox="0 0 80 80" className="h-8 w-8" fill="none">
-            {/* Qatar emblem: crossed swords + dhow + palm */}
-            <g fill="#A71D3A">
-              {/* Left sword */}
-              <rect x="8" y="58" width="3" height="24" rx="1.5" transform="rotate(-40 8 58)" />
-              <polygon points="8,58 5,65 11,65" />
-              {/* Right sword */}
-              <rect x="60" y="58" width="3" height="24" rx="1.5" transform="rotate(40 60 58)" />
-              <polygon points="72,58 69,65 75,65" />
-              {/* Water waves */}
-              <path d="M15 62 Q22 58 29 62 Q36 66 43 62 Q50 58 57 62 Q64 66 65 62" stroke="#A71D3A" strokeWidth="2" fill="none" />
-              {/* Dhow hull */}
-              <ellipse cx="40" cy="55" rx="18" ry="5" />
-              {/* Dhow mast */}
-              <rect x="39" y="32" width="2" height="23" />
-              {/* Dhow sail */}
-              <polygon points="41,33 58,52 41,52" opacity="0.85" />
-              {/* Left palm trunk */}
-              <rect x="20" y="30" width="3" height="22" rx="1.5" transform="rotate(-5 20 30)" />
-              {/* Left palm fronds */}
-              <ellipse cx="19" cy="28" rx="7" ry="4" transform="rotate(-20 19 28)" />
-              <ellipse cx="22" cy="26" rx="7" ry="3.5" transform="rotate(10 22 26)" />
-              {/* Right palm trunk */}
-              <rect x="57" y="30" width="3" height="22" rx="1.5" transform="rotate(5 57 30)" />
-              {/* Right palm fronds */}
-              <ellipse cx="61" cy="28" rx="7" ry="4" transform="rotate(20 61 28)" />
-              <ellipse cx="58" cy="26" rx="7" ry="3.5" transform="rotate(-10 58 26)" />
-            </g>
-          </svg>
-        </div>
-        <div className="leading-none">
-          <p className="text-sm font-bold text-slate-900">SBR</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">NPC Qatar</p>
-        </div>
+        <Logo size="sm" showText variant="light" />
       </Link>
 
       {/* Divider */}
@@ -77,6 +55,7 @@ export function TopNav() {
       <nav className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
         {NAVIGATION.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          const navKey = NAV_KEY_MAP[item.href];
           return (
             <Link
               key={item.href}
@@ -88,22 +67,38 @@ export function TopNav() {
                   : 'font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               )}
             >
-              {item.title}
+              {navKey ? t(navKey) : item.title}
             </Link>
           );
         })}
       </nav>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
+
+        {/* Language Toggle */}
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+          title={isArabic ? 'Switch to English' : 'التبديل إلى العربية'}
+        >
+          {isArabic ? (
+            <><span>إنجليزي</span><span>English</span></>
+          ) : (
+            <><span>Arabic</span><span>عربي</span></>
+          )}
+        </button>
+
+        {/* Home */}
         <button
           onClick={() => router.push('/frame')}
           className="h-8 w-8 flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
-          title="Home"
+          title={isArabic ? 'الرئيسية' : 'Home'}
         >
           <Home className="h-4 w-4" />
         </button>
 
+        {/* User Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-md pl-2 pr-1.5 py-1 hover:bg-slate-50 transition-colors">
@@ -122,11 +117,11 @@ export function TopNav() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('actions.myAccount')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              {t('actions.profile')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -134,7 +129,7 @@ export function TopNav() {
               className="text-red-600 focus:text-red-600 focus:bg-red-50"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              {t('actions.signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

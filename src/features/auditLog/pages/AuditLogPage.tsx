@@ -13,6 +13,7 @@ import type { AuditLogFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 20 };
 
@@ -25,6 +26,7 @@ const TABLE_OPTIONS = [
 
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
+  const { t } = useTranslation();
 
   const { data, isLoading, isError, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
     refetchOnMountOrArgChange: true,
@@ -44,8 +46,8 @@ export function AuditLogPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Audit Log"
-        description="Track all data changes made across Establishments, Contacts and Addresses"
+        title={t('pages.auditLog.title')}
+        description={t('pages.auditLog.description')}
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <ClipboardList className="h-4 w-4" />
@@ -60,7 +62,7 @@ export function AuditLogPage() {
           onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
         >
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="All Tables" />
+            <SelectValue placeholder={t('filters.allTables')} />
           </SelectTrigger>
           <SelectContent>
             {TABLE_OPTIONS.map((o) => (
