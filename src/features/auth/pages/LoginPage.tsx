@@ -6,19 +6,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { setCredentials } from '../authSlice';
+import { useLoginMutation } from '../api/authApi';
 import { useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
 import { Logo } from '@/components/common/Logo';
-
-const STATIC_USERS = [
-  { email: 'admin@sbr.com', password: 'admin123', role: 'ADMIN' },
-  { email: 'analyst@npc.qa', password: 'analyst123', role: 'ANALYST' },
-  { email: 'viewer@npc.qa', password: 'viewer123', role: 'VIEWER' },
-];
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -33,8 +29,8 @@ export function LoginPage() {
   const { t } = useTranslation();
   const { isArabic, toggleLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginMutation, { isLoading }] = useLoginMutation();
 
   const {
     register,
@@ -42,25 +38,15 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
-  function onSubmit(values: LoginForm) {
+  async function onSubmit(values: LoginForm) {
     setLoginError(null);
-    setIsLoading(true);
-
-    // Simulate async for UX
-    setTimeout(() => {
-      const user = STATIC_USERS.find(
-        (u) => u.email === values.email && u.password === values.password
-      );
-
-      if (!user) {
-        setLoginError('Invalid email or password. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-
-      dispatch(setCredentials({ token: `static-token-${user.role}`, role: user.role, email: user.email }));
+    try {
+      const result = await loginMutation(values).unwrap();
+      dispatch(setCredentials(result.data!));
       router.push('/frame');
-    }, 500);
+    } catch {
+      setLoginError('Invalid email or password. Please try again.');
+    }
   }
 
   return (
