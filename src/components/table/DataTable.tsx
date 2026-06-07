@@ -20,7 +20,7 @@ import { TableLoader } from '@/components/common/Loader';
 import { NoData } from '@/components/common/NoData';
 import { ErrorState } from '@/components/common/ErrorState';
 import { TablePagination } from './TablePagination';
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,40 +53,6 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [hasHScroll, setHasHScroll] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const overflows = el.scrollWidth > el.clientWidth + 1;
-    setHasHScroll(overflows);
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    updateScrollState();
-    el.addEventListener('scroll', updateScrollState);
-    const ro = new ResizeObserver(updateScrollState);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener('scroll', updateScrollState);
-      ro.disconnect();
-    };
-  }, [updateScrollState]);
-
-  // Runs synchronously after DOM mutations so table is fully laid out before measuring
-  useLayoutEffect(() => {
-    updateScrollState();
-  }, [data, isLoading, updateScrollState]);
-
-  const handleScroll = (dir: 'left' | 'right') => {
-    scrollRef.current?.scrollBy({ left: dir === 'right' ? 300 : -300, behavior: 'smooth' });
-  };
 
   const table = useReactTable({
     data,
@@ -173,11 +139,6 @@ export function DataTable<TData, TValue>({
         total={total}
         onPageChange={onPageChange}
         onLimitChange={onLimitChange}
-        hasHScroll={hasHScroll}
-        canScrollLeft={canScrollLeft}
-        canScrollRight={canScrollRight}
-        onScrollLeft={() => handleScroll('left')}
-        onScrollRight={() => handleScroll('right')}
       />
     </div>
   );
