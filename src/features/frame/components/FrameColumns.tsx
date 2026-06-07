@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { nullableText, formatDate } from '@/utils/format';
 import { Pencil } from 'lucide-react';
 
-const h = (s: string) => s.replaceAll('_', ' ');
-
 function MonoCell({ value }: { value: string | null | undefined }) {
   return value ? (
     <span className="font-mono text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{value}</span>
@@ -28,11 +26,13 @@ function DateCell({ value }: { value: string | null | undefined }) {
   return <span className="text-sm text-slate-600">{formatDate(value ?? null)}</span>;
 }
 
-export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrFrame>[] => [
+type TFunc = (key: string) => string;
+
+export const getFrameColumns = (onEdit: (row: SbrFrame) => void, t: TFunc): ColumnDef<SbrFrame>[] => [
   // ── Core identifiers
   {
     accessorKey: 'SBR_ID',
-    header: h('SBR_ID'),
+    header: t('columns.SBR_ID'),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
     ),
@@ -40,14 +40,14 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'SOURCE_CODE',
-    header: h('SOURCE_CODE'),
+    header: t('columns.SOURCE_CODE'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
 
   // ── English names
   {
     accessorKey: 'NAME_ENU',
-    header: h('NAME_ENU'),
+    header: t('columns.NAME_ENU'),
     cell: ({ getValue, row }) => {
       const nameEnu = getValue<string | null>();
       const nameAra = row.original.NAME_ARA;
@@ -67,96 +67,96 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'NAME_ENU_SOURCE',
-    header: h('NAME_ENU_SOURCE'),
+    header: t('columns.NAME_ENU_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'NAME_ARA_SOURCE',
-    header: h('NAME_ARA_SOURCE'),
+    header: t('columns.NAME_ARA_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'TRADE_NAME_ENU',
-    header: h('TRADE_NAME_ENU'),
+    header: t('columns.TRADE_NAME_ENU'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'TRADE_NAME_ENU_SOURCE',
-    header: h('TRADE_NAME_ENU_SOURCE'),
+    header: t('columns.TRADE_NAME_ENU_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'TRADE_NAME_ARA',
-    header: h('TRADE_NAME_ARA'),
+    header: t('columns.TRADE_NAME_ARA'),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>
     ),
   },
   {
     accessorKey: 'TRADE_NAME_ARA_SOURCE',
-    header: h('TRADE_NAME_ARA_SOURCE'),
+    header: t('columns.TRADE_NAME_ARA_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'NPC_NAME_ENU',
-    header: h('NPC_NAME_ENU'),
+    header: t('columns.NPC_NAME_ENU'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'NPC_NAME_ENU_SOURCE',
-    header: h('NPC_NAME_ENU_SOURCE'),
+    header: t('columns.NPC_NAME_ENU_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'NPC_NAME_ARA',
-    header: h('NPC_NAME_ARA'),
+    header: t('columns.NPC_NAME_ARA'),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>
     ),
   },
   {
     accessorKey: 'NPC_NAME_ARA_SOURCE',
-    header: h('NPC_NAME_ARA_SOURCE'),
+    header: t('columns.NPC_NAME_ARA_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── Status
   {
     accessorKey: 'EST_STATUS',
-    header: h('EST_STATUS'),
+    header: t('columns.EST_STATUS'),
     cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} />,
     enableSorting: true,
   },
   {
     accessorKey: 'EST_STATUS_SOURCE',
-    header: h('EST_STATUS_SOURCE'),
+    header: t('columns.EST_STATUS_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EST_STATUS_CATEGORY',
-    header: h('EST_STATUS_CATEGORY'),
+    header: t('columns.EST_STATUS_CATEGORY'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EST_STATUS_CATEGORY_SOURCE',
-    header: h('EST_STATUS_CATEGORY_SOURCE'),
+    header: t('columns.EST_STATUS_CATEGORY_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── Classification
   {
     accessorKey: 'LEGAL_TYPE',
-    header: h('LEGAL_TYPE'),
+    header: t('columns.LEGAL_TYPE'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'LEGAL_TYPE_SOURCE',
-    header: h('LEGAL_TYPE_SOURCE'),
+    header: t('columns.LEGAL_TYPE_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'SECTOR_ID',
-    header: h('SECTOR_ID'),
+    header: t('columns.SECTOR_ID'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? <Badge variant="secondary">{val}</Badge> : <span className="text-slate-400">—</span>;
@@ -164,24 +164,24 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'SECTOR_ID_SOURCE',
-    header: h('SECTOR_ID_SOURCE'),
+    header: t('columns.SECTOR_ID_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'ISIC_CODE',
-    header: h('ISIC_CODE'),
+    header: t('columns.ISIC_CODE'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'ISIC_CODE_SOURCE',
-    header: h('ISIC_CODE_SOURCE'),
+    header: t('columns.ISIC_CODE_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── Branch / Holding
   {
     accessorKey: 'MAIN_BRANCH_FLG',
-    header: h('MAIN_BRANCH_FLG'),
+    header: t('columns.MAIN_BRANCH_FLG'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val === 'MAIN' ? (
@@ -195,12 +195,12 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'MAIN_BRANCH_FLG_SOURCE',
-    header: h('MAIN_BRANCH_FLG_SOURCE'),
+    header: t('columns.MAIN_BRANCH_FLG_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'MAIN_BRANCH_SBR_ID',
-    header: h('MAIN_BRANCH_SBR_ID'),
+    header: t('columns.MAIN_BRANCH_SBR_ID'),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
@@ -212,24 +212,24 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'MAIN_BRANCH_SBR_ID_SOURCE',
-    header: h('MAIN_BRANCH_SBR_ID_SOURCE'),
+    header: t('columns.MAIN_BRANCH_SBR_ID_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'HOLDING_COMPANY_FLG',
-    header: h('HOLDING_COMPANY_FLG'),
+    header: t('columns.HOLDING_COMPANY_FLG'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'HOLDING_COMPANY_FLG_SOURCE',
-    header: h('HOLDING_COMPANY_FLG_SOURCE'),
+    header: t('columns.HOLDING_COMPANY_FLG_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── Employment
   {
     accessorKey: 'EMPLOYMENT_COUNT',
-    header: h('EMPLOYMENT_COUNT'),
+    header: t('columns.EMPLOYMENT_COUNT'),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
@@ -242,154 +242,154 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void): ColumnDef<SbrF
   },
   {
     accessorKey: 'EMPLOYMENT_COUNT_SOURCE',
-    header: h('EMPLOYMENT_COUNT_SOURCE'),
+    header: t('columns.EMPLOYMENT_COUNT_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── Registration numbers
   {
     accessorKey: 'MOCI_ORG_ID',
-    header: h('MOCI_ORG_ID'),
+    header: t('columns.MOCI_ORG_ID'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'MOCI_CR_NUM',
-    header: h('MOCI_CR_NUM'),
+    header: t('columns.MOCI_CR_NUM'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'MOCI_CP_NUM',
-    header: h('MOCI_CP_NUM'),
+    header: t('columns.MOCI_CP_NUM'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'QFC_NUMBER',
-    header: h('QFC_NUMBER'),
+    header: t('columns.QFC_NUMBER'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'QFZ_SOURCE_ID',
-    header: h('QFZ_SOURCE_ID'),
+    header: t('columns.QFZ_SOURCE_ID'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'QSTP_REG_NUM',
-    header: h('QSTP_REG_NUM'),
+    header: t('columns.QSTP_REG_NUM'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'QSTP_TAX_REG_NUM',
-    header: h('QSTP_TAX_REG_NUM'),
+    header: t('columns.QSTP_TAX_REG_NUM'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'QSTP_PARENT_REG_NUM',
-    header: h('QSTP_PARENT_REG_NUM'),
+    header: t('columns.QSTP_PARENT_REG_NUM'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'FARM_NO',
-    header: h('FARM_NO'),
+    header: t('columns.FARM_NO'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EID',
-    header: 'EID',
+    header: t('columns.EID'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EID_SOURCE',
-    header: h('EID_SOURCE'),
+    header: t('columns.EID_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EID_ORIG',
-    header: h('EID_ORIG'),
+    header: t('columns.EID_ORIG'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'EID_ORIG_SOURCE',
-    header: h('EID_ORIG_SOURCE'),
+    header: t('columns.EID_ORIG_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   // ── CR Dates
   {
     accessorKey: 'CR_ISSUE_DATE',
-    header: h('CR_ISSUE_DATE'),
+    header: t('columns.CR_ISSUE_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'CR_EXPIRY_DATE',
-    header: h('CR_EXPIRY_DATE'),
+    header: t('columns.CR_EXPIRY_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'CR_CANCEL_DATE',
-    header: h('CR_CANCEL_DATE'),
+    header: t('columns.CR_CANCEL_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
   // ── CP Dates
   {
     accessorKey: 'CP_ISSUE_DATE',
-    header: h('CP_ISSUE_DATE'),
+    header: t('columns.CP_ISSUE_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'CP_END_DATE',
-    header: h('CP_END_DATE'),
+    header: t('columns.CP_END_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'CP_CANCEL_DATE',
-    header: h('CP_CANCEL_DATE'),
+    header: t('columns.CP_CANCEL_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
   // ── Registration Dates
   {
     accessorKey: 'REG_DATE',
-    header: h('REG_DATE'),
+    header: t('columns.REG_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'REG_EXPIRY_DATE',
-    header: h('REG_EXPIRY_DATE'),
+    header: t('columns.REG_EXPIRY_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'REG_CANCEL_DATE',
-    header: h('REG_CANCEL_DATE'),
+    header: t('columns.REG_CANCEL_DATE'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
   // ── Validity & Timestamps
   {
     accessorKey: 'VALID_FROM',
-    header: h('VALID_FROM'),
+    header: t('columns.VALID_FROM'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'VALID_TO',
-    header: h('VALID_TO'),
+    header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'CREATED_AT',
-    header: h('CREATED_AT'),
+    header: t('columns.CREATED_AT'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
   {
     accessorKey: 'UPDATED_AT',
-    header: h('UPDATED_AT'),
+    header: t('columns.UPDATED_AT'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
   // ── Actions
   {
     id: 'actions',
-    header: 'Actions',
+    header: t('columns.ACTIONS'),
     cell: ({ row }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5 mr-1" />

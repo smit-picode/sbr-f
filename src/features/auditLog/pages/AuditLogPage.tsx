@@ -7,7 +7,7 @@ import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { auditLogColumns } from '../components/AuditLogColumns';
+import { getAuditLogColumns } from '../components/AuditLogColumns';
 import { useGetAuditLogListQuery } from '../api/auditLogApi';
 import type { AuditLogFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
@@ -24,24 +24,30 @@ const TABLE_OPTIONS = [
   { label: 'SBR_ADDRESSES', value: 'SBR_ADDRESSES' },
 ];
 
+function is400(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
+}
+
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
   const { t } = useTranslation();
 
-  const { data, isLoading, isError, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
+  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
     refetchOnMountOrArgChange: true,
   });
 
+  const isValidationError = isError && is400(error);
+
   useEffect(() => {
-    if (isError) toast.error('Failed to load audit log. Please try again.');
-  }, [isError]);
+    if (isError && !is400(error)) toast.error('Failed to load audit log. Please try again.');
+  }, [isError, error]);
 
   const handleFilterChange = useCallback((partial: Partial<AuditLogFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const records = data?.data ?? [];
-  const total = data?.total ?? 0;
+  const records = isValidationError ? [] : (data?.data ?? []);
+  const total = isValidationError ? 0 : (data?.total ?? 0);
 
   return (
     <PageContainer>
@@ -77,10 +83,15 @@ export function AuditLogPage() {
           type="number"
           placeholder="Filter by Record ID..."
           className="w-48"
+          min="1"
           value={filters.recordId ?? ''}
-          onChange={(e) =>
-            handleFilterChange({ recordId: e.target.value ? Number(e.target.value) : undefined, page: 1 })
-          }
+          onKeyDown={(e) => {
+            if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+          }}
+          onChange={(e) => {
+            const val = e.target.value ? Number(e.target.value) : undefined;
+            handleFilterChange({ recordId: val && val > 0 ? val : undefined, page: 1 });
+          }}
         />
 
         {(() => {
@@ -103,10 +114,10 @@ export function AuditLogPage() {
       </div>
 
       <DataTable
-        columns={auditLogColumns}
+        columns={getAuditLogColumns(t)}
         data={records}
         isLoading={isLoading}
-        isError={isError}
+        isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}
         limit={filters.limit ?? 20}

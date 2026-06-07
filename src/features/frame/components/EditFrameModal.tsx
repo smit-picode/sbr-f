@@ -9,6 +9,7 @@ import { useUpdateFrameMutation } from '../api/frameApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import type { SbrFrame } from '@/types';
+import { useTranslation } from 'react-i18next';
 import {
   FRAME_FIELD_LABELS,
   EST_STATUS_OPTIONS,
@@ -85,6 +86,7 @@ function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<st
 type FormState = Omit<Partial<SbrFrame>, 'ID' | 'SBR_ID' | 'VALID_FROM' | 'VALID_TO'>;
 
 export function EditFrameModal({ frame, open, onClose }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<FormState>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCommentDialog, setShowCommentDialog] = useState(false);
@@ -264,7 +266,7 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
       <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Establishment</DialogTitle>
+            <DialogTitle>{t('editFrame.title')}</DialogTitle>
           </DialogHeader>
 
           {/* Error Summary - Outside scroll container to prevent layout shift */}
@@ -275,113 +277,113 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
           <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
 
           {/* Identifiers (read-only) */}
-          <SectionDivider title="Identifiers" />
-          <ReadOnlyField label="SBR ID" value={frame?.SBR_ID} />
-          <ReadOnlyField label="Record ID" value={frame?.ID} />
+          <SectionDivider title={t('editFrame.sections.identifiers')} />
+          <ReadOnlyField label={t('editFrame.fields.sbrId')} value={frame?.SBR_ID} />
+          <ReadOnlyField label={t('editFrame.fields.recordId')} value={frame?.ID} />
 
           {/* Names */}
-          <SectionDivider title="Names" />
+          <SectionDivider title={t('editFrame.sections.names')} />
           <div className="space-y-1" data-field="NAME_ENU">
-            <Label>Name (English)</Label>
+            <Label>{t('editFrame.fields.nameEnu')}</Label>
             <Input className={inp('NAME_ENU')} value={sel('NAME_ENU')} onChange={(e) => set('NAME_ENU', e.target.value)} />
             <FieldErr msg={err('NAME_ENU')} />
           </div>
           <div className="space-y-1">
-            <Label>Name (Arabic)</Label>
+            <Label>{t('editFrame.fields.nameAra')}</Label>
             <Input dir="rtl" className={inp('NAME_ARA')} value={sel('NAME_ARA')} onChange={(e) => set('NAME_ARA', e.target.value)} />
             <FieldErr msg={err('NAME_ARA')} />
           </div>
           <div className="space-y-1">
-            <Label>Name ENU Source</Label>
+            <Label>{t('editFrame.fields.nameEnuSource')}</Label>
             <Input className={inp('NAME_ENU_SOURCE')} value={sel('NAME_ENU_SOURCE')} onChange={(e) => set('NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Name ARA Source</Label>
+            <Label>{t('editFrame.fields.nameAraSource')}</Label>
             <Input className={inp('NAME_ARA_SOURCE')} value={sel('NAME_ARA_SOURCE')} onChange={(e) => set('NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('NAME_ARA_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Trade Name (English)</Label>
+            <Label>{t('editFrame.fields.tradeNameEnu')}</Label>
             <Input className={inp('TRADE_NAME_ENU')} value={sel('TRADE_NAME_ENU')} onChange={(e) => set('TRADE_NAME_ENU', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ENU')} />
           </div>
           <div className="space-y-1">
-            <Label>Trade Name (Arabic)</Label>
+            <Label>{t('editFrame.fields.tradeNameAra')}</Label>
             <Input dir="rtl" className={inp('TRADE_NAME_ARA')} value={sel('TRADE_NAME_ARA')} onChange={(e) => set('TRADE_NAME_ARA', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ARA')} />
           </div>
           <div className="space-y-1">
-            <Label>Trade Name ENU Source</Label>
+            <Label>{t('editFrame.fields.tradeNameEnuSource')}</Label>
             <Input className={inp('TRADE_NAME_ENU_SOURCE')} value={sel('TRADE_NAME_ENU_SOURCE')} onChange={(e) => set('TRADE_NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Trade Name ARA Source</Label>
+            <Label>{t('editFrame.fields.tradeNameAraSource')}</Label>
             <Input className={inp('TRADE_NAME_ARA_SOURCE')} value={sel('TRADE_NAME_ARA_SOURCE')} onChange={(e) => set('TRADE_NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ARA_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>NPC Name (English)</Label>
+            <Label>{t('editFrame.fields.npcNameEnu')}</Label>
             <Input className={inp('NPC_NAME_ENU')} value={sel('NPC_NAME_ENU')} onChange={(e) => set('NPC_NAME_ENU', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ENU')} />
           </div>
           <div className="space-y-1">
-            <Label>NPC Name (Arabic)</Label>
+            <Label>{t('editFrame.fields.npcNameAra')}</Label>
             <Input dir="rtl" className={inp('NPC_NAME_ARA')} value={sel('NPC_NAME_ARA')} onChange={(e) => set('NPC_NAME_ARA', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ARA')} />
           </div>
           <div className="space-y-1">
-            <Label>NPC Name ENU Source</Label>
+            <Label>{t('editFrame.fields.npcNameEnuSource')}</Label>
             <Input className={inp('NPC_NAME_ENU_SOURCE')} value={sel('NPC_NAME_ENU_SOURCE')} onChange={(e) => set('NPC_NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>NPC Name ARA Source</Label>
+            <Label>{t('editFrame.fields.npcNameAraSource')}</Label>
             <Input className={inp('NPC_NAME_ARA_SOURCE')} value={sel('NPC_NAME_ARA_SOURCE')} onChange={(e) => set('NPC_NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ARA_SOURCE')} />
           </div>
 
           {/* Status & Classification */}
-          <SectionDivider title="Status & Classification" />
+          <SectionDivider title={t('editFrame.sections.statusClassification')} />
           <div className="space-y-1" data-field="EST_STATUS">
-            <Label>Est. Status</Label>
+            <Label>{t('editFrame.fields.estStatus')}</Label>
             <select className={`w-full border rounded-md px-3 py-2 text-sm ${err('EST_STATUS') ? 'border-red-400' : 'border-slate-200'}`} value={sel('EST_STATUS')} onChange={(e) => set('EST_STATUS', e.target.value)}>
-              <option value="">— Select —</option>
+              <option value="">{t('editFrame.selectPlaceholder')}</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
             <FieldErr msg={err('EST_STATUS')} />
           </div>
           <div className="space-y-1">
-            <Label>Est. Status Source</Label>
+            <Label>{t('editFrame.fields.estStatusSource')}</Label>
             <Input className={inp('EST_STATUS_SOURCE')} value={sel('EST_STATUS_SOURCE')} onChange={(e) => set('EST_STATUS_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Est. Status Category</Label>
+            <Label>{t('editFrame.fields.estStatusCategory')}</Label>
             <Input className={inp('EST_STATUS_CATEGORY')} value={sel('EST_STATUS_CATEGORY')} onChange={(e) => set('EST_STATUS_CATEGORY', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_CATEGORY')} />
           </div>
           <div className="space-y-1">
-            <Label>Est. Status Category Source</Label>
+            <Label>{t('editFrame.fields.estStatusCategorySource')}</Label>
             <Input className={inp('EST_STATUS_CATEGORY_SOURCE')} value={sel('EST_STATUS_CATEGORY_SOURCE')} onChange={(e) => set('EST_STATUS_CATEGORY_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_CATEGORY_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Legal Type</Label>
+            <Label>{t('editFrame.fields.legalType')}</Label>
             <Input className={inp('LEGAL_TYPE')} value={sel('LEGAL_TYPE')} onChange={(e) => set('LEGAL_TYPE', e.target.value)} />
             <FieldErr msg={err('LEGAL_TYPE')} />
           </div>
           <div className="space-y-1">
-            <Label>Legal Type Source</Label>
+            <Label>{t('editFrame.fields.legalTypeSource')}</Label>
             <Input className={inp('LEGAL_TYPE_SOURCE')} value={sel('LEGAL_TYPE_SOURCE')} onChange={(e) => set('LEGAL_TYPE_SOURCE', e.target.value)} />
             <FieldErr msg={err('LEGAL_TYPE_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="SECTOR_ID">
-            <Label>Sector</Label>
+            <Label>{t('editFrame.fields.sector')}</Label>
             <select className={`w-full border rounded-md px-3 py-2 text-sm ${err('SECTOR_ID') ? 'border-red-400' : 'border-slate-200'}`} value={sel('SECTOR_ID')} onChange={(e) => set('SECTOR_ID', e.target.value)}>
-              <option value="">— Select —</option>
+              <option value="">{t('editFrame.selectPlaceholder')}</option>
               <option value="Private">Private</option>
               <option value="Mixed-Private">Mixed-Private</option>
               <option value="Mixed-Government">Mixed-Government</option>
@@ -389,68 +391,68 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('SECTOR_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>Sector Source</Label>
+            <Label>{t('editFrame.fields.sectorSource')}</Label>
             <Input className={inp('SECTOR_ID_SOURCE')} value={sel('SECTOR_ID_SOURCE')} onChange={(e) => set('SECTOR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('SECTOR_ID_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>ISIC Code</Label>
+            <Label>{t('editFrame.fields.isicCode')}</Label>
             <Input className={inp('ISIC_CODE')} value={sel('ISIC_CODE')} onChange={(e) => set('ISIC_CODE', e.target.value)} />
             <FieldErr msg={err('ISIC_CODE')} />
           </div>
           <div className="space-y-1">
-            <Label>ISIC Code Source</Label>
+            <Label>{t('editFrame.fields.isicCodeSource')}</Label>
             <Input className={inp('ISIC_CODE_SOURCE')} value={sel('ISIC_CODE_SOURCE')} onChange={(e) => set('ISIC_CODE_SOURCE', e.target.value)} />
             <FieldErr msg={err('ISIC_CODE_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="EMPLOYMENT_COUNT">
-            <Label>Employment Count</Label>
+            <Label>{t('editFrame.fields.employmentCount')}</Label>
             <Input type="number" className={inp('EMPLOYMENT_COUNT')} value={form.EMPLOYMENT_COUNT ?? ''} onChange={(e) => set('EMPLOYMENT_COUNT', Number(e.target.value))} />
             <FieldErr msg={err('EMPLOYMENT_COUNT')} />
           </div>
           <div className="space-y-1">
-            <Label>Employment Count Source</Label>
+            <Label>{t('editFrame.fields.employmentCountSource')}</Label>
             <Input className={inp('EMPLOYMENT_COUNT_SOURCE')} value={sel('EMPLOYMENT_COUNT_SOURCE')} onChange={(e) => set('EMPLOYMENT_COUNT_SOURCE', e.target.value)} />
             <FieldErr msg={err('EMPLOYMENT_COUNT_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_FLG">
-            <Label>Main Branch Flag</Label>
+            <Label>{t('editFrame.fields.mainBranchFlg')}</Label>
             <select className={`w-full border rounded-md px-3 py-2 text-sm ${err('MAIN_BRANCH_FLG') ? 'border-red-400' : 'border-slate-200'}`} value={sel('MAIN_BRANCH_FLG')} onChange={(e) => set('MAIN_BRANCH_FLG', e.target.value)}>
-              <option value="">— Select —</option>
+              <option value="">{t('editFrame.selectPlaceholder')}</option>
               <option value="MAIN">MAIN</option>
               <option value="BRANCH">BRANCH</option>
             </select>
             <FieldErr msg={err('MAIN_BRANCH_FLG')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
-            <Label>Main Branch SBR ID</Label>
+            <Label>{t('editFrame.fields.mainBranchSbrId')}</Label>
             <Input type="number" className={inp('MAIN_BRANCH_SBR_ID')} value={form.MAIN_BRANCH_SBR_ID ?? ''} onChange={(e) => set('MAIN_BRANCH_SBR_ID', e.target.value ? Number(e.target.value) : null)} />
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>Main Branch Flag Source</Label>
+            <Label>{t('editFrame.fields.mainBranchFlgSource')}</Label>
             <Input className={inp('MAIN_BRANCH_FLG_SOURCE')} value={sel('MAIN_BRANCH_FLG_SOURCE')} onChange={(e) => set('MAIN_BRANCH_FLG_SOURCE', e.target.value)} />
             <FieldErr msg={err('MAIN_BRANCH_FLG_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID_SOURCE">
-            <Label>Main Branch SBR ID Source</Label>
+            <Label>{t('editFrame.fields.mainBranchSbrIdSource')}</Label>
             <Input className={inp('MAIN_BRANCH_SBR_ID_SOURCE')} value={sel('MAIN_BRANCH_SBR_ID_SOURCE')} onChange={(e) => set('MAIN_BRANCH_SBR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Holding Company Flag</Label>
+            <Label>{t('editFrame.fields.holdingCompanyFlg')}</Label>
             <Input className={inp('HOLDING_COMPANY_FLG')} value={sel('HOLDING_COMPANY_FLG')} onChange={(e) => set('HOLDING_COMPANY_FLG', e.target.value)} />
             <FieldErr msg={err('HOLDING_COMPANY_FLG')} />
           </div>
           <div className="space-y-1">
-            <Label>Holding Company Flag Source</Label>
+            <Label>{t('editFrame.fields.holdingCompanyFlgSource')}</Label>
             <Input className={inp('HOLDING_COMPANY_FLG_SOURCE')} value={sel('HOLDING_COMPANY_FLG_SOURCE')} onChange={(e) => set('HOLDING_COMPANY_FLG_SOURCE', e.target.value)} />
             <FieldErr msg={err('HOLDING_COMPANY_FLG_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>Source Code</Label>
+            <Label>{t('editFrame.fields.sourceCode')}</Label>
             <select className={`w-full border rounded-md px-3 py-2 text-sm ${err('SOURCE_CODE') ? 'border-red-400' : 'border-slate-200'}`} value={sel('SOURCE_CODE')} onChange={(e) => set('SOURCE_CODE', e.target.value)}>
-              <option value="">— Select —</option>
+              <option value="">{t('editFrame.selectPlaceholder')}</option>
               {FRAME_SOURCE_CODE_OPTIONS.map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
@@ -459,124 +461,124 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
           </div>
 
           {/* Registration Numbers */}
-          <SectionDivider title="Registration Numbers" />
+          <SectionDivider title={t('editFrame.sections.registrationNumbers')} />
           <div className="space-y-1">
-            <Label>MOCI Org ID</Label>
+            <Label>{t('editFrame.fields.mociOrgId')}</Label>
             <Input className={inp('MOCI_ORG_ID')} value={sel('MOCI_ORG_ID')} onChange={(e) => set('MOCI_ORG_ID', e.target.value)} />
             <FieldErr msg={err('MOCI_ORG_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>MOCI CR Num</Label>
+            <Label>{t('editFrame.fields.mociCrNum')}</Label>
             <Input className={inp('MOCI_CR_NUM')} value={sel('MOCI_CR_NUM')} onChange={(e) => set('MOCI_CR_NUM', e.target.value)} />
             <FieldErr msg={err('MOCI_CR_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>MOCI CP Num</Label>
+            <Label>{t('editFrame.fields.mociCpNum')}</Label>
             <Input className={inp('MOCI_CP_NUM')} value={sel('MOCI_CP_NUM')} onChange={(e) => set('MOCI_CP_NUM', e.target.value)} />
             <FieldErr msg={err('MOCI_CP_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>QFC Number</Label>
+            <Label>{t('editFrame.fields.qfcNumber')}</Label>
             <Input className={inp('QFC_NUMBER')} value={sel('QFC_NUMBER')} onChange={(e) => set('QFC_NUMBER', e.target.value)} />
             <FieldErr msg={err('QFC_NUMBER')} />
           </div>
           <div className="space-y-1">
-            <Label>QFZ Source ID</Label>
+            <Label>{t('editFrame.fields.qfzSourceId')}</Label>
             <Input className={inp('QFZ_SOURCE_ID')} value={sel('QFZ_SOURCE_ID')} onChange={(e) => set('QFZ_SOURCE_ID', e.target.value)} />
             <FieldErr msg={err('QFZ_SOURCE_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>QSTP Reg Num</Label>
+            <Label>{t('editFrame.fields.qstpRegNum')}</Label>
             <Input className={inp('QSTP_REG_NUM')} value={sel('QSTP_REG_NUM')} onChange={(e) => set('QSTP_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>QSTP Tax Reg Num</Label>
+            <Label>{t('editFrame.fields.qstpTaxRegNum')}</Label>
             <Input className={inp('QSTP_TAX_REG_NUM')} value={sel('QSTP_TAX_REG_NUM')} onChange={(e) => set('QSTP_TAX_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_TAX_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>QSTP Parent Reg Num</Label>
+            <Label>{t('editFrame.fields.qstpParentRegNum')}</Label>
             <Input className={inp('QSTP_PARENT_REG_NUM')} value={sel('QSTP_PARENT_REG_NUM')} onChange={(e) => set('QSTP_PARENT_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_PARENT_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>Farm No</Label>
+            <Label>{t('editFrame.fields.farmNo')}</Label>
             <Input className={inp('FARM_NO')} value={sel('FARM_NO')} onChange={(e) => set('FARM_NO', e.target.value)} />
             <FieldErr msg={err('FARM_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>EID</Label>
+            <Label>{t('editFrame.fields.eid')}</Label>
             <Input className={inp('EID')} value={sel('EID')} onChange={(e) => set('EID', e.target.value)} />
             <FieldErr msg={err('EID')} />
           </div>
           <div className="space-y-1">
-            <Label>EID Source</Label>
+            <Label>{t('editFrame.fields.eidSource')}</Label>
             <Input className={inp('EID_SOURCE')} value={sel('EID_SOURCE')} onChange={(e) => set('EID_SOURCE', e.target.value)} />
             <FieldErr msg={err('EID_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>EID (Original / Unhashed)</Label>
+            <Label>{t('editFrame.fields.eidOrig')}</Label>
             <Input className={inp('EID_ORIG')} value={sel('EID_ORIG')} onChange={(e) => set('EID_ORIG', e.target.value)} />
             <FieldErr msg={err('EID_ORIG')} />
           </div>
           <div className="space-y-1">
-            <Label>EID Original Source</Label>
+            <Label>{t('editFrame.fields.eidOrigSource')}</Label>
             <Input className={inp('EID_ORIG_SOURCE')} value={sel('EID_ORIG_SOURCE')} onChange={(e) => set('EID_ORIG_SOURCE', e.target.value)} />
             <FieldErr msg={err('EID_ORIG_SOURCE')} />
           </div>
 
           {/* Dates */}
-          <SectionDivider title="Dates" />
+          <SectionDivider title={t('editFrame.sections.dates')} />
           <div className="space-y-1">
-            <Label>CR Issue Date</Label>
+            <Label>{t('editFrame.fields.crIssueDate')}</Label>
             <Input type="date" value={sel('CR_ISSUE_DATE').split('T')[0]} onChange={(e) => set('CR_ISSUE_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>CR Expiry Date</Label>
+            <Label>{t('editFrame.fields.crExpiryDate')}</Label>
             <Input type="date" value={sel('CR_EXPIRY_DATE').split('T')[0]} onChange={(e) => set('CR_EXPIRY_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>CR Cancel Date</Label>
+            <Label>{t('editFrame.fields.crCancelDate')}</Label>
             <Input type="date" value={sel('CR_CANCEL_DATE').split('T')[0]} onChange={(e) => set('CR_CANCEL_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>CP Issue Date</Label>
+            <Label>{t('editFrame.fields.cpIssueDate')}</Label>
             <Input type="date" value={sel('CP_ISSUE_DATE').split('T')[0]} onChange={(e) => set('CP_ISSUE_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>CP End Date</Label>
+            <Label>{t('editFrame.fields.cpEndDate')}</Label>
             <Input type="date" value={sel('CP_END_DATE').split('T')[0]} onChange={(e) => set('CP_END_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>CP Cancel Date</Label>
+            <Label>{t('editFrame.fields.cpCancelDate')}</Label>
             <Input type="date" value={sel('CP_CANCEL_DATE').split('T')[0]} onChange={(e) => set('CP_CANCEL_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Reg Date</Label>
+            <Label>{t('editFrame.fields.regDate')}</Label>
             <Input type="date" value={sel('REG_DATE').split('T')[0]} onChange={(e) => set('REG_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Reg Expiry Date</Label>
+            <Label>{t('editFrame.fields.regExpiryDate')}</Label>
             <Input type="date" value={sel('REG_EXPIRY_DATE').split('T')[0]} onChange={(e) => set('REG_EXPIRY_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Reg Cancel Date</Label>
+            <Label>{t('editFrame.fields.regCancelDate')}</Label>
             <Input type="date" value={sel('REG_CANCEL_DATE').split('T')[0]} onChange={(e) => set('REG_CANCEL_DATE', e.target.value)} />
           </div>
 
           {/* Metadata (read-only) */}
-          <SectionDivider title="Metadata" />
-          <ReadOnlyField label="Valid From" value={frame?.VALID_FROM ? new Date(frame.VALID_FROM).toLocaleDateString() : '—'} />
-          <ReadOnlyField label="Valid To" value={frame?.VALID_TO ? new Date(frame.VALID_TO).toLocaleDateString() : '—'} />
-          <ReadOnlyField label="Created At" value={frame?.CREATED_AT ? new Date(frame.CREATED_AT).toLocaleString() : '—'} />
-          <ReadOnlyField label="Updated At" value={frame?.UPDATED_AT ? new Date(frame.UPDATED_AT).toLocaleString() : '—'} />
+          <SectionDivider title={t('editFrame.sections.metadata')} />
+          <ReadOnlyField label={t('editFrame.fields.validFrom')} value={frame?.VALID_FROM ? new Date(frame.VALID_FROM).toLocaleDateString('en-GB') : '—'} />
+          <ReadOnlyField label={t('editFrame.fields.validTo')} value={frame?.VALID_TO ? new Date(frame.VALID_TO).toLocaleDateString('en-GB') : '—'} />
+          <ReadOnlyField label={t('editFrame.fields.createdAt')} value={frame?.CREATED_AT ? new Date(frame.CREATED_AT).toLocaleString('en-GB') : '—'} />
+          <ReadOnlyField label={t('editFrame.fields.updatedAt')} value={frame?.UPDATED_AT ? new Date(frame.UPDATED_AT).toLocaleString('en-GB') : '—'} />
 
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={isLoading}>Save Changes</Button>
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
+            <Button onClick={handleSubmit} disabled={isLoading}>{t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

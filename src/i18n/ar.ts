@@ -11,7 +11,7 @@ export const ar: Translations = {
     frame:     'إدارة المنشآت',
     contacts:  'إدارة جهات الاتصال',
     addresses: 'إدارة العناوين',
-    auditLog:  'سجل التدقيق',
+    auditLog:  'إدارة سجل التدقيق',
   },
   pages: {
     frame: {

@@ -52,7 +52,7 @@ export function FrameListPage() {
     setFilters(FRAME_DEFAULT_FILTERS);
   }, []);
 
-  const columns = getFrameColumns((row) => setEditTarget(row));
+  const columns = getFrameColumns((row) => setEditTarget(row), t);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
 

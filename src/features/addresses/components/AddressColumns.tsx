@@ -4,12 +4,12 @@ import { nullableText, formatDate } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 
-const h = (s: string) => s.replaceAll('_', ' ');
+type TFunc = (key: string) => string;
 
-export const getAddressColumns = (onEdit: (row: SbrAddress) => void): ColumnDef<SbrAddress>[] => [
+export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc): ColumnDef<SbrAddress>[] => [
   {
     accessorKey: 'SBR_ID',
-    header: h('SBR_ID'),
+    header: t('columns.SBR_ID'),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
     ),
@@ -17,38 +17,38 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void): ColumnDef<
   },
   {
     accessorKey: 'MUNICIPALITY_ID',
-    header: h('MUNICIPALITY_ID'),
+    header: t('columns.MUNICIPALITY_ID'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
     enableSorting: true,
   },
   {
     accessorKey: 'ZONE',
-    header: 'ZONE',
+    header: t('columns.ZONE'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'STREET',
-    header: 'STREET',
+    header: t('columns.STREET'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'BUILDING_NO',
-    header: h('BUILDING_NO'),
+    header: t('columns.BUILDING_NO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'UNIT_NO',
-    header: h('UNIT_NO'),
+    header: t('columns.UNIT_NO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'FLOOR_NO',
-    header: h('FLOOR_NO'),
+    header: t('columns.FLOOR_NO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'QARS',
-    header: 'QARS',
+    header: t('columns.QARS'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -60,26 +60,26 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void): ColumnDef<
   },
   {
     accessorKey: 'ELECTRICITY_NO',
-    header: h('ELECTRICITY_NO'),
+    header: t('columns.ELECTRICITY_NO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'LATITUDE',
-    header: 'LATITUDE',
+    header: t('columns.LATITUDE'),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-slate-600">{nullableText(getValue<string | null>())}</span>
     ),
   },
   {
     accessorKey: 'LONGITUDE',
-    header: 'LONGITUDE',
+    header: t('columns.LONGITUDE'),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-slate-600">{nullableText(getValue<string | null>())}</span>
     ),
   },
   {
     accessorKey: 'SOURCE_CODE',
-    header: h('SOURCE_CODE'),
+    header: t('columns.SOURCE_CODE'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -91,7 +91,7 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void): ColumnDef<
   },
   {
     accessorKey: 'PRIORITY',
-    header: 'PRIORITY',
+    header: t('columns.PRIORITY'),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
@@ -104,17 +104,17 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void): ColumnDef<
   },
   {
     accessorKey: 'VALID_FROM',
-    header: h('VALID_FROM'),
+    header: t('columns.VALID_FROM'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'VALID_TO',
-    header: h('VALID_TO'),
+    header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: t('columns.ACTIONS'),
     cell: ({ row }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5" />

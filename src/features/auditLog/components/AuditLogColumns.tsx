@@ -17,10 +17,12 @@ function ChangedByCell({ value }: { value: string }) {
   );
 }
 
-export const auditLogColumns: ColumnDef<AuditLog>[] = [
+type TFunc = (key: string) => string;
+
+export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {
     accessorKey: 'TABLE_NAME',
-    header: 'Table Name',
+    header: t('columns.TABLE_NAME'),
     cell: ({ getValue }) => {
       const val = getValue<string>();
       const color = TABLE_COLORS[val] ?? 'bg-slate-100 text-slate-600';
@@ -33,26 +35,26 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
   },
   {
     accessorKey: 'RECORD_ID',
-    header: 'Row ID',
+    header: t('columns.RECORD_ID'),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
     ),
   },
   {
     accessorKey: 'REASON',
-    header: 'Reason',
+    header: t('columns.REASON'),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700">{getValue<string>() || '—'}</span>
     ),
   },
   {
     accessorKey: 'CHANGED_BY',
-    header: 'Changed By',
+    header: t('columns.CHANGED_BY'),
     cell: ({ getValue }) => <ChangedByCell value={getValue<string>()} />,
   },
   {
     accessorKey: 'APPROVED_BY',
-    header: 'Approved By',
+    header: t('columns.APPROVED_BY'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val

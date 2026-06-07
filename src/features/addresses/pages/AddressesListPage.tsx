@@ -39,7 +39,7 @@ export function AddressesListPage() {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const columns = getAddressColumns((row) => setEditTarget(row));
+  const columns = getAddressColumns((row) => setEditTarget(row), t);
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
 

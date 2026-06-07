@@ -63,6 +63,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     pageCount: Math.ceil(total / limit),
+    sortDescFirst: false,
   });
 
   const colCount = columns.length;
@@ -107,18 +108,6 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {isLoading ? (
               <TableLoader rows={limit} cols={colCount} />
-            ) : isError ? (
-              <tr>
-                <td colSpan={colCount}>
-                  <ErrorState onRetry={onRetry} />
-                </td>
-              </tr>
-            ) : table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={colCount}>
-                  <NoData />
-                </td>
-              </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
@@ -132,6 +121,18 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
       </Table>
+
+      {/* Render outside the scroll container so they fill the visible width */}
+      {!isLoading && isError && (
+        <div className="border-t border-slate-100">
+          <ErrorState onRetry={onRetry} />
+        </div>
+      )}
+      {!isLoading && !isError && table.getRowModel().rows.length === 0 && (
+        <div className="border-t border-slate-100">
+          <NoData />
+        </div>
+      )}
 
       <TablePagination
         page={page}

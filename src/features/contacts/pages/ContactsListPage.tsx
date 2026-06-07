@@ -45,7 +45,7 @@ export function ContactsListPage() {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const columns = getContactColumns((row) => setEditTarget(row));
+  const columns = getContactColumns((row) => setEditTarget(row), t);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
 
