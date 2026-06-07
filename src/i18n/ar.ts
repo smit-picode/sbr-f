@@ -8,10 +8,10 @@ export const ar: Translations = {
     auditLog: 'سجل التدقيق',
   },
   pageBanner: {
-    '/frame': 'سجل الأعمال الإحصائي',
-    '/contacts': 'إدارة جهات الاتصال',
-    '/addresses': 'إدارة العناوين',
-    '/audit-log': 'سجل التدقيق',
+    frame:     'إدارة المنشآت',
+    contacts:  'إدارة جهات الاتصال',
+    addresses: 'إدارة العناوين',
+    auditLog:  'سجل التدقيق',
   },
   pages: {
     frame: {

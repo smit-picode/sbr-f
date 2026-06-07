@@ -80,8 +80,6 @@ export function LoginPage() {
 
           <div className="text-center">
             <h2 className="text-white text-xl font-bold tracking-wide">{t('login.branding')}</h2>
-            <p className="text-white/75 text-sm mt-2 font-medium">{t('login.brandingSub')}</p>
-            <p className="text-white/60 text-xs mt-1">{t('login.brandingCountry')}</p>
           </div>
         </div>
       </div>

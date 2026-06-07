@@ -74,10 +74,10 @@ export const en: Translations = {
     auditLog: 'Audit Log',
   },
   pageBanner: {
-    '/frame':      'Statistical Business Register',
-    '/contacts':   'Contacts Management',
-    '/addresses':  'Addresses Management',
-    '/audit-log':  'Audit Log',
+    frame:      'Establishments Management',
+    contacts:   'Contacts Management',
+    addresses:  'Addresses Management',
+    auditLog:   'Audit Log',
   },
   pages: {
     frame: {
