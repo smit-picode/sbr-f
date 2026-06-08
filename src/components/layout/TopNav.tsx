@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
+import { formatRole } from '@/utils/format';
 
 const NAV_KEY_MAP: Record<string, string> = {
   '/frame':     'nav.establishments',
@@ -109,8 +110,8 @@ export function TopNav() {
               </Avatar>
               <div className="hidden md:block text-left leading-none">
                 <p className="text-xs font-medium text-slate-700">{user?.email ?? 'User'}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5 capitalize">
-                  {user?.role?.toLowerCase() ?? 'guest'}
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {formatRole(user?.role)}
                 </p>
               </div>
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />

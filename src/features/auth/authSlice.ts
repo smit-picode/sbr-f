@@ -17,6 +17,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       if (typeof window !== 'undefined') {
         localStorage.setItem('sbr_token', action.payload.token);
+        localStorage.setItem('sbr_user', JSON.stringify(state.user));
       }
     },
     logout: (state) => {
@@ -25,14 +26,23 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       if (typeof window !== 'undefined') {
         localStorage.removeItem('sbr_token');
+        localStorage.removeItem('sbr_user');
       }
     },
     hydrateAuth: (state) => {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('sbr_token');
+        const userStr = localStorage.getItem('sbr_user');
         if (token) {
           state.token = token;
           state.isAuthenticated = true;
+          if (userStr) {
+            try {
+              state.user = JSON.parse(userStr);
+            } catch {
+              // Invalid JSON, skip
+            }
+          }
         }
       }
     },

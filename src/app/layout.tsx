@@ -15,6 +15,11 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: 'SBR Portal — NPC Qatar',
   description: 'Statistical Business Register — National Planning Council Qatar',
+  icons: {
+    icon: '/sbr-logo-white.png',
+    shortcut: '/sbr-logo-white.png',
+    apple: '/sbr-logo-white.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

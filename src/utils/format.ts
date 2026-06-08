@@ -24,3 +24,11 @@ export function truncate(value: string, maxLength = 40): string {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength)}...`;
 }
+
+export function formatRole(role: string | null | undefined): string {
+  if (!role) return 'Guest';
+  return role
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
