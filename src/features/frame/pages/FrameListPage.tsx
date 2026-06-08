@@ -64,7 +64,7 @@ export function FrameListPage() {
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Building2 className="h-4 w-4" />
-            <span className="font-medium text-slate-700">{total.toLocaleString()}</span> records
+            <span className="font-medium text-slate-700">{total.toLocaleString()}</span> {t('table.records')}
           </div>
         }
       />

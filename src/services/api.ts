@@ -26,10 +26,11 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     const status = result.error.status;
 
     if (status === 401) {
-      // Token expired or invalid — clear session and redirect to login
+      // Token expired or invalid — clear session, show message, then redirect
       api.dispatch(logout());
+      toast.warning('Your session has expired. Please log in again.');
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        setTimeout(() => { window.location.href = '/login'; }, 2000);
       }
       return result;
     }

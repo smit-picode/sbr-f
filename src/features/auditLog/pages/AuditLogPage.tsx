@@ -14,6 +14,7 @@ import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 20 };
 
@@ -30,7 +31,15 @@ function is400(error: unknown): boolean {
 
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
+  const [recordIdInput, setRecordIdInput] = useState<string>('');
+  const debouncedRecordId = useDebounce(recordIdInput, 500);
   const { t } = useTranslation();
+
+  // Sync debounced recordId into filters
+  useEffect(() => {
+    const val = debouncedRecordId ? Number(debouncedRecordId) : undefined;
+    setFilters((prev) => ({ ...prev, recordId: val && val > 0 ? val : undefined, page: 1 }));
+  }, [debouncedRecordId]);
 
   const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
     refetchOnMountOrArgChange: true,
@@ -57,7 +66,7 @@ export function AuditLogPage() {
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <ClipboardList className="h-4 w-4" />
-            <span className="font-medium text-slate-700">{total.toLocaleString()}</span> records
+            <span className="font-medium text-slate-700">{total.toLocaleString()}</span> {t('table.records')}
           </div>
         }
       />
@@ -81,16 +90,20 @@ export function AuditLogPage() {
 
         <Input
           type="number"
-          placeholder="Filter by Record ID..."
+          placeholder={t('filters.filterByRecordId')}
           className="w-48"
           min="1"
-          value={filters.recordId ?? ''}
+          value={recordIdInput}
           onKeyDown={(e) => {
             if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
           }}
           onChange={(e) => {
-            const val = e.target.value ? Number(e.target.value) : undefined;
-            handleFilterChange({ recordId: val && val > 0 ? val : undefined, page: 1 });
+            const val = e.target.value;
+            if (val !== '' && Number(val) <= 0) {
+              toast.warning('Record ID must be greater than 0.');
+              return;
+            }
+            setRecordIdInput(val);
           }}
         />
 
@@ -101,7 +114,7 @@ export function AuditLogPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setFilters(DEFAULT_FILTERS)}
+                onClick={() => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); }}
                 disabled={isDefault}
                 className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
               >
