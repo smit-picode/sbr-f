@@ -137,10 +137,10 @@ function PermSubGroup({
 //   a) Simple permission rows (no grandchildren)
 //   b) Sub-group headers (with their own children + Select All)
 function PermSection({
-  node, children, grantedIds, onToggle, onToggleAll, canEdit, label, childLabel, grantLabel, masterCollapsed,
+  node, items, grantedIds, onToggle, onToggleAll, canEdit, label, childLabel, grantLabel, masterCollapsed,
 }: {
   node: PermissionNode;
-  children: TreeNode[];
+  items: TreeNode[];
   grantedIds: Set<number>;
   onToggle: (id: number, granted: boolean) => void;
   onToggleAll: (perms: Array<SbrPermission | null>, granted: boolean) => void;
@@ -152,7 +152,7 @@ function PermSection({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   useEffect(() => { if (masterCollapsed !== undefined) setIsCollapsed(masterCollapsed); }, [masterCollapsed]);
-  const allLeafs    = flatLeafPerms(children);
+  const allLeafs    = flatLeafPerms(items);
   const allGranted  = allLeafs.length > 0 && allLeafs.every(p => p && grantedIds.has(p.ID));
   const someGranted = allLeafs.some(p => p && grantedIds.has(p.ID));
 
@@ -191,7 +191,7 @@ function PermSection({
       </div>
 
       {/* Children — can be simple rows or sub-group blocks */}
-      {!isCollapsed && children.map((childNode) => {
+      {!isCollapsed && items.map((childNode) => {
         const { node: cn, perm: cp, children: grandchildren } = childNode;
         if (grandchildren.length > 0) {
           return (
@@ -268,7 +268,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
     if (!editTarget) return;
     if (rolePermData?.data) {
       const existing = (rolePermData?.data as unknown as Array<{ PERMISSION_ID?: number }>) ?? [];
-      setGrantedIds(new Set(existing.map((rp) => rp.PERMISSION_ID).filter(Boolean as any)));
+      setGrantedIds(new Set(existing.map((rp) => rp.PERMISSION_ID).filter((id): id is number => id !== undefined && id !== null)));
     } else {
       setGrantedIds(new Set());
     }
@@ -475,7 +475,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                       <PermSection
                         key={node.key}
                         node={node}
-                        children={children}
+                        items={children}
                         grantedIds={viewGrantedIds}
                         onToggle={() => {}}
                         onToggleAll={() => {}}
