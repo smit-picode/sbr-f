@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -8,6 +8,7 @@ import {
   Users,
   MapPin,
   ClipboardList,
+  Settings,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -16,12 +17,14 @@ import { cn } from '@/lib/utils';
 import { NAVIGATION, type NavItem } from '@/constants/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Logo } from '@/components/common/Logo';
+import { useAppSelector } from '@/hooks';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
   Users,
   MapPin,
   ClipboardList,
+  Settings,
 };
 
 interface NavLinkProps {
@@ -70,6 +73,33 @@ function NavLink({ item, collapsed }: NavLinkProps) {
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const user = useAppSelector((s) => s.auth.user);
+  const [localUser, setLocalUser] = useState<{ email: string; role: string } | null>(null);
+
+  // Fallback: read from localStorage if Redux isn't hydrated yet (hydration race condition fix)
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sbr_user');
+      if (stored) {
+        try {
+          setLocalUser(JSON.parse(stored));
+        } catch {
+          // Invalid JSON
+        }
+      }
+    }
+  }, [user]);
+
+  // Check if user is super admin (handle various role formats)
+  const effectiveUser = user || localUser;
+  const isSuperAdmin = effectiveUser?.role && (
+    effectiveUser.role === 'SUPER_ADMIN' ||
+    effectiveUser.role === 'Super Admin' ||
+    effectiveUser.role?.toUpperCase() === 'SUPER_ADMIN'
+  );
+
+  const permissions = useAppSelector((s) => s.auth.permissions);
+  const hasAnyAdminPermission = permissions.some(p => p.permissionName?.startsWith('admin_panel.'));
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -96,9 +126,27 @@ export function Sidebar() {
               Main Menu
             </p>
           )}
-          {NAVIGATION.map((item) => (
+          {NAVIGATION.filter(item =>
+            isSuperAdmin ||
+            permissions.some(p => p.permissionName?.toLowerCase() === item.permKey.toLowerCase())
+          ).map((item) => (
             <NavLink key={item.href} item={item} collapsed={collapsed} />
           ))}
+
+          {(isSuperAdmin || hasAnyAdminPermission) && (
+            <>
+              <div className="my-4 border-t border-slate-800" />
+              {!collapsed && (
+                <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
+                  Administration
+                </p>
+              )}
+              <NavLink
+                item={{ title: 'Admin Panel', href: '/admin', icon: 'Settings', permKey: 'admin_panel' }}
+                collapsed={collapsed}
+              />
+            </>
+          )}
         </nav>
 
         {/* Collapse Toggle */}

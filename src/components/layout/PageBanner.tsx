@@ -13,6 +13,10 @@ const BANNER_KEY_MAP: Record<string, string> = {
 export function PageBanner() {
   const pathname = usePathname();
   const { t } = useTranslation();
+
+  // Hide banner entirely on admin routes
+  if (pathname.startsWith('/admin')) return null;
+
   const key = BANNER_KEY_MAP[pathname] ?? 'pageBanner.frame';
 
   return (

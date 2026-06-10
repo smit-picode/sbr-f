@@ -12,12 +12,19 @@ import { FRAME_DEFAULT_FILTERS } from '../constants';
 import type { FrameFilters, SbrFrame } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce } from '@/hooks';
+import { useDebounce, usePermission } from '@/hooks';
 import { Building2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
+}
+
+function is403(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
+}
+function is401(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
 }
 
 export function FrameListPage() {
@@ -36,13 +43,34 @@ export function FrameListPage() {
     sourceCode: filters.sourceCode === '__all__' ? undefined : filters.sourceCode,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetFrameListQuery(queryParams);
+  // Determine which permission to declare for this request.
+  // The backend checks this header strictly: it must be in the route's allowed list
+  // AND the user must have that specific permission (or hold the parent without any children).
+  const FILTER_KEYS: (keyof typeof queryParams)[] = ['search', 'estStatus', 'sectorId', 'sourceCode', 'isicCode', 'mainBranchFLG'];
+  const hasActiveFilters = FILTER_KEYS.some(k => {
+    const v = queryParams[k];
+    return v !== undefined && v !== '' && v !== null;
+  });
+  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated
+  const declaredPermission = hasActiveFilters
+    ? 'establishments.view,establishments.search'
+    : 'establishments.view';
+
+  const { data, isLoading, isError, error, refetch } = useGetFrameListQuery({
+    ...queryParams,
+    _permission: declaredPermission,
+  });
 
   const isValidationError = isError && is400(error);
+  const isPermissionError = isError && is403(error);
+  const isSessionError    = isError && is401(error);
 
   useEffect(() => {
-    if (isError && !is400(error)) toast.error('Failed to load establishments. Please try again.');
-  }, [isError, error]);
+    // Skip 400/401/403 — each has its own handler (validation inline, session/permission via global handler)
+    if (isError && !isValidationError && !isPermissionError && !isSessionError) {
+      toast.error('Failed to load establishments. Please try again.');
+    }
+  }, [isError, isValidationError, isPermissionError]);
 
   const handleFilterChange = useCallback((partial: Partial<FrameFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -52,9 +80,11 @@ export function FrameListPage() {
     setFilters(FRAME_DEFAULT_FILTERS);
   }, []);
 
-  const columns = getFrameColumns((row) => setEditTarget(row), t);
-  const records = isValidationError ? [] : (data?.data ?? []);
-  const total = isValidationError ? 0 : (data?.total ?? 0);
+  const { canEdit: canEditFrame, canSearch } = usePermission('establishments');
+  const columns = getFrameColumns((row) => setEditTarget(row), t, canEditFrame);
+  // On 403: clear data so stale cached records don't appear alongside the error state
+  const records = (isValidationError || isPermissionError || isSessionError) ? [] : (data?.data ?? []);
+  const total   = (isValidationError || isPermissionError || isSessionError) ? 0 : (data?.total ?? 0);
 
   return (
     <PageContainer>
@@ -69,12 +99,14 @@ export function FrameListPage() {
         }
       />
 
-      <FrameFiltersBar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={handleReset}
-        isDefault={JSON.stringify(filters) === JSON.stringify(FRAME_DEFAULT_FILTERS)}
-      />
+      {canSearch && (
+        <FrameFiltersBar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onReset={handleReset}
+          isDefault={JSON.stringify(filters) === JSON.stringify(FRAME_DEFAULT_FILTERS)}
+        />
+      )}
 
       <DataTable
         columns={columns}

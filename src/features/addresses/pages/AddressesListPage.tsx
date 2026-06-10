@@ -12,7 +12,7 @@ import { ADDRESS_DEFAULT_FILTERS } from '../constants';
 import type { AddressFilters, SbrAddress } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce } from '@/hooks';
+import { useDebounce, usePermission } from '@/hooks';
 import { MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,17 +29,21 @@ export function AddressesListPage() {
     search: debouncedSearch,
   });
 
-  const { data, isLoading, isError, refetch } = useGetAddressesListQuery(queryParams);
+  const { data, isLoading, isError, error, refetch } = useGetAddressesListQuery(queryParams);
 
   useEffect(() => {
-    if (isError) toast.error('Failed to load addresses. Please try again.');
-  }, [isError]);
+    const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
+    const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
+    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
+    if (isError && !is401 && !is403) toast.error('Failed to load addresses. Please try again.');
+  }, [isError, error]);
 
   const handleFilterChange = useCallback((partial: Partial<AddressFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const columns = getAddressColumns((row) => setEditTarget(row), t);
+  const { canEdit: canEditAddress } = usePermission('addresses');
+  const columns = getAddressColumns((row) => setEditTarget(row), t, canEditAddress);
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
 

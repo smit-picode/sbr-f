@@ -4,7 +4,21 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAppDispatch } from '@/hooks';
-import { hydrateAuth } from '@/features/auth/authSlice';
+import { hydrateAuth, setPermissions } from '@/features/auth/authSlice';
+import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
+
+function PermissionLoader() {
+  const dispatch = useAppDispatch();
+  const { data } = useGetMyPermissionsQuery();
+
+  useEffect(() => {
+    if (data?.data) {
+      dispatch(setPermissions(data.data));
+    }
+  }, [data, dispatch]);
+
+  return null;
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -33,5 +47,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <DashboardLayout>
+      <PermissionLoader />
+      {children}
+    </DashboardLayout>
+  );
 }

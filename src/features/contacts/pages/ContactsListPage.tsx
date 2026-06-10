@@ -12,12 +12,18 @@ import { CONTACT_DEFAULT_FILTERS } from '../constants';
 import type { ContactFilters, SbrContact } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce } from '@/hooks';
+import { useDebounce, usePermission } from '@/hooks';
 import { Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
+}
+function is403(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
+}
+function is401(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
 }
 
 export function ContactsListPage() {
@@ -38,14 +44,17 @@ export function ContactsListPage() {
   const isValidationError = isError && is400(error);
 
   useEffect(() => {
-    if (isError && !is400(error)) toast.error('Failed to load contacts. Please try again.');
+    // Skip 403 — global handler in services/api.ts already shows the permission toast
+    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
+    if (isError && !is400(error) && !is401(error) && !is403(error)) toast.error('Failed to load contacts. Please try again.');
   }, [isError, error]);
 
   const handleFilterChange = useCallback((partial: Partial<ContactFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const columns = getContactColumns((row) => setEditTarget(row), t);
+  const { canEdit: canEditContact } = usePermission('contacts');
+  const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
 

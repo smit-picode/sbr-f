@@ -9,8 +9,14 @@ export interface LoginResponse {
   email: string;
 }
 
+// A permission is just a name string. Having it in the list = granted.
+export interface UserPermission {
+  permissionName: string;
+}
+
 export interface AuthState {
   token: string | null;
   user: { email: string; role: string } | null;
   isAuthenticated: boolean;
+  permissions: UserPermission[];
 }

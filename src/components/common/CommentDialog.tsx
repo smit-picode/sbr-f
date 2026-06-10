@@ -23,6 +23,12 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel }: Props) {
     if (open) { setComment(''); setError(''); setSubmitting(false); }
   }, [open]);
 
+  // Reset submitting when the API call finishes (success or error).
+  // On success the dialog closes anyway; on error this re-enables the button.
+  useEffect(() => {
+    if (!isLoading) setSubmitting(false);
+  }, [isLoading]);
+
   const handleConfirm = () => {
     if (!comment.trim()) { setError(t('comment.required')); return; }
     // Guard against double-submit: isLoading from RTK Query updates on the next

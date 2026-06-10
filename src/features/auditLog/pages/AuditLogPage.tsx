@@ -15,6 +15,7 @@ import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePermission } from '@/hooks';
 
 const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 20 };
 
@@ -48,7 +49,12 @@ export function AuditLogPage() {
   const isValidationError = isError && is400(error);
 
   useEffect(() => {
-    if (isError && !is400(error)) toast.error('Failed to load audit log. Please try again.');
+    const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
+    const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
+    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
+    if (isError && !is400(error) && !is401 && !is403) {
+      toast.error('Failed to load audit log. Please try again.');
+    }
   }, [isError, error]);
 
   const handleFilterChange = useCallback((partial: Partial<AuditLogFilters>) => {

@@ -32,3 +32,10 @@ export function formatRole(role: string | null | undefined): string {
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+export function formatPermissionName(name: string | null | undefined): string {
+  if (!name) return '—';
+  return name
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}

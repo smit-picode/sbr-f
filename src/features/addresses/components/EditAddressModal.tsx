@@ -174,6 +174,7 @@ export function EditAddressModal({ address, open, onClose }: Props) {
       setShowCommentDialog(false);
       onClose();
     } catch (error) {
+      if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
         ?? 'Failed to update address. Please try again.';
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);

@@ -71,24 +71,22 @@ export function LoginPage() {
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="w-full md:w-1/2 lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white">
+      <div className="w-full md:w-1/2 lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
+        {/* Language Toggle - Top Right Corner */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          {isArabic ? <><span>إنجليزي</span> English</> : <><span>Arabic</span> عربي</>}
+        </button>
+
         <div className="w-full max-w-sm">
           {/* Mobile Header */}
           <div className="md:hidden flex flex-col items-center mb-8">
             <h1 className="text-2xl font-bold text-slate-900">SBR Portal</h1>
             <p className="text-sm text-slate-500 mt-1">Statistical Business Register</p>
             <p className="text-xs text-slate-400">NPC Qatar</p>
-          </div>
-
-          {/* Language Toggle on login page */}
-          <div className="flex justify-end mb-6">
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              {isArabic ? <><span>إنجليزي</span> English</> : <><span>Arabic</span> عربي</>}
-            </button>
           </div>
 
           {/* Form Title */}

@@ -68,9 +68,6 @@ export interface SbrFrame {
   // Validity
   VALID_FROM: string | null;
   VALID_TO: string | null;
-  // System timestamps
-  CREATED_AT: string | null;
-  UPDATED_AT: string | null;
 }
 
 export interface FrameFilters {

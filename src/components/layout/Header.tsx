@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Bell, LogOut, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -29,8 +30,33 @@ export function Header() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
+  const [localUser, setLocalUser] = useState<{ email: string; role: string } | null>(null);
+
   const breadcrumbs = getBreadcrumbs(pathname);
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'U';
+
+  // Fallback: read from localStorage if Redux isn't hydrated yet (hydration race condition fix)
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sbr_user');
+      if (stored) {
+        try {
+          setLocalUser(JSON.parse(stored));
+        } catch {
+          // invalid JSON
+        }
+      }
+    }
+  }, [user]);
+
+  // Check if user is super admin (handle various role formats)
+  const effectiveUser = user || localUser;
+  const isSuperAdmin = effectiveUser?.role && (
+    effectiveUser.role === 'SUPER_ADMIN' ||
+    effectiveUser.role === 'Super Admin' ||
+    effectiveUser.role?.toUpperCase() === 'SUPER_ADMIN'
+  );
+
 
   function handleLogout() {
     dispatch(logout());

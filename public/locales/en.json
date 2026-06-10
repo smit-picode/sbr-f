@@ -3,18 +3,21 @@
     "establishments": "Establishments",
     "contacts": "Contacts",
     "addresses": "Addresses",
-    "auditLog": "Audit Log"
+    "auditLog": "Audit Log",
+    "admin": "Admin Panel",
+    "sbrPanel": "SBR Panel"
   },
   "pageBanner": {
     "frame": "Establishments Management",
     "contacts": "Contacts Management",
     "addresses": "Addresses Management",
-    "auditLog": "Audit Log Management"
+    "auditLog": "Audit Log Management",
+    "admin": "Admin Panel"
   },
   "pages": {
     "frame": {
       "title": "Establishments",
-      "description": "Statistical Business Register — Establishment records"
+      "description": "Main business establishment records from the Statistical Business Register"
     },
     "contacts": {
       "title": "Contacts",
@@ -27,6 +30,10 @@
     "auditLog": {
       "title": "Audit Log",
       "description": "Track all data changes across Establishments, Contacts and Addresses"
+    },
+    "admin": {
+      "title": "Admin Panel",
+      "description": "Manage permissions, roles, and users"
     }
   },
   "filters": {
@@ -265,9 +272,7 @@
       "regExpiryDate": "Reg Expiry Date",
       "regCancelDate": "Reg Cancel Date",
       "validFrom": "Valid From",
-      "validTo": "Valid To",
-      "createdAt": "Created At",
-      "updatedAt": "Updated At"
+      "validTo": "Valid To"
     }
   },
   "login": {
@@ -280,5 +285,112 @@
     "brandingSub": "National Planning Council",
     "brandingCountry": "State of Qatar",
     "copyright": "National Planning Council — Qatar"
+  },
+  "admin": {
+    "panel": {
+      "title": "Admin Panel",
+      "subtitle": "System configuration & access management",
+      "accessDenied": "Access Denied",
+      "accessDeniedDesc": "You do not have permission to access the admin panel.",
+      "backToMain": "Back to Main Panel",
+      "noTabsAvailable": "No tabs available for your permissions."
+    },
+    "tabs": {
+      "permissions": "Permissions",
+      "permissionsDesc": "Manage access permissions",
+      "roles": "Roles",
+      "rolesDesc": "Configure role definitions",
+      "users": "Users",
+      "usersDesc": "Manage system users",
+      "management": "Management"
+    },
+    "permLabels": {
+      "establishments": "Establishments",
+      "establishments_view": "View Establishments",
+      "establishments_edit": "Edit Establishments",
+      "establishments_search": "Search & Filter",
+      "contacts": "Contacts",
+      "contacts_view": "View Contacts",
+      "contacts_edit": "Edit Contacts",
+      "addresses": "Addresses",
+      "addresses_view": "View Addresses",
+      "addresses_edit": "Edit Addresses",
+      "audit_log": "Audit Log",
+      "audit_log_view": "View Audit Log",
+      "admin_panel": "Admin Panel",
+      "admin_panel_view": "View Admin Panel",
+      "admin_panel_permissions": "Permissions Tab",
+      "admin_panel_permissions_view": "View Permissions",
+      "admin_panel_permissions_view_detail": "View Permission Detail",
+      "admin_panel_permissions_edit": "Edit Permissions",
+      "admin_panel_roles": "Roles Tab",
+      "admin_panel_roles_view": "View Roles",
+      "admin_panel_roles_view_detail": "View Role Detail",
+      "admin_panel_roles_edit": "Edit Roles",
+      "admin_panel_users": "Users Tab",
+      "admin_panel_users_view": "View Users",
+      "admin_panel_users_view_detail": "View User Detail",
+      "admin_panel_users_edit": "Edit Users"
+    },
+    "permissions": {
+      "searchPlaceholder": "Search by name or key...",
+      "ofPermissions": "{{total}} permissions",
+      "childPermissions": "{{count}} child permissions",
+      "parent": "Parent"
+    },
+    "roles": {
+      "searchPlaceholder": "Search roles...",
+      "addRole": "Add Role",
+      "colName": "Name",
+      "colActions": "Actions",
+      "loading": "Loading...",
+      "noRoles": "No roles found",
+      "viewPermissionsTitle": "View permissions",
+      "superAdminCannotEdit": "SUPER_ADMIN cannot be edited",
+      "editRoleTitle": "Edit role",
+      "roleLabel": "Role",
+      "assignedPermissions": "Assigned Permissions",
+      "permissionsCount": "{{count}} permissions",
+      "noPermissionsAssigned": "No permissions assigned to this role",
+      "colPermission": "Permission",
+      "colView": "View",
+      "colEdit": "Edit",
+      "addRoleDialogTitle": "Add Role",
+      "assignPermissions": "Assign Permissions",
+      "editRoleDialogTitle": "Edit Role: {{name}}",
+      "permissionsSection": "Permissions",
+      "savePermissions": "Save Permissions",
+      "roleName": "Role Name",
+      "close": "Close",
+      "yes": "✓ Yes",
+      "no": "✗ No",
+      "grantLabel": "Grant",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "users": {
+      "searchPlaceholder": "Search users by name or email...",
+      "addUser": "Add User",
+      "colName": "Name",
+      "colEmail": "Email",
+      "colRole": "Role",
+      "colActions": "Actions",
+      "loading": "Loading...",
+      "noUsers": "No users found",
+      "viewUserTitle": "View user",
+      "superAdminCannotEdit": "SUPER_ADMIN user cannot be edited",
+      "editUserTitle": "Edit user",
+      "addUserDialogTitle": "Add User",
+      "userDetailsTitle": "User Details",
+      "editUserDialogTitle": "Edit User",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "roleLabel": "Role",
+      "selectRole": "Select role",
+      "creating": "Creating...",
+      "saving": "Saving...",
+      "close": "Close"
+    }
   }
 }

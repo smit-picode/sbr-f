@@ -6,7 +6,7 @@ import { Pencil } from 'lucide-react';
 
 type TFunc = (key: string) => string;
 
-export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc): ColumnDef<SbrAddress>[] => [
+export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc, canEdit = true): ColumnDef<SbrAddress>[] => [
   {
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
@@ -112,13 +112,13 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc): 
     header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
-  {
+  ...(canEdit ? [{
     id: 'actions',
     header: t('columns.ACTIONS'),
-    cell: ({ row }) => (
+    cell: ({ row }: { row: { original: SbrAddress } }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
     ),
-  },
+  } as ColumnDef<SbrAddress>] : []),
 ];

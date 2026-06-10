@@ -3,18 +3,21 @@
     "establishments": "المنشآت",
     "contacts": "جهات الاتصال",
     "addresses": "العناوين",
-    "auditLog": "سجل التدقيق"
+    "auditLog": "سجل التدقيق",
+    "admin": "لوحة الإدارة",
+    "sbrPanel": "لوحة SBR"
   },
   "pageBanner": {
     "frame": "إدارة المنشآت",
     "contacts": "إدارة جهات الاتصال",
     "addresses": "إدارة العناوين",
-    "auditLog": "إدارة سجل التدقيق"
+    "auditLog": "إدارة سجل التدقيق",
+    "admin": "لوحة الإدارة"
   },
   "pages": {
     "frame": {
       "title": "المنشآت",
-      "description": "سجل الأعمال الإحصائي — سجلات المنشآت"
+      "description": "سجلات المنشآت الرئيسية من السجل الإحصائي للأعمال"
     },
     "contacts": {
       "title": "جهات الاتصال",
@@ -27,6 +30,10 @@
     "auditLog": {
       "title": "سجل التدقيق",
       "description": "تتبع جميع تغييرات البيانات عبر المنشآت وجهات الاتصال والعناوين"
+    },
+    "admin": {
+      "title": "لوحة الإدارة",
+      "description": "إدارة الأذونات والأدوار والمستخدمين"
     }
   },
   "filters": {
@@ -265,9 +272,7 @@
       "regExpiryDate": "تاريخ انتهاء التسجيل",
       "regCancelDate": "تاريخ إلغاء التسجيل",
       "validFrom": "صالح من",
-      "validTo": "صالح حتى",
-      "createdAt": "تاريخ الإنشاء",
-      "updatedAt": "تاريخ التحديث"
+      "validTo": "صالح حتى"
     }
   },
   "login": {
@@ -280,5 +285,112 @@
     "brandingSub": "المجلس الأعلى للتخطيط",
     "brandingCountry": "دولة قطر",
     "copyright": "المجلس الأعلى للتخطيط — قطر"
+  },
+  "admin": {
+    "panel": {
+      "title": "لوحة الإدارة",
+      "subtitle": "إعداد النظام وإدارة الوصول",
+      "accessDenied": "تم رفض الوصول",
+      "accessDeniedDesc": "ليس لديك صلاحية للوصول إلى لوحة الإدارة.",
+      "backToMain": "العودة إلى اللوحة الرئيسية",
+      "noTabsAvailable": "لا توجد تبويبات متاحة لصلاحياتك."
+    },
+    "tabs": {
+      "permissions": "الصلاحيات",
+      "permissionsDesc": "إدارة صلاحيات الوصول",
+      "roles": "الأدوار",
+      "rolesDesc": "إعداد تعريفات الأدوار",
+      "users": "المستخدمون",
+      "usersDesc": "إدارة مستخدمي النظام",
+      "management": "إدارة"
+    },
+    "permLabels": {
+      "establishments": "المنشآت",
+      "establishments_view": "عرض المنشآت",
+      "establishments_edit": "تعديل المنشآت",
+      "establishments_search": "البحث والتصفية",
+      "contacts": "جهات الاتصال",
+      "contacts_view": "عرض جهات الاتصال",
+      "contacts_edit": "تعديل جهات الاتصال",
+      "addresses": "العناوين",
+      "addresses_view": "عرض العناوين",
+      "addresses_edit": "تعديل العناوين",
+      "audit_log": "سجل التدقيق",
+      "audit_log_view": "عرض سجل التدقيق",
+      "admin_panel": "لوحة الإدارة",
+      "admin_panel_view": "عرض لوحة الإدارة",
+      "admin_panel_permissions": "تبويب الصلاحيات",
+      "admin_panel_permissions_view": "عرض الصلاحيات",
+      "admin_panel_permissions_view_detail": "عرض تفاصيل الصلاحية",
+      "admin_panel_permissions_edit": "تعديل الصلاحيات",
+      "admin_panel_roles": "تبويب الأدوار",
+      "admin_panel_roles_view": "عرض الأدوار",
+      "admin_panel_roles_view_detail": "عرض تفاصيل الدور",
+      "admin_panel_roles_edit": "تعديل الأدوار",
+      "admin_panel_users": "تبويب المستخدمين",
+      "admin_panel_users_view": "عرض المستخدمين",
+      "admin_panel_users_view_detail": "عرض تفاصيل المستخدم",
+      "admin_panel_users_edit": "تعديل المستخدمين"
+    },
+    "permissions": {
+      "searchPlaceholder": "البحث بالاسم أو المفتاح...",
+      "ofPermissions": "{{total}} صلاحية",
+      "childPermissions": "{{count}} صلاحيات فرعية",
+      "parent": "رئيسي"
+    },
+    "roles": {
+      "searchPlaceholder": "البحث عن الأدوار...",
+      "addRole": "إضافة دور",
+      "colName": "الاسم",
+      "colActions": "الإجراءات",
+      "loading": "جاري التحميل...",
+      "noRoles": "لا توجد أدوار",
+      "viewPermissionsTitle": "عرض الصلاحيات",
+      "superAdminCannotEdit": "لا يمكن تعديل SUPER_ADMIN",
+      "editRoleTitle": "تعديل الدور",
+      "roleLabel": "الدور",
+      "assignedPermissions": "الصلاحيات المُعيَّنة",
+      "permissionsCount": "{{count}} صلاحيات",
+      "noPermissionsAssigned": "لا توجد صلاحيات مُعيَّنة لهذا الدور",
+      "colPermission": "الصلاحية",
+      "colView": "عرض",
+      "colEdit": "تعديل",
+      "addRoleDialogTitle": "إضافة دور",
+      "assignPermissions": "تعيين الصلاحيات",
+      "editRoleDialogTitle": "تعديل الدور: {{name}}",
+      "permissionsSection": "الصلاحيات",
+      "savePermissions": "حفظ الصلاحيات",
+      "roleName": "اسم الدور",
+      "close": "إغلاق",
+      "yes": "✓ نعم",
+      "no": "✗ لا",
+      "grantLabel": "منح",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "users": {
+      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني...",
+      "addUser": "إضافة مستخدم",
+      "colName": "الاسم",
+      "colEmail": "البريد الإلكتروني",
+      "colRole": "الدور",
+      "colActions": "الإجراءات",
+      "loading": "جاري التحميل...",
+      "noUsers": "لا يوجد مستخدمون",
+      "viewUserTitle": "عرض المستخدم",
+      "superAdminCannotEdit": "لا يمكن تعديل مستخدم SUPER_ADMIN",
+      "editUserTitle": "تعديل المستخدم",
+      "addUserDialogTitle": "إضافة مستخدم",
+      "userDetailsTitle": "تفاصيل المستخدم",
+      "editUserDialogTitle": "تعديل المستخدم",
+      "nameLabel": "الاسم",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "roleLabel": "الدور",
+      "selectRole": "اختر دورًا",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ...",
+      "close": "إغلاق"
+    }
   }
 }

@@ -28,7 +28,7 @@ function DateCell({ value }: { value: string | null | undefined }) {
 
 type TFunc = (key: string) => string;
 
-export const getFrameColumns = (onEdit: (row: SbrFrame) => void, t: TFunc): ColumnDef<SbrFrame>[] => [
+export const getFrameColumns = (onEdit: (row: SbrFrame) => void, t: TFunc, canEdit = true): ColumnDef<SbrFrame>[] => [
   // ── Core identifiers
   {
     accessorKey: 'SBR_ID',
@@ -375,25 +375,15 @@ export const getFrameColumns = (onEdit: (row: SbrFrame) => void, t: TFunc): Colu
     header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
-  {
-    accessorKey: 'CREATED_AT',
-    header: t('columns.CREATED_AT'),
-    cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
-  },
-  {
-    accessorKey: 'UPDATED_AT',
-    header: t('columns.UPDATED_AT'),
-    cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
-  },
 
   // ── Actions
-  {
+  ...(canEdit ? [{
     id: 'actions',
     header: t('columns.ACTIONS'),
-    cell: ({ row }) => (
+    cell: ({ row }: { row: { original: SbrFrame } }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5 mr-1" />
       </Button>
     ),
-  },
+  } as ColumnDef<SbrFrame>] : []),
 ];

@@ -7,7 +7,7 @@ import { Mail, Phone, Globe, Pencil } from 'lucide-react';
 
 type TFunc = (key: string) => string;
 
-export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc): ColumnDef<SbrContact>[] => [
+export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, canEdit = true): ColumnDef<SbrContact>[] => [
   {
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
@@ -129,13 +129,13 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc): 
     header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
-  {
+  ...(canEdit ? [{
     id: 'actions',
     header: t('columns.ACTIONS'),
-    cell: ({ row }) => (
+    cell: ({ row }: { row: { original: SbrContact } }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
     ),
-  },
+  } as ColumnDef<SbrContact>] : []),
 ];

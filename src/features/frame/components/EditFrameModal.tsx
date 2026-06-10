@@ -246,6 +246,7 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
       setShowCommentDialog(false);
       onClose();
     } catch (error) {
+      if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
         ?? 'Failed to update establishment. Please try again.';
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
@@ -571,8 +572,6 @@ export function EditFrameModal({ frame, open, onClose }: Props) {
           <SectionDivider title={t('editFrame.sections.metadata')} />
           <ReadOnlyField label={t('editFrame.fields.validFrom')} value={frame?.VALID_FROM ? new Date(frame.VALID_FROM).toLocaleDateString('en-GB') : '—'} />
           <ReadOnlyField label={t('editFrame.fields.validTo')} value={frame?.VALID_TO ? new Date(frame.VALID_TO).toLocaleDateString('en-GB') : '—'} />
-          <ReadOnlyField label={t('editFrame.fields.createdAt')} value={frame?.CREATED_AT ? new Date(frame.CREATED_AT).toLocaleString('en-GB') : '—'} />
-          <ReadOnlyField label={t('editFrame.fields.updatedAt')} value={frame?.UPDATED_AT ? new Date(frame.UPDATED_AT).toLocaleString('en-GB') : '—'} />
 
           </div>
 
