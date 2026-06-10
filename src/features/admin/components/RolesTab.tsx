@@ -532,7 +532,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                   <PermSection
                     key={node.key}
                     node={node}
-                    children={children}
+                    items={children}
                     grantedIds={grantedIds}
                     onToggle={handleToggle}
                     onToggleAll={handleToggleAll}
@@ -587,7 +587,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                   <PermSection
                     key={node.key}
                     node={node}
-                    children={children}
+                    items={children}
                     grantedIds={grantedIds}
                     onToggle={handleToggle}
                     onToggleAll={handleToggleAll}
