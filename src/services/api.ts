@@ -6,6 +6,8 @@ import { logout } from '@/features/auth/authSlice';
 
 // Prevents multiple 403 errors from stacking duplicate toasts and redirects
 let permissionRedirectInProgress = false;
+// Prevents duplicate toasts when multiple concurrent requests all fail with 401
+let sessionExpiredInProgress = false;
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: `${env.apiUrl}/api/v1`,
@@ -29,11 +31,13 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     const status = result.error.status;
 
     if (status === 401) {
-      // Token expired or invalid — clear session and redirect to login
-      api.dispatch(logout());
-      toast.warning('Your session has expired. Please log in again.');
-      if (typeof window !== 'undefined') {
-        setTimeout(() => { window.location.href = '/login'; }, 2000);
+      if (!sessionExpiredInProgress) {
+        sessionExpiredInProgress = true;
+        api.dispatch(logout());
+        toast.warning('Your session has expired. Please log in again.');
+        if (typeof window !== 'undefined') {
+          setTimeout(() => { window.location.href = '/login'; }, 2000);
+        }
       }
       return result;
     }
@@ -58,7 +62,8 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     }
 
     // 400 = validation error — handled per-component
-    if (status !== 400) {
+    // suppress generic toasts while a session-expiry or permission redirect is already in progress
+    if (status !== 400 && !sessionExpiredInProgress && !permissionRedirectInProgress) {
       const data = result.error.data as { message?: string } | undefined;
       const msg = data?.message ?? 'Something went wrong. Please try again.';
       toast.error(msg);

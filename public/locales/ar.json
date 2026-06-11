@@ -336,7 +336,9 @@
       "searchPlaceholder": "البحث بالاسم أو المفتاح...",
       "ofPermissions": "{{total}} صلاحية",
       "childPermissions": "{{count}} صلاحيات فرعية",
-      "parent": "رئيسي"
+      "parent": "رئيسي",
+      "expandAll": "توسيع الكل",
+      "collapseAll": "طي الكل"
     },
     "roles": {
       "searchPlaceholder": "البحث عن الأدوار...",
@@ -366,7 +368,11 @@
       "no": "✗ لا",
       "grantLabel": "منح",
       "creating": "جاري الإنشاء...",
-      "saving": "جاري الحفظ..."
+      "saving": "جاري الحفظ...",
+      "expandAll": "توسيع الكل",
+      "collapseAll": "طي الكل",
+      "selectAll": "تحديد الكل",
+      "roleNamePlaceholder": "مثال: محلل"
     },
     "users": {
       "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني...",

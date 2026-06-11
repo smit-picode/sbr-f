@@ -147,10 +147,10 @@ export function UsersTab({ canEdit = false, canViewDetail = false }: { canEdit?:
         <table className="w-full">
           <thead className="bg-white border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colName')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colEmail')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colRole')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colActions')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colName')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colEmail')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colRole')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.users.colActions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -161,10 +161,10 @@ export function UsersTab({ canEdit = false, canViewDetail = false }: { canEdit?:
             ) : (
               users.map((user) => (
                 <tr key={user.ID} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.NAME}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.EMAIL}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{user.role?.ROLE_NAME || '—'}</td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="px-6 py-4 text-sm text-slate-700 text-start">{user.NAME}</td>
+                  <td className="px-6 py-4 text-sm text-slate-700 text-start">{user.EMAIL}</td>
+                  <td className="px-6 py-4 text-sm text-slate-700 text-start">{user.role?.ROLE_NAME || '—'}</td>
+                  <td className="px-6 py-4 flex gap-2 justify-start">
                     {canViewDetail && (
                       <Button
                         size="sm" variant="outline"

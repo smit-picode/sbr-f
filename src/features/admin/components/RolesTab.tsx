@@ -70,6 +70,7 @@ function PermSubGroup({
   grantLabel: string;
   masterCollapsed?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   useEffect(() => { if (masterCollapsed !== undefined) setIsCollapsed(masterCollapsed); }, [masterCollapsed]);
   const { node: cn, children: grandchildren } = treeNode;
@@ -102,7 +103,7 @@ function PermSubGroup({
               className={subSome && !subAllGranted ? 'opacity-60' : ''}
               onCheckedChange={(v) => onToggleAll(subLeafs, !!v)}
             />
-            <span className="text-xs text-slate-500">Select All</span>
+            <span className="text-xs text-slate-500">{t('admin.roles.selectAll')}</span>
           </label>
         )}
       </div>
@@ -137,10 +138,10 @@ function PermSubGroup({
 //   a) Simple permission rows (no grandchildren)
 //   b) Sub-group headers (with their own children + Select All)
 function PermSection({
-  node, items, grantedIds, onToggle, onToggleAll, canEdit, label, childLabel, grantLabel, masterCollapsed,
+  node, children, grantedIds, onToggle, onToggleAll, canEdit, label, childLabel, grantLabel, masterCollapsed,
 }: {
   node: PermissionNode;
-  items: TreeNode[];
+  children: TreeNode[];
   grantedIds: Set<number>;
   onToggle: (id: number, granted: boolean) => void;
   onToggleAll: (perms: Array<SbrPermission | null>, granted: boolean) => void;
@@ -150,9 +151,10 @@ function PermSection({
   grantLabel: string;
   masterCollapsed?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   useEffect(() => { if (masterCollapsed !== undefined) setIsCollapsed(masterCollapsed); }, [masterCollapsed]);
-  const allLeafs    = flatLeafPerms(items);
+  const allLeafs    = flatLeafPerms(children);
   const allGranted  = allLeafs.length > 0 && allLeafs.every(p => p && grantedIds.has(p.ID));
   const someGranted = allLeafs.some(p => p && grantedIds.has(p.ID));
 
@@ -185,13 +187,13 @@ function PermSection({
               className={someGranted && !allGranted ? 'opacity-60' : ''}
               onCheckedChange={(v) => onToggleAll(allLeafs, !!v)}
             />
-            <span className="text-xs font-medium text-slate-500">Select All</span>
+            <span className="text-xs font-medium text-slate-500">{t('admin.roles.selectAll')}</span>
           </label>
         )}
       </div>
 
       {/* Children — can be simple rows or sub-group blocks */}
-      {!isCollapsed && items.map((childNode) => {
+      {!isCollapsed && children.map((childNode) => {
         const { node: cn, perm: cp, children: grandchildren } = childNode;
         if (grandchildren.length > 0) {
           return (
@@ -268,7 +270,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
     if (!editTarget) return;
     if (rolePermData?.data) {
       const existing = (rolePermData?.data as unknown as Array<{ PERMISSION_ID?: number }>) ?? [];
-      setGrantedIds(new Set(existing.map((rp) => rp.PERMISSION_ID).filter((id): id is number => id !== undefined && id !== null)));
+      setGrantedIds(new Set(existing.map((rp) => rp.PERMISSION_ID).filter(Boolean as any)));
     } else {
       setGrantedIds(new Set());
     }
@@ -372,8 +374,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
         <table className="w-full">
           <thead className="bg-white border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colName')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colActions')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colName')}</th>
+              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colActions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -384,8 +386,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
             ) : (
               roles.map((role) => (
                 <tr key={role.ID} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-700">{role.ROLE_NAME}</td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="px-6 py-4 text-sm text-slate-700 text-start">{role.ROLE_NAME}</td>
+                  <td className="px-6 py-4 flex gap-2 justify-start">
                     {canViewDetail && (
                       <Button
                         size="sm" variant="outline"
@@ -458,8 +460,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                           className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
                         >
                           {viewAllCollapsed
-                            ? <><ChevronDown className="h-3.5 w-3.5" /> Expand All</>
-                            : <><ChevronRight className="h-3.5 w-3.5" /> Collapse All</>
+                            ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
+                            : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
                           }
                         </button>
                       )}
@@ -475,7 +477,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                       <PermSection
                         key={node.key}
                         node={node}
-                        items={children}
+                        children={children}
                         grantedIds={viewGrantedIds}
                         onToggle={() => {}}
                         onToggleAll={() => {}}
@@ -509,7 +511,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                 id="role-name"
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
-                placeholder="e.g., Analyst"
+                placeholder={t('admin.roles.roleNamePlaceholder')}
               />
             </div>
 
@@ -523,8 +525,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                     className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
                   >
                     {createAllCollapsed
-                      ? <><ChevronDown className="h-3.5 w-3.5" /> Expand All</>
-                      : <><ChevronRight className="h-3.5 w-3.5" /> Collapse All</>
+                      ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
+                      : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
                     }
                   </button>
                 </div>
@@ -532,7 +534,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                   <PermSection
                     key={node.key}
                     node={node}
-                    items={children}
+                    children={children}
                     grantedIds={grantedIds}
                     onToggle={handleToggle}
                     onToggleAll={handleToggleAll}
@@ -578,8 +580,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                     className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
                   >
                     {editAllCollapsed
-                      ? <><ChevronDown className="h-3.5 w-3.5" /> Expand All</>
-                      : <><ChevronRight className="h-3.5 w-3.5" /> Collapse All</>
+                      ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
+                      : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
                     }
                   </button>
                 </div>
@@ -587,7 +589,7 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                   <PermSection
                     key={node.key}
                     node={node}
-                    items={children}
+                    children={children}
                     grantedIds={grantedIds}
                     onToggle={handleToggle}
                     onToggleAll={handleToggleAll}

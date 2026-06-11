@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { ShieldCheck, ChevronRight, ChevronDown, Layers, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSION_TREE, type PermissionNode } from '@/constants/permissionTree';
+import { useGetPermissionsListQuery } from '@/features/admin/api/adminApi';
 
 function countLeafPerms(node: PermissionNode): number {
   if (!node.children || node.children.length === 0) return 1;
@@ -31,7 +32,9 @@ export function PermissionsTab() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // Build flat list with parent info — walks all 3 levels for accurate totalCount
+  const { data: permissionsData } = useGetPermissionsListQuery({ limit: 200 });
+
+  // Build flat list with parent info — walks all 3 levels for search matching
   const allItems = useMemo(() => {
     const items: { key: string; label: string; parentKey?: string }[] = [];
     for (const node of PERMISSION_TREE) {
@@ -61,8 +64,7 @@ export function PermissionsTab() {
     return keys;
   }, [q, allItems]);
 
-  const totalCount = allItems.length;
-  const visibleCount = matchedKeys ? matchedKeys.size : totalCount;
+  const totalCount = permissionsData?.data?.length ?? 0;
 
   // Keys of all parent nodes (those that have children)
   const parentKeys = useMemo(
@@ -90,11 +92,11 @@ export function PermissionsTab() {
         <button
           type="button"
           onClick={handleMasterToggle}
-          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+          className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700 transition-colors"
         >
           {allExpanded
-            ? <><ChevronDown className="h-3.5 w-3.5" /> Collapse All</>
-            : <><ChevronRight className="h-3.5 w-3.5" /> Expand All</>
+            ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.permissions.collapseAll')}</>
+            : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.permissions.expandAll')}</>
           }
         </button>
         <span className="text-xs text-slate-400 tabular-nums">
@@ -221,7 +223,7 @@ export function PermissionsTab() {
                     // Simple permission row (no grandchildren)
                     return (
                       <div key={child.key} className="flex items-center gap-4 pl-16 pr-5 py-3 hover:bg-slate-50 transition-colors">
-                        <ChevronRight className="h-3 w-3 text-slate-300 shrink-0 -ml-5" />
+                        <ChevronRight className="h-3 w-3 text-slate-300 shrink-0 ltr:-ml-5" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-slate-600 font-medium">{child.label}</p>
                         </div>

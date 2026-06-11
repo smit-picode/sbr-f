@@ -336,7 +336,9 @@
       "searchPlaceholder": "Search by name or key...",
       "ofPermissions": "{{total}} permissions",
       "childPermissions": "{{count}} child permissions",
-      "parent": "Parent"
+      "parent": "Parent",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All"
     },
     "roles": {
       "searchPlaceholder": "Search roles...",
@@ -366,7 +368,11 @@
       "no": "✗ No",
       "grantLabel": "Grant",
       "creating": "Creating...",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All",
+      "selectAll": "Select All",
+      "roleNamePlaceholder": "e.g., Analyst"
     },
     "users": {
       "searchPlaceholder": "Search users by name or email...",
