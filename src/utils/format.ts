@@ -9,7 +9,7 @@ export function formatDate(value: string | null | undefined): string {
   } catch {
     return value;
   }
-}
+} 
 
 export function formatNumber(value: number | null | undefined): string {
   if (value == null) return '—';
