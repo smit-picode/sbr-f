@@ -34,7 +34,7 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
     cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
+      <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
     ),
     enableSorting: true,
   },

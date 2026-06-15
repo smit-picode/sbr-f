@@ -38,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   onSortChange?: (field: string, order: 'asc' | 'desc') => void;
+  stickyFirstColumn?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -51,6 +52,7 @@ export function DataTable<TData, TValue>({
   total,
   onPageChange,
   onLimitChange,
+  stickyFirstColumn,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -82,14 +84,18 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-slate-50">
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, colIndex) => {
                   const sorted = header.column.getIsSorted();
                   const canSort = header.column.getCanSort();
+                  const isSticky = stickyFirstColumn && colIndex === 0;
                   return (
                     <TableHead
                       key={header.id}
                       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                      className={cn(canSort && 'cursor-pointer select-none group')}
+                      className={cn(
+                        canSort && 'cursor-pointer select-none group',
+                        isSticky && 'sticky left-0 z-20 bg-slate-50'
+                      )}
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex items-center gap-1">
@@ -119,11 +125,17 @@ export function DataTable<TData, TValue>({
             ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                  {row.getVisibleCells().map((cell, colIndex) => {
+                    const isSticky = stickyFirstColumn && colIndex === 0;
+                    return (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(isSticky && 'sticky left-0 z-10 bg-white')}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
-                  ))}
+                    );
+                  })}
                 </TableRow>
               ))
             )}

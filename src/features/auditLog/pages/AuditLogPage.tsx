@@ -82,7 +82,7 @@ export function AuditLogPage() {
           value={filters.tableName ?? '__all__'}
           onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
         >
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-52 shadow-none">
             <SelectValue placeholder={t('filters.allTables')} />
           </SelectTrigger>
           <SelectContent>
@@ -97,7 +97,7 @@ export function AuditLogPage() {
         <Input
           type="number"
           placeholder={t('filters.filterByRecordId')}
-          className="w-48"
+          className="w-48 shadow-none"
           min="1"
           value={recordIdInput}
           onKeyDown={(e) => {

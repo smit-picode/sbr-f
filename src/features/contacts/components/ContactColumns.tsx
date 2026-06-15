@@ -12,7 +12,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
     cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
+      <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
     ),
     enableSorting: true,
   },
@@ -83,7 +83,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
-        <div className="flex items-center gap-1.5 text-sm text-blue-600">
+        <div className="flex items-center gap-1.5 text-sm" style={{ color: '#A71D3A' }}>
           <Globe className="h-3.5 w-3.5" />
           <a href={val.startsWith('http') ? val : `https://${val}`} target="_blank" rel="noopener noreferrer" className="hover:underline truncate max-w-[140px]">
             {val}

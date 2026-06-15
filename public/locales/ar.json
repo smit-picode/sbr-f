@@ -1,6 +1,6 @@
 {
   "nav": {
-    "establishments": "المنشآت",
+    "establishments": "الوحدات القانونية",
     "contacts": "جهات الاتصال",
     "addresses": "العناوين",
     "auditLog": "سجل التدقيق",
@@ -24,7 +24,7 @@
     "enterprise360": "المؤسسة 360"
   },
   "pageBanner": {
-    "frame": "إدارة المنشآت",
+    "frame": "إدارة الوحدات القانونية",
     "contacts": "إدارة جهات الاتصال",
     "addresses": "إدارة العناوين",
     "auditLog": "إدارة سجل التدقيق",
@@ -152,7 +152,7 @@
     "description": "قدّم سببًا أو وصفًا لهذا التغيير. سيتم تخزينه في سجل التدقيق.",
     "label": "التعليق",
     "required": "التعليق مطلوب قبل الحفظ.",
-    "placeholder": "مثال: تم تصحيح اسم المنشأة بناءً على الرخصة التجارية..."
+    "placeholder": "مثال: تم تصحيح اسم الوحدة القانونية بناءً على الرخصة التجارية..."
   },
   "columns": {
     "ACTIONS": "الإجراءات",
@@ -290,7 +290,7 @@
     }
   },
   "editLegalUnit": {
-    "title": "تعديل المنشأة",
+    "title": "تعديل الوحدة القانونية",
     "selectPlaceholder": "— اختر —",
     "sections": {
       "identifiers": "المعرّفات",
@@ -413,9 +413,9 @@
       "management": "إدارة"
     },
     "permLabels": {
-      "establishments": "المنشآت",
-      "establishments_view": "عرض المنشآت",
-      "establishments_edit": "تعديل المنشآت",
+      "establishments": "الوحدات القانونية",
+      "establishments_view": "عرض الوحدات القانونية",
+      "establishments_edit": "تعديل الوحدات القانونية",
       "establishments_search": "البحث والتصفية",
       "contacts": "جهات الاتصال",
       "contacts_view": "عرض جهات الاتصال",

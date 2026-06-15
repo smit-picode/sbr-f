@@ -242,13 +242,13 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
     if (!frame) return;
     try {
       await updateLegalUnit({ id: frame.ID, data: { ...form, comment } }).unwrap();
-      toast.success('Establishment updated successfully!');
+      toast.success('Legal unit updated successfully!');
       setShowCommentDialog(false);
       onClose();
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
-        ?? 'Failed to update establishment. Please try again.';
+        ?? 'Failed to update legal unit. Please try again.';
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
       parts.forEach((part) => {

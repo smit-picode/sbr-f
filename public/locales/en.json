@@ -1,6 +1,6 @@
 {
   "nav": {
-    "establishments": "Establishments",
+    "establishments": "Legal Units",
     "contacts": "Contacts",
     "addresses": "Addresses",
     "auditLog": "Audit Log",
@@ -24,7 +24,7 @@
     "enterprise360": "Enterprise 360"
   },
   "pageBanner": {
-    "frame": "Establishments Management",
+    "frame": "Legal Units Management",
     "contacts": "Contacts Management",
     "addresses": "Addresses Management",
     "auditLog": "Audit Log Management",
@@ -152,7 +152,7 @@
     "description": "Provide a reason or description for this change. This will be stored in the Audit Log.",
     "label": "Comment",
     "required": "Comment is required before saving.",
-    "placeholder": "e.g. Corrected establishment name based on trade license..."
+    "placeholder": "e.g. Corrected legal unit name based on trade license..."
   },
   "columns": {
     "ACTIONS": "ACTIONS",
@@ -290,7 +290,7 @@
     }
   },
   "editLegalUnit": {
-    "title": "Edit Establishment",
+    "title": "Edit Legal Unit",
     "selectPlaceholder": "— Select —",
     "sections": {
       "identifiers": "Identifiers",
@@ -413,9 +413,9 @@
       "management": "Management"
     },
     "permLabels": {
-      "establishments": "Establishments",
-      "establishments_view": "View Establishments",
-      "establishments_edit": "Edit Establishments",
+      "establishments": "Legal Units",
+      "establishments_view": "View Legal Units",
+      "establishments_edit": "Edit Legal Units",
       "establishments_search": "Search & Filter",
       "contacts": "Contacts",
       "contacts_view": "View Contacts",

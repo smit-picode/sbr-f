@@ -10,10 +10,10 @@ export interface PermissionNode {
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'establishments',
-    label: 'Establishments',
+    label: 'Legal Units',
     children: [
-      { key: 'establishments.view',   label: 'View Establishments' },
-      { key: 'establishments.edit',   label: 'Edit Establishments' },
+      { key: 'establishments.view',   label: 'View Legal Units' },
+      { key: 'establishments.edit',   label: 'Edit Legal Units' },
       { key: 'establishments.search', label: 'Search & Filter' },
     ],
   },

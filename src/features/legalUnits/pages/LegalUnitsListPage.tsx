@@ -119,6 +119,7 @@ export function LegalUnitsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        stickyFirstColumn
       />
 
       <EditLegalUnitModal

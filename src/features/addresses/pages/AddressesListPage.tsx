@@ -62,6 +62,7 @@ export function AddressesListPage() {
 
       <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
         <SearchInput
+          className="shadow-none"
           value={filters.search ?? ''}
           onChange={(v) => handleFilterChange({ search: v, page: 1 })}
           placeholder={t('filters.searchByAddress')}
@@ -79,6 +80,7 @@ export function AddressesListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        stickyFirstColumn
       />
 
       <EditAddressModal
