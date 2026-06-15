@@ -29,6 +29,14 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   if (result.error) {
     const status = result.error.status;
+    const url = typeof args === 'string' ? args : args.url;
+
+    // Login failures are handled inline on the login page — a 401/400 here means
+    // wrong credentials, NOT an expired session. Skip all global handling so the
+    // session-expired toast and the delayed redirect/reload never fire.
+    if (url === '/auth/login') {
+      return result;
+    }
 
     if (status === 401) {
       if (!sessionExpiredInProgress) {
@@ -76,6 +84,6 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Frame', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin'],
+  tagTypes: ['LegalUnits', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin'],
   endpoints: () => ({}),
 });

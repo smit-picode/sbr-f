@@ -5,7 +5,23 @@
     "addresses": "Addresses",
     "auditLog": "Audit Log",
     "admin": "Admin Panel",
-    "sbrPanel": "SBR Panel"
+    "sbrPanel": "SBR Panel",
+    "sbrLiveFrame": "SBR Live Frame",
+    "legalUnits": "Legal Units",
+    "enterprises": "Enterprises",
+    "administration": "Administration",
+    "home": "Home",
+    "approvals": "Approvals",
+    "requests": "Requests",
+    "approvalsHistory": "Approvals History",
+    "frozenFrames": "Frozen Frames",
+    "createSnapshot": "Create Snapshot",
+    "browseSnapshots": "Browse Snapshots",
+    "dataQuality": "Data Quality",
+    "qualityDashboard": "Quality Dashboard",
+    "qualityFindings": "Quality Findings",
+    "regulatorEscalation": "Regulator Escalation",
+    "enterprise360": "Enterprise 360"
   },
   "pageBanner": {
     "frame": "Establishments Management",
@@ -15,9 +31,9 @@
     "admin": "Admin Panel"
   },
   "pages": {
-    "frame": {
-      "title": "Establishments",
-      "description": "Main business establishment records from the Statistical Business Register"
+    "legalUnits": {
+      "title": "Legal Units",
+      "description": "Statistical Business Register — Legal unit records"
     },
     "contacts": {
       "title": "Contacts",
@@ -29,11 +45,71 @@
     },
     "auditLog": {
       "title": "Audit Log",
-      "description": "Track all data changes across Establishments, Contacts and Addresses"
+      "description": "Track all data changes across Legal Units, Enterprises, Contacts and Addresses"
     },
     "admin": {
       "title": "Admin Panel",
       "description": "Manage permissions, roles, and users"
+    },
+    "enterprises": {
+      "title": "Enterprises",
+      "description": "Enterprise records from the Statistical Business Register",
+      "noData": "No data found",
+      "noDataDesc": "Enterprise records will appear here once available."
+    },
+    "home": {
+      "title": "Home",
+      "description": "Statistical Business Register — Overview dashboard",
+      "noData": "No data found",
+      "noDataDesc": "Dashboard content will appear here once available."
+    },
+    "requests": {
+      "title": "Requests",
+      "description": "Pending change requests awaiting approval",
+      "noData": "No data found",
+      "noDataDesc": "Requests data will appear here once available."
+    },
+    "approvalsHistory": {
+      "title": "Approvals History",
+      "description": "History of approved and rejected change requests",
+      "noData": "No data found",
+      "noDataDesc": "Approvals History data will appear here once available."
+    },
+    "createSnapshot": {
+      "title": "Create Snapshot",
+      "description": "Create a frozen snapshot of the live frame",
+      "noData": "No data found",
+      "noDataDesc": "Create Snapshot data will appear here once available."
+    },
+    "browseSnapshots": {
+      "title": "Browse Snapshots",
+      "description": "Browse previously created frame snapshots",
+      "noData": "No data found",
+      "noDataDesc": "Browse Snapshots data will appear here once available."
+    },
+    "qualityDashboard": {
+      "title": "Quality Dashboard",
+      "description": "Data quality metrics and indicators",
+      "noData": "No data found",
+      "noDataDesc": "Quality Dashboard data will appear here once available."
+    },
+    "qualityFindings": {
+      "title": "Quality Findings",
+      "description": "Open data quality findings and issues",
+      "noData": "No data found",
+      "noDataDesc": "Quality Findings data will appear here once available."
+    },
+    "regulatorEscalation": {
+      "title": "Regulator Escalation",
+      "description": "Escalate data issues to source regulators",
+      "noData": "No data found",
+      "noDataDesc": "Regulator Escalation data will appear here once available."
+    },
+    "enterprise360": {
+      "title": "Enterprise 360",
+      "description": "Select an enterprise to open its full 360° profile",
+      "noData": "No data found",
+      "noDataDesc": "Enterprise 360 profiles will appear here once available."
     }
   },
   "filters": {
@@ -160,11 +236,18 @@
     "RECORD_ID": "ROW ID",
     "REASON": "REASON",
     "CHANGED_BY": "CHANGED BY",
-    "APPROVED_BY": "APPROVED BY"
+    "APPROVED_BY": "APPROVED BY",
+    "PREV_RECORD_ID": "PREV RECORD ID",
+    "NEW_RECORD_ID": "NEW RECORD ID",
+    "OPERATION": "OPERATION",
+    "COLUMN_NAME": "COLUMN NAME",
+    "APPROVAL_DATE": "APPROVAL DATE"
   },
   "editContact": {
     "title": "Edit Contact",
-    "sections": { "metadata": "Metadata" },
+    "sections": {
+      "metadata": "Metadata"
+    },
     "fields": {
       "sbrId": "SBR ID",
       "recordId": "Record ID",
@@ -184,7 +267,9 @@
   },
   "editAddress": {
     "title": "Edit Address",
-    "sections": { "metadata": "Metadata" },
+    "sections": {
+      "metadata": "Metadata"
+    },
     "fields": {
       "sbrId": "SBR ID",
       "recordId": "Record ID",
@@ -204,7 +289,7 @@
       "validTo": "Valid To"
     }
   },
-  "editFrame": {
+  "editLegalUnit": {
     "title": "Edit Establishment",
     "selectPlaceholder": "— Select —",
     "sections": {
@@ -276,7 +361,7 @@
     }
   },
   "login": {
-    "title": "Login",
+    "title": "Sign in",
     "email": "Email address",
     "password": "Password",
     "signIn": "Sign In",
@@ -284,7 +369,30 @@
     "branding": "Statistical Business Register",
     "brandingSub": "National Planning Council",
     "brandingCountry": "State of Qatar",
-    "copyright": "National Planning Council — Qatar"
+    "copyright": "National Planning Council — Qatar",
+    "chooseRoleTitle": "Choose your role",
+    "chooseRoleSubtitle": "You hold multiple roles — pick the one to sign in with",
+    "changeRole": "Change role",
+    "roleNote": "You can sign out and pick a different role at any time.",
+    "roles": {
+      "sbrManager": {
+        "title": "SBR Manager",
+        "desc": "Read/write · all data, DQ, freeze frames"
+      },
+      "governanceInternal": {
+        "title": "Governance — Internal",
+        "desc": "Read-only · dashboards + all tables"
+      },
+      "governanceExternal": {
+        "title": "Governance — External",
+        "desc": "Read-only · scoped to MoCI + tagged findings"
+      },
+      "administrator": {
+        "title": "Administrator",
+        "desc": "User & role management, registry, logs"
+      }
+    },
+    "backToLogin": "Back to login"
   },
   "admin": {
     "panel": {
@@ -396,7 +504,20 @@
       "selectRole": "Select role",
       "creating": "Creating...",
       "saving": "Saving...",
-      "close": "Close"
+      "close": "Close",
+      "colUser": "USER",
+      "colRoles": "ROLES",
+      "colStatus": "STATUS",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "regulatorScopeLabel": "Regulator scope",
+      "noScope": "No scope (all regulators)",
+      "statusLabel": "Status",
+      "assignedRolesLabel": "Assigned roles",
+      "assignedRolesHint": "A user can hold multiple roles; effective permissions follow the active role. Set an optional per-role expiry date.",
+      "scopedBadge": "SCOPED",
+      "expiryTitle": "Optional expiry date for this role",
+      "noRoles": "No roles available"
     }
   }
 }

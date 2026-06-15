@@ -5,16 +5,39 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Building2,
+  Landmark,
+  ShieldCheck,
+  UserCircle2,
+  ChevronRight,
+  ArrowLeft,
+  type LucideIcon,
+} from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { setCredentials } from '../authSlice';
-import { useLoginMutation } from '../api/authApi';
+import { setCredentials, logout } from '../authSlice';
+import { useLoginMutation, useSwitchRoleMutation } from '../api/authApi';
+import { LOGIN_SELECTED_ROLE_KEY } from '../constants';
 import { useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
 import { Logo } from '@/components/common/Logo';
+import type { AuthRole } from '@/types';
+
+// Visual rotation for role cards — purely decorative
+const ROLE_CARD_ICONS: LucideIcon[] = [ShieldCheck, Building2, Eye, Landmark, UserCircle2];
+const ROLE_CARD_TINTS: { bg: string; color: string }[] = [
+  { bg: 'bg-violet-50', color: 'text-violet-600' },
+  { bg: 'bg-rose-50', color: 'text-[#A71D3A]' },
+  { bg: 'bg-blue-50', color: 'text-blue-700' },
+  { bg: 'bg-amber-50', color: 'text-amber-600' },
+  { bg: 'bg-emerald-50', color: 'text-emerald-600' },
+];
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -30,7 +53,11 @@ export function LoginPage() {
   const { isArabic, toggleLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  // Set after successful credentials when the user holds more than one role
+  const [pendingRoles, setPendingRoles] = useState<AuthRole[] | null>(null);
+  const [switchingRoleId, setSwitchingRoleId] = useState<number | null>(null);
   const [loginMutation, { isLoading }] = useLoginMutation();
+  const [switchRoleMutation] = useSwitchRoleMutation();
 
   const {
     register,
@@ -42,11 +69,41 @@ export function LoginPage() {
     setLoginError(null);
     try {
       const result = await loginMutation(values).unwrap();
-      dispatch(setCredentials(result.data!));
-      router.push('/frame');
-    } catch {
-      setLoginError('Invalid email or password. Please try again.');
+      const data = result.data!;
+      dispatch(setCredentials(data));
+      if ((data.roles?.length ?? 0) > 1) {
+        setPendingRoles(data.roles!);
+      } else {
+        router.push('/legal-units');
+      }
+    } catch (err) {
+      const apiMsg = (err as { data?: { message?: string } })?.data?.message;
+      setLoginError(apiMsg || 'Invalid email or password. Please try again.');
     }
+  }
+
+  async function handleRolePick(role: AuthRole) {
+    setSwitchingRoleId(role.ID);
+    try {
+      const result = await switchRoleMutation({ roleId: role.ID }).unwrap();
+      dispatch(setCredentials(result.data!));
+      try {
+        localStorage.setItem(LOGIN_SELECTED_ROLE_KEY, String(role.ID));
+      } catch {
+        // Ignore storage failures
+      }
+      router.push('/legal-units');
+    } catch {
+      setSwitchingRoleId(null);
+      setLoginError('Could not switch to that role. Please try again.');
+    }
+  }
+
+  function handleBackToLogin() {
+    dispatch(logout());
+    setPendingRoles(null);
+    setSwitchingRoleId(null);
+    setLoginError(null);
   }
 
   return (
@@ -70,18 +127,18 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side: Login Form */}
+      {/* Right Side */}
       <div className="w-full md:w-1/2 lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
-        {/* Language Toggle - Top Right Corner */}
+        {/* Language Toggle */}
         <button
           type="button"
           onClick={toggleLanguage}
-          className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          className="absolute top-6 end-6 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
         >
           {isArabic ? <><span>إنجليزي</span> English</> : <><span>Arabic</span> عربي</>}
         </button>
 
-        <div className="w-full max-w-sm">
+        <div className={pendingRoles ? 'w-full max-w-md' : 'w-full max-w-sm'}>
           {/* Mobile Header */}
           <div className="md:hidden flex flex-col items-center mb-8">
             <h1 className="text-2xl font-bold text-slate-900">SBR Portal</h1>
@@ -89,7 +146,9 @@ export function LoginPage() {
             <p className="text-xs text-slate-400">NPC Qatar</p>
           </div>
 
-          {/* Form Title */}
+          {/* Step 1 — Credentials */}
+          {!pendingRoles && (
+            <>
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-slate-900">{t('login.title')}</h2>
           </div>
@@ -157,6 +216,67 @@ export function LoginPage() {
               {isLoading ? t('login.signingIn') : t('login.signIn')}
             </button>
           </form>
+            </>
+          )}
+
+          {/* Step 2 — Role selection (only when the user holds multiple roles) */}
+          {pendingRoles && (
+            <>
+              <button
+                type="button"
+                onClick={handleBackToLogin}
+                className="mb-6 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#A71D3A] transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
+                {t('login.backToLogin')}
+              </button>
+
+              <div className="mb-8">
+                <h2 className="text-2xl font-semibold text-slate-900">{t('login.chooseRoleTitle')}</h2>
+                <p className="text-sm text-slate-500 mt-1">{t('login.chooseRoleSubtitle')}</p>
+              </div>
+
+              {loginError && (
+                <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {loginError}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {pendingRoles.map((role, idx) => {
+                  const Icon = ROLE_CARD_ICONS[idx % ROLE_CARD_ICONS.length];
+                  const tint = ROLE_CARD_TINTS[idx % ROLE_CARD_TINTS.length];
+                  const switching = switchingRoleId === role.ID;
+                  return (
+                    <button
+                      key={role.ID}
+                      type="button"
+                      disabled={switchingRoleId !== null}
+                      onClick={() => handleRolePick(role)}
+                      className="w-full flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 text-start shadow-sm hover:border-[#A71D3A]/40 hover:shadow transition-all group disabled:opacity-60"
+                    >
+                      <span className={`h-11 w-11 rounded-lg flex items-center justify-center shrink-0 ${tint.bg}`}>
+                        {switching
+                          ? <Loader2 className={`h-5 w-5 animate-spin ${tint.color}`} />
+                          : <Icon className={`h-5 w-5 ${tint.color}`} />}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-semibold text-slate-900">{role.ROLE_NAME}</span>
+                        {role.IS_SCOPED && (
+                          <span className="block text-[10px] font-bold tracking-wide text-[#A71D3A] mt-0.5">
+                            {t('admin.users.scopedBadge')}
+                          </span>
+                        )}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#A71D3A] transition-colors rtl:rotate-180" />
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-slate-400 mt-6">{t('login.roleNote')}</p>
+            </>
+          )}
 
           <p className="text-center text-xs text-slate-400 mt-8">
             © {new Date().getFullYear()} {t('login.copyright')}

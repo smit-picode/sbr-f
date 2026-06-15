@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrPermission, SbrRole, SbrRoleWithPermissions, SbrUser, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
+import type { ApiResponse, SbrPermission, SbrRole, SbrRoleWithPermissions, SbrUser, UserRoleInput, RegulatorScope, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -68,17 +68,23 @@ export const adminApi = baseApi.injectEndpoints({
       providesTags: ['Admin'],
       keepUnusedDataFor: 0,
     }),
-    createUser: builder.mutation<ApiResponse<SbrUser>, { NAME: string; EMAIL: string; PASSWORD: string; ROLE_ID: number }>({
+    createUser: builder.mutation<ApiResponse<SbrUser>, { NAME: string; EMAIL: string; PASSWORD: string; IS_ACTIVE?: boolean; roles?: UserRoleInput[] }>({
       query: (data) => ({ url: '/admin/users', method: 'POST', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
-    updateUser: builder.mutation<ApiResponse<SbrUser>, { id: number; data: { NAME?: string; ROLE_ID?: number } }>({
+    updateUser: builder.mutation<ApiResponse<SbrUser>, { id: number; data: { NAME?: string; IS_ACTIVE?: boolean; roles?: UserRoleInput[] } }>({
       query: ({ id, data }) => ({ url: `/admin/users/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
     deleteUser: builder.mutation<ApiResponse<void>, number>({
       query: (id) => ({ url: `/admin/users/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Admin', 'AuditLog'],
+    }),
+
+    // Regulator scopes — reference data for the user onboarding dialog
+    getRegulatorScopes: builder.query<ApiResponse<RegulatorScope[]>, void>({
+      query: () => ({ url: '/admin/regulator-scopes' }),
+      providesTags: ['Admin'],
     }),
   }),
   overrideExisting: false,
@@ -101,4 +107,5 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useGetRegulatorScopesQuery,
 } = adminApi;

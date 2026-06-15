@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cairo } from 'next/font/google';
+import { Cairo, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { ReduxProvider } from '@/providers/ReduxProvider';
 import { Toaster } from '@/components/common/Toaster';
@@ -12,19 +12,26 @@ const cairo = Cairo({
   variable: '--font-cairo',
 });
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-jakarta',
+});
+
 export const metadata: Metadata = {
   title: 'SBR Portal — NPC Qatar',
   description: 'Statistical Business Register — National Planning Council Qatar',
   icons: {
-    icon: '/sbr-logo-white.png',
-    shortcut: '/sbr-logo-white.png',
-    apple: '/sbr-logo-white.png',
+    icon: '/sbr-logo.png',
+    shortcut: '/sbr-logo.png',
+    apple: '/sbr-logo.png',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={cairo.variable}>
+    <html lang="en" suppressHydrationWarning className={`${cairo.variable} ${jakarta.variable}`}>
       <body suppressHydrationWarning>
         <ReduxProvider>
           <LanguageProvider>

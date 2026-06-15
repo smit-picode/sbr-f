@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Pencil, Plus, Eye, ChevronDown, ChevronRight } from 'lucide-react';
-import { useAppSelector } from '@/hooks';
+import { useAppSelector, useDebounce } from '@/hooks';
 import {
   useGetRolesListQuery,
   useCreateRoleMutation,
@@ -251,7 +251,13 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
     p.permissionName === 'admin_panel.permissions.view'
   );
 
-  const { data, isLoading } = useGetRolesListQuery(cleanParams(filters), { refetchOnMountOrArgChange: true });
+  // Debounce only the text search — typing no longer fires an API call per keystroke
+  const debouncedSearch = useDebounce(filters.search, 500);
+
+  const { data, isLoading } = useGetRolesListQuery(
+    cleanParams({ ...filters, search: debouncedSearch }),
+    { refetchOnMountOrArgChange: true }
+  );
   // Fetch permissions if: user has admin_panel.permissions OR when editing/viewing a role (to assign perms)
   const { data: permData } = useGetPermissionsListQuery(
     { page: 1, limit: 100 },

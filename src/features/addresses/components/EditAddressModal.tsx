@@ -268,7 +268,7 @@ export function EditAddressModal({ address, open, onClose }: Props) {
               value={form.SOURCE_CODE ?? ''}
               onChange={(e) => handleChange('SOURCE_CODE', e.target.value)}
             >
-              <option value="">{t('editFrame.selectPlaceholder')}</option>
+              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
               {ADDRESS_SOURCE_CODE_OPTIONS.map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}

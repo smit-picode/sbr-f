@@ -6,6 +6,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   permissions: [],
+  roles: [],
 };
 
 const authSlice = createSlice({
@@ -17,9 +18,11 @@ const authSlice = createSlice({
       state.user = { email: action.payload.email, role: action.payload.role };
       state.isAuthenticated = true;
       state.permissions = [];
+      state.roles = action.payload.roles ?? [];
       if (typeof window !== 'undefined') {
         localStorage.setItem('sbr_token', action.payload.token);
         localStorage.setItem('sbr_user', JSON.stringify(state.user));
+        localStorage.setItem('sbr_roles', JSON.stringify(state.roles));
       }
     },
     setPermissions: (state, action: PayloadAction<UserPermission[] | string[]>) => {
@@ -37,10 +40,12 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.permissions = [];
+      state.roles = [];
       if (typeof window !== 'undefined') {
         localStorage.removeItem('sbr_token');
         localStorage.removeItem('sbr_user');
         localStorage.removeItem('sbr_permissions');
+        localStorage.removeItem('sbr_roles');
       }
     },
     hydrateAuth: (state) => {
@@ -48,6 +53,7 @@ const authSlice = createSlice({
         const token = localStorage.getItem('sbr_token');
         const userStr = localStorage.getItem('sbr_user');
         const permStr = localStorage.getItem('sbr_permissions');
+        const rolesStr = localStorage.getItem('sbr_roles');
         if (token) {
           state.token = token;
           state.isAuthenticated = true;
@@ -56,6 +62,9 @@ const authSlice = createSlice({
           }
           if (permStr) {
             try { state.permissions = JSON.parse(permStr); } catch { /* skip */ }
+          }
+          if (rolesStr) {
+            try { state.roles = JSON.parse(rolesStr); } catch { /* skip */ }
           }
         }
       }

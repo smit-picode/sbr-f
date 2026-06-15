@@ -1,2 +1,0 @@
-// Fix line 97 - change type cast
-const existing = rolePermData?.data as unknown as Array<{ PERMISSION_ID?: number }>;

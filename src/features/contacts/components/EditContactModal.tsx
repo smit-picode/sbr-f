@@ -258,7 +258,7 @@ export function EditContactModal({ contact, open, onClose }: Props) {
               value={form.ROLE ?? ''}
               onChange={(e) => handleChange('ROLE', e.target.value)}
             >
-              <option value="">{t('editFrame.selectPlaceholder')}</option>
+              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
               {CONTACT_ROLE_OPTIONS.map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
@@ -272,7 +272,7 @@ export function EditContactModal({ contact, open, onClose }: Props) {
               value={form.SOURCE_CODE ?? ''}
               onChange={(e) => handleChange('SOURCE_CODE', e.target.value)}
             >
-              <option value="">{t('editFrame.selectPlaceholder')}</option>
+              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
               {CONTACT_SOURCE_CODE_OPTIONS.map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}

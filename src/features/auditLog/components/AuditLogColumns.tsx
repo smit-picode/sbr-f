@@ -1,20 +1,46 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { AuditLog } from '@/types';
+import type { AuditLog, AuditUserRef } from '@/types';
+import { formatDate } from '@/utils/format';
 
 const TABLE_COLORS: Record<string, string> = {
-  SBR_FRAME:     'bg-blue-100 text-blue-700',
-  SBR_CONTACTS:  'bg-green-100 text-green-700',
-  SBR_ADDRESSES: 'bg-purple-100 text-purple-700',
+  SBR_LEGAL_UNITS: 'bg-[#F3DEE4] text-[#A71D3A]',
+  SBR_CONTACTS:    'bg-green-100 text-green-700',
+  SBR_ADDRESSES:   'bg-purple-100 text-purple-700',
 };
 
-function ChangedByCell({ value }: { value: string }) {
-  if (!value) return <span className="text-slate-400 text-xs">—</span>;
+const OPERATION_COLORS: Record<string, string> = {
+  INSERT: 'bg-emerald-100 text-emerald-700',
+  UPDATE: 'bg-[#F3DEE4] text-[#A71D3A]',
+  DELETE: 'bg-red-100 text-red-700',
+  REVERT: 'bg-amber-100 text-amber-700',
+};
+
+function UserCell({ user }: { user: AuditUserRef | null | undefined }) {
+  if (!user) return <span className="text-slate-400">-</span>;
   return (
     <div className="flex flex-col gap-0.5 min-w-[120px]">
-      <span className="text-xs font-semibold text-slate-800">Admin User</span>
-      <span className="text-xs text-blue-600">{value}</span>
+      <span className="text-xs font-semibold text-slate-900">{user.NAME}</span>
+      <span className="text-xs text-[#A71D3A]">{user.EMAIL}</span>
     </div>
   );
+}
+
+function RecordIdCell({ value }: { value: number | null }) {
+  if (value === null || value === undefined) return <span className="text-slate-400 text-xs">—</span>;
+  return <span className="font-mono text-xs font-medium text-[#A71D3A]">{String(value)}</span>;
+}
+
+// COLUMN_NAME holds a JSON-stringified array (e.g. ["NAME_ENU","CP_END_DATE"]);
+// legacy rows hold a single plain column name or null
+function formatColumnNames(value: string | null): string {
+  if (!value) return '—';
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.join(', ');
+  } catch {
+    // legacy plain string — fall through
+  }
+  return value;
 }
 
 type TFunc = (key: string) => string;
@@ -34,10 +60,36 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
     },
   },
   {
-    accessorKey: 'RECORD_ID',
-    header: t('columns.RECORD_ID'),
+    accessorKey: 'PREV_RECORD_ID',
+    header: t('columns.PREV_RECORD_ID'),
+    cell: ({ getValue }) => <RecordIdCell value={getValue<number | null>()} />,
+  },
+  {
+    accessorKey: 'NEW_RECORD_ID',
+    header: t('columns.NEW_RECORD_ID'),
+    cell: ({ getValue }) => <RecordIdCell value={getValue<number | null>()} />,
+  },
+  {
+    accessorKey: 'OPERATION',
+    header: t('columns.OPERATION'),
+    cell: ({ getValue }) => {
+      const val = getValue<string>();
+      if (!val) return <span className="text-slate-400 text-xs">—</span>;
+      const color = OPERATION_COLORS[val] ?? 'bg-slate-100 text-slate-600';
+      return (
+        <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+          {val}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: 'COLUMN_NAME',
+    header: t('columns.COLUMN_NAME'),
     cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>
+      <span className="font-mono text-xs text-slate-700 whitespace-normal break-words max-w-[260px] inline-block">
+        {formatColumnNames(getValue<string | null>())}
+      </span>
     ),
   },
   {
@@ -50,16 +102,28 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {
     accessorKey: 'CHANGED_BY',
     header: t('columns.CHANGED_BY'),
-    cell: ({ getValue }) => <ChangedByCell value={getValue<string>()} />,
+    cell: ({ row }) => <UserCell user={row.original.changedByUser} />,
   },
   {
     accessorKey: 'APPROVED_BY',
     header: t('columns.APPROVED_BY'),
+    cell: ({ row }) => <UserCell user={row.original.approvedByUser} />,
+  },
+  {
+    accessorKey: 'APPROVAL_DATE',
+    header: t('columns.APPROVAL_DATE'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val
-        ? <span className="text-sm text-slate-700">{val}</span>
-        : <span className="text-slate-400 text-xs italic">-</span>;
+        ? <span className="text-sm text-slate-700">{formatDate(val)}</span>
+        : <span className="text-slate-400">-</span>;
     },
+  },
+  {
+    accessorKey: 'CREATED_AT',
+    header: t('columns.CREATED_AT'),
+    cell: ({ getValue }) => (
+      <span className="text-sm text-slate-700">{formatDate(getValue<string | null>())}</span>
+    ),
   },
 ];

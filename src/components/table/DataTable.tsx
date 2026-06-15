@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type SortingState,
+  type VisibilityState,
   getSortedRowModel,
 } from '@tanstack/react-table';
 import {
@@ -20,6 +21,7 @@ import { TableLoader } from '@/components/common/Loader';
 import { NoData } from '@/components/common/NoData';
 import { ErrorState } from '@/components/common/ErrorState';
 import { TablePagination } from './TablePagination';
+import { ColumnToggle } from './ColumnToggle';
 import { useState, useRef } from 'react';
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -51,14 +53,16 @@ export function DataTable<TData, TValue>({
   onLimitChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
+    state: { sorting, columnVisibility },
     onSortingChange: setSorting,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
@@ -69,7 +73,11 @@ export function DataTable<TData, TValue>({
   const colCount = columns.length;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="space-y-3">
+      <div className="flex items-center justify-end">
+        <ColumnToggle table={table} />
+      </div>
+      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
       <Table wrapperRef={scrollRef}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -141,6 +149,7 @@ export function DataTable<TData, TValue>({
         onPageChange={onPageChange}
         onLimitChange={onLimitChange}
       />
+      </div>
     </div>
   );
 }

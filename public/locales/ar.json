@@ -5,7 +5,23 @@
     "addresses": "العناوين",
     "auditLog": "سجل التدقيق",
     "admin": "لوحة الإدارة",
-    "sbrPanel": "لوحة SBR"
+    "sbrPanel": "لوحة SBR",
+    "sbrLiveFrame": "إطار SBR الحي",
+    "legalUnits": "الوحدات القانونية",
+    "enterprises": "المؤسسات",
+    "administration": "الإدارة",
+    "home": "الرئيسية",
+    "approvals": "الموافقات",
+    "requests": "الطلبات",
+    "approvalsHistory": "سجل الموافقات",
+    "frozenFrames": "الإطارات المجمدة",
+    "createSnapshot": "إنشاء لقطة",
+    "browseSnapshots": "تصفح اللقطات",
+    "dataQuality": "جودة البيانات",
+    "qualityDashboard": "لوحة الجودة",
+    "qualityFindings": "نتائج الجودة",
+    "regulatorEscalation": "التصعيد إلى الجهة التنظيمية",
+    "enterprise360": "المؤسسة 360"
   },
   "pageBanner": {
     "frame": "إدارة المنشآت",
@@ -15,9 +31,9 @@
     "admin": "لوحة الإدارة"
   },
   "pages": {
-    "frame": {
-      "title": "المنشآت",
-      "description": "سجلات المنشآت الرئيسية من السجل الإحصائي للأعمال"
+    "legalUnits": {
+      "title": "الوحدات القانونية",
+      "description": "السجل الإحصائي للأعمال — سجلات الوحدات القانونية"
     },
     "contacts": {
       "title": "جهات الاتصال",
@@ -29,11 +45,71 @@
     },
     "auditLog": {
       "title": "سجل التدقيق",
-      "description": "تتبع جميع تغييرات البيانات عبر المنشآت وجهات الاتصال والعناوين"
+      "description": "تتبع جميع تغييرات البيانات عبر الوحدات القانونية والمؤسسات وجهات الاتصال والعناوين"
     },
     "admin": {
       "title": "لوحة الإدارة",
       "description": "إدارة الأذونات والأدوار والمستخدمين"
+    },
+    "enterprises": {
+      "title": "المؤسسات",
+      "description": "سجلات المؤسسات من السجل الإحصائي للأعمال",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر سجلات المؤسسات هنا عند توفرها."
+    },
+    "home": {
+      "title": "الرئيسية",
+      "description": "السجل الإحصائي للأعمال — لوحة النظرة العامة",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "سيظهر محتوى لوحة المعلومات هنا عند توفره."
+    },
+    "requests": {
+      "title": "الطلبات",
+      "description": "طلبات التغيير المعلقة في انتظار الموافقة",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "approvalsHistory": {
+      "title": "سجل الموافقات",
+      "description": "سجل طلبات التغيير الموافق عليها والمرفوضة",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "createSnapshot": {
+      "title": "إنشاء لقطة",
+      "description": "إنشاء لقطة مجمدة من الإطار الحي",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "browseSnapshots": {
+      "title": "تصفح اللقطات",
+      "description": "تصفح لقطات الإطار المنشأة سابقًا",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "qualityDashboard": {
+      "title": "لوحة الجودة",
+      "description": "مقاييس ومؤشرات جودة البيانات",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "qualityFindings": {
+      "title": "نتائج الجودة",
+      "description": "نتائج وقضايا جودة البيانات المفتوحة",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "regulatorEscalation": {
+      "title": "التصعيد إلى الجهة التنظيمية",
+      "description": "تصعيد مشكلات البيانات إلى الجهات التنظيمية المصدرية",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر البيانات هنا عند توفرها."
+    },
+    "enterprise360": {
+      "title": "المؤسسة 360",
+      "description": "اختر مؤسسة لفتح ملفها الشامل 360°",
+      "noData": "لا توجد بيانات",
+      "noDataDesc": "ستظهر ملفات المؤسسات الشاملة هنا عند توفرها."
     }
   },
   "filters": {
@@ -160,11 +236,18 @@
     "RECORD_ID": "رقم الصف",
     "REASON": "السبب",
     "CHANGED_BY": "تم التغيير بواسطة",
-    "APPROVED_BY": "تم الاعتماد بواسطة"
+    "APPROVED_BY": "تم الاعتماد بواسطة",
+    "PREV_RECORD_ID": "معرف السجل السابق",
+    "NEW_RECORD_ID": "معرف السجل الجديد",
+    "OPERATION": "العملية",
+    "COLUMN_NAME": "اسم العمود",
+    "APPROVAL_DATE": "تاريخ الموافقة"
   },
   "editContact": {
     "title": "تعديل جهة الاتصال",
-    "sections": { "metadata": "البيانات الوصفية" },
+    "sections": {
+      "metadata": "البيانات الوصفية"
+    },
     "fields": {
       "sbrId": "رقم SBR",
       "recordId": "رقم السجل",
@@ -184,7 +267,9 @@
   },
   "editAddress": {
     "title": "تعديل العنوان",
-    "sections": { "metadata": "البيانات الوصفية" },
+    "sections": {
+      "metadata": "البيانات الوصفية"
+    },
     "fields": {
       "sbrId": "رقم SBR",
       "recordId": "رقم السجل",
@@ -204,7 +289,7 @@
       "validTo": "صالح حتى"
     }
   },
-  "editFrame": {
+  "editLegalUnit": {
     "title": "تعديل المنشأة",
     "selectPlaceholder": "— اختر —",
     "sections": {
@@ -284,7 +369,30 @@
     "branding": "سجل الأعمال الإحصائي",
     "brandingSub": "المجلس الأعلى للتخطيط",
     "brandingCountry": "دولة قطر",
-    "copyright": "المجلس الأعلى للتخطيط — قطر"
+    "copyright": "المجلس الأعلى للتخطيط — قطر",
+    "chooseRoleTitle": "اختر دورك",
+    "chooseRoleSubtitle": "لديك عدة أدوار — اختر الدور الذي تريد الدخول به",
+    "changeRole": "تغيير الدور",
+    "roleNote": "يمكنك تسجيل الخروج واختيار دور مختلف في أي وقت.",
+    "roles": {
+      "sbrManager": {
+        "title": "مدير SBR",
+        "desc": "قراءة/كتابة · جميع البيانات، الجودة، تجميد الإطارات"
+      },
+      "governanceInternal": {
+        "title": "الحوكمة — داخلي",
+        "desc": "قراءة فقط · لوحات المعلومات + جميع الجداول"
+      },
+      "governanceExternal": {
+        "title": "الحوكمة — خارجي",
+        "desc": "قراءة فقط · مقتصر على وزارة التجارة والنتائج الموسومة"
+      },
+      "administrator": {
+        "title": "مسؤول النظام",
+        "desc": "إدارة المستخدمين والأدوار والسجلات"
+      }
+    },
+    "backToLogin": "العودة لتسجيل الدخول"
   },
   "admin": {
     "panel": {
@@ -396,7 +504,20 @@
       "selectRole": "اختر دورًا",
       "creating": "جاري الإنشاء...",
       "saving": "جاري الحفظ...",
-      "close": "إغلاق"
+      "close": "إغلاق",
+      "colUser": "المستخدم",
+      "colRoles": "الأدوار",
+      "colStatus": "الحالة",
+      "statusActive": "نشط",
+      "statusInactive": "غير نشط",
+      "regulatorScopeLabel": "نطاق الجهة التنظيمية",
+      "noScope": "بدون نطاق (جميع الجهات)",
+      "statusLabel": "الحالة",
+      "assignedRolesLabel": "الأدوار المسندة",
+      "assignedRolesHint": "يمكن للمستخدم حمل عدة أدوار؛ تتبع الصلاحيات الدور النشط. يمكن تحديد تاريخ انتهاء اختياري لكل دور.",
+      "scopedBadge": "مُقيَّد بنطاق",
+      "expiryTitle": "تاريخ انتهاء اختياري لهذا الدور",
+      "noRoles": "لا توجد أدوار متاحة"
     }
   }
 }

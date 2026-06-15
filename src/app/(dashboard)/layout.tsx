@@ -36,13 +36,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [dispatch, router]);
 
   if (!ready) return (
-    <div className="flex flex-col h-screen" style={{ background: '#F5F5F5' }}>
-      <div className="h-14 bg-white border-b border-slate-200 shrink-0" />
-      <div className="h-14 shrink-0" style={{ background: 'linear-gradient(to right, #A71D3A 0%, #6B1428 40%, #1a3a52 100%)' }} />
-      <div className="flex-1 p-6 space-y-4">
-        <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
-        <div className="h-4 w-96 bg-slate-100 rounded animate-pulse" />
-        <div className="h-64 bg-white border border-slate-200 rounded-lg animate-pulse" />
+    <div className="flex h-screen overflow-hidden" style={{ background: '#F7F8FA' }}>
+      <div
+        className="w-[236px] shrink-0"
+        style={{ background: 'linear-gradient(180deg, #6B1428 0%, #6B1428 42%, #7E1830 68%, #A71D3A 100%)' }}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="h-[58px] bg-white border-b border-slate-200 shrink-0" />
+        <div className="flex-1 p-6 space-y-4">
+          <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-96 bg-slate-100 rounded animate-pulse" />
+          <div className="h-64 bg-white border border-slate-200 rounded-lg animate-pulse" />
+        </div>
       </div>
     </div>
   );

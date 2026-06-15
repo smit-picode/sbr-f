@@ -11,6 +11,8 @@ export type RolePermissionAssignment = number; // permissionId
 export interface SbrRole {
   ID: number;
   ROLE_NAME: string;
+  // true = assignments may carry a regulator scope; false = always global
+  IS_SCOPED?: boolean;
   CREATED_AT: string;
   UPDATED_AT: string;
 }
@@ -19,12 +21,33 @@ export interface SbrRoleWithPermissions extends SbrRole {
   permissions?: SbrPermission[];
 }
 
+export interface UserRoleAssignment {
+  ID: number;
+  ROLE_ID: number;
+  SCOPE: string;
+  EXPIRES_AT: string | null;
+  role?: { ID: number; ROLE_NAME: string; IS_SCOPED: boolean };
+}
+
+// Payload shape for assigning a role when creating/updating a user
+export interface UserRoleInput {
+  ROLE_ID: number;
+  SCOPE?: string;
+  EXPIRES_AT?: string | null;
+}
+
+export interface RegulatorScope {
+  ID: number;
+  CODE: string;
+  NAME: string;
+}
+
 export interface SbrUser {
   ID: number;
   NAME: string;
   EMAIL: string;
-  ROLE_ID: number;
-  role?: { ID?: number; ROLE_NAME: string };
+  IS_ACTIVE: boolean;
+  roleAssignments?: UserRoleAssignment[];
   CREATED_AT: string;
   UPDATED_AT: string;
 }

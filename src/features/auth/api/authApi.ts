@@ -6,6 +6,9 @@ export const authApi = baseApi.injectEndpoints({
     login: builder.mutation<ApiResponse<LoginResponse>, LoginRequest>({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
     }),
+    switchRole: builder.mutation<ApiResponse<LoginResponse>, { roleId: number }>({
+      query: (body) => ({ url: '/auth/switch-role', method: 'POST', body }),
+    }),
     getMyPermissions: builder.query<ApiResponse<UserPermission[]>, void>({
       query: () => ({ url: '/auth/my-permissions' }),
       providesTags: ['Auth'],
@@ -14,4 +17,4 @@ export const authApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useGetMyPermissionsQuery } = authApi;
+export const { useLoginMutation, useSwitchRoleMutation, useGetMyPermissionsQuery } = authApi;

@@ -1,121 +1,60 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Bell, LogOut, User } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAppDispatch, useAppSelector } from '@/hooks';
-import { logout } from '@/features/auth/authSlice';
-import { NAVIGATION } from '@/constants/navigation';
+import { usePathname } from 'next/navigation';
+import { Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { NAV_GROUPS } from '@/constants/navigation';
+import { useLanguage } from '@/i18n';
 
-function getBreadcrumbs(pathname: string) {
-  const nav = NAVIGATION.find(
-    (item) => item.href !== '/' && pathname.startsWith(item.href)
-  );
-  if (!nav) return [{ label: 'Dashboard', href: '/' }];
-  return [{ label: 'Home', href: '/' }, { label: nav.title, href: nav.href }];
+// route -> { group i18n key, item i18n key } for the breadcrumb
+function crumbFor(pathname: string): { groupKey: string; groupTitle: string; itemKey: string; itemTitle: string } {
+  for (const group of NAV_GROUPS) {
+    for (const item of group.items) {
+      if (pathname === item.href || pathname.startsWith(item.href + '/')) {
+        return { groupKey: group.i18nKey, groupTitle: group.title, itemKey: item.i18nKey, itemTitle: item.title };
+      }
+    }
+  }
+  // /admin root (before redirect resolves) falls back to the Administration group
+  if (pathname.startsWith('/admin')) {
+    const admin = NAV_GROUPS.find((g) => g.id === 'administration') ?? NAV_GROUPS[0];
+    return { groupKey: admin.i18nKey, groupTitle: admin.title, itemKey: admin.items[0].i18nKey, itemTitle: admin.items[0].title };
+  }
+  const sbr = NAV_GROUPS[0];
+  return { groupKey: sbr.i18nKey, groupTitle: sbr.title, itemKey: sbr.items[0].i18nKey, itemTitle: sbr.items[0].title };
 }
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((s) => s.auth.user);
-  const [localUser, setLocalUser] = useState<{ email: string; role: string } | null>(null);
-
-  const breadcrumbs = getBreadcrumbs(pathname);
-  const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'U';
-
-  // Fallback: read from localStorage if Redux isn't hydrated yet (hydration race condition fix)
-  useEffect(() => {
-    if (!user && typeof window !== 'undefined') {
-      const stored = localStorage.getItem('sbr_user');
-      if (stored) {
-        try {
-          setLocalUser(JSON.parse(stored));
-        } catch {
-          // invalid JSON
-        }
-      }
-    }
-  }, [user]);
-
-  // Check if user is super admin (handle various role formats)
-  const effectiveUser = user || localUser;
-  const isSuperAdmin = effectiveUser?.role && (
-    effectiveUser.role === 'SUPER_ADMIN' ||
-    effectiveUser.role === 'Super Admin' ||
-    effectiveUser.role?.toUpperCase() === 'SUPER_ADMIN'
-  );
-
-
-  function handleLogout() {
-    dispatch(logout());
-    router.push('/login');
-  }
+  const { t } = useTranslation();
+  const { toggleLanguage, isArabic } = useLanguage();
+  const crumb = crumbFor(pathname);
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 bg-white border-b border-slate-200 shrink-0">
+    <header className="h-[58px] bg-white border-b border-slate-200 flex items-center px-5 gap-4 shrink-0 z-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm">
-        {breadcrumbs.map((crumb, i) => (
-          <span key={crumb.href} className="flex items-center gap-1.5">
-            {i > 0 && <span className="text-slate-300">/</span>}
-            {i === breadcrumbs.length - 1 ? (
-              <span className="font-medium text-slate-800">{crumb.label}</span>
-            ) : (
-              <span className="text-slate-500 hover:text-slate-700 cursor-pointer" onClick={() => router.push(crumb.href)}>
-                {crumb.label}
-              </span>
-            )}
-          </span>
-        ))}
-      </nav>
+      <div className="flex items-center gap-2 text-[12.5px] min-w-0">
+        <span className="text-slate-400 truncate">{t(crumb.groupKey, { defaultValue: crumb.groupTitle })}</span>
+        <span className="text-slate-300">/</span>
+        <span className="text-slate-700 font-semibold truncate">{t(crumb.itemKey, { defaultValue: crumb.itemTitle })}</span>
+      </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4 text-slate-500" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-600" />
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100 transition-colors">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-              </Avatar>
-              {user?.email && (
-                <div className="hidden md:block text-left">
-                  <p className="text-xs font-medium text-slate-700 leading-none">{user.email}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5 capitalize">{user.role?.toLowerCase()}</p>
-                </div>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="ms-auto flex items-center gap-2.5">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-3 h-9 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          title={isArabic ? 'Switch to English' : 'التبديل إلى العربية'}
+        >
+          {isArabic ? 'English' : 'عربي'}
+        </button>
+        <button
+          className="relative h-9 w-9 flex items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+          title="Notifications"
+        >
+          <Bell className="h-[17px] w-[17px]" />
+          <span className="absolute top-1.5 end-2 w-1.5 h-1.5 rounded-full bg-[#A71D3A]" />
+        </button>
       </div>
     </header>
   );

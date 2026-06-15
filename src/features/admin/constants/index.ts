@@ -20,3 +20,9 @@ export const ADMIN_DEFAULT_FILTERS: { page: number; limit: number; search: strin
   limit: 20,
   search: '',
 };
+
+// Select sentinel for "No scope (all regulators)" — maps to the backend's GLOBAL scope
+export const NO_SCOPE_VALUE: string = '__none__';
+
+// Backend sentinel stored for unscoped role assignments
+export const GLOBAL_SCOPE_VALUE: string = 'GLOBAL';
