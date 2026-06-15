@@ -86,11 +86,11 @@ export const en: Translations = {
     },
     contacts: {
       title: 'Contacts',
-      description: 'Business contacts associated with registered establishments',
+      description: 'Business contacts associated with registered Legal Units',
     },
     addresses: {
       title: 'Addresses',
-      description: 'Physical address records linked to registered establishments',
+      description: 'Physical address records linked to registered Legal Units',
     },
     auditLog: {
       title: 'Audit Log',
