@@ -406,10 +406,10 @@
     "tabs": {
       "permissions": "Permissions",
       "permissionsDesc": "Manage access permissions",
-      "roles": "Roles",
-      "rolesDesc": "Configure role definitions",
-      "users": "Users",
-      "usersDesc": "Manage system users",
+      "roles": "Roles & Permissions",
+      "rolesDesc": "Edit which permissions each role grants",
+      "users": "User Management",
+      "usersDesc": "Onboard users, assign roles with optional expiry, and manage account lifecycle",
       "management": "Management"
     },
     "permLabels": {
@@ -480,11 +480,16 @@
       "expandAll": "Expand All",
       "collapseAll": "Collapse All",
       "selectAll": "Select All",
-      "roleNamePlaceholder": "e.g., Analyst"
+      "roleNamePlaceholder": "e.g., Analyst",
+      "rolesLabel": "Roles",
+      "scopedRole": "Scoped Role",
+      "globalRole": "Global Role",
+      "permissions": "permissions",
+      "selectRolePrompt": "Select a role to view permissions"
     },
     "users": {
-      "searchPlaceholder": "Search users by name or email...",
-      "addUser": "Add User",
+      "searchPlaceholder": "Search users by name, email, or role.",
+      "addUser": "Onboard user",
       "colName": "Name",
       "colEmail": "Email",
       "colRole": "Role",
@@ -508,6 +513,7 @@
       "colUser": "USER",
       "colRoles": "ROLES",
       "colStatus": "STATUS",
+      "colCreatedAt": "CREATED",
       "statusActive": "Active",
       "statusInactive": "Inactive",
       "regulatorScopeLabel": "Regulator scope",

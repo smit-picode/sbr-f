@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Pencil, Plus, Eye, ChevronDown, ChevronRight } from 'lucide-react';
-import { useAppSelector, useDebounce } from '@/hooks';
+import { Pencil, ShieldCheck, Info, Check } from 'lucide-react';
+import { useAppSelector, useAppDispatch } from '@/hooks';
 import {
+  adminApi,
   useGetRolesListQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
@@ -15,13 +15,12 @@ import {
   useGetRolePermissionsQuery,
   useAssignRolePermissionsMutation,
 } from '../api/adminApi';
-import { ADMIN_FIELD_LABELS, ADMIN_DEFAULT_FILTERS } from '../constants';
+import { ADMIN_DEFAULT_FILTERS } from '../constants';
 import type { SbrRole, SbrPermission } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { formatPermissionName } from '@/utils/format';
 import { useTranslation } from 'react-i18next';
-import { PERMISSION_TREE, CHILD_PERMISSION_KEYS, type PermissionNode } from '@/constants/permissionTree';
+import { PERMISSION_TREE, type PermissionNode } from '@/constants/permissionTree';
 
 function getApiError(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'data' in err) {
@@ -31,8 +30,10 @@ function getApiError(err: unknown, fallback: string): string {
   return fallback;
 }
 
-// Recursive tree node type — supports unlimited nesting depth
-type TreeNode = { perm: SbrPermission | null; node: PermissionNode; children: TreeNode[] };
+// ─── Tree helpers ────────────────────────────────────────────────────────────
+
+type TreeNode  = { perm: SbrPermission | null; node: PermissionNode; children: TreeNode[] };
+type LeafEntry = { perm: SbrPermission; label: string; nodeKey: string };
 
 function buildTreeNode(node: PermissionNode, byName: Record<string, SbrPermission>): TreeNode {
   return {
@@ -47,84 +48,73 @@ function buildTree(allPerms: SbrPermission[]): TreeNode[] {
   return PERMISSION_TREE.map(node => buildTreeNode(node, byName));
 }
 
-// Recursively collect all leaf-level SbrPermission objects under a node list
-function flatLeafPerms(items: TreeNode[]): Array<SbrPermission | null> {
-  const result: Array<SbrPermission | null> = [];
+function flatLeafEntries(items: TreeNode[]): LeafEntry[] {
+  const result: LeafEntry[] = [];
   for (const item of items) {
-    if (item.children.length > 0) result.push(...flatLeafPerms(item.children));
-    else result.push(item.perm);
+    if (item.children.length > 0) result.push(...flatLeafEntries(item.children));
+    else if (item.perm) result.push({ perm: item.perm, label: item.node.label, nodeKey: item.node.key });
   }
   return result;
 }
 
-// Sub-group block (e.g. "PERMISSIONS TAB" inside "Admin Panel") — needs its own useState for collapse
-function PermSubGroup({
-  treeNode, grantedIds, onToggle, onToggleAll, canEdit, childLabel, grantLabel, masterCollapsed,
+// ─── Permission label helper ─────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function pLabel(key: string, fallback: string, t: any): string {
+  return t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fallback });
+}
+
+// ─── Permission grid (2-column card grid) ────────────────────────────────────
+
+function PermissionGrid({
+  entries, grantedIds, onToggle, canEdit,
 }: {
-  treeNode: TreeNode;
+  entries:    LeafEntry[];
   grantedIds: Set<number>;
-  onToggle: (id: number, granted: boolean) => void;
-  onToggleAll: (perms: Array<SbrPermission | null>, granted: boolean) => void;
-  canEdit: boolean;
-  childLabel: (key: string, fallback: string) => string;
-  grantLabel: string;
-  masterCollapsed?: boolean;
+  onToggle:   (id: number, granted: boolean) => void;
+  canEdit:    boolean;
 }) {
   const { t } = useTranslation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { if (masterCollapsed !== undefined) setIsCollapsed(masterCollapsed); }, [masterCollapsed]);
-  const { node: cn, children: grandchildren } = treeNode;
-  const subLeafs      = flatLeafPerms(grandchildren);
-  const subAllGranted = subLeafs.length > 0 && subLeafs.every(p => p && grantedIds.has(p.ID));
-  const subSome       = subLeafs.some(p => p && grantedIds.has(p.ID));
-
+  if (entries.length === 0) return null;
   return (
-    <div>
-      {/* Sub-group header */}
-      <div className="flex items-center gap-3 px-4 py-2 bg-slate-100/70 border-t border-slate-200">
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(v => !v)}
-          className="flex items-center justify-center h-4 w-4 shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
-          aria-label={isCollapsed ? 'Expand sub-group' : 'Collapse sub-group'}
-        >
-          {isCollapsed
-            ? <ChevronRight className="h-3.5 w-3.5" />
-            : <ChevronDown className="h-3.5 w-3.5" />
-          }
-        </button>
-        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide flex-1">
-          {childLabel(cn.key, cn.label)}
-        </span>
-        {canEdit && subLeafs.length > 0 && (
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <Checkbox
-              checked={subAllGranted}
-              className={subSome && !subAllGranted ? 'opacity-60' : ''}
-              onCheckedChange={(v) => onToggleAll(subLeafs, !!v)}
-            />
-            <span className="text-xs text-slate-500">{t('admin.roles.selectAll')}</span>
-          </label>
-        )}
-      </div>
-      {/* Sub-group permission rows */}
-      {!isCollapsed && grandchildren.map(({ node: gn, perm: gp }) => {
-        if (!gp) return null;
-        const granted = grantedIds.has(gp.ID);
+    <div className="grid sm:grid-cols-2 gap-2">
+      {entries.map(({ perm, label, nodeKey }) => {
+        const granted = grantedIds.has(perm.ID);
         return (
-          <div key={gn.key} className="flex items-center gap-3 pl-8 pr-4 py-2 bg-white border-t border-slate-100 hover:bg-slate-50 transition-colors">
-            <span className="text-slate-300 text-xs shrink-0">└</span>
-            <span className="text-sm text-slate-600 flex-1">{childLabel(gn.key, gn.label)}</span>
-            {canEdit ? (
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <Checkbox checked={granted} onCheckedChange={(v) => onToggle(gp.ID, !!v)} />
-                <span className="text-xs text-slate-500">{grantLabel}</span>
-              </label>
-            ) : granted ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">✓ {grantLabel}</span>
-            ) : (
-              <span className="text-xs text-slate-300">—</span>
-            )}
+          <div
+            key={perm.ID}
+            className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 transition-colors ${
+              granted
+                ? 'border-[#A71D3A]/40 bg-[#FCF4F6]'
+                : 'border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => canEdit && onToggle(perm.ID, !granted)}
+              disabled={!canEdit}
+              className={`flex items-center gap-2.5 flex-1 text-start min-w-0 ${
+                canEdit ? 'cursor-pointer' : 'cursor-default'
+              }`}
+            >
+              <span
+                className={`flex h-4 w-4 items-center justify-center rounded border shrink-0 ${
+                  granted ? 'border-[#A71D3A] bg-[#A71D3A] text-white' : 'border-slate-300'
+                }`}
+              >
+                {granted && <Check className="h-3 w-3" strokeWidth={3} />}
+              </span>
+              <span className="text-[12.5px] text-slate-700 truncate">
+                {pLabel(nodeKey, label, t)}
+              </span>
+            </button>
+            <span className="relative group shrink-0">
+              <Info className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#A71D3A] cursor-help" />
+              <span className="pointer-events-none absolute z-50 end-0 top-6 w-56 rounded-lg bg-slate-900 text-white text-[11px] leading-snug px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
+                <span className="block font-semibold mb-0.5">{pLabel(nodeKey, label, t)}</span>
+                <span className="block font-mono text-[10px] text-slate-300">{perm.PERMISSION_NAME}</span>
+              </span>
+            </span>
           </div>
         );
       })}
@@ -132,173 +122,207 @@ function PermSubGroup({
   );
 }
 
-// Renders one permission group with support for 3-level nesting:
-// - Section header with Select All (toggles all leaf permissions)
-// - Child items that are either:
-//   a) Simple permission rows (no grandchildren)
-//   b) Sub-group headers (with their own children + Select All)
+// ─── Permission section (one top-level tree node) ────────────────────────────
+
 function PermSection({
-  node, items, grantedIds, onToggle, onToggleAll, canEdit, label, childLabel, grantLabel, masterCollapsed,
+  treeNode, grantedIds, onToggle, canEdit,
 }: {
-  node: PermissionNode;
-  items: TreeNode[];
+  treeNode:   TreeNode;
   grantedIds: Set<number>;
-  onToggle: (id: number, granted: boolean) => void;
-  onToggleAll: (perms: Array<SbrPermission | null>, granted: boolean) => void;
-  canEdit: boolean;
-  label: string;
-  childLabel: (key: string, fallback: string) => string;
-  grantLabel: string;
-  masterCollapsed?: boolean;
+  onToggle:   (id: number, granted: boolean) => void;
+  canEdit:    boolean;
 }) {
   const { t } = useTranslation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { if (masterCollapsed !== undefined) setIsCollapsed(masterCollapsed); }, [masterCollapsed]);
-  const allLeafs    = flatLeafPerms(items);
-  const allGranted  = allLeafs.length > 0 && allLeafs.every(p => p && grantedIds.has(p.ID));
-  const someGranted = allLeafs.some(p => p && grantedIds.has(p.ID));
-
-  const GrantedBadge = () => (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-      ✓ {grantLabel}
-    </span>
-  );
+  const { node, children } = treeNode;
+  const sectionLabel  = pLabel(node.key, node.label, t);
+  const hasSubGroups  = children.some(c => c.children.length > 0);
 
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
-      {/* Top-level section header */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-slate-50">
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(v => !v)}
-          className="flex items-center justify-center h-5 w-5 shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
-          aria-label={isCollapsed ? 'Expand section' : 'Collapse section'}
-        >
-          {isCollapsed
-            ? <ChevronRight className="h-4 w-4" />
-            : <ChevronDown className="h-4 w-4" />
-          }
-        </button>
-        <span className="text-sm font-semibold text-slate-800 flex-1">{label}</span>
-        {canEdit && allLeafs.length > 0 && (
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <Checkbox
-              checked={allGranted}
-              className={someGranted && !allGranted ? 'opacity-60' : ''}
-              onCheckedChange={(v) => onToggleAll(allLeafs, !!v)}
-            />
-            <span className="text-xs font-medium text-slate-500">{t('admin.roles.selectAll')}</span>
-          </label>
-        )}
-      </div>
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      {/* Section label — inside the card */}
+      <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2.5">
+        {sectionLabel}
+      </h3>
 
-      {/* Children — can be simple rows or sub-group blocks */}
-      {!isCollapsed && items.map((childNode) => {
-        const { node: cn, perm: cp, children: grandchildren } = childNode;
-        if (grandchildren.length > 0) {
-          return (
-            <PermSubGroup
-              key={cn.key}
-              treeNode={childNode}
-              grantedIds={grantedIds}
-              onToggle={onToggle}
-              onToggleAll={onToggleAll}
-              canEdit={canEdit}
-              childLabel={childLabel}
-              grantLabel={grantLabel}
-              masterCollapsed={masterCollapsed}
-            />
-          );
-        }
-
-        // Simple permission row (no sub-group)
-        if (!cp) return null;
-        const granted = grantedIds.has(cp.ID);
-        return (
-          <div key={cn.key} className="flex items-center gap-3 px-4 py-2.5 bg-white border-t border-slate-100 hover:bg-slate-50 transition-colors">
-            <span className="text-slate-300 text-xs shrink-0">└</span>
-            <span className="text-sm text-slate-600 flex-1">{childLabel(cn.key, cn.label)}</span>
-            {canEdit ? (
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <Checkbox checked={granted} onCheckedChange={(v) => onToggle(cp.ID, !!v)} />
-                <span className="text-xs text-slate-500">{grantLabel}</span>
-              </label>
-            ) : granted ? <GrantedBadge /> : <span className="text-xs text-slate-300">—</span>}
-          </div>
-        );
-      })}
+      {hasSubGroups ? (
+        <div className="space-y-3">
+          {children.map(child => {
+            if (child.children.length > 0) {
+              return (
+                <div key={child.node.key}>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-2">
+                    {pLabel(child.node.key, child.node.label, t)}
+                  </p>
+                  <PermissionGrid
+                    entries={flatLeafEntries(child.children)}
+                    grantedIds={grantedIds}
+                    onToggle={onToggle}
+                    canEdit={canEdit}
+                  />
+                </div>
+              );
+            }
+            if (child.perm) {
+              return (
+                <PermissionGrid
+                  key={child.node.key}
+                  entries={[{ perm: child.perm, label: child.node.label, nodeKey: child.node.key }]}
+                  grantedIds={grantedIds}
+                  onToggle={onToggle}
+                  canEdit={canEdit}
+                />
+              );
+            }
+            return null;
+          })}
+        </div>
+      ) : (
+        <PermissionGrid
+          entries={flatLeafEntries(children)}
+          grantedIds={grantedIds}
+          onToggle={onToggle}
+          canEdit={canEdit}
+        />
+      )}
     </div>
   );
 }
 
-export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?: boolean; canViewDetail?: boolean }) {
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function RolesTab({
+  canEdit = false,
+  onRegisterCreate,
+}: {
+  canEdit?: boolean;
+  canViewDetail?: boolean;
+  onRegisterCreate?: (fn: () => void) => void;
+}) {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState({ ...ADMIN_DEFAULT_FILTERS });
-  const [editTarget, setEditTarget] = useState<SbrRole | null>(null);
-  const [viewTarget, setViewTarget] = useState<SbrRole | null>(null);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [form, setForm] = useState({ ROLE_NAME: '' });
-  const [grantedIds, setGrantedIds] = useState<Set<number>>(new Set());
-  const [editAllCollapsed, setEditAllCollapsed] = useState(false);
-  const [createAllCollapsed, setCreateAllCollapsed] = useState(false);
-  const [viewAllCollapsed, setViewAllCollapsed] = useState(false);
-  const user = useAppSelector((s) => s.auth.user);
+
+  // ── local state ──
+  const [selectedRole, setSelectedRole]   = useState<SbrRole | null>(null);
+  const [grantedIds, setGrantedIds]       = useState<Set<number>>(new Set());
+  const [originalIds, setOriginalIds]     = useState<Set<number>>(new Set());
+  const [isCreateOpen, setIsCreateOpen]   = useState(false);
+  const [editTarget, setEditTarget]       = useState<SbrRole | null>(null);
+  const [form, setForm]                   = useState({ ROLE_NAME: '' });
+
+  // ── permission gate ──
+  const dispatch    = useAppDispatch();
+  const user        = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.role?.toUpperCase() === 'SUPER_ADMIN';
-  // Load permissions list if user can edit roles (to assign) or view permissions tab
-  const hasPermPermission = isSuperAdmin || permissions.some(p =>
-    p.permissionName === 'admin_panel.roles.edit' ||
-    p.permissionName === 'admin_panel.permissions.view'
+  const isSA        = user?.role === 'SUPER_ADMIN' || user?.role?.toUpperCase() === 'SUPER_ADMIN';
+  const canFetchPerms = isSA || permissions.some(p =>
+    ['admin_panel.roles.edit', 'admin_panel.roles.view', 'admin_panel.permissions.view']
+      .includes(p.permissionName ?? '')
   );
 
-  // Debounce only the text search — typing no longer fires an API call per keystroke
-  const debouncedSearch = useDebounce(filters.search, 500);
-
-  const { data, isLoading } = useGetRolesListQuery(
-    cleanParams({ ...filters, search: debouncedSearch }),
-    { refetchOnMountOrArgChange: true }
+  // ── queries ──
+  const { data: rolesData } = useGetRolesListQuery(
+    cleanParams({ ...ADMIN_DEFAULT_FILTERS, limit: 100 }),
+    { refetchOnMountOrArgChange: true },
   );
-  // Fetch permissions if: user has admin_panel.permissions OR when editing/viewing a role (to assign perms)
   const { data: permData } = useGetPermissionsListQuery(
     { page: 1, limit: 100 },
-    { skip: !hasPermPermission && !editTarget && !viewTarget }
+    { skip: !canFetchPerms },
   );
-  const { data: rolePermData } = useGetRolePermissionsQuery(editTarget?.ID ?? 0, { skip: !editTarget });
-  const { data: viewRolePermData } = useGetRolePermissionsQuery(viewTarget?.ID ?? 0, { skip: !viewTarget });
-  const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
-  const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
-  const [assignPermissions, { isLoading: isAssigning }] = useAssignRolePermissionsMutation();
+  const { data: rolePermData } = useGetRolePermissionsQuery(
+    selectedRole?.ID ?? 0,
+    { skip: !selectedRole, refetchOnMountOrArgChange: true },
+  );
 
-  const allPermissions = permData?.data ?? [];
+  // ── mutations ──
+  const [createRole,       { isLoading: isCreating  }] = useCreateRoleMutation();
+  const [updateRole,       { isLoading: isUpdating  }] = useUpdateRoleMutation();
+  const [assignPermissions,{ isLoading: isAssigning }] = useAssignRolePermissionsMutation();
 
-  // Pre-populate granted IDs when edit dialog opens
+  const roles          = rolesData?.data ?? [];
+  const allPermissions = permData?.data  ?? [];
+  const permTree       = buildTree(allPermissions);
+
+  // Pre-fetch all role permissions so counts are visible upfront in the sidebar
   useEffect(() => {
-    if (!editTarget) return;
-    if (rolePermData?.data) {
-      const existing = (rolePermData?.data as unknown as Array<{ PERMISSION_ID?: number }>) ?? [];
-      setGrantedIds(new Set(existing.map((rp) => rp.PERMISSION_ID).filter((id): id is number => id !== undefined)));
-    } else {
-      setGrantedIds(new Set());
-    }
-  }, [editTarget, rolePermData]);
+    if (!canFetchPerms || roles.length === 0) return;
+    const subs = roles.map(role =>
+      dispatch(adminApi.endpoints.getRolePermissions.initiate(role.ID)),
+    );
+    return () => { subs.forEach(sub => sub.unsubscribe()); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roles, canFetchPerms]);
 
-  // Reset master collapse state to "all expanded" whenever a dialog opens
-  useEffect(() => { if (editTarget) setEditAllCollapsed(false); }, [editTarget]);
-  useEffect(() => { if (isCreateOpen) setCreateAllCollapsed(false); }, [isCreateOpen]);
-  useEffect(() => { if (viewTarget) setViewAllCollapsed(false); }, [viewTarget]);
+  // Read permission counts for all roles from the RTK Query cache
+  const cachedCounts = useAppSelector(state =>
+    roles.reduce<Record<number, number>>((acc, role) => {
+      const result = adminApi.endpoints.getRolePermissions.select(role.ID)(state);
+      if (result.data) {
+        const raw = (result.data.data as unknown as unknown[]) ?? [];
+        acc[role.ID] = raw.length;
+      }
+      return acc;
+    }, {}),
+  );
+
+  // Register the "open create dialog" callback with the parent page header
+  useEffect(() => {
+    if (canEdit && onRegisterCreate) {
+      onRegisterCreate(() => { setForm({ ROLE_NAME: '' }); setIsCreateOpen(true); });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canEdit, onRegisterCreate]);
+
+  // Auto-select first role on load
+  useEffect(() => {
+    if (roles.length > 0 && !selectedRole) setSelectedRole(roles[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roles]);
+
+  // Load permissions when selected role or its data changes
+  useEffect(() => {
+    const raw = ((rolePermData?.data as unknown) as Array<{ PERMISSION_ID?: number }>) ?? [];
+    const ids = new Set(
+      raw.map(r => r.PERMISSION_ID).filter((id): id is number => id !== undefined),
+    );
+    setGrantedIds(ids);
+    setOriginalIds(new Set(ids));
+  }, [selectedRole?.ID, rolePermData]);
+
+  // ── dirty check ──
+  const isDirty = (() => {
+    if (grantedIds.size !== originalIds.size) return true;
+    for (const id of grantedIds) if (!originalIds.has(id)) return true;
+    return false;
+  })();
+
+  // ── handlers ──
+  const handleToggle = (id: number, granted: boolean) => {
+    setGrantedIds(prev => {
+      const next = new Set(prev);
+      if (granted) next.add(id); else next.delete(id);
+      return next;
+    });
+  };
+
+  const handleSavePermissions = async () => {
+    if (!selectedRole) return;
+    const roleId  = selectedRole.ID;
+    const permIds = Array.from(grantedIds);
+    try {
+      await assignPermissions({ roleId, permissions: permIds }).unwrap();
+      setOriginalIds(new Set(grantedIds));
+      toast.success('Permissions saved successfully!');
+    } catch (err) {
+      toast.error(getApiError(err, 'Failed to save permissions. Please try again.'));
+    }
+  };
 
   const handleCreate = async () => {
-    if (!form.ROLE_NAME.trim()) {
-      toast.error('Role name is required.');
-      return;
-    }
+    if (!form.ROLE_NAME.trim()) { toast.error('Role name is required.'); return; }
     try {
-      await createRole({ ROLE_NAME: form.ROLE_NAME, permissions: Array.from(grantedIds) }).unwrap();
+      await createRole({ ROLE_NAME: form.ROLE_NAME, permissions: [] }).unwrap();
       toast.success('Role created successfully!');
       setForm({ ROLE_NAME: '' });
-      setGrantedIds(new Set());
       setIsCreateOpen(false);
-      setFilters({ ...ADMIN_DEFAULT_FILTERS });
     } catch (err) {
       toast.error(getApiError(err, 'Failed to create role. Please try again.'));
     }
@@ -306,14 +330,8 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
 
   const handleUpdate = async () => {
     if (!editTarget) return;
-    if (!form.ROLE_NAME.trim()) {
-      toast.error('Role name is required.');
-      return;
-    }
-    if (form.ROLE_NAME === editTarget.ROLE_NAME) {
-      toast.info('No changes detected.');
-      return;
-    }
+    if (!form.ROLE_NAME.trim()) { toast.error('Role name is required.'); return; }
+    if (form.ROLE_NAME === editTarget.ROLE_NAME) { toast.info('No changes detected.'); return; }
     try {
       await updateRole({ id: editTarget.ID, data: { ROLE_NAME: form.ROLE_NAME } }).unwrap();
       toast.success('Role updated successfully!');
@@ -324,192 +342,131 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
     }
   };
 
-  const handleAssignPermissions = async () => {
-    if (!editTarget) return;
-    // Capture values and close the dialog BEFORE the mutation fires.
-    // Closing first releases the getRolePermissions(editTarget.ID) subscription so it
-    // is already inactive when invalidateTags(['Admin']) runs — prevents the stale
-    // refetch from being aborted mid-flight and triggering the error toast.
-    const roleId = editTarget.ID;
-    const permIds = Array.from(grantedIds);
-    setEditTarget(null);
-    try {
-      await assignPermissions({ roleId, permissions: permIds }).unwrap();
-      toast.success('Permissions saved successfully!');
-    } catch (err) {
-      toast.error(getApiError(err, 'Failed to save permissions. Please try again.'));
-    }
-  };
+  const canEditPermissions = canEdit && selectedRole?.ROLE_NAME !== 'SUPER_ADMIN';
 
-  const roles = data?.data ?? [];
-  const permTree = buildTree(allPermissions);
-
-  const handleToggle = (id: number, granted: boolean) => {
-    setGrantedIds(prev => {
-      const next = new Set(prev);
-      if (granted) next.add(id); else next.delete(id);
-      return next;
-    });
-  };
-
-  const handleToggleAll = (childPerms: Array<SbrPermission | null>, granted: boolean) => {
-    setGrantedIds(prev => {
-      const next = new Set(prev);
-      childPerms.forEach(p => { if (p) { if (granted) next.add(p.ID); else next.delete(p.ID); } });
-      return next;
-    });
-  };
-
+  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder={t('admin.roles.searchPlaceholder')}
-          value={filters.search}
-          onChange={(e) => setFilters(p => ({ ...p, search: e.target.value, page: 1 }))}
-          className="max-w-xs"
-        />
-        {canEdit && (
-          <Button onClick={() => { setForm({ ROLE_NAME: '' }); setGrantedIds(new Set()); setIsCreateOpen(true); }} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white hover:opacity-90">
-            <Plus className="h-4 w-4 mr-2" /> {t('admin.roles.addRole')}
-          </Button>
+    <>
+      {/* ── 4-column grid: roles list (1) │ permission panel (3) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+
+        {/* ══ Roles list card ══ */}
+        <div className="rounded-xl border border-slate-200 bg-white p-2">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400 px-2 py-1.5">
+            {t('admin.roles.rolesLabel', { defaultValue: 'Roles' })}
+          </div>
+          {roles.map((role) => {
+            const isSelected = selectedRole?.ID === role.ID;
+            const count      = cachedCounts[role.ID];
+            return (
+              <button
+                key={role.ID}
+                onClick={() => setSelectedRole(role)}
+                className={`group flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-start text-[12.5px] transition-colors ${
+                  isSelected ? 'bg-[#FAEDF0]' : 'hover:bg-slate-50'
+                }`}
+              >
+                <span
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ background: isSelected ? '#A71D3A' : '#94a3b8' }}
+                />
+                <span className={`flex-1 truncate ${
+                  isSelected ? 'font-bold text-[#A71D3A]' : 'text-slate-700'
+                }`}>
+                  {role.ROLE_NAME}
+                </span>
+
+                {canEdit && role.ROLE_NAME !== 'SUPER_ADMIN' && (
+                  <span
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setForm({ ROLE_NAME: role.ROLE_NAME });
+                      setEditTarget(role);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200"
+                    title={t('admin.roles.editRoleTitle')}
+                  >
+                    <Pencil className="h-3 w-3 text-slate-400" />
+                  </span>
+                )}
+
+                {count !== undefined && (
+                  <span className="text-[10.5px] text-slate-400 tabular-nums">{count}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ══ Permission matrix (3 cols) ══ */}
+        {selectedRole ? (
+          <div className="lg:col-span-3 space-y-3">
+
+            {/* ── Role header — separate box ── */}
+            <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <span className="h-7 w-7 rounded-lg flex items-center justify-center text-white shrink-0 bg-[#A71D3A]">
+                <ShieldCheck className="h-[15px] w-[15px]" />
+              </span>
+              <div className="min-w-0">
+                <div className="font-bold text-slate-800 text-[14px] truncate">
+                  {selectedRole.ROLE_NAME}
+                </div>
+                <div className="text-[11.5px] text-slate-400">
+                  {selectedRole.IS_SCOPED
+                    ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
+                    : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
+                </div>
+              </div>
+              <div className="ms-auto flex items-center gap-3">
+                <span className="text-[12px] text-slate-500 whitespace-nowrap">
+                  {grantedIds.size} / {allPermissions.length}{' '}
+                  {t('admin.roles.permissions', { defaultValue: 'permissions' })}
+                </span>
+                {canEditPermissions && isDirty && (
+                  <Button
+                    size="sm"
+                    onClick={handleSavePermissions}
+                    disabled={isAssigning}
+                    style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+                    className="text-white hover:opacity-90 text-xs h-8 px-3"
+                  >
+                    {isAssigning ? t('admin.roles.saving') : t('admin.roles.savePermissions')}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* ── Permission groups — each a separate card ── */}
+            {allPermissions.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-16 text-center text-sm text-slate-400">
+                {t('admin.roles.noPermissionsAssigned')}
+              </div>
+            ) : (
+              permTree.map(treeNode => (
+                <PermSection
+                  key={treeNode.node.key}
+                  treeNode={treeNode}
+                  grantedIds={grantedIds}
+                  onToggle={handleToggle}
+                  canEdit={canEditPermissions}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white px-4 py-16 text-center text-sm text-slate-400">
+            {t('admin.roles.selectRolePrompt', { defaultValue: 'Select a role to view permissions' })}
+          </div>
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
-        <table className="w-full">
-          <thead className="bg-white border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colName')}</th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-slate-500 uppercase tracking-wide">{t('admin.roles.colActions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-500">{t('admin.roles.loading')}</td></tr>
-            ) : roles.length === 0 ? (
-              <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-500">{t('admin.roles.noRoles')}</td></tr>
-            ) : (
-              roles.map((role) => (
-                <tr key={role.ID} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-700 text-start">{role.ROLE_NAME}</td>
-                  <td className="px-6 py-4 flex gap-2 justify-start">
-                    {canViewDetail && (
-                      <Button
-                        size="sm" variant="outline"
-                        onClick={() => setViewTarget(role)}
-                        title={t('admin.roles.viewPermissionsTitle')}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                    {canEdit && (
-                      <Button
-                        size="sm" variant="outline"
-                        onClick={() => {
-                          setForm({ ROLE_NAME: role.ROLE_NAME });
-                          setEditTarget(role);
-                        }}
-                        disabled={isUpdating || role.ROLE_NAME === 'SUPER_ADMIN'}
-                        title={role.ROLE_NAME === 'SUPER_ADMIN' ? t('admin.roles.superAdminCannotEdit') : t('admin.roles.editRoleTitle')}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* View Dialog — same grouped layout as Edit, read-only */}
-      <Dialog open={!!viewTarget} onOpenChange={(o) => { if (!o) setViewTarget(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
-                {viewTarget?.ROLE_NAME?.charAt(0)}
-              </span>
-              {viewTarget?.ROLE_NAME}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="py-2 space-y-4">
-            {/* Role badge */}
-            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider w-24">{t('admin.roles.roleLabel')}</span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                {viewTarget?.ROLE_NAME}
-              </span>
-            </div>
-
-            {/* Permissions — grouped by section, identical structure to Edit dialog */}
-            {(() => {
-              const rawList = ((viewRolePermData?.data as unknown) as Array<{ PERMISSION_ID?: number }>) ?? [];
-              const viewGrantedIds = new Set(rawList.map(r => r.PERMISSION_ID).filter(Boolean) as number[]);
-              const assignedCount = viewGrantedIds.size;
-
-              return (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('admin.roles.assignedPermissions')}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400">{t('admin.roles.permissionsCount', { count: assignedCount })}</span>
-                      {assignedCount > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setViewAllCollapsed(v => !v)}
-                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
-                        >
-                          {viewAllCollapsed
-                            ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
-                            : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
-                          }
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {assignedCount === 0 ? (
-                    <div className="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                      <p className="text-sm text-slate-400">{t('admin.roles.noPermissionsAssigned')}</p>
-                    </div>
-                  ) : (
-                    permTree.map(({ node, children }) => (
-                      <PermSection
-                        key={node.key}
-                        node={node}
-                        items={children}
-                        grantedIds={viewGrantedIds}
-                        onToggle={() => {}}
-                        onToggleAll={() => {}}
-                        canEdit={false}
-                        label={t(`admin.permLabels.${node.key.replace(/\./g, '_')}`, { defaultValue: node.label })}
-                        childLabel={(key, fb) => t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fb })}
-                        grantLabel={t('admin.roles.grantLabel')}
-                        masterCollapsed={viewAllCollapsed}
-                      />
-                    ))
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setViewTarget(null)}>{t('admin.roles.close')}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Dialog */}
+      {/* ── Create Role dialog ── */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{t('admin.roles.addRoleDialogTitle')}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('admin.roles.addRoleDialogTitle')}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">
               <Label htmlFor="role-name">{t('admin.roles.roleName')}</Label>
@@ -520,51 +477,31 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                 placeholder={t('admin.roles.roleNamePlaceholder')}
               />
             </div>
-
-            {permTree.length > 0 && (
-              <div className="space-y-2 border-t border-slate-200 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">{t('admin.roles.assignPermissions')}</Label>
-                  <button
-                    type="button"
-                    onClick={() => setCreateAllCollapsed(v => !v)}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    {createAllCollapsed
-                      ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
-                      : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
-                    }
-                  </button>
-                </div>
-                {permTree.map(({ node, children }) => (
-                  <PermSection
-                    key={node.key}
-                    node={node}
-                    items={children}
-                    grantedIds={grantedIds}
-                    onToggle={handleToggle}
-                    onToggleAll={handleToggleAll}
-                    canEdit={true}
-                    label={t(`admin.permLabels.${node.key.replace(/\./g, '_')}`, { defaultValue: node.label })}
-                    childLabel={(key, fb) => t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fb })}
-                    grantLabel={t('admin.roles.grantLabel')}
-                    masterCollapsed={createAllCollapsed}
-                  />
-                ))}
-              </div>
-            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>{t('actions.cancel')}</Button>
-            <Button onClick={handleCreate} disabled={isCreating} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">{isCreating ? t('admin.roles.creating') : t('actions.confirmSave')}</Button>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>
+              {t('actions.cancel')}
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={isCreating}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              className="text-white"
+            >
+              {isCreating ? t('admin.roles.creating') : t('actions.confirmSave')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* ── Edit Role Name dialog ── */}
       <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{t('admin.roles.editRoleDialogTitle', { name: editTarget?.ROLE_NAME })}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {t('admin.roles.editRoleDialogTitle', { name: editTarget?.ROLE_NAME })}
+            </DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">
               <Label htmlFor="edit-role-name">{t('admin.roles.roleName')}</Label>
@@ -572,51 +509,24 @@ export function RolesTab({ canEdit = false, canViewDetail = false }: { canEdit?:
                 id="edit-role-name"
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
-                disabled={editTarget?.ROLE_NAME === 'SUPER_ADMIN'}
               />
             </div>
-
-            {permTree.length > 0 && (
-              <div className="space-y-2 border-t border-slate-200 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">{t('admin.roles.permissionsSection')}</Label>
-                  <button
-                    type="button"
-                    onClick={() => setEditAllCollapsed(v => !v)}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    {editAllCollapsed
-                      ? <><ChevronDown className="h-3.5 w-3.5" /> {t('admin.roles.expandAll')}</>
-                      : <><ChevronRight className="h-3.5 w-3.5" /> {t('admin.roles.collapseAll')}</>
-                    }
-                  </button>
-                </div>
-                {permTree.map(({ node, children }) => (
-                  <PermSection
-                    key={node.key}
-                    node={node}
-                    items={children}
-                    grantedIds={grantedIds}
-                    onToggle={handleToggle}
-                    onToggleAll={handleToggleAll}
-                    canEdit={true}
-                    label={t(`admin.permLabels.${node.key.replace(/\./g, '_')}`, { defaultValue: node.label })}
-                    childLabel={(key, fb) => t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fb })}
-                    grantLabel={t('admin.roles.grantLabel')}
-                    masterCollapsed={editAllCollapsed}
-                  />
-                ))}
-              </div>
-            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating || isAssigning}>{t('actions.cancel')}</Button>
-            <Button onClick={handleAssignPermissions} disabled={isAssigning} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">
-              {isAssigning ? t('admin.roles.saving') : t('admin.roles.savePermissions')}
+            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating}>
+              {t('actions.cancel')}
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={isUpdating}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              className="text-white"
+            >
+              {isUpdating ? t('admin.roles.saving') : t('actions.confirmSave')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -6,19 +6,20 @@ import { useTranslation } from 'react-i18next';
 import { NAV_GROUPS } from '@/constants/navigation';
 import { useLanguage } from '@/i18n';
 
-// route -> { group i18n key, item i18n key } for the breadcrumb
-function crumbFor(pathname: string): { groupKey: string; groupTitle: string; itemKey: string; itemTitle: string } {
+// route -> breadcrumb data for the current path
+function crumbFor(pathname: string): { groupKey: string; groupTitle: string; itemKey: string; itemTitle: string; itemBreadcrumb?: string } {
   for (const group of NAV_GROUPS) {
     for (const item of group.items) {
       if (pathname === item.href || pathname.startsWith(item.href + '/')) {
-        return { groupKey: group.i18nKey, groupTitle: group.title, itemKey: item.i18nKey, itemTitle: item.title };
+        return { groupKey: group.i18nKey, groupTitle: group.title, itemKey: item.i18nKey, itemTitle: item.title, itemBreadcrumb: item.breadcrumbLabel };
       }
     }
   }
   // /admin root (before redirect resolves) falls back to the Administration group
   if (pathname.startsWith('/admin')) {
     const admin = NAV_GROUPS.find((g) => g.id === 'administration') ?? NAV_GROUPS[0];
-    return { groupKey: admin.i18nKey, groupTitle: admin.title, itemKey: admin.items[0].i18nKey, itemTitle: admin.items[0].title };
+    const first = admin.items[0];
+    return { groupKey: admin.i18nKey, groupTitle: admin.title, itemKey: first.i18nKey, itemTitle: first.title, itemBreadcrumb: first.breadcrumbLabel };
   }
   const sbr = NAV_GROUPS[0];
   return { groupKey: sbr.i18nKey, groupTitle: sbr.title, itemKey: sbr.items[0].i18nKey, itemTitle: sbr.items[0].title };
@@ -36,7 +37,7 @@ export function Header() {
       <div className="flex items-center gap-2 text-[12.5px] min-w-0">
         <span className="text-slate-400 truncate">{t(crumb.groupKey, { defaultValue: crumb.groupTitle })}</span>
         <span className="text-slate-300">/</span>
-        <span className="text-slate-700 font-semibold truncate">{t(crumb.itemKey, { defaultValue: crumb.itemTitle })}</span>
+        <span className="text-slate-700 font-semibold truncate">{crumb.itemBreadcrumb ?? t(crumb.itemKey, { defaultValue: crumb.itemTitle })}</span>
       </div>
 
       {/* Right Actions */}

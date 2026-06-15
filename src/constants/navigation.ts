@@ -3,7 +3,9 @@ export type NavItem = {
   href: string;
   icon: string;
   permKey: string;    // The .view permission required to show this nav link ('' = always visible)
-  i18nKey: string;    // Translation key for the link label
+  i18nKey: string;       // Translation key for the link label (page header)
+  sidebarLabel?: string; // Override label shown only in the sidebar
+  breadcrumbLabel?: string; // Override label shown only in the breadcrumb
   divider?: boolean;  // Render a thin separator above this item (reference design)
   children?: NavItem[];
 };
@@ -67,9 +69,8 @@ export const NAV_GROUPS: NavGroup[] = [
     title: 'Administration',
     i18nKey: 'nav.administration',
     items: [
-      { title: 'Users',       href: '/admin/users',       icon: 'Users',     permKey: 'admin_panel.users.view',       i18nKey: 'admin.tabs.users'       },
-      { title: 'Roles',       href: '/admin/roles',       icon: 'Shield',    permKey: 'admin_panel.roles.view',       i18nKey: 'admin.tabs.roles'       },
-      { title: 'Permissions', href: '/admin/permissions', icon: 'KeyRound',  permKey: 'admin_panel.permissions.view', i18nKey: 'admin.tabs.permissions' },
+      { title: 'User Management', href: '/admin/users',  icon: 'Users',     permKey: 'admin_panel.users.view',       i18nKey: 'admin.tabs.users',       sidebarLabel: 'Users', breadcrumbLabel: 'User' },
+      { title: 'Roles',       href: '/admin/roles',       icon: 'ShieldCheck', permKey: 'admin_panel.roles.view',       i18nKey: 'admin.tabs.roles'       },
     ],
   },
 ];

@@ -406,8 +406,8 @@
     "tabs": {
       "permissions": "الصلاحيات",
       "permissionsDesc": "إدارة صلاحيات الوصول",
-      "roles": "الأدوار",
-      "rolesDesc": "إعداد تعريفات الأدوار",
+      "roles": "الأدوار والصلاحيات",
+      "rolesDesc": "تعديل الصلاحيات التي يمنحها كل دور",
       "users": "المستخدمون",
       "usersDesc": "إدارة مستخدمي النظام",
       "management": "إدارة"
@@ -480,7 +480,12 @@
       "expandAll": "توسيع الكل",
       "collapseAll": "طي الكل",
       "selectAll": "تحديد الكل",
-      "roleNamePlaceholder": "مثال: محلل"
+      "roleNamePlaceholder": "مثال: محلل",
+      "rolesLabel": "الأدوار",
+      "scopedRole": "دور محدود النطاق",
+      "globalRole": "دور عام",
+      "permissions": "صلاحيات",
+      "selectRolePrompt": "اختر دوراً لعرض الصلاحيات"
     },
     "users": {
       "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني...",
@@ -508,6 +513,7 @@
       "colUser": "المستخدم",
       "colRoles": "الأدوار",
       "colStatus": "الحالة",
+      "colCreatedAt": "تاريخ الإنشاء",
       "statusActive": "نشط",
       "statusInactive": "غير نشط",
       "regulatorScopeLabel": "نطاق الجهة التنظيمية",

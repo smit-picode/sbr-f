@@ -82,7 +82,7 @@ export function AuditLogPage() {
           value={filters.tableName ?? '__all__'}
           onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
         >
-          <SelectTrigger className="w-52 shadow-none">
+          <SelectTrigger className="w-44 shadow-none">
             <SelectValue placeholder={t('filters.allTables')} />
           </SelectTrigger>
           <SelectContent>

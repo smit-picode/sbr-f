@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Users, Key, ArrowLeft } from 'lucide-react';
+import { Shield, Users, Key, ArrowLeft, Plus } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
+import { Button } from '@/components/ui/button';
 import { PermissionsTab } from '../components/PermissionsTab';
 import { RolesTab } from '../components/RolesTab';
 import { UsersTab } from '../components/UsersTab';
@@ -36,6 +37,8 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
     { refetchOnMountOrArgChange: true }
   );
   const seenFetching = useRef(false);
+  const usersOpenCreate = useRef<(() => void) | null>(null);
+  const rolesOpenCreate = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (permsFetching) { seenFetching.current = true; return; }
@@ -97,11 +100,33 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
     );
   }
 
+  const canEditUsers = isSuperAdmin || hasPermission('admin_panel.users.edit');
+  const canEditRoles = isSuperAdmin || hasPermission('admin_panel.roles.edit');
+
   return (
     <PageContainer>
       <PageHeader
         title={t(currentDef.labelKey)}
         description={t(currentDef.descKey)}
+        actions={
+          tab === 'users' && canEditUsers ? (
+            <Button
+              onClick={() => usersOpenCreate.current?.()}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              className="text-white hover:opacity-90"
+            >
+              <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
+            </Button>
+          ) : tab === 'roles' && canEditRoles ? (
+            <Button
+              onClick={() => rolesOpenCreate.current?.()}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              className="text-white hover:opacity-90"
+            >
+              <Plus className="h-4 w-4 mr-2" /> {t('admin.roles.addRole')}
+            </Button>
+          ) : undefined
+        }
       />
 
       {visibleTabs.length === 0 ? (
@@ -109,23 +134,32 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           <p className="text-sm text-slate-500">{t('admin.panel.noTabsAvailable')}</p>
         </div>
       ) : canSeeCurrent ? (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-          <div className="p-6">
-            {tab === 'permissions' && <PermissionsTab />}
-            {tab === 'roles' && (
-              <RolesTab
-                canEdit={isSuperAdmin || hasPermission('admin_panel.roles.edit')}
-                canViewDetail={isSuperAdmin || hasPermission('admin_panel.roles.view_detail')}
-              />
-            )}
-            {tab === 'users' && (
-              <UsersTab
-                canEdit={isSuperAdmin || hasPermission('admin_panel.users.edit')}
-                canViewDetail={isSuperAdmin || hasPermission('admin_panel.users.view_detail')}
-              />
-            )}
-          </div>
-        </div>
+        <>
+          {/* Users tab manages its own two-card layout */}
+          {tab === 'users' && (
+            <UsersTab
+              canEdit={canEditUsers}
+              canViewDetail={isSuperAdmin || hasPermission('admin_panel.users.view_detail')}
+              onRegisterCreate={(fn) => { usersOpenCreate.current = fn; }}
+            />
+          )}
+          {/* Roles — own layout like Users, no card wrapper */}
+          {tab === 'roles' && (
+            <RolesTab
+              canEdit={canEditRoles}
+              canViewDetail={isSuperAdmin || hasPermission('admin_panel.roles.view_detail')}
+              onRegisterCreate={(fn) => { rolesOpenCreate.current = fn; }}
+            />
+          )}
+          {/* Permissions stays inside a single card */}
+          {tab === 'permissions' && (
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+              <div className="p-6">
+                <PermissionsTab />
+              </div>
+            </div>
+          )}
+        </>
       ) : null}
     </PageContainer>
   );

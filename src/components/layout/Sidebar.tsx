@@ -12,6 +12,7 @@ import {
   MapPin,
   ClipboardList,
   Shield,
+  ShieldCheck,
   KeyRound,
   Inbox,
   CheckCheck,
@@ -43,6 +44,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   MapPin,
   ClipboardList,
   Shield,
+  ShieldCheck,
   KeyRound,
   Inbox,
   CheckCheck,
@@ -69,7 +71,7 @@ function NavLink({ item, collapsed }: NavLinkProps) {
   const { t } = useTranslation();
   const Icon = ICON_MAP[item.icon];
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-  const label = t(item.i18nKey, { defaultValue: item.title });
+  const label = item.sidebarLabel ?? t(item.i18nKey, { defaultValue: item.title });
 
   if (collapsed) {
     return (
