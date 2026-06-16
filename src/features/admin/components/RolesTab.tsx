@@ -302,11 +302,34 @@ export function RolesTab({
 
   // ── handlers ──
   const handleToggle = (id: number, granted: boolean) => {
-    setGrantedIds(prev => {
-      const next = new Set(prev);
-      if (granted) next.add(id); else next.delete(id);
-      return next;
-    });
+    const toggled = allPermissions.find(p => p.ID === id);
+
+    if (granted) {
+      // Block enabling any admin_panel child if admin_panel.view is not granted
+      const isAdminChild =
+        toggled?.PERMISSION_NAME?.startsWith('admin_panel.') &&
+        toggled?.PERMISSION_NAME !== 'admin_panel.view';
+      if (isAdminChild) {
+        const viewAdminPerm = allPermissions.find(p => p.PERMISSION_NAME === 'admin_panel.view');
+        if (viewAdminPerm && !grantedIds.has(viewAdminPerm.ID)) {
+          toast.warning('Please enable "View Admin Panel" permission first.');
+          return;
+        }
+      }
+      setGrantedIds(prev => { const next = new Set(prev); next.add(id); return next; });
+    } else {
+      setGrantedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        // When "View Admin Panel" is unchecked, cascade-remove all its child permissions
+        if (toggled?.PERMISSION_NAME === 'admin_panel.view') {
+          allPermissions
+            .filter(p => p.PERMISSION_NAME?.startsWith('admin_panel.') && p.PERMISSION_NAME !== 'admin_panel.view')
+            .forEach(p => next.delete(p.ID));
+        }
+        return next;
+      });
+    }
   };
 
   const handleSavePermissions = async () => {
