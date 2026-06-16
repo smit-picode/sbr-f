@@ -40,7 +40,7 @@ const ROLE_BADGE_PALETTE = [
   'bg-[#A71D3A] text-white',   // maroon
   'bg-slate-600 text-white',   // charcoal
   'bg-emerald-700 text-white', // green
-  'bg-purple-700 text-white',  // purple
+  'bg-[#6B4FA0] text-white',   // purple
   'bg-orange-600 text-white',  // orange
   'bg-rose-700 text-white',    // rose/pink
 ];
@@ -49,6 +49,11 @@ function getRoleBadgeClass(roleName: string): string {
   if (roleName === 'SUPER_ADMIN') return 'bg-slate-800 text-white';
   const hash = roleName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return ROLE_BADGE_PALETTE[hash % ROLE_BADGE_PALETTE.length];
+}
+
+// Display-only: "SYS_ADMIN" → "Sys Admin". Does not affect the stored value.
+function toTitleCaseRole(roleName: string): string {
+  return roleName.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes('SUPER_ADMIN');
@@ -228,7 +233,7 @@ export function UsersTab({
           onChange={() => toggleRole(role.ID)}
           className="h-4 w-4 shrink-0 accent-[#A71D3A]"
         />
-        <span className="flex-1 text-sm text-slate-800">{role.ROLE_NAME}</span>
+        <span className="flex-1 text-sm text-slate-800">{toTitleCaseRole(role.ROLE_NAME)}</span>
       </label>
     );
   };
@@ -239,12 +244,12 @@ export function UsersTab({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label htmlFor="user-name">{t('admin.users.nameLabel')}</Label>
-          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" />
+          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="user-email">{t('admin.users.emailLabel')}</Label>
           <Input id="user-email" type="email" value={form.EMAIL} disabled={mode === 'edit'}
-            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" />
+            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none" />
         </div>
       </div>
 
@@ -258,7 +263,7 @@ export function UsersTab({
                 type={showPassword ? 'text' : 'password'}
                 value={form.PASSWORD}
                 onChange={(e) => setForm(p => ({ ...p, PASSWORD: e.target.value }))}
-                className="pr-9"
+                className="pr-9 shadow-none"
                 autoComplete="new-password"
               />
               <button
@@ -306,7 +311,7 @@ export function UsersTab({
             </TooltipProvider>
           </div>
           <Select value={form.SCOPE} onValueChange={(v) => setForm(p => ({ ...p, SCOPE: v }))} disabled>
-            <SelectTrigger id="user-scope" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed">
+            <SelectTrigger id="user-scope" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -336,7 +341,7 @@ export function UsersTab({
             </TooltipProvider>
           </div>
           <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
-            <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed">
+            <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -348,7 +353,19 @@ export function UsersTab({
       </div>
 
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-slate-800">{t('admin.users.assignedRolesLabel')}</p>
+        <div className="flex items-center gap-1">
+          <p className="text-sm font-semibold text-slate-800">{t('admin.users.assignedRolesLabel')}</p>
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-slate-400 cursor-help shrink-0" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-center text-xs">
+                Role expiry and multiple-role assignment will be implemented in the next phase
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <p className="text-xs text-slate-500">{t('admin.users.assignedRolesHint')}</p>
         <div className="space-y-2 pt-1 max-h-64 overflow-y-auto pr-1">
           {assignableRoles.length === 0 ? (
@@ -416,7 +433,7 @@ export function UsersTab({
                     </div>
                   </td>
                   <td className="px-4 py-4 text-start align-middle">
-                    <span className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
+                    <span className={`rounded px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap uppercase ${
                       user.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                     }`}>
                       {user.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')}
@@ -453,7 +470,7 @@ export function UsersTab({
 
     {/* Create (Onboard user) Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={(o) => { if (!o) { setIsCreateOpen(false); resetDialogState(); } }}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{t('admin.users.addUserDialogTitle')}</DialogTitle></DialogHeader>
           {dialogBody('create')}
           <DialogFooter>
@@ -497,7 +514,7 @@ export function UsersTab({
 
       {/* Edit Dialog */}
       <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) { setEditTarget(null); resetDialogState(); } }}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{t('admin.users.editUserDialogTitle')}</DialogTitle></DialogHeader>
           {dialogBody('edit')}
           <DialogFooter>

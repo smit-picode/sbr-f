@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
-import { Cairo, Plus_Jakarta_Sans } from 'next/font/google';
+import { Tajawal, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { ReduxProvider } from '@/providers/ReduxProvider';
 import { Toaster } from '@/components/common/Toaster';
 import { LanguageProvider } from '@/i18n';
 
-const cairo = Cairo({
+const tajawal = Tajawal({
   subsets: ['arabic', 'latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '700', '800'],
   display: 'swap',
   variable: '--font-cairo',
 });
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${cairo.variable} ${jakarta.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${tajawal.variable} ${jakarta.variable}`}>
       <body suppressHydrationWarning>
         <ReduxProvider>
           <LanguageProvider>

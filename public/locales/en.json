@@ -54,62 +54,62 @@
     "enterprises": {
       "title": "Enterprises",
       "description": "Enterprise records from the Statistical Business Register",
-      "noData": "No data found",
-      "noDataDesc": "Enterprise records will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "home": {
       "title": "Home",
       "description": "Statistical Business Register — Overview dashboard",
-      "noData": "No data found",
-      "noDataDesc": "Dashboard content will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "requests": {
       "title": "Requests",
       "description": "Pending change requests awaiting approval",
-      "noData": "No data found",
-      "noDataDesc": "Requests data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "approvalsHistory": {
       "title": "Approvals History",
       "description": "History of approved and rejected change requests",
-      "noData": "No data found",
-      "noDataDesc": "Approvals History data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "createSnapshot": {
       "title": "Create Snapshot",
       "description": "Create a frozen snapshot of the live frame",
-      "noData": "No data found",
-      "noDataDesc": "Create Snapshot data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "browseSnapshots": {
       "title": "Browse Snapshots",
       "description": "Browse previously created frame snapshots",
-      "noData": "No data found",
-      "noDataDesc": "Browse Snapshots data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "qualityDashboard": {
       "title": "Quality Dashboard",
       "description": "Data quality metrics and indicators",
-      "noData": "No data found",
-      "noDataDesc": "Quality Dashboard data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "qualityFindings": {
       "title": "Quality Findings",
       "description": "Open data quality findings and issues",
-      "noData": "No data found",
-      "noDataDesc": "Quality Findings data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "regulatorEscalation": {
       "title": "Regulator Escalation",
       "description": "Escalate data issues to source regulators",
-      "noData": "No data found",
-      "noDataDesc": "Regulator Escalation data will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     },
     "enterprise360": {
       "title": "Enterprise 360",
       "description": "Select an enterprise to open its full 360° profile",
-      "noData": "No data found",
-      "noDataDesc": "Enterprise 360 profiles will appear here once available."
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     }
   },
   "filters": {
@@ -360,6 +360,13 @@
       "validTo": "Valid To"
     }
   },
+  "sidebar": {
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "header": {
+    "notifications": "Notifications"
+  },
   "login": {
     "title": "Sign in",
     "email": "Email address",
@@ -409,6 +416,10 @@
       "roles": "Roles & Permissions",
       "rolesDesc": "Edit which permissions each role grants",
       "users": "User Management",
+      "ruleRegistry": "Rule Registry",
+      "columnAccess": "Column Access",
+      "pipelineLogs": "Pipeline Logs",
+      "activityLogs": "Activity Logs",
       "usersDesc": "Onboard users, assign roles with optional expiry, and manage account lifecycle",
       "management": "Management"
     },
@@ -488,7 +499,7 @@
       "selectRolePrompt": "Select a role to view permissions"
     },
     "users": {
-      "searchPlaceholder": "Search users by name, email, or role.",
+      "searchPlaceholder": "Search users by name, email",
       "addUser": "Onboard user",
       "colName": "Name",
       "colEmail": "Email",

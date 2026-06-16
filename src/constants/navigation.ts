@@ -69,8 +69,12 @@ export const NAV_GROUPS: NavGroup[] = [
     title: 'Administration',
     i18nKey: 'nav.administration',
     items: [
-      { title: 'User Management', href: '/admin/users',  icon: 'Users',     permKey: 'admin_panel.users.view',       i18nKey: 'admin.tabs.users',       sidebarLabel: 'Users', breadcrumbLabel: 'User' },
-      { title: 'Roles',       href: '/admin/roles',       icon: 'ShieldCheck', permKey: 'admin_panel.roles.view',       i18nKey: 'admin.tabs.roles'       },
+      { title: 'User Management',  href: '/admin/users',          icon: 'Users',       permKey: 'admin_panel.users.view', i18nKey: 'admin.tabs.users',         sidebarLabel: 'Users', breadcrumbLabel: 'Users' },
+      { title: 'Roles',            href: '/admin/roles',          icon: 'ShieldCheck', permKey: 'admin_panel.roles.view', i18nKey: 'admin.tabs.roles'                                                              },
+      { title: 'Rule Registry',    href: '/admin/rule-registry',  icon: 'ScrollText',  permKey: '',                       i18nKey: 'admin.tabs.ruleRegistry'                                                       },
+      { title: 'Column Access',    href: '/admin/column-access',  icon: 'Columns2',    permKey: '',                       i18nKey: 'admin.tabs.columnAccess'                                                       },
+      { title: 'Pipeline Logs',    href: '/admin/pipeline-logs',  icon: 'DatabaseZap', permKey: '',                       i18nKey: 'admin.tabs.pipelineLogs'                                                       },
+      { title: 'Activity Logs',    href: '/admin/activity-logs',  icon: 'History',     permKey: '',                       i18nKey: 'admin.tabs.activityLogs'                                                       },
     ],
   },
 ];

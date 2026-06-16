@@ -57,11 +57,17 @@ function flatLeafEntries(items: TreeNode[]): LeafEntry[] {
   return result;
 }
 
+// ─── Role display name — replaces _ with space for human-readable labels ─────
+function displayRoleName(name: string): string {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\B\w/g, (c) => c.toLowerCase());
+}
+
 // ─── Permission label helper ─────────────────────────────────────────────────
 
+// Permission and section labels are always shown in English regardless of UI language
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function pLabel(key: string, fallback: string, t: any): string {
-  return t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fallback });
+function pLabel(_key: string, fallback: string, _t: any): string {
+  return fallback;
 }
 
 // ─── Permission grid (2-column card grid) ────────────────────────────────────
@@ -373,7 +379,7 @@ export function RolesTab({
                 <span className={`flex-1 truncate ${
                   isSelected ? 'font-bold text-[#A71D3A]' : 'text-slate-700'
                 }`}>
-                  {role.ROLE_NAME}
+                  {displayRoleName(role.ROLE_NAME)}
                 </span>
 
                 {canEdit && role.ROLE_NAME !== 'SUPER_ADMIN' && (
@@ -410,18 +416,26 @@ export function RolesTab({
               </span>
               <div className="min-w-0">
                 <div className="font-bold text-slate-800 text-[14px] truncate">
-                  {selectedRole.ROLE_NAME}
+                  {displayRoleName(selectedRole.ROLE_NAME)}
                 </div>
-                <div className="text-[11.5px] text-slate-400">
-                  {selectedRole.IS_SCOPED
-                    ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
-                    : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
+                <div className="flex items-center gap-1">
+                  <span className="text-[11.5px] text-slate-400">
+                    {selectedRole.IS_SCOPED
+                      ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
+                      : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
+                  </span>
+                  <div className="relative group/scopetip flex items-center">
+                    <Info className="h-3 w-3 text-slate-400 cursor-help" />
+                    <div className="pointer-events-none absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-1.5 w-max max-w-[220px] rounded bg-slate-800 px-2.5 py-1.5 text-[11px] text-white shadow-lg opacity-0 group-hover/scopetip:opacity-100 transition-opacity z-50 whitespace-normal text-center">
+                      This feature will be implemented in the next phase.
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="ms-auto flex items-center gap-3">
-                <span className="text-[12px] text-slate-500 whitespace-nowrap">
-                  {grantedIds.size} / {allPermissions.length}{' '}
-                  {t('admin.roles.permissions', { defaultValue: 'permissions' })}
+                <span className="text-[12px] text-slate-500 whitespace-nowrap" dir="ltr">
+                  {grantedIds.size} / {allPermissions.length}
+                  {' '}<span dir="auto">{t('admin.roles.permissions', { defaultValue: 'permissions' })}</span>
                 </span>
                 {canEditPermissions && isDirty && (
                   <Button
@@ -499,7 +513,7 @@ export function RolesTab({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {t('admin.roles.editRoleDialogTitle', { name: editTarget?.ROLE_NAME })}
+              {t('admin.roles.editRoleDialogTitle', { name: editTarget ? displayRoleName(editTarget.ROLE_NAME) : '' })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">

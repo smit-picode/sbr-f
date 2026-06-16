@@ -22,6 +22,10 @@ import {
   Flag,
   Landmark,
   Orbit,
+  ScrollText,
+  Columns2,
+  DatabaseZap,
+  History,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
@@ -54,6 +58,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Flag,
   Landmark,
   Orbit,
+  ScrollText,
+  Columns2,
+  DatabaseZap,
+  History,
 };
 
 const RAIL_GRADIENT = 'linear-gradient(180deg, #6B1428 0%, #6B1428 42%, #7E1830 68%, #A71D3A 100%)';
@@ -68,10 +76,13 @@ interface NavLinkProps {
 
 function NavLink({ item, collapsed }: NavLinkProps) {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const Icon = ICON_MAP[item.icon];
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-  const label = item.sidebarLabel ?? t(item.i18nKey, { defaultValue: item.title });
+  // In Arabic, always use the translation key so sidebarLabel (English-only short form) doesn't leak through
+  const label = i18n.language === 'ar'
+    ? t(item.i18nKey, { defaultValue: item.title })
+    : (item.sidebarLabel ?? t(item.i18nKey, { defaultValue: item.title }));
 
   if (collapsed) {
     return (
@@ -265,7 +276,7 @@ export function Sidebar() {
                 >
                   <span className="truncate">{t(group.i18nKey, { defaultValue: group.title })}</span>
                   <ChevronDown
-                    className={cn('h-[13px] w-[13px] ms-auto transition-transform', !isOpen && '-rotate-90 rtl:rotate-90')}
+                    className={cn('h-[13px] w-[13px] ms-auto transition-transform', !isOpen && '-rotate-90')}
                   />
                 </button>
                 {isOpen && (
@@ -290,14 +301,14 @@ export function Sidebar() {
             'flex items-center gap-2 h-10 shrink-0 text-[12px] font-semibold text-[#f0cdd5] transition-colors hover:bg-white/10',
             collapsed ? 'justify-center' : 'px-4'
           )}
-          title={collapsed ? 'Expand' : 'Collapse'}
+          title={collapsed ? t('sidebar.expand', { defaultValue: 'Expand' }) : t('sidebar.collapse', { defaultValue: 'Collapse' })}
         >
           {collapsed ? (
             <ChevronsRight className="h-[18px] w-[18px] rtl:rotate-180" />
           ) : (
             <>
               <ChevronsLeft className="h-[18px] w-[18px] rtl:rotate-180" />
-              <span>Collapse</span>
+              <span>{t('sidebar.collapse', { defaultValue: 'Collapse' })}</span>
             </>
           )}
         </button>

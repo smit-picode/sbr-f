@@ -37,7 +37,11 @@ export function Header() {
       <div className="flex items-center gap-2 text-[12.5px] min-w-0">
         <span className="text-slate-400 truncate">{t(crumb.groupKey, { defaultValue: crumb.groupTitle })}</span>
         <span className="text-slate-300">/</span>
-        <span className="text-slate-700 font-semibold truncate">{crumb.itemBreadcrumb ?? t(crumb.itemKey, { defaultValue: crumb.itemTitle })}</span>
+        <span className="text-slate-700 font-semibold truncate">
+          {isArabic
+            ? t(crumb.itemKey, { defaultValue: crumb.itemTitle })
+            : (crumb.itemBreadcrumb ?? t(crumb.itemKey, { defaultValue: crumb.itemTitle }))}
+        </span>
       </div>
 
       {/* Right Actions */}
@@ -51,7 +55,7 @@ export function Header() {
         </button>
         <button
           className="relative h-9 w-9 flex items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
-          title="Notifications"
+          title={t('header.notifications', { defaultValue: 'Notifications' })}
         >
           <Bell className="h-[17px] w-[17px]" />
           <span className="absolute top-1.5 end-2 w-1.5 h-1.5 rounded-full bg-[#A71D3A]" />
