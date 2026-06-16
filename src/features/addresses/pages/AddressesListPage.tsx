@@ -5,6 +5,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { SearchInput } from '@/components/common/SearchInput';
+import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { getAddressColumns } from '../components/AddressColumns';
 import { EditAddressModal } from '../components/EditAddressModal';
 import { useGetAddressesListQuery } from '../api/addressesApi';
@@ -68,6 +69,15 @@ export function AddressesListPage() {
           placeholder={t('filters.searchByAddress')}
         />
       </div>
+
+      <FilterChips
+        chips={filters.search ? [{
+          key: 'search',
+          label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+          onRemove: () => handleFilterChange({ search: '', page: 1 }),
+        } as FilterChip] : []}
+        onClearAll={() => handleFilterChange({ search: '', page: 1 })}
+      />
 
       <DataTable
         columns={columns}

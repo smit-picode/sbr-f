@@ -121,7 +121,14 @@
     "sector": "القطاع",
     "source": "المصدر",
     "allTables": "جميع الجداول",
-    "reset": "إعادة تعيين"
+    "reset": "إعادة تعيين",
+    "search": "بحث",
+    "table": "الجدول",
+    "recordId": "رقم السجل",
+    "clearAll": "مسح الكل",
+    "removeFilter": "إزالة المرشح",
+    "filterOne": "مرشح",
+    "filterMany": "مرشحات"
   },
   "table": {
     "showing": "عرض",

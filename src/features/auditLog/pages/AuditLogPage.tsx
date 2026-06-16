@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAuditLogColumns } from '../components/AuditLogColumns';
+import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { useGetAuditLogListQuery } from '../api/auditLogApi';
 import type { AuditLogFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
@@ -63,6 +64,24 @@ export function AuditLogPage() {
 
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
+
+  // Active-filter chips
+  const activeChips: FilterChip[] = [];
+  if (filters.tableName) {
+    activeChips.push({
+      key: 'tableName',
+      label: `${t('filters.table', { defaultValue: 'Table' })}: ${filters.tableName}`,
+      onRemove: () => handleFilterChange({ tableName: undefined, page: 1 }),
+    });
+  }
+  if (filters.recordId) {
+    activeChips.push({
+      key: 'recordId',
+      label: `${t('filters.recordId', { defaultValue: 'Record ID' })}: ${filters.recordId}`,
+      onRemove: () => { setRecordIdInput(''); handleFilterChange({ recordId: undefined, page: 1 }); },
+    });
+  }
+  const clearAllAudit = () => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); };
 
   return (
     <PageContainer>
@@ -131,6 +150,8 @@ export function AuditLogPage() {
           );
         })()}
       </div>
+
+      <FilterChips chips={activeChips} onClearAll={clearAllAudit} />
 
       <DataTable
         columns={getAuditLogColumns(t)}

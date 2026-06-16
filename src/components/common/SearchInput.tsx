@@ -24,7 +24,7 @@ export function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`pl-8 pr-8 w-80 ${className ?? ''}`}
+        className={`pl-8 pr-8 w-80 focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${className ?? ''}`}
       />
       {value && (
         <Button

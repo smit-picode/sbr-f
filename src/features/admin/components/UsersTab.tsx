@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { Pencil, Eye, EyeOff, RefreshCw, Search, Info } from 'lucide-react';
 import {
   useGetUsersListQuery,
@@ -388,11 +389,20 @@ export function UsersTab({
             placeholder={t('admin.users.searchPlaceholder')}
             value={filters.search}
             onChange={(e) => setFilters(p => ({ ...p, search: e.target.value, page: 1 }))}
-            className="pl-9 w-80 shadow-none"
+            className="pl-9 w-80 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
             autoComplete="off"
           />
         </div>
       </div>
+
+      <FilterChips
+        chips={filters.search ? [{
+          key: 'search',
+          label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+          onRemove: () => setFilters(p => ({ ...p, search: '', page: 1 })),
+        } as FilterChip] : []}
+        onClearAll={() => setFilters(p => ({ ...p, search: '', page: 1 }))}
+      />
 
       {/* Card 2 — Table */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">

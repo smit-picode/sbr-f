@@ -121,7 +121,14 @@
     "sector": "Sector",
     "source": "Source",
     "allTables": "All Tables",
-    "reset": "Reset"
+    "reset": "Reset",
+    "search": "Search",
+    "table": "Table",
+    "recordId": "Record ID",
+    "clearAll": "Clear all",
+    "removeFilter": "Remove filter",
+    "filterOne": "filter",
+    "filterMany": "filters"
   },
   "table": {
     "showing": "Showing",

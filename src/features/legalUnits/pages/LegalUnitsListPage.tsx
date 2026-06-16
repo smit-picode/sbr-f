@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { getLegalUnitsColumns } from '../components/LegalUnitsColumns';
 import { LegalUnitsFiltersBar } from '../components/LegalUnitsFilters';
+import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { EditLegalUnitModal } from '../components/EditLegalUnitModal';
 import { useGetLegalUnitsListQuery } from '../api/legalUnitsApi';
 import { LEGAL_UNITS_DEFAULT_FILTERS } from '../constants';
@@ -80,6 +81,37 @@ export function LegalUnitsListPage() {
     setFilters(LEGAL_UNITS_DEFAULT_FILTERS);
   }, []);
 
+  // Active-filter chips — value is "active" when it isn't empty or the "__all__" sentinel
+  const activeChips: FilterChip[] = [];
+  if (filters.search) {
+    activeChips.push({
+      key: 'search',
+      label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+      onRemove: () => handleFilterChange({ search: '', page: 1 }),
+    });
+  }
+  if (filters.estStatus && filters.estStatus !== '__all__') {
+    activeChips.push({
+      key: 'estStatus',
+      label: `${t('filters.status')}: ${filters.estStatus}`,
+      onRemove: () => handleFilterChange({ estStatus: '', page: 1 }),
+    });
+  }
+  if (filters.sectorId && filters.sectorId !== '__all__') {
+    activeChips.push({
+      key: 'sectorId',
+      label: `${t('filters.sector')}: ${filters.sectorId}`,
+      onRemove: () => handleFilterChange({ sectorId: '', page: 1 }),
+    });
+  }
+  if (filters.sourceCode && filters.sourceCode !== '__all__') {
+    activeChips.push({
+      key: 'sourceCode',
+      label: `${t('filters.source')}: ${filters.sourceCode}`,
+      onRemove: () => handleFilterChange({ sourceCode: '', page: 1 }),
+    });
+  }
+
   const { canEdit: canEditLegalUnit, canSearch } = usePermission('establishments');
   const columns = getLegalUnitsColumns((row) => setEditTarget(row), t, canEditLegalUnit);
   // On 403: clear data so stale cached records don't appear alongside the error state
@@ -107,6 +139,8 @@ export function LegalUnitsListPage() {
           isDefault={JSON.stringify(filters) === JSON.stringify(LEGAL_UNITS_DEFAULT_FILTERS)}
         />
       )}
+
+      {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}
 
       <DataTable
         columns={columns}
