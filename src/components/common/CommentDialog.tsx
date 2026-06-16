@@ -52,7 +52,7 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel }: Props) {
               {t('comment.label')} <span className="text-red-500">*</span>
             </Label>
             <textarea
-              className={`w-full border rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2B7A9E] focus:ring-offset-1 ${
+              className={`w-full border rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#A71D3A]/40 focus:border-[#A71D3A]/40 ${
                 error ? 'border-red-400' : 'border-slate-200'
               }`}
               rows={4}
@@ -68,7 +68,7 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel }: Props) {
           <Button variant="outline" onClick={onCancel} disabled={isLoading}>
             {t('actions.cancel')}
           </Button>
-          <Button onClick={handleConfirm} disabled={isLoading || submitting || !comment.trim()}>
+          <Button onClick={handleConfirm} disabled={isLoading || submitting || !comment.trim()} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">
             {isLoading || submitting ? t('actions.saving') : t('actions.confirmSave')}
           </Button>
         </DialogFooter>

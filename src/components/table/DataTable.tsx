@@ -94,7 +94,7 @@ export function DataTable<TData, TValue>({
                       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                       className={cn(
                         canSort && 'cursor-pointer select-none group',
-                        isSticky && 'sticky left-0 z-20 bg-slate-50'
+                        isSticky && 'sticky start-0 z-20 bg-slate-50'
                       )}
                     >
                       {header.isPlaceholder ? null : (
@@ -130,7 +130,7 @@ export function DataTable<TData, TValue>({
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && 'sticky left-0 z-10 bg-white')}
+                      className={cn(isSticky && 'sticky start-0 z-10 bg-white')}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

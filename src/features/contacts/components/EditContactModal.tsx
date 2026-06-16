@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateContactMutation } from '../api/contactsApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
@@ -196,7 +197,7 @@ export function EditContactModal({ contact, open, onClose }: Props) {
   const err = (f: string) => errors[f];
   const inp = (f: string) => err(f)
     ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-    : 'focus-visible:border-2 focus-visible:border-blue-600 focus-visible:ring-0';
+    : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
 
   return (
     <>
@@ -213,74 +214,82 @@ export function EditContactModal({ contact, open, onClose }: Props) {
 
         <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
 
-          <ReadOnlyField label={t('editContact.fields.sbrId')} value={contact?.SBR_ID} />
-          <ReadOnlyField label={t('editContact.fields.recordId')} value={contact?.ID} />
+          <ReadOnlyField label={t('editContact.fields.sbrId', { lng: 'en' })} value={contact?.SBR_ID} />
+          <ReadOnlyField label={t('editContact.fields.recordId', { lng: 'en' })} value={contact?.ID} />
 
           <div className="col-span-2 space-y-1" data-field="CONTACT_NAME">
-            <Label>{t('editContact.fields.contactName')}</Label>
+            <Label>{t('editContact.fields.contactName', { lng: 'en' })}</Label>
             <Input className={inp('CONTACT_NAME')} value={form.CONTACT_NAME ?? ''} onChange={(e) => handleChange('CONTACT_NAME', e.target.value)} />
             <FieldErr msg={err('CONTACT_NAME')} />
           </div>
           <div className="space-y-1" data-field="PHONE">
-            <Label>{t('editContact.fields.phone')}</Label>
+            <Label>{t('editContact.fields.phone', { lng: 'en' })}</Label>
             <Input className={inp('PHONE')} value={form.PHONE ?? ''} onChange={(e) => handleChange('PHONE', e.target.value)} />
             <FieldErr msg={err('PHONE')} />
           </div>
           <div className="space-y-1" data-field="MOBILE">
-            <Label>{t('editContact.fields.mobile')}</Label>
+            <Label>{t('editContact.fields.mobile', { lng: 'en' })}</Label>
             <Input className={inp('MOBILE')} value={form.MOBILE ?? ''} onChange={(e) => handleChange('MOBILE', e.target.value)} />
             <FieldErr msg={err('MOBILE')} />
           </div>
           <div className="col-span-2 space-y-1" data-field="EMAIL">
-            <Label>{t('editContact.fields.email')}</Label>
+            <Label>{t('editContact.fields.email', { lng: 'en' })}</Label>
             <Input type="email" className={inp('EMAIL')} value={form.EMAIL ?? ''} onChange={(e) => handleChange('EMAIL', e.target.value)} />
             <FieldErr msg={err('EMAIL')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.fax')}</Label>
+            <Label>{t('editContact.fields.fax', { lng: 'en' })}</Label>
             <Input className={inp('FAX')} value={form.FAX ?? ''} onChange={(e) => handleChange('FAX', e.target.value)} />
             <FieldErr msg={err('FAX')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.poBox')}</Label>
+            <Label>{t('editContact.fields.poBox', { lng: 'en' })}</Label>
             <Input className={inp('PO_BOX')} value={form.PO_BOX ?? ''} onChange={(e) => handleChange('PO_BOX', e.target.value)} />
             <FieldErr msg={err('PO_BOX')} />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>{t('editContact.fields.website')}</Label>
+            <Label>{t('editContact.fields.website', { lng: 'en' })}</Label>
             <Input className={inp('WEBSITE')} value={form.WEBSITE ?? ''} onChange={(e) => handleChange('WEBSITE', e.target.value)} />
             <FieldErr msg={err('WEBSITE')} />
           </div>
           <div className="space-y-1" data-field="ROLE">
-            <Label>{t('editContact.fields.role')}</Label>
-            <select
-              className={`w-full border rounded-md px-3 py-2 text-sm ${err('ROLE') ? 'border-red-400' : 'border-slate-200'}`}
-              value={form.ROLE ?? ''}
-              onChange={(e) => handleChange('ROLE', e.target.value)}
+            <Label>{t('editContact.fields.role', { lng: 'en' })}</Label>
+            <Select
+              value={form.ROLE ? String(form.ROLE) : '__none__'}
+              onValueChange={(v) => handleChange('ROLE', v === '__none__' ? '' : v)}
             >
-              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
-              {CONTACT_ROLE_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
+              <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''}`}>
+                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                {CONTACT_ROLE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FieldErr msg={err('ROLE')} />
           </div>
           <div className="space-y-1" data-field="SOURCE_CODE">
-            <Label>{t('editContact.fields.sourceCode')}</Label>
-            <select
-              className={`w-full border rounded-md px-3 py-2 text-sm ${err('SOURCE_CODE') ? 'border-red-400' : 'border-slate-200'}`}
-              value={form.SOURCE_CODE ?? ''}
-              onChange={(e) => handleChange('SOURCE_CODE', e.target.value)}
+            <Label>{t('editContact.fields.sourceCode', { lng: 'en' })}</Label>
+            <Select
+              value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
+              onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
             >
-              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
-              {CONTACT_SOURCE_CODE_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''}`}>
+                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                {CONTACT_SOURCE_CODE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
           <div className="space-y-1" data-field="PRIORITY">
-            <Label>{t('editContact.fields.priority')}</Label>
+            <Label>{t('editContact.fields.priority', { lng: 'en' })}</Label>
             <Input
               type="number"
               className={inp('PRIORITY')}
@@ -294,16 +303,16 @@ export function EditContactModal({ contact, open, onClose }: Props) {
           </div>
 
           <div className="col-span-2 pt-2">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editContact.sections.metadata')}</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editContact.sections.metadata', { lng: 'en' })}</p>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editContact.fields.validFrom')}</label>
+            <label className="text-slate-400 text-xs">{t('editContact.fields.validFrom', { lng: 'en' })}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {contact?.VALID_FROM ? new Date(contact.VALID_FROM).toLocaleDateString('en-GB') : '—'}
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editContact.fields.validTo')}</label>
+            <label className="text-slate-400 text-xs">{t('editContact.fields.validTo', { lng: 'en' })}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {contact?.VALID_TO ? new Date(contact.VALID_TO).toLocaleDateString('en-GB') : '—'}
             </div>
@@ -312,7 +321,7 @@ export function EditContactModal({ contact, open, onClose }: Props) {
 
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-            <Button onClick={handleSubmit} disabled={isLoading}>{t('actions.saveChanges')}</Button>
+            <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

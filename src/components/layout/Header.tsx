@@ -5,6 +5,7 @@ import { Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NAV_GROUPS } from '@/constants/navigation';
 import { useLanguage } from '@/i18n';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // route -> breadcrumb data for the current path
 function crumbFor(pathname: string): { groupKey: string; groupTitle: string; itemKey: string; itemTitle: string; itemBreadcrumb?: string } {
@@ -53,13 +54,21 @@ export function Header() {
         >
           {isArabic ? 'English' : 'عربي'}
         </button>
-        <button
-          className="relative h-9 w-9 flex items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
-          title={t('header.notifications', { defaultValue: 'Notifications' })}
-        >
-          <Bell className="h-[17px] w-[17px]" />
-          <span className="absolute top-1.5 end-2 w-1.5 h-1.5 rounded-full bg-[#A71D3A]" />
-        </button>
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="relative h-9 w-9 flex items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+              >
+                <Bell className="h-[17px] w-[17px]" />
+                <span className="absolute top-1.5 end-2 w-1.5 h-1.5 rounded-full bg-[#A71D3A]" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[220px] text-center text-xs">
+              This feature will be implemented in the next phase
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </header>
   );

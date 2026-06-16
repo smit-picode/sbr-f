@@ -23,6 +23,7 @@ import {
   Landmark,
   Orbit,
   ScrollText,
+  SlidersVertical,
   Columns2,
   DatabaseZap,
   History,
@@ -59,6 +60,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Landmark,
   Orbit,
   ScrollText,
+  SlidersVertical,
   Columns2,
   DatabaseZap,
   History,
@@ -122,7 +124,7 @@ export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -218,8 +220,10 @@ export function Sidebar() {
         )}
         style={{
           background: RAIL_GRADIENT,
-          // Reference design font — Cairo stays as fallback for Arabic glyphs
-          fontFamily: 'var(--font-jakarta), var(--font-cairo), sans-serif',
+          // Arabic mode: Noto Sans Arabic primary so nav text matches client; English: Jakarta primary
+          fontFamily: i18n.language === 'ar'
+            ? 'var(--font-cairo), var(--font-jakarta), sans-serif'
+            : 'var(--font-jakarta), var(--font-cairo), sans-serif',
         }}
       >
         {/* Brand */}

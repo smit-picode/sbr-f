@@ -245,12 +245,12 @@ export function UsersTab({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label htmlFor="user-name">{t('admin.users.nameLabel')}</Label>
-          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none" />
+          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="user-email">{t('admin.users.emailLabel')}</Label>
           <Input id="user-email" type="email" value={form.EMAIL} disabled={mode === 'edit'}
-            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none" />
+            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20" />
         </div>
       </div>
 
@@ -264,7 +264,7 @@ export function UsersTab({
                 type={showPassword ? 'text' : 'password'}
                 value={form.PASSWORD}
                 onChange={(e) => setForm(p => ({ ...p, PASSWORD: e.target.value }))}
-                className="pr-9 shadow-none"
+                className="pr-9 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
                 autoComplete="new-password"
               />
               <button
@@ -410,11 +410,11 @@ export function UsersTab({
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colUser')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions')}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colUser', { lng: 'en' })}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles', { lng: 'en' })}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus', { lng: 'en' })}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt', { lng: 'en' })}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions', { lng: 'en' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -494,7 +494,7 @@ export function UsersTab({
       <Dialog open={!!viewTarget} onOpenChange={(o) => { if (!o) setViewTarget(null); }}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
+            <DialogTitle className="flex items-center gap-2 text-slate-900 rtl:pr-2">
               <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-[#F3DEE4] text-[#A71D3A] font-bold text-sm">
                 {viewTarget?.NAME?.charAt(0)?.toUpperCase()}
               </span>

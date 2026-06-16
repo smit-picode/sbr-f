@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateAddressMutation } from '../api/addressesApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
@@ -191,7 +192,7 @@ export function EditAddressModal({ address, open, onClose }: Props) {
   const err = (f: string) => errors[f];
   const inp = (f: string) => err(f)
     ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-    : 'focus-visible:border-2 focus-visible:border-blue-600 focus-visible:ring-0';
+    : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
 
   return (
     <>
@@ -208,75 +209,79 @@ export function EditAddressModal({ address, open, onClose }: Props) {
 
         <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
 
-          <ReadOnlyField label={t('editAddress.fields.sbrId')} value={address?.SBR_ID} />
-          <ReadOnlyField label={t('editAddress.fields.recordId')} value={address?.ID} />
+          <ReadOnlyField label={t('editAddress.fields.sbrId', { lng: 'en' })} value={address?.SBR_ID} />
+          <ReadOnlyField label={t('editAddress.fields.recordId', { lng: 'en' })} value={address?.ID} />
 
           <div className="space-y-1" data-field="MUNICIPALITY_ID">
-            <Label>{t('editAddress.fields.municipalityId')}</Label>
+            <Label>{t('editAddress.fields.municipalityId', { lng: 'en' })}</Label>
             <Input className={inp('MUNICIPALITY_ID')} value={form.MUNICIPALITY_ID ?? ''} onChange={(e) => handleChange('MUNICIPALITY_ID', e.target.value)} />
             <FieldErr msg={err('MUNICIPALITY_ID')} />
           </div>
           <div className="space-y-1" data-field="ZONE">
-            <Label>{t('editAddress.fields.zone')}</Label>
+            <Label>{t('editAddress.fields.zone', { lng: 'en' })}</Label>
             <Input className={inp('ZONE')} value={form.ZONE ?? ''} onChange={(e) => handleChange('ZONE', e.target.value)} />
             <FieldErr msg={err('ZONE')} />
           </div>
           <div className="col-span-2 space-y-1" data-field="STREET">
-            <Label>{t('editAddress.fields.street')}</Label>
+            <Label>{t('editAddress.fields.street', { lng: 'en' })}</Label>
             <Input className={inp('STREET')} value={form.STREET ?? ''} onChange={(e) => handleChange('STREET', e.target.value)} />
             <FieldErr msg={err('STREET')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.buildingNo')}</Label>
+            <Label>{t('editAddress.fields.buildingNo', { lng: 'en' })}</Label>
             <Input className={inp('BUILDING_NO')} value={form.BUILDING_NO ?? ''} onChange={(e) => handleChange('BUILDING_NO', e.target.value)} />
             <FieldErr msg={err('BUILDING_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.unitNo')}</Label>
+            <Label>{t('editAddress.fields.unitNo', { lng: 'en' })}</Label>
             <Input className={inp('UNIT_NO')} value={form.UNIT_NO ?? ''} onChange={(e) => handleChange('UNIT_NO', e.target.value)} />
             <FieldErr msg={err('UNIT_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.floorNo')}</Label>
+            <Label>{t('editAddress.fields.floorNo', { lng: 'en' })}</Label>
             <Input className={inp('FLOOR_NO')} value={form.FLOOR_NO ?? ''} onChange={(e) => handleChange('FLOOR_NO', e.target.value)} />
             <FieldErr msg={err('FLOOR_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.qars')}</Label>
+            <Label>{t('editAddress.fields.qars', { lng: 'en' })}</Label>
             <Input className={inp('QARS')} value={form.QARS ?? ''} onChange={(e) => handleChange('QARS', e.target.value)} />
             <FieldErr msg={err('QARS')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.electricityNo')}</Label>
+            <Label>{t('editAddress.fields.electricityNo', { lng: 'en' })}</Label>
             <Input className={inp('ELECTRICITY_NO')} value={form.ELECTRICITY_NO ?? ''} onChange={(e) => handleChange('ELECTRICITY_NO', e.target.value)} />
             <FieldErr msg={err('ELECTRICITY_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.latitude')}</Label>
+            <Label>{t('editAddress.fields.latitude', { lng: 'en' })}</Label>
             <Input className={inp('LATITUDE')} value={form.LATITUDE ?? ''} onChange={(e) => handleChange('LATITUDE', e.target.value)} />
             <FieldErr msg={err('LATITUDE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.longitude')}</Label>
+            <Label>{t('editAddress.fields.longitude', { lng: 'en' })}</Label>
             <Input className={inp('LONGITUDE')} value={form.LONGITUDE ?? ''} onChange={(e) => handleChange('LONGITUDE', e.target.value)} />
             <FieldErr msg={err('LONGITUDE')} />
           </div>
           <div className="space-y-1" data-field="SOURCE_CODE">
-            <Label>{t('editAddress.fields.sourceCode')}</Label>
-            <select
-              className={`w-full border rounded-md px-3 py-2 text-sm ${err('SOURCE_CODE') ? 'border-red-400' : 'border-slate-200'}`}
-              value={form.SOURCE_CODE ?? ''}
-              onChange={(e) => handleChange('SOURCE_CODE', e.target.value)}
+            <Label>{t('editAddress.fields.sourceCode', { lng: 'en' })}</Label>
+            <Select
+              value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
+              onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
             >
-              <option value="">{t('editLegalUnit.selectPlaceholder')}</option>
-              {ADDRESS_SOURCE_CODE_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''}`}>
+                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                {ADDRESS_SOURCE_CODE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
           <div className="space-y-1" data-field="PRIORITY">
-            <Label>{t('editAddress.fields.priority')}</Label>
+            <Label>{t('editAddress.fields.priority', { lng: 'en' })}</Label>
             <Input
               type="number"
               className={inp('PRIORITY')}
@@ -290,16 +295,16 @@ export function EditAddressModal({ address, open, onClose }: Props) {
           </div>
 
           <div className="col-span-2 pt-2">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editAddress.sections.metadata')}</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editAddress.sections.metadata', { lng: 'en' })}</p>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editAddress.fields.validFrom')}</label>
+            <label className="text-slate-400 text-xs">{t('editAddress.fields.validFrom', { lng: 'en' })}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {address?.VALID_FROM ? new Date(address.VALID_FROM).toLocaleDateString('en-GB') : '—'}
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editAddress.fields.validTo')}</label>
+            <label className="text-slate-400 text-xs">{t('editAddress.fields.validTo', { lng: 'en' })}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {address?.VALID_TO ? new Date(address.VALID_TO).toLocaleDateString('en-GB') : '—'}
             </div>
@@ -308,7 +313,7 @@ export function EditAddressModal({ address, open, onClose }: Props) {
 
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-            <Button onClick={handleSubmit} disabled={isLoading}>{t('actions.saveChanges')}</Button>
+            <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

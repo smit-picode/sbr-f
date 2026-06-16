@@ -43,12 +43,12 @@ function formatColumnNames(value: string | null): string {
   return value;
 }
 
-type TFunc = (key: string) => string;
+type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {
     accessorKey: 'TABLE_NAME',
-    header: t('columns.TABLE_NAME'),
+    header: t('columns.TABLE_NAME', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string>();
       const color = TABLE_COLORS[val] ?? 'bg-slate-100 text-slate-600';
@@ -61,17 +61,17 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   },
   {
     accessorKey: 'PREV_RECORD_ID',
-    header: t('columns.PREV_RECORD_ID'),
+    header: t('columns.PREV_RECORD_ID', { lng: 'en' }),
     cell: ({ getValue }) => <RecordIdCell value={getValue<number | null>()} />,
   },
   {
     accessorKey: 'NEW_RECORD_ID',
-    header: t('columns.NEW_RECORD_ID'),
+    header: t('columns.NEW_RECORD_ID', { lng: 'en' }),
     cell: ({ getValue }) => <RecordIdCell value={getValue<number | null>()} />,
   },
   {
     accessorKey: 'OPERATION',
-    header: t('columns.OPERATION'),
+    header: t('columns.OPERATION', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string>();
       if (!val) return <span className="text-slate-400 text-xs">—</span>;
@@ -85,7 +85,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   },
   {
     accessorKey: 'COLUMN_NAME',
-    header: t('columns.COLUMN_NAME'),
+    header: t('columns.COLUMN_NAME', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-slate-700 whitespace-normal break-words max-w-[260px] inline-block">
         {formatColumnNames(getValue<string | null>())}
@@ -94,24 +94,24 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   },
   {
     accessorKey: 'REASON',
-    header: t('columns.REASON'),
+    header: t('columns.REASON', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700">{getValue<string>() || '—'}</span>
     ),
   },
   {
     accessorKey: 'CHANGED_BY',
-    header: t('columns.CHANGED_BY'),
+    header: t('columns.CHANGED_BY', { lng: 'en' }),
     cell: ({ row }) => <UserCell user={row.original.changedByUser} />,
   },
   {
     accessorKey: 'APPROVED_BY',
-    header: t('columns.APPROVED_BY'),
+    header: t('columns.APPROVED_BY', { lng: 'en' }),
     cell: ({ row }) => <UserCell user={row.original.approvedByUser} />,
   },
   {
     accessorKey: 'APPROVAL_DATE',
-    header: t('columns.APPROVAL_DATE'),
+    header: t('columns.APPROVAL_DATE', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val
@@ -121,7 +121,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   },
   {
     accessorKey: 'CREATED_AT',
-    header: t('columns.CREATED_AT'),
+    header: t('columns.CREATED_AT', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700">{formatDate(getValue<string | null>())}</span>
     ),

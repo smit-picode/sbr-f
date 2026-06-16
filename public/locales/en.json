@@ -427,6 +427,11 @@
       "columnAccess": "Column Access",
       "pipelineLogs": "Pipeline Logs",
       "activityLogs": "Activity Logs",
+      "ruleRegistryDesc": "Manage data quality and validation rules",
+      "columnAccessDesc": "Configure column-level access control per role",
+      "pipelineLogsDesc": "Monitor data pipeline execution and processing logs",
+      "activityLogsDesc": "Track user actions and system activity across the portal",
+      "nextPhase": "This feature will be implemented in the next phase",
       "usersDesc": "Onboard users, assign roles with optional expiry, and manage account lifecycle",
       "management": "Management"
     },

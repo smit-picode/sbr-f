@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, Globe, Pencil } from 'lucide-react';
 
-type TFunc = (key: string) => string;
+type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, canEdit = true): ColumnDef<SbrContact>[] => [
   {
     accessorKey: 'SBR_ID',
-    header: t('columns.SBR_ID'),
+    header: t('columns.SBR_ID', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
     ),
@@ -18,7 +18,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'CONTACT_NAME',
-    header: t('columns.CONTACT_NAME'),
+    header: t('columns.CONTACT_NAME', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="font-medium text-slate-800">{nullableText(getValue<string | null>())}</span>
     ),
@@ -26,7 +26,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'ROLE',
-    header: t('columns.ROLE'),
+    header: t('columns.ROLE', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? <Badge variant="secondary">{val}</Badge> : <span className="text-slate-400">—</span>;
@@ -34,7 +34,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'PHONE',
-    header: t('columns.PHONE'),
+    header: t('columns.PHONE', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -49,17 +49,17 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'MOBILE',
-    header: t('columns.MOBILE'),
+    header: t('columns.MOBILE', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'FAX',
-    header: t('columns.FAX'),
+    header: t('columns.FAX', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'EMAIL',
-    header: t('columns.EMAIL'),
+    header: t('columns.EMAIL', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -74,12 +74,12 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'PO_BOX',
-    header: t('columns.PO_BOX'),
+    header: t('columns.PO_BOX', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'WEBSITE',
-    header: t('columns.WEBSITE'),
+    header: t('columns.WEBSITE', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -96,7 +96,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'SOURCE_CODE',
-    header: t('columns.SOURCE_CODE'),
+    header: t('columns.SOURCE_CODE', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -108,7 +108,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'PRIORITY',
-    header: t('columns.PRIORITY'),
+    header: t('columns.PRIORITY', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
@@ -121,17 +121,17 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
   },
   {
     accessorKey: 'VALID_FROM',
-    header: t('columns.VALID_FROM'),
+    header: t('columns.VALID_FROM', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'VALID_TO',
-    header: t('columns.VALID_TO'),
+    header: t('columns.VALID_TO', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
   ...(canEdit ? [{
     id: 'actions',
-    header: t('columns.ACTIONS'),
+    header: t('columns.ACTIONS', { lng: 'en' }),
     cell: ({ row }: { row: { original: SbrContact } }) => (
       <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
         <Pencil className="h-3.5 w-3.5" />
