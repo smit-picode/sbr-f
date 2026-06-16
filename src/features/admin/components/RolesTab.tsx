@@ -489,6 +489,7 @@ export function RolesTab({
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
                 placeholder={t('admin.roles.roleNamePlaceholder')}
+                className="focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
               />
             </div>
           </div>
@@ -523,6 +524,7 @@ export function RolesTab({
                 id="edit-role-name"
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
+                className="focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
               />
             </div>
           </div>
