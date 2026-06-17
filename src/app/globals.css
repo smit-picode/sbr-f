@@ -24,7 +24,8 @@ body {
 /* In Arabic (RTL) mode, Noto Sans Arabic becomes the PRIMARY font for ALL text
    so Arabic + inline Latin render consistently — matches client website. LTR unaffected. */
 html[dir='rtl'] body {
-  font-family: var(--font-cairo), var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* font-family: var(--font-cairo), var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; */
+  font-family: var(--font-jakarta), var(--font-cairo), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Hide scrollbar for horizontal nav overflow */

@@ -4,8 +4,14 @@ import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/i18n';
 
-const Select = SelectPrimitive.Root;
+// Direction-aware Select root: in Arabic (RTL) the trigger/content flip correctly.
+// In English (LTR) this is identical to Radix's default. Explicit `dir` prop still wins.
+const Select = (props: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => {
+  const { dir } = useLanguage();
+  return <SelectPrimitive.Root dir={dir} {...props} />;
+};
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 

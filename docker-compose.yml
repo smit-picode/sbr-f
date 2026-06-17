@@ -1,0 +1,31 @@
+# =====================================================================
+# SBR Frontend — local development (for FRONTEND developers)
+# Runs the frontend from source with hot reload. The backend is reached
+# over a dev tunnel URL shared by a backend developer.
+#
+#   1. Get the backend dev-tunnel URL from a backend developer
+#   2. Put it in a .env file next to this one:
+#        BACKEND_URL=https://xxxx-3000.devtunnels.ms
+#   3. docker compose up
+#
+# Frontend -> http://localhost:7000
+# =====================================================================
+services:
+  frontend:
+    build:
+      context: .
+      target: dev
+    container_name: sbr-frontend
+    ports:
+      - "7000:7000"
+    environment:
+      # The backend dev-tunnel URL (falls back to localhost if running a
+      # backend yourself). The browser calls this URL directly.
+      - NEXT_PUBLIC_API_URL=${BACKEND_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules        # keep container's node_modules
+      - /app/.next               # keep container's build cache
+    command: npm run dev
+    restart: unless-stopped

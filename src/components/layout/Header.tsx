@@ -51,6 +51,8 @@ export function Header() {
           onClick={toggleLanguage}
           className="flex items-center gap-1.5 px-3 h-9 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
           title={isArabic ? 'Switch to English' : 'التبديل إلى العربية'}
+          // Render the Arabic label ("عربي") in Noto Sans Arabic; leave the English label untouched
+          style={!isArabic ? { fontFamily: 'var(--font-cairo), sans-serif' } : undefined}
         >
           {isArabic ? 'English' : 'عربي'}
         </button>
