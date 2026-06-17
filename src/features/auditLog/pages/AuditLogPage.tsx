@@ -144,7 +144,7 @@ export function AuditLogPage() {
                 className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                Reset
+                {t('filters.reset')}
               </Button>
             </div>
           );
