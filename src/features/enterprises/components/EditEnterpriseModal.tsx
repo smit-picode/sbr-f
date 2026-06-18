@@ -13,6 +13,7 @@ import { SECTOR_OPTIONS, EST_STATUS_OPTIONS } from '@/constants';
 import { useDebounce } from '@/hooks';
 import { toast } from '@/utils/toast';
 import { nullableText } from '@/utils/format';
+import { CommentDialog } from '@/components/common/CommentDialog';
 import { Building2, X, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { SbrEnterprise, EnterpriseEstablishment, SbrLegalUnit } from '@/types';
@@ -40,6 +41,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const [removed, setRemoved] = useState<Set<number>>(new Set());
   const [added, setAdded] = useState<EstabRow[]>([]);
   const [search, setSearch] = useState('');
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
@@ -96,11 +98,15 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     setSearch('');
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!hasChanges) {
       toast.info('No changes detected.');
       return;
     }
+    setShowCommentDialog(true);
+  };
+
+  const handleConfirmWithComment = async (comment: string) => {
     try {
       await updateEnterprise({
         enterpriseId: enterprise.ENTERPRISE_ID,
@@ -110,9 +116,11 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           STATUS: status,
           addEstablishmentSbrIds: added.map((a) => a.SBR_ID),
           removeEstablishmentSbrIds: Array.from(removed),
+          comment,
         },
       }).unwrap();
       toast.success('Enterprise updated successfully!');
+      setShowCommentDialog(false);
       onClose();
     } catch {
       toast.error('Failed to update enterprise. Please try again.');
@@ -120,6 +128,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -249,5 +258,13 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <CommentDialog
+      open={showCommentDialog}
+      isLoading={isLoading}
+      onConfirm={handleConfirmWithComment}
+      onCancel={() => setShowCommentDialog(false)}
+    />
+    </>
   );
 }

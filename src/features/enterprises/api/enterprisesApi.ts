@@ -7,6 +7,7 @@ export interface UpdateEnterprisePayload {
   STATUS?: string;
   addEstablishmentSbrIds?: number[];
   removeEstablishmentSbrIds?: number[];
+  comment?: string;
 }
 
 export const enterprisesApi = baseApi.injectEndpoints({
