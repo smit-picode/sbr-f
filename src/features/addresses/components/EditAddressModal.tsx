@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ADDRESS_FIELD_LABELS,
   ADDRESS_SOURCE_CODE_OPTIONS,
+  isAddressFieldEditable,
 } from '../constants';
 
 interface Props {
@@ -169,8 +170,13 @@ export function EditAddressModal({ address, open, onClose }: Props) {
 
   const handleConfirmWithComment = async (comment: string) => {
     if (!address) return;
+    // Only send user-editable fields — SOURCE_CODE is not editable and is rejected
+    // by the backend, so it must never be included in the payload.
+    const editableData = Object.fromEntries(
+      Object.entries(form).filter(([key]) => isAddressFieldEditable(key))
+    );
     try {
-      await updateAddress({ id: address.ID, data: { ...form, comment: comment } }).unwrap();
+      await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
       toast.success('Address updated successfully!');
       setShowCommentDialog(false);
       onClose();
@@ -267,8 +273,9 @@ export function EditAddressModal({ address, open, onClose }: Props) {
             <Select
               value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
               onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
+              disabled={!isAddressFieldEditable('SOURCE_CODE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isAddressFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>

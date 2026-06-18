@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { Pencil, Eye, EyeOff, RefreshCw, Search, Info } from 'lucide-react';
+import { Pencil, Eye, EyeOff, RefreshCw, Search } from 'lucide-react';
 import {
   useGetUsersListQuery,
   useCreateUserMutation,
@@ -300,16 +300,7 @@ export function UsersTab({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <Label htmlFor="user-scope">{t('admin.users.regulatorScopeLabel')}</Label>
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-slate-400 cursor-help shrink-0" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-[200px] text-center text-xs">
-                  This feature will be implemented in the next phase
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <InfoTooltip content="This feature will be implemented in the next phase" />
           </div>
           <Select value={form.SCOPE} onValueChange={(v) => setForm(p => ({ ...p, SCOPE: v }))} disabled>
             <SelectTrigger id="user-scope" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
@@ -330,16 +321,7 @@ export function UsersTab({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <Label htmlFor="user-status">{t('admin.users.statusLabel')}</Label>
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-slate-400 cursor-help shrink-0" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-[200px] text-center text-xs">
-                  This feature will be implemented in the next phase
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <InfoTooltip content="This feature will be implemented in the next phase" />
           </div>
           <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
             <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
@@ -356,16 +338,7 @@ export function UsersTab({
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <p className="text-sm font-semibold text-slate-800">{t('admin.users.assignedRolesLabel')}</p>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-3.5 w-3.5 text-slate-400 cursor-help shrink-0" />
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[220px] text-center text-xs">
-                Role expiry and multiple-role assignment will be implemented in the next phase
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <InfoTooltip content="Role expiry and multiple-role assignment will be implemented in the next phase" contentClassName="max-w-[220px]" />
         </div>
         <p className="text-xs text-slate-500">{t('admin.users.assignedRolesHint')}</p>
         <div className="space-y-2 pt-1 max-h-64 overflow-y-auto pr-1">

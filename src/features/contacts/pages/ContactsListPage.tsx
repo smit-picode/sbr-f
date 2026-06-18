@@ -97,7 +97,7 @@ export function ContactsListPage() {
         isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}
-        limit={filters.limit ?? 20}
+        limit={filters.limit ?? 10}
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}

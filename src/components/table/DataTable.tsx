@@ -39,6 +39,7 @@ interface DataTableProps<TData, TValue> {
   onLimitChange: (limit: number) => void;
   onSortChange?: (field: string, order: 'asc' | 'desc') => void;
   stickyFirstColumn?: boolean;
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -53,6 +54,7 @@ export function DataTable<TData, TValue>({
   onPageChange,
   onLimitChange,
   stickyFirstColumn,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -124,13 +126,17 @@ export function DataTable<TData, TValue>({
               <TableLoader rows={limit} cols={colCount} />
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                  className={cn(onRowClick && 'cursor-pointer')}
+                >
                   {row.getVisibleCells().map((cell, colIndex) => {
                     const isSticky = stickyFirstColumn && colIndex === 0;
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && 'sticky start-0 z-10 bg-white')}
+                      className={cn(isSticky && 'sticky start-0 z-10 bg-white', onRowClick && 'group-hover:bg-slate-50')}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

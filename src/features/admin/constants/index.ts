@@ -17,7 +17,7 @@ export const ADMIN_MAX_LENGTHS: Record<string, number> = {
 
 export const ADMIN_DEFAULT_FILTERS: { page: number; limit: number; search: string } = {
   page: 1,
-  limit: 20,
+  limit: 10,
   search: '',
 };
 

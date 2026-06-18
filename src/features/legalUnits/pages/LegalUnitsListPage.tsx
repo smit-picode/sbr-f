@@ -33,6 +33,15 @@ export function LegalUnitsListPage() {
   const [editTarget, setEditTarget] = useState<SbrLegalUnit | null>(null);
   const { t } = useTranslation();
 
+  // Deep-link support: a `?search=` param (e.g. from the Enterprise detail "open
+  // establishment" action) seeds the search filter once on mount.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const initialSearch = new URLSearchParams(window.location.search).get('search');
+    if (initialSearch) setFilters((prev) => ({ ...prev, search: initialSearch, page: 1 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -149,7 +158,7 @@ export function LegalUnitsListPage() {
         isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}
-        limit={filters.limit ?? 20}
+        limit={filters.limit ?? 10}
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}

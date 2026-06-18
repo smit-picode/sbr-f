@@ -61,7 +61,7 @@ export const LEGAL_UNITS_MAX_LENGTHS: Record<string, number> = {
 
 export const LEGAL_UNITS_DEFAULT_FILTERS = {
   page: 1,
-  limit: 20,
+  limit: 10,
   search: '',
   estStatus: '',
   sectorId: '',
@@ -69,3 +69,18 @@ export const LEGAL_UNITS_DEFAULT_FILTERS = {
   sourceCode: '',
   mainBranchFLG: '',
 } as const;
+
+// Fields that are LOCKED (not user-editable). Everything else is editable.
+// These map to the "Is Editable = false" variables: identifiers, regulator IDs,
+// main regulator (SOURCE_CODE), all CR/CP/registration dates, and the branch flag.
+export const LEGAL_UNIT_LOCKED_FIELDS: string[] = [
+  'MOCI_ORG_ID',      // Organisation ID
+  'SOURCE_CODE',      // Main Regulator
+  'MOCI_CR_NUM',      // Commercial Registration ID (CR)
+  'MOCI_CP_NUM',      // Commercial Permit ID (CP)
+  'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CR_CANCEL_DATE',
+  'CP_ISSUE_DATE', 'CP_END_DATE', 'CP_CANCEL_DATE',
+  'REG_DATE', 'REG_EXPIRY_DATE', 'REG_CANCEL_DATE',
+  'MAIN_BRANCH_FLG',  // Branch Flag
+];
+export const isLegalUnitFieldEditable = (field: string): boolean => !LEGAL_UNIT_LOCKED_FIELDS.includes(field);

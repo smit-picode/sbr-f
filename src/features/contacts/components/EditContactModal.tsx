@@ -15,6 +15,7 @@ import {
   CONTACT_FIELD_LABELS,
   CONTACT_ROLE_OPTIONS,
   CONTACT_SOURCE_CODE_OPTIONS,
+  isContactFieldEditable,
 } from '../constants';
 
 interface Props {
@@ -174,8 +175,13 @@ export function EditContactModal({ contact, open, onClose }: Props) {
 
   const handleConfirmWithComment = async (comment: string) => {
     if (!contact) return;
+    // Only send user-editable fields — ROLE / SOURCE_CODE are not editable and are
+    // rejected by the backend, so they must never be included in the payload.
+    const editableData = Object.fromEntries(
+      Object.entries(form).filter(([key]) => isContactFieldEditable(key))
+    );
     try {
-      await updateContact({ id: contact.ID, data: { ...form, comment } }).unwrap();
+      await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
       toast.success('Contact updated successfully!');
       setShowCommentDialog(false);
       onClose();
@@ -257,8 +263,9 @@ export function EditContactModal({ contact, open, onClose }: Props) {
             <Select
               value={form.ROLE ? String(form.ROLE) : '__none__'}
               onValueChange={(v) => handleChange('ROLE', v === '__none__' ? '' : v)}
+              disabled={!isContactFieldEditable('ROLE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''} ${!isContactFieldEditable('ROLE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -275,8 +282,9 @@ export function EditContactModal({ contact, open, onClose }: Props) {
             <Select
               value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
               onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
+              disabled={!isContactFieldEditable('SOURCE_CODE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isContactFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>

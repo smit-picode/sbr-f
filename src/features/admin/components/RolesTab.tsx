@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Pencil, ShieldCheck, Info, Check } from 'lucide-react';
+import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import {
   adminApi,
@@ -500,12 +501,7 @@ export function RolesTab({
                       ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
                       : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
                   </span>
-                  <div className="relative group/scopetip flex items-center">
-                    <Info className="h-3 w-3 text-slate-400 cursor-help" />
-                    <div className="pointer-events-none absolute bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-1.5 w-max max-w-[220px] rounded bg-slate-800 px-2.5 py-1.5 text-[11px] text-white shadow-lg opacity-0 group-hover/scopetip:opacity-100 transition-opacity z-50 whitespace-normal text-center">
-                      This feature will be implemented in the next phase.
-                    </div>
-                  </div>
+                  <InfoTooltip content="This feature will be implemented in the next phase." iconClassName="h-3 w-3" contentClassName="max-w-[220px]" />
                 </div>
               </div>
               <div className="ms-auto flex items-center gap-3">
@@ -571,12 +567,7 @@ export function RolesTab({
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <Label>Category</Label>
-                <div className="relative group/cattip flex items-center">
-                  <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                  <div className="pointer-events-none absolute bottom-full start-1/2 -translate-x-1/2 mb-1.5 w-max max-w-[220px] rounded bg-slate-800 px-2.5 py-1.5 text-[11px] text-white shadow-lg opacity-0 group-hover/cattip:opacity-100 transition-opacity z-50 whitespace-normal text-center">
-                    This feature will be implemented in the next phase.
-                  </div>
-                </div>
+                <InfoTooltip content="This feature will be implemented in the next phase." contentClassName="max-w-[220px]" />
               </div>
               <div className="relative">
                 <select

@@ -50,14 +50,14 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
     header: t('columns.NAME_ENU', { lng: 'en' }),
     cell: ({ getValue, row }) => {
       const nameEnu = getValue<string | null>();
-      const nameAra = row.original.NAME_ARA;
-      const showAra = nameAra && nameAra.trim() !== nameEnu?.trim();
+      const npcNameAra = row.original.NPC_NAME_ARA;
+      const showAra = npcNameAra && npcNameAra.trim() !== nameEnu?.trim();
       return (
         <div className="min-w-[280px]">
           <p className="font-medium text-slate-800 text-sm leading-snug">{nullableText(nameEnu)}</p>
           {showAra && (
-            <p className="text-xs text-slate-400 mt-0.5 leading-snug truncate max-w-[260px]" lang="ar" title={nameAra}>
-              {nameAra}
+            <p className="text-xs text-slate-400 mt-0.5 leading-snug truncate max-w-[260px]" lang="ar" title={npcNameAra}>
+              {npcNameAra}
             </p>
           )}
         </div>
@@ -124,7 +124,7 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
   {
     accessorKey: 'EST_STATUS',
     header: t('columns.EST_STATUS', { lng: 'en' }),
-    cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} />,
+    cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" />,
     enableSorting: true,
   },
   {
@@ -159,7 +159,7 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
     header: t('columns.SECTOR_ID', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
-      return val ? <Badge variant="secondary">{val}</Badge> : <span className="text-slate-400">—</span>;
+      return val ? <Badge variant="secondary" className="rounded-md">{val}</Badge> : <span className="text-slate-400">—</span>;
     },
   },
   {
@@ -185,7 +185,7 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val === 'MAIN' ? (
-        <Badge className="rounded bg-[#A71D3A] text-white font-bold">MAIN</Badge>
+        <Badge className="rounded-md bg-[#A71D3A] text-white font-bold">MAIN</Badge>
       ) : val ? (
         <span className="text-xs text-slate-600">{val}</span>
       ) : (

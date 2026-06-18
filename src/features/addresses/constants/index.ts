@@ -17,9 +17,17 @@ export const ADDRESS_FIELD_LABELS: Record<string, string> = {
 // Enum Options from backend
 export const ADDRESS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QSTP', 'KRMA_QID', 'KRMA_OWNER', 'KRMA_ELEC', 'LEGACY_SBR'];
 
+// Fields the user is allowed to edit (per the "Is Editable" spec).
+// SOURCE_CODE (Contact Source) and identifiers/metadata are read-only / disabled.
+export const ADDRESS_EDITABLE_FIELDS: string[] = [
+  'MUNICIPALITY_ID', 'ZONE', 'STREET', 'BUILDING_NO', 'UNIT_NO', 'FLOOR_NO',
+  'QARS', 'ELECTRICITY_NO', 'LONGITUDE', 'LATITUDE', 'PRIORITY',
+];
+export const isAddressFieldEditable = (field: string): boolean => ADDRESS_EDITABLE_FIELDS.includes(field);
+
 export const ADDRESS_DEFAULT_FILTERS = {
   page: 1,
-  limit: 20,
+  limit: 10,
   search: '',
   municipalityId: '',
   sourceCode: '',

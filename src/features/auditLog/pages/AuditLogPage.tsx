@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { usePermission } from '@/hooks';
 
-const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 20 };
+const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 10 };
 
 const TABLE_OPTIONS = [
   { label: 'All Tables', value: '__all__' },
@@ -160,7 +160,7 @@ export function AuditLogPage() {
         isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}
-        limit={filters.limit ?? 20}
+        limit={filters.limit ?? 10}
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}

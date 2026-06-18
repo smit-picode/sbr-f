@@ -4,7 +4,7 @@ export * from './navigation';
 export const APP_NAME = 'SBR Portal';
 export const APP_DESCRIPTION = 'Statistical Business Register - NPC Qatar';
 
-export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_PAGE_SIZE = 10;
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 export const EST_STATUS_OPTIONS = [

@@ -18,6 +18,7 @@ import {
   MAIN_BRANCH_FLG_OPTIONS,
   LEGAL_UNITS_SOURCE_CODE_OPTIONS,
   LEGAL_UNITS_MAX_LENGTHS,
+  isLegalUnitFieldEditable,
 } from '../constants';
 
 interface Props {
@@ -159,7 +160,11 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
     }
   }, [frame]);
 
+  // Whether a field is user-editable (per the "Is Editable" spec)
+  const ed = (field: string): boolean => isLegalUnitFieldEditable(field);
+
   const set = (field: keyof FormState, value: string | number | null) => {
+    if (!ed(field as string)) return; // locked field — ignore edits
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field as string]) setErrors((e) => { const n = { ...e }; delete n[field as string]; return n; });
   };
@@ -228,9 +233,12 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
   };
 
   const err = (f: string) => errors[f];
-  const inp = (f: string) => err(f)
-    ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-    : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
+  const inp = (f: string) => {
+    if (!ed(f)) return 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none';
+    return err(f)
+      ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
+      : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
+  };
 
   const handleSubmit = () => {
     if (!frame) return;
@@ -241,8 +249,12 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
 
   const handleConfirmWithComment = async (comment: string) => {
     if (!frame) return;
+    // Only send user-editable fields — locked fields are rejected by the backend.
+    const editableData = Object.fromEntries(
+      Object.entries(form).filter(([key]) => ed(key))
+    );
     try {
-      await updateLegalUnit({ id: frame.ID, data: { ...form, comment } }).unwrap();
+      await updateLegalUnit({ id: frame.ID, data: { ...editableData, comment } }).unwrap();
       toast.success('Legal unit updated successfully!');
       setShowCommentDialog(false);
       onClose();
@@ -429,8 +441,8 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_FLG">
             <Label>{t('editLegalUnit.fields.mainBranchFlg', { lng: 'en' })}</Label>
-            <Select value={sel('MAIN_BRANCH_FLG') || '__none__'} onValueChange={(v) => set('MAIN_BRANCH_FLG', v === '__none__' ? '' : v)}>
-              <SelectTrigger className={`w-full shadow-none ${err('MAIN_BRANCH_FLG') ? 'border-red-400' : ''}`}>
+            <Select value={sel('MAIN_BRANCH_FLG') || '__none__'} onValueChange={(v) => set('MAIN_BRANCH_FLG', v === '__none__' ? '' : v)} disabled={!ed('MAIN_BRANCH_FLG')}>
+              <SelectTrigger className={`w-full shadow-none ${err('MAIN_BRANCH_FLG') ? 'border-red-400' : ''} ${!ed('MAIN_BRANCH_FLG') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -468,8 +480,8 @@ export function EditLegalUnitModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1">
             <Label>{t('editLegalUnit.fields.sourceCode', { lng: 'en' })}</Label>
-            <Select value={sel('SOURCE_CODE') || '__none__'} onValueChange={(v) => set('SOURCE_CODE', v === '__none__' ? '' : v)}>
-              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''}`}>
+            <Select value={sel('SOURCE_CODE') || '__none__'} onValueChange={(v) => set('SOURCE_CODE', v === '__none__' ? '' : v)} disabled={!ed('SOURCE_CODE')}>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!ed('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>

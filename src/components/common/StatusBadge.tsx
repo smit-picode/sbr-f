@@ -2,9 +2,10 @@ import { Badge } from '@/components/ui/badge';
 
 interface StatusBadgeProps {
   status: string | null | undefined;
+  className?: string;
 }
 
-export function StatusBadge({ status }: StatusBadgeProps) {
+export function StatusBadge({ status, className }: StatusBadgeProps) {
   if (!status) return <span className="text-slate-400 text-xs">—</span>;
 
   const variant =
@@ -14,5 +15,5 @@ export function StatusBadge({ status }: StatusBadgeProps) {
         ? 'destructive'
         : 'secondary';
 
-  return <Badge variant={variant}>{status}</Badge>;
+  return <Badge variant={variant} className={className}>{status}</Badge>;
 }

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useTranslation } from 'react-i18next';
 
 interface ColumnToggleProps<TData> {
   table: Table<TData>;
@@ -21,6 +22,7 @@ function columnLabel(id: string, header: unknown): string {
 
 export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
   const [query, setQuery] = useState('');
+  const { t } = useTranslation();
 
   const leafColumns = table.getAllLeafColumns().filter((c) => c.id !== 'actions');
   const total = leafColumns.length;
@@ -45,7 +47,7 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 px-3 h-9 rounded-md border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
           <Columns3 className="h-3.5 w-3.5" />
-          Columns
+          {t('columnsToggle.columns')}
           <span className="text-[10px] font-bold rounded px-1.5 py-0.5 bg-[#A71D3A]/10 text-[#A71D3A]">
             {visible}/{total}
           </span>
@@ -60,7 +62,7 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              placeholder="Find a column..."
+              placeholder={t('columnsToggle.findColumn')}
               className="h-8 w-full rounded-md border border-slate-200 ps-8 pe-2.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
             />
           </div>
@@ -69,17 +71,17 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
         {/* Show all / Hide all */}
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-100 text-[11px]">
           <button onClick={showAll} className="font-semibold text-[#A71D3A] hover:underline">
-            Show all
+            {t('columnsToggle.showAll')}
           </button>
           <button onClick={hideAll} className="font-semibold text-slate-500 hover:underline">
-            Hide all
+            {t('columnsToggle.hideAll')}
           </button>
         </div>
 
         {/* Column list */}
         <div className="max-h-72 overflow-y-auto py-1">
           {filtered.length === 0 ? (
-            <p className="px-3 py-4 text-center text-xs text-slate-400">No columns found</p>
+            <p className="px-3 py-4 text-center text-xs text-slate-400">{t('columnsToggle.noColumns')}</p>
           ) : (
             filtered.map((column) => (
               <label
