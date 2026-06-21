@@ -52,6 +52,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
           { key: 'admin_panel.permissions.view',        label: 'View Permissions' },
           { key: 'admin_panel.permissions.view_detail', label: 'View Permission Detail' },
           { key: 'admin_panel.permissions.edit',        label: 'Edit Permissions' },
+          { key: 'admin_panel.permissions.search',      label: 'Search Permissions' },
         ],
       },
       {

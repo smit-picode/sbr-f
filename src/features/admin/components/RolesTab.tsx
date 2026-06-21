@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Pencil, ShieldCheck, Info, Check } from 'lucide-react';
 import { InfoTooltip } from '@/components/common/InfoTooltip';
+import { SearchInput } from '@/components/common/SearchInput';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import {
   adminApi,
@@ -262,6 +263,7 @@ export function RolesTab({
   const [isCreateOpen, setIsCreateOpen]   = useState(false);
   const [editTarget, setEditTarget]       = useState<SbrRole | null>(null);
   const [form, setForm]                   = useState({ ROLE_NAME: '' });
+  const [permSearch, setPermSearch]       = useState('');
 
   // ── permission gate ──
   const dispatch    = useAppDispatch();
@@ -272,6 +274,8 @@ export function RolesTab({
     ['admin_panel.roles.edit', 'admin_panel.roles.view', 'admin_panel.permissions.view']
       .includes(p.permissionName ?? '')
   );
+  // Whether the current user may use the permission search bar
+  const canSearchPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.search');
 
   // ── queries ──
   const { data: rolesData, isLoading: isRolesLoading } = useGetRolesListQuery(
@@ -295,6 +299,14 @@ export function RolesTab({
   const roles          = rolesData?.data ?? [];
   const allPermissions = permData?.data  ?? [];
   const permTree       = buildTree(allPermissions);
+
+  // Search filter for the permission list (matches by label or permission key)
+  const permSearchQuery   = permSearch.trim().toLowerCase();
+  const filteredPermEntries = permSearchQuery
+    ? flatLeafEntries(permTree).filter(e =>
+        e.label.toLowerCase().includes(permSearchQuery) ||
+        e.perm.PERMISSION_NAME.toLowerCase().includes(permSearchQuery))
+    : [];
 
   // Pre-fetch all role permissions so counts are visible upfront in the sidebar
   useEffect(() => {
@@ -523,10 +535,38 @@ export function RolesTab({
               </div>
             </div>
 
+            {/* ── Search permissions (gated by admin_panel.permissions.search) ── */}
+            {allPermissions.length > 0 && canSearchPerms && (
+              <SearchInput
+                value={permSearch}
+                onChange={(v) => setPermSearch(v)}
+                placeholder={t('admin.roles.searchPermissions', { defaultValue: 'Search permissions...' })}
+                className="!w-full shadow-none"
+              />
+            )}
+
             {/* ── Permission groups — each a separate card ── */}
             {allPermissions.length === 0 ? (
               <div className="rounded-xl border border-slate-200 bg-white px-4 py-16 text-center text-sm text-slate-400">
                 {t('admin.roles.noPermissionsAssigned')}
+              </div>
+            ) : (canSearchPerms && permSearchQuery) ? (
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2.5">
+                  {t('admin.roles.searchResults', { defaultValue: 'Search results' })}
+                </h3>
+                {filteredPermEntries.length > 0 ? (
+                  <PermissionGrid
+                    entries={filteredPermEntries}
+                    grantedIds={grantedIds}
+                    onToggle={handleToggle}
+                    canEdit={canEditPermissions}
+                  />
+                ) : (
+                  <p className="py-8 text-center text-sm text-slate-400">
+                    {t('admin.roles.noPermissionsFound', { defaultValue: 'No permissions found' })}
+                  </p>
+                )}
               </div>
             ) : (
               permTree.map(treeNode => (

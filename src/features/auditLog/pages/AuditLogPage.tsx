@@ -23,6 +23,7 @@ const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 10 };
 const TABLE_OPTIONS = [
   { label: 'All Tables', value: '__all__' },
   { label: 'SBR_LEGAL_UNITS', value: 'SBR_LEGAL_UNITS' },
+  { label: 'SBR_ENTERPRISES', value: 'SBR_ENTERPRISES' },
   { label: 'SBR_CONTACTS', value: 'SBR_CONTACTS' },
   { label: 'SBR_ADDRESSES', value: 'SBR_ADDRESSES' },
 ];

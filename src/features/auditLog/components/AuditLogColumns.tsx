@@ -4,6 +4,7 @@ import { formatDate } from '@/utils/format';
 
 const TABLE_COLORS: Record<string, string> = {
   SBR_LEGAL_UNITS: 'bg-[#F3DEE4] text-[#A71D3A]',
+  SBR_ENTERPRISES: 'bg-amber-100 text-amber-700',
   SBR_CONTACTS:    'bg-green-100 text-green-700',
   SBR_ADDRESSES:   'bg-purple-100 text-purple-700',
 };
