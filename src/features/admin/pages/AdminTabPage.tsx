@@ -102,6 +102,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
 
   const canEditUsers = isSuperAdmin || hasPermission('admin_panel.users.edit');
   const canEditRoles = isSuperAdmin || hasPermission('admin_panel.roles.edit');
+  const canCreateRoles = isSuperAdmin || hasPermission('admin_panel.roles.create');
 
   return (
     <PageContainer>
@@ -117,7 +118,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
             >
               <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
             </Button>
-          ) : tab === 'roles' && canEditRoles ? (
+          ) : tab === 'roles' && canCreateRoles ? (
             <Button
               onClick={() => rolesOpenCreate.current?.()}
               style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
@@ -148,6 +149,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           {tab === 'roles' && (
             <RolesTab
               canEdit={canEditRoles}
+              canCreate={canCreateRoles}
               canViewDetail={isSuperAdmin || hasPermission('admin_panel.roles.view_detail')}
               onRegisterCreate={(fn) => { rolesOpenCreate.current = fn; }}
             />

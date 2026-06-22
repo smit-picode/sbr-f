@@ -248,9 +248,11 @@ function RolesTabSkeleton() {
 
 export function RolesTab({
   canEdit = false,
+  canCreate = false,
   onRegisterCreate,
 }: {
   canEdit?: boolean;
+  canCreate?: boolean;
   canViewDetail?: boolean;
   onRegisterCreate?: (fn: () => void) => void;
 }) {
@@ -330,13 +332,13 @@ export function RolesTab({
     }, {}),
   );
 
-  // Register the "open create dialog" callback with the parent page header
+  // Register the "open create dialog" callback with the parent page header (gated by the create permission)
   useEffect(() => {
-    if (canEdit && onRegisterCreate) {
+    if (canCreate && onRegisterCreate) {
       onRegisterCreate(() => { setForm({ ROLE_NAME: '' }); setIsCreateOpen(true); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canEdit, onRegisterCreate]);
+  }, [canCreate, onRegisterCreate]);
 
   // Auto-select first role on load
   useEffect(() => {

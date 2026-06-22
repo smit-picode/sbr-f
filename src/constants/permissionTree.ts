@@ -75,6 +75,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
           { key: 'admin_panel.roles.view',        label: 'View Roles' },
           { key: 'admin_panel.roles.view_detail', label: 'View Role Detail' },
           { key: 'admin_panel.roles.edit',        label: 'Edit Roles' },
+          { key: 'admin_panel.roles.create',      label: 'Add Role' },
         ],
       },
       {
