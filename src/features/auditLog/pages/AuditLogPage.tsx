@@ -44,9 +44,20 @@ export function AuditLogPage() {
     setFilters((prev) => ({ ...prev, recordId: val && val > 0 ? val : undefined, page: 1 }));
   }, [debouncedRecordId]);
 
-  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
-    refetchOnMountOrArgChange: true,
-  });
+  const { canSearch } = usePermission('audit_log');
+
+  const queryParams = cleanParams(filters);
+  // Filtering requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
+  // Without an active filter the call only declares audit_log.view.
+  const hasActiveFilters = !!filters.tableName || !!filters.recordId;
+  const declaredPermission = hasActiveFilters
+    ? 'audit_log.view,audit_log.search'
+    : 'audit_log.view';
+
+  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(
+    { ...queryParams, _permission: declaredPermission },
+    { refetchOnMountOrArgChange: true },
+  );
 
   const isValidationError = isError && is400(error);
 
@@ -97,62 +108,64 @@ export function AuditLogPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
-        <Select
-          value={filters.tableName ?? '__all__'}
-          onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
-        >
-          <SelectTrigger className="w-44 shadow-none">
-            <SelectValue placeholder={t('filters.allTables')} />
-          </SelectTrigger>
-          <SelectContent>
-            {TABLE_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {canSearch && (
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+          <Select
+            value={filters.tableName ?? '__all__'}
+            onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
+          >
+            <SelectTrigger className="w-44 shadow-none">
+              <SelectValue placeholder={t('filters.allTables')} />
+            </SelectTrigger>
+            <SelectContent>
+              {TABLE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Input
-          type="number"
-          placeholder={t('filters.filterByRecordId')}
-          className="w-48 shadow-none"
-          min="1"
-          value={recordIdInput}
-          onKeyDown={(e) => {
-            if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
-          }}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val !== '' && Number(val) <= 0) {
-              toast.warning('Record ID must be greater than 0.');
-              return;
-            }
-            setRecordIdInput(val);
-          }}
-        />
+          <Input
+            type="number"
+            placeholder={t('filters.filterByRecordId')}
+            className="w-48 shadow-none"
+            min="1"
+            value={recordIdInput}
+            onKeyDown={(e) => {
+              if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+            }}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val !== '' && Number(val) <= 0) {
+                toast.warning('Record ID must be greater than 0.');
+                return;
+              }
+              setRecordIdInput(val);
+            }}
+          />
 
-        {(() => {
-          const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS);
-          return (
-            <div className={isDefault ? 'cursor-not-allowed' : undefined}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); }}
-                disabled={isDefault}
-                className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                {t('filters.reset')}
-              </Button>
-            </div>
-          );
-        })()}
-      </div>
+          {(() => {
+            const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS);
+            return (
+              <div className={isDefault ? 'cursor-not-allowed' : undefined}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); }}
+                  disabled={isDefault}
+                  className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {t('filters.reset')}
+                </Button>
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
-      <FilterChips chips={activeChips} onClearAll={clearAllAudit} />
+      {canSearch && <FilterChips chips={activeChips} onClearAll={clearAllAudit} />}
 
       <DataTable
         columns={getAuditLogColumns(t)}

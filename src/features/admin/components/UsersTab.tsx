@@ -73,10 +73,12 @@ const EMPTY_FORM = { NAME: '', EMAIL: '', PASSWORD: '', IS_ACTIVE: 'Y', SCOPE: N
 export function UsersTab({
   canEdit = false,
   canViewDetail = false,
+  canSearch = false,
   onRegisterCreate,
 }: {
   canEdit?: boolean;
   canViewDetail?: boolean;
+  canSearch?: boolean;
   onRegisterCreate?: (fn: () => void) => void;
 }) {
   const { t } = useTranslation();
@@ -114,8 +116,15 @@ export function UsersTab({
   // Debounce only the text search — typing no longer fires an API call per keystroke
   const debouncedSearch = useDebounce(filters.search, 500);
 
+  const queryParams = cleanParams({ ...filters, search: debouncedSearch });
+  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
+  // Without an active search the call only declares admin_panel.users.view.
+  const declaredPermission = queryParams.search
+    ? 'admin_panel.users.view,admin_panel.users.search'
+    : 'admin_panel.users.view';
+
   const { data, isLoading } = useGetUsersListQuery(
-    cleanParams({ ...filters, search: debouncedSearch }),
+    { ...queryParams, _permission: declaredPermission },
     { skip: isCreateOpen }
   );
   // Roles + scopes are only needed for the create/edit dialogs — skip if user can't edit
@@ -354,28 +363,32 @@ export function UsersTab({
 
   return (
     <>
-      {/* Card 1 — Search bar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-          <Input
-            placeholder={t('admin.users.searchPlaceholder')}
-            value={filters.search}
-            onChange={(e) => setFilters(p => ({ ...p, search: e.target.value, page: 1 }))}
-            className="pl-9 w-80 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
-            autoComplete="off"
-          />
-        </div>
-      </div>
+      {/* Card 1 — Search bar (gated by admin_panel.users.search) */}
+      {canSearch && (
+        <>
+          <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              <Input
+                placeholder={t('admin.users.searchPlaceholder')}
+                value={filters.search}
+                onChange={(e) => setFilters(p => ({ ...p, search: e.target.value, page: 1 }))}
+                className="pl-9 w-80 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                autoComplete="off"
+              />
+            </div>
+          </div>
 
-      <FilterChips
-        chips={filters.search ? [{
-          key: 'search',
-          label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
-          onRemove: () => setFilters(p => ({ ...p, search: '', page: 1 })),
-        } as FilterChip] : []}
-        onClearAll={() => setFilters(p => ({ ...p, search: '', page: 1 }))}
-      />
+          <FilterChips
+            chips={filters.search ? [{
+              key: 'search',
+              label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+              onRemove: () => setFilters(p => ({ ...p, search: '', page: 1 })),
+            } as FilterChip] : []}
+            onClearAll={() => setFilters(p => ({ ...p, search: '', page: 1 }))}
+          />
+        </>
+      )}
 
       {/* Card 2 — Table */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">

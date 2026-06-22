@@ -140,6 +140,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
             <UsersTab
               canEdit={canEditUsers}
               canViewDetail={isSuperAdmin || hasPermission('admin_panel.users.view_detail')}
+              canSearch={isSuperAdmin || hasPermission('admin_panel.users.search')}
               onRegisterCreate={(fn) => { usersOpenCreate.current = fn; }}
             />
           )}

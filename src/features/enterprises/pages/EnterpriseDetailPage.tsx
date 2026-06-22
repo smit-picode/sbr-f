@@ -20,6 +20,7 @@ import type {
   SbrLegalUnit,
 } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
+import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import {
   ChevronLeft, ChevronRight, Target, Briefcase, Building2, Users, MapPin,
@@ -228,7 +229,23 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
   const { isArabic } = useLanguage();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
-  const { data, isLoading, isError, refetch } = useGetEnterpriseByIdQuery(enterpriseId);
+  const { canEdit, canViewDetail } = usePermission('enterprises');
+  // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
+  const canOpenDetail = canViewDetail || canEdit;
+  const { data, isLoading, isError, refetch } = useGetEnterpriseByIdQuery(enterpriseId, { skip: !canOpenDetail });
+
+  if (!canOpenDetail) {
+    return (
+      <PageContainer>
+        <button onClick={() => router.push('/enterprises')} className="mb-3 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
+          {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('enterpriseDetail.allEnterprises')}
+        </button>
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-8 text-center">
+          <p className="text-sm text-slate-500">{t('admin.panel.accessDeniedDesc')}</p>
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -274,9 +291,11 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
               <h1 className="mt-2 text-2xl font-bold">{nullableText(enterprise.NAME_ENU)}</h1>
               {enterprise.MAIN_CR && <p className="text-sm text-white/80">CR {enterprise.MAIN_CR}</p>}
             </div>
-            <Button onClick={() => setEditOpen(true)} className="shrink-0 bg-white text-[#A71D3A] hover:bg-white/90">
-              <Pencil className="mr-1.5 h-4 w-4" /> {t('actions.edit')}
-            </Button>
+            {canEdit && (
+              <Button onClick={() => setEditOpen(true)} className="shrink-0 bg-white text-[#A71D3A] hover:bg-white/90">
+                <Pencil className="mr-1.5 h-4 w-4" /> {t('actions.edit')}
+              </Button>
+            )}
           </div>
         </div>
         {/* Summary strip */}

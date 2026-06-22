@@ -10,11 +10,22 @@ export interface UpdateEnterprisePayload {
   comment?: string;
 }
 
+// _permission is stripped from query params and sent as x-required-permission header instead,
+// so the backend enforces the exact permission the frontend is using for each call.
+type EnterprisesListArg = EnterpriseFilters & { _permission?: string };
+
 export const enterprisesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEnterprisesList: builder.query<ApiResponse<SbrEnterprise[]>, EnterpriseFilters>({
-      query: (params) => ({ url: '/enterprises', params }),
+    getEnterprisesList: builder.query<ApiResponse<SbrEnterprise[]>, EnterprisesListArg>({
+      query: ({ _permission, ...params }) => ({
+        url: '/enterprises',
+        params,
+        headers: _permission ? { 'x-required-permission': _permission } : {},
+      }),
       providesTags: ['Enterprises'],
+      // Exclude _permission from the RTK Query cache key so toggling
+      // search on/off doesn't create duplicate cache entries.
+      serializeQueryArgs: ({ queryArgs: { _permission: _p, ...rest } }) => rest,
     }),
     getEnterpriseById: builder.query<ApiResponse<EnterpriseDetail>, number>({
       query: (enterpriseId) => ({ url: `/enterprises/${enterpriseId}` }),

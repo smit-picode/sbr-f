@@ -29,7 +29,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: 'Home',        href: '/home',        icon: 'Home',          permKey: '',                    i18nKey: 'nav.home'        },
       { title: 'Legal Units', href: '/legal-units',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.legalUnits'  },
-      { title: 'Enterprises', href: '/enterprises', icon: 'Layers',        permKey: '',                    i18nKey: 'nav.enterprises' },
+      { title: 'Enterprises', href: '/enterprises', icon: 'Layers',        permKey: 'enterprises.view',    i18nKey: 'nav.enterprises' },
       { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts'    },
       { title: 'Addresses',   href: '/addresses',   icon: 'MapPin',        permKey: 'addresses.view',      i18nKey: 'nav.addresses'   },
       { title: 'Audit Log',   href: '/audit-log',   icon: 'ClipboardList', permKey: 'audit_log.view',      i18nKey: 'nav.auditLog'    },

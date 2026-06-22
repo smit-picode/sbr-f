@@ -40,7 +40,16 @@ export function ContactsListPage() {
     search: debouncedSearch,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetContactsListQuery(queryParams);
+  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
+  // Without an active search the call only declares contacts.view.
+  const declaredPermission = queryParams.search
+    ? 'contacts.view,contacts.search'
+    : 'contacts.view';
+
+  const { data, isLoading, isError, error, refetch } = useGetContactsListQuery({
+    ...queryParams,
+    _permission: declaredPermission,
+  });
 
   const isValidationError = isError && is400(error);
 
@@ -54,7 +63,7 @@ export function ContactsListPage() {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const { canEdit: canEditContact } = usePermission('contacts');
+  const { canEdit: canEditContact, canSearch } = usePermission('contacts');
   const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
@@ -72,23 +81,27 @@ export function ContactsListPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
-        <SearchInput
-          className="shadow-none"
-          value={filters.search ?? ''}
-          onChange={(v) => handleFilterChange({ search: v, page: 1 })}
-          placeholder={t('filters.searchByContact')}
-        />
-      </div>
+      {canSearch && (
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+          <SearchInput
+            className="shadow-none"
+            value={filters.search ?? ''}
+            onChange={(v) => handleFilterChange({ search: v, page: 1 })}
+            placeholder={t('filters.searchByContact')}
+          />
+        </div>
+      )}
 
-      <FilterChips
-        chips={filters.search ? [{
-          key: 'search',
-          label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
-          onRemove: () => handleFilterChange({ search: '', page: 1 }),
-        } as FilterChip] : []}
-        onClearAll={() => handleFilterChange({ search: '', page: 1 })}
-      />
+      {canSearch && (
+        <FilterChips
+          chips={filters.search ? [{
+            key: 'search',
+            label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+            onRemove: () => handleFilterChange({ search: '', page: 1 }),
+          } as FilterChip] : []}
+          onClearAll={() => handleFilterChange({ search: '', page: 1 })}
+        />
+      )}
 
       <DataTable
         columns={columns}

@@ -12,7 +12,7 @@ import { ENTERPRISE_DEFAULT_FILTERS } from '../constants';
 import type { EnterpriseFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce } from '@/hooks';
+import { useDebounce, usePermission } from '@/hooks';
 import { Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
@@ -35,6 +35,8 @@ export function EnterprisesListPage() {
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
+  const { canSearch, canViewDetail } = usePermission('enterprises');
+
   const queryParams = cleanParams({
     ...filters,
     search: debouncedSearch,
@@ -42,7 +44,17 @@ export function EnterprisesListPage() {
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery(queryParams);
+  // Searching/filtering requires BOTH view (to see the list) AND search (to filter it) — sent as
+  // comma-separated. Without an active filter the call only declares enterprises.view.
+  const hasActiveFilters = !!queryParams.search || !!queryParams.status || !!queryParams.sectorId;
+  const declaredPermission = hasActiveFilters
+    ? 'enterprises.view,enterprises.search'
+    : 'enterprises.view';
+
+  const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery({
+    ...queryParams,
+    _permission: declaredPermission,
+  });
 
   const isValidationError = isError && is400(error);
 
@@ -101,14 +113,16 @@ export function EnterprisesListPage() {
         }
       />
 
-      <EnterprisesFiltersBar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={handleReset}
-        isDefault={JSON.stringify(filters) === JSON.stringify(ENTERPRISE_DEFAULT_FILTERS)}
-      />
+      {canSearch && (
+        <EnterprisesFiltersBar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onReset={handleReset}
+          isDefault={JSON.stringify(filters) === JSON.stringify(ENTERPRISE_DEFAULT_FILTERS)}
+        />
+      )}
 
-      <FilterChips chips={activeChips} onClearAll={handleReset} />
+      {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}
 
       <DataTable
         columns={columns}
@@ -121,7 +135,7 @@ export function EnterprisesListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
-        onRowClick={(row) => router.push(`/enterprises/${row.ENTERPRISE_ID}`)}
+        onRowClick={canViewDetail ? (row) => router.push(`/enterprises/${row.ENTERPRISE_ID}`) : undefined}
         stickyFirstColumn
       />
     </PageContainer>

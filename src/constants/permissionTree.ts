@@ -18,26 +18,39 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'enterprises',
+    label: 'Enterprises',
+    children: [
+      { key: 'enterprises.view',        label: 'View Enterprises' },
+      { key: 'enterprises.view_detail', label: 'View Enterprise Detail' },
+      { key: 'enterprises.edit',        label: 'Edit Enterprises' },
+      { key: 'enterprises.search',      label: 'Search & Filter' },
+    ],
+  },
+  {
     key: 'contacts',
     label: 'Contacts',
     children: [
-      { key: 'contacts.view', label: 'View Contacts' },
-      { key: 'contacts.edit', label: 'Edit Contacts' },
+      { key: 'contacts.view',   label: 'View Contacts' },
+      { key: 'contacts.edit',   label: 'Edit Contacts' },
+      { key: 'contacts.search', label: 'Search & Filter' },
     ],
   },
   {
     key: 'addresses',
     label: 'Addresses',
     children: [
-      { key: 'addresses.view', label: 'View Addresses' },
-      { key: 'addresses.edit', label: 'Edit Addresses' },
+      { key: 'addresses.view',   label: 'View Addresses' },
+      { key: 'addresses.edit',   label: 'Edit Addresses' },
+      { key: 'addresses.search', label: 'Search & Filter' },
     ],
   },
   {
     key: 'audit_log',
     label: 'Audit Log',
     children: [
-      { key: 'audit_log.view', label: 'View Audit Log' },
+      { key: 'audit_log.view',   label: 'View Audit Log' },
+      { key: 'audit_log.search', label: 'Search & Filter' },
     ],
   },
   {
@@ -71,6 +84,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
           { key: 'admin_panel.users.view',        label: 'View Users' },
           { key: 'admin_panel.users.view_detail', label: 'View User Detail' },
           { key: 'admin_panel.users.edit',        label: 'Edit Users' },
+          { key: 'admin_panel.users.search',      label: 'Search Users' },
         ],
       },
     ],
