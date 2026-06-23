@@ -58,19 +58,10 @@ export const adminApi = baseApi.injectEndpoints({
     }),
 
     // Users
-    // _permission is stripped from query params and sent as x-required-permission header instead,
-    // so the backend enforces the exact permission the frontend is using for each call.
-    getUsersList: builder.query<ApiResponse<SbrUser[]>, AdminUserFilters & { _permission?: string }>({
-      query: ({ _permission, ...params }) => ({
-        url: '/admin/users',
-        params,
-        headers: _permission ? { 'x-required-permission': _permission } : {},
-      }),
+    getUsersList: builder.query<ApiResponse<SbrUser[]>, AdminUserFilters>({
+      query: (params) => ({ url: '/admin/users', params }),
       providesTags: ['Admin'],
       keepUnusedDataFor: 0,
-      // Exclude _permission from the RTK Query cache key so toggling
-      // search on/off doesn't create duplicate cache entries.
-      serializeQueryArgs: ({ queryArgs: { _permission: _p, ...rest } }) => rest,
     }),
     getUserById: builder.query<ApiResponse<SbrUser>, number>({
       query: (id) => ({ url: `/admin/users/${id}` }),

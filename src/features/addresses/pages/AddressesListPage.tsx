@@ -30,16 +30,7 @@ export function AddressesListPage() {
     search: debouncedSearch,
   });
 
-  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
-  // Without an active search the call only declares addresses.view.
-  const declaredPermission = queryParams.search
-    ? 'addresses.view,addresses.search'
-    : 'addresses.view';
-
-  const { data, isLoading, isError, error, refetch } = useGetAddressesListQuery({
-    ...queryParams,
-    _permission: declaredPermission,
-  });
+  const { data, isLoading, isError, error, refetch } = useGetAddressesListQuery(queryParams);
 
   useEffect(() => {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;

@@ -59,23 +59,18 @@ export const PERMISSION_TREE: PermissionNode[] = [
     children: [
       { key: 'admin_panel.view', label: 'View Admin Panel' },
       {
-        key: 'admin_panel.permissions',
-        label: 'Permissions Tab',
+        // UI-only group node: combines the Roles and Permissions sections into one
+        // "Roles & Permissions Tab" group, mirroring the merged admin tab.
+        // Leaf keys below are unchanged — all RBAC gating still works.
+        key: 'admin_panel.roles_permissions',
+        label: 'Roles & Permissions Tab',
         children: [
-          { key: 'admin_panel.permissions.view',        label: 'View Permissions' },
-          { key: 'admin_panel.permissions.view_detail', label: 'View Permission Detail' },
-          { key: 'admin_panel.permissions.edit',        label: 'Edit Permissions' },
-          { key: 'admin_panel.permissions.search',      label: 'Search Permissions' },
-        ],
-      },
-      {
-        key: 'admin_panel.roles',
-        label: 'Roles Tab',
-        children: [
-          { key: 'admin_panel.roles.view',        label: 'View Roles' },
-          { key: 'admin_panel.roles.view_detail', label: 'View Role Detail' },
-          { key: 'admin_panel.roles.edit',        label: 'Edit Roles' },
-          { key: 'admin_panel.roles.create',      label: 'Add Role' },
+          { key: 'admin_panel.roles.view',         label: 'View Roles' },
+          { key: 'admin_panel.roles.edit',         label: 'Edit Roles' },
+          { key: 'admin_panel.roles.create',       label: 'Add Role' },
+          { key: 'admin_panel.permissions.view',   label: 'View Permissions' },
+          { key: 'admin_panel.permissions.edit',   label: 'Edit Permissions' },
+          { key: 'admin_panel.permissions.search', label: 'Search Permissions' },
         ],
       },
       {

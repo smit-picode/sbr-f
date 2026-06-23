@@ -53,23 +53,7 @@ export function LegalUnitsListPage() {
     sourceCode: filters.sourceCode === '__all__' ? undefined : filters.sourceCode,
   });
 
-  // Determine which permission to declare for this request.
-  // The backend checks this header strictly: it must be in the route's allowed list
-  // AND the user must have that specific permission (or hold the parent without any children).
-  const FILTER_KEYS: (keyof typeof queryParams)[] = ['search', 'estStatus', 'sectorId', 'sourceCode', 'isicCode', 'mainBranchFLG'];
-  const hasActiveFilters = FILTER_KEYS.some(k => {
-    const v = queryParams[k];
-    return v !== undefined && v !== '' && v !== null;
-  });
-  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated
-  const declaredPermission = hasActiveFilters
-    ? 'establishments.view,establishments.search'
-    : 'establishments.view';
-
-  const { data, isLoading, isError, error, refetch } = useGetLegalUnitsListQuery({
-    ...queryParams,
-    _permission: declaredPermission,
-  });
+  const { data, isLoading, isError, error, refetch } = useGetLegalUnitsListQuery(queryParams);
 
   const isValidationError = isError && is400(error);
   const isPermissionError = isError && is403(error);

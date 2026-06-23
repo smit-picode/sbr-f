@@ -21,7 +21,15 @@
     "qualityDashboard": "لوحة الجودة",
     "qualityFindings": "نتائج الجودة",
     "regulatorEscalation": "التصعيد إلى الجهة التنظيمية",
-    "enterprise360": "المؤسسة 360"
+    "enterprise360": "المؤسسة 360",
+    "enterpriseGroups": "مجموعات المؤسسات",
+    "tasks": "المهام",
+    "attributeChangeRequests": "طلبات تغيير السمات",
+    "profilingRuns": "عمليات التوصيف",
+    "tasksHistory": "سجل المهام",
+    "profilingHistory": "سجل التوصيف",
+    "sourceData": "بيانات المصدر",
+    "sourceCatalog": "كتالوج المصادر"
   },
   "pageBanner": {
     "frame": "إدارة الوحدات القانونية",
@@ -108,6 +116,42 @@
     "enterprise360": {
       "title": "المؤسسة 360",
       "description": "اختر مؤسسة لفتح ملفها الشامل 360°",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "enterpriseGroups": {
+      "title": "مجموعات المؤسسات",
+      "description": "السجل الإحصائي للأعمال — سجلات مجموعات المؤسسات",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "attributeChangeRequests": {
+      "title": "طلبات تغيير السمات",
+      "description": "مراجعة ومعالجة طلبات تغيير السمات",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "profilingRuns": {
+      "title": "عمليات التوصيف",
+      "description": "تتبع وإدارة عمليات التوصيف",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "tasksHistory": {
+      "title": "سجل المهام",
+      "description": "سجل المهام المكتملة",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "profilingHistory": {
+      "title": "سجل التوصيف",
+      "description": "سجل عمليات التوصيف المكتملة",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "sourceCatalog": {
+      "title": "كتالوج المصادر",
+      "description": "كتالوج أنظمة بيانات المصدر المسجلة",
       "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
       "noDataDesc": ""
     }
@@ -546,6 +590,7 @@
       "assignedPermissions": "الصلاحيات المُعيَّنة",
       "permissionsCount": "{{count}} صلاحيات",
       "noPermissionsAssigned": "لا توجد صلاحيات مُعيَّنة لهذا الدور",
+      "noViewPermission": "ليس لديك صلاحية لعرض الصلاحيات.",
       "searchPermissions": "ابحث عن صلاحية...",
       "searchResults": "نتائج البحث",
       "noPermissionsFound": "لا توجد صلاحيات",

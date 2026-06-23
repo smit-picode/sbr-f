@@ -21,7 +21,15 @@
     "qualityDashboard": "Quality Dashboard",
     "qualityFindings": "Quality Findings",
     "regulatorEscalation": "Regulator Escalation",
-    "enterprise360": "Enterprise 360"
+    "enterprise360": "Enterprise 360",
+    "enterpriseGroups": "Enterprise Groups",
+    "tasks": "Tasks",
+    "attributeChangeRequests": "Attribute Change Requests",
+    "profilingRuns": "Profiling Runs",
+    "tasksHistory": "Tasks History",
+    "profilingHistory": "Profiling History",
+    "sourceData": "Source Data",
+    "sourceCatalog": "Source Catalog"
   },
   "pageBanner": {
     "frame": "Legal Units Management",
@@ -108,6 +116,42 @@
     "enterprise360": {
       "title": "Enterprise 360",
       "description": "Select an enterprise to open its full 360° profile",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "enterpriseGroups": {
+      "title": "Enterprise Groups",
+      "description": "Statistical Business Register — Enterprise group records",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "attributeChangeRequests": {
+      "title": "Attribute Change Requests",
+      "description": "Review and process attribute change requests",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "profilingRuns": {
+      "title": "Profiling Runs",
+      "description": "Track and manage profiling runs",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "tasksHistory": {
+      "title": "Tasks History",
+      "description": "History of completed tasks",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "profilingHistory": {
+      "title": "Profiling History",
+      "description": "History of completed profiling runs",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "sourceCatalog": {
+      "title": "Source Catalog",
+      "description": "Catalog of registered source data systems",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     }
@@ -546,6 +590,7 @@
       "assignedPermissions": "Assigned Permissions",
       "permissionsCount": "{{count}} permissions",
       "noPermissionsAssigned": "No permissions assigned to this role",
+      "noViewPermission": "You do not have permission to view permissions.",
       "searchPermissions": "Search permissions...",
       "searchResults": "Search results",
       "noPermissionsFound": "No permissions found",

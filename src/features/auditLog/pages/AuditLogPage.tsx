@@ -46,18 +46,9 @@ export function AuditLogPage() {
 
   const { canSearch } = usePermission('audit_log');
 
-  const queryParams = cleanParams(filters);
-  // Filtering requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
-  // Without an active filter the call only declares audit_log.view.
-  const hasActiveFilters = !!filters.tableName || !!filters.recordId;
-  const declaredPermission = hasActiveFilters
-    ? 'audit_log.view,audit_log.search'
-    : 'audit_log.view';
-
-  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(
-    { ...queryParams, _permission: declaredPermission },
-    { refetchOnMountOrArgChange: true },
-  );
+  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
+    refetchOnMountOrArgChange: true,
+  });
 
   const isValidationError = isError && is400(error);
 

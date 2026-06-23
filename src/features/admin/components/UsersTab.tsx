@@ -116,15 +116,8 @@ export function UsersTab({
   // Debounce only the text search — typing no longer fires an API call per keystroke
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const queryParams = cleanParams({ ...filters, search: debouncedSearch });
-  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
-  // Without an active search the call only declares admin_panel.users.view.
-  const declaredPermission = queryParams.search
-    ? 'admin_panel.users.view,admin_panel.users.search'
-    : 'admin_panel.users.view';
-
   const { data, isLoading } = useGetUsersListQuery(
-    { ...queryParams, _permission: declaredPermission },
+    cleanParams({ ...filters, search: debouncedSearch }),
     { skip: isCreateOpen }
   );
   // Roles + scopes are only needed for the create/edit dialogs — skip if user can't edit
@@ -226,6 +219,8 @@ export function UsersTab({
   };
 
   const users = data?.data ?? [];
+  // Hide the Actions column entirely when the user can neither view details nor edit
+  const showActions = canViewDetail || canEdit;
 
   const roleRow = (role: SbrRole) => {
     const checked = selectedRoles === role.ID;
@@ -400,14 +395,16 @@ export function UsersTab({
               <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles', { lng: 'en' })}</th>
               <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus', { lng: 'en' })}</th>
               <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt', { lng: 'en' })}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions', { lng: 'en' })}</th>
+              {showActions && (
+                <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions', { lng: 'en' })}</th>
+              )}
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">{t('admin.users.loading')}</td></tr>
+              <tr><td colSpan={showActions ? 5 : 4} className="px-6 py-8 text-center text-slate-500">{t('admin.users.loading')}</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">{t('admin.users.noUsers')}</td></tr>
+              <tr><td colSpan={showActions ? 5 : 4} className="px-6 py-8 text-center text-slate-500">{t('admin.users.noUsers')}</td></tr>
             ) : (
               users.map((user) => (
                 <tr key={user.ID} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
@@ -438,24 +435,26 @@ export function UsersTab({
                   <td className="px-4 py-4 text-start align-middle">
                     <span className="text-sm text-slate-700">{formatDate(user.CREATED_AT)}</span>
                   </td>
-                  <td className="px-4 py-4 align-middle flex gap-2 justify-start items-center">
-                    {canViewDetail && (
-                      <Button size="sm" variant="outline" onClick={() => setViewTarget(user)} title={t('admin.users.viewUserTitle')} className="h-8 w-8 p-0">
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                    {canEdit && (
-                      <Button
-                        size="sm" variant="outline"
-                        onClick={() => openEdit(user)}
-                        disabled={isUpdating || isSuperAdminUser(user)}
-                        title={isSuperAdminUser(user) ? t('admin.users.superAdminCannotEdit') : t('admin.users.editUserTitle')}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </td>
+                  {showActions && (
+                    <td className="px-4 py-4 align-middle flex gap-2 justify-start items-center">
+                      {canViewDetail && (
+                        <Button size="sm" variant="outline" onClick={() => setViewTarget(user)} title={t('admin.users.viewUserTitle')} className="h-8 w-8 p-0">
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      {canEdit && (
+                        <Button
+                          size="sm" variant="outline"
+                          onClick={() => openEdit(user)}
+                          disabled={isUpdating || isSuperAdminUser(user)}
+                          title={isSuperAdminUser(user) ? t('admin.users.superAdminCannotEdit') : t('admin.users.editUserTitle')}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             )}

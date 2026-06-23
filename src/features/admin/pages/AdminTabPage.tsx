@@ -150,7 +150,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
             <RolesTab
               canEdit={canEditRoles}
               canCreate={canCreateRoles}
-              canViewDetail={isSuperAdmin || hasPermission('admin_panel.roles.view_detail')}
               onRegisterCreate={(fn) => { rolesOpenCreate.current = fn; }}
             />
           )}

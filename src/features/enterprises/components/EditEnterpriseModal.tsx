@@ -61,7 +61,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
   const debouncedSearch = useDebounce(search, 400);
   const { data: searchData, isFetching: isSearching } = useGetLegalUnitsListQuery(
-    { search: debouncedSearch, limit: 6, page: 1, _permission: 'establishments.view,establishments.search' },
+    { search: debouncedSearch, limit: 6, page: 1 },
     { skip: !open || !debouncedSearch }
   );
 

@@ -44,17 +44,7 @@ export function EnterprisesListPage() {
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
   });
 
-  // Searching/filtering requires BOTH view (to see the list) AND search (to filter it) — sent as
-  // comma-separated. Without an active filter the call only declares enterprises.view.
-  const hasActiveFilters = !!queryParams.search || !!queryParams.status || !!queryParams.sectorId;
-  const declaredPermission = hasActiveFilters
-    ? 'enterprises.view,enterprises.search'
-    : 'enterprises.view';
-
-  const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery({
-    ...queryParams,
-    _permission: declaredPermission,
-  });
+  const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery(queryParams);
 
   const isValidationError = isError && is400(error);
 

@@ -40,16 +40,7 @@ export function ContactsListPage() {
     search: debouncedSearch,
   });
 
-  // Search requires BOTH view (to see the list) AND search (to filter it) — sent as comma-separated.
-  // Without an active search the call only declares contacts.view.
-  const declaredPermission = queryParams.search
-    ? 'contacts.view,contacts.search'
-    : 'contacts.view';
-
-  const { data, isLoading, isError, error, refetch } = useGetContactsListQuery({
-    ...queryParams,
-    _permission: declaredPermission,
-  });
+  const { data, isLoading, isError, error, refetch } = useGetContactsListQuery(queryParams);
 
   const isValidationError = isError && is400(error);
 

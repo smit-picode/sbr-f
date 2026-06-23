@@ -253,7 +253,6 @@ export function RolesTab({
 }: {
   canEdit?: boolean;
   canCreate?: boolean;
-  canViewDetail?: boolean;
   onRegisterCreate?: (fn: () => void) => void;
 }) {
   const { t } = useTranslation();
@@ -272,9 +271,11 @@ export function RolesTab({
   const user        = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);
   const isSA        = user?.role === 'SUPER_ADMIN' || user?.role?.toUpperCase() === 'SUPER_ADMIN';
+  // The permission listing/matrix is gated SOLELY by permissions.view. roles.edit lets a
+  // user toggle & save a role's permissions, but only once they can already SEE the listing
+  // (permissions.view). roles.edit or roles.view alone never reveals the permission listing.
   const canFetchPerms = isSA || permissions.some(p =>
-    ['admin_panel.roles.edit', 'admin_panel.roles.view', 'admin_panel.permissions.view']
-      .includes(p.permissionName ?? '')
+    p.permissionName === 'admin_panel.permissions.view'
   );
   // Whether the current user may use the permission search bar
   const canSearchPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.search');
@@ -290,7 +291,7 @@ export function RolesTab({
   );
   const { data: rolePermData } = useGetRolePermissionsQuery(
     selectedRole?.ID ?? 0,
-    { skip: !selectedRole, refetchOnMountOrArgChange: true },
+    { skip: !selectedRole || !canFetchPerms, refetchOnMountOrArgChange: true },
   );
 
   // ── mutations ──
@@ -434,7 +435,11 @@ export function RolesTab({
     }
   };
 
-  const canEditPermissions = canEdit && selectedRole?.ROLE_NAME !== 'SUPER_ADMIN';
+  // Toggling & saving the permission matrix is gated by permissions.edit (editing the
+  // permission listing) — NOT roles.edit (which only governs role-level actions like rename).
+  // SUPER_ADMIN's own permissions are never editable.
+  const canEditPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.edit');
+  const canEditPermissions = canEditPerms && selectedRole?.ROLE_NAME !== 'SUPER_ADMIN';
 
   // Show a skeleton while the initial roles/permissions data is loading
   const isInitialLoading = isRolesLoading || (canFetchPerms && isPermsLoading);
@@ -519,10 +524,12 @@ export function RolesTab({
                 </div>
               </div>
               <div className="ms-auto flex items-center gap-3">
-                <span className="text-[12px] text-slate-500 whitespace-nowrap" dir="ltr">
-                  {grantedIds.size} / {allPermissions.length}
-                  {' '}<span dir="auto">{t('admin.roles.permissions', { defaultValue: 'permissions' })}</span>
-                </span>
+                {canFetchPerms && (
+                  <span className="text-[12px] text-slate-500 whitespace-nowrap" dir="ltr">
+                    {grantedIds.size} / {allPermissions.length}
+                    {' '}<span dir="auto">{t('admin.roles.permissions', { defaultValue: 'permissions' })}</span>
+                  </span>
+                )}
                 {canEditPermissions && isDirty && (
                   <Button
                     size="sm"
@@ -548,7 +555,11 @@ export function RolesTab({
             )}
 
             {/* ── Permission groups — each a separate card ── */}
-            {allPermissions.length === 0 ? (
+            {!canFetchPerms ? (
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-16 text-center text-sm text-slate-400">
+                {t('admin.roles.noViewPermission', { defaultValue: 'You do not have permission to view permissions.' })}
+              </div>
+            ) : allPermissions.length === 0 ? (
               <div className="rounded-xl border border-slate-200 bg-white px-4 py-16 text-center text-sm text-slate-400">
                 {t('admin.roles.noPermissionsAssigned')}
               </div>

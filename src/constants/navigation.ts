@@ -28,12 +28,23 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.sbrLiveFrame',
     items: [
       { title: 'Home',        href: '/home',        icon: 'Home',          permKey: '',                    i18nKey: 'nav.home'        },
-      { title: 'Legal Units', href: '/legal-units',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.legalUnits'  },
-      { title: 'Enterprises', href: '/enterprises', icon: 'Layers',        permKey: 'enterprises.view',    i18nKey: 'nav.enterprises' },
-      { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts'    },
+      { title: 'Legal Units', href: '/legal-units',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.legalUnits', divider: true  },
+      { title: 'Enterprises', href: '/enterprises', icon: 'Orbit',         permKey: 'enterprises.view',    i18nKey: 'nav.enterprises' },
+      { title: 'Enterprise Groups', href: '/enterprise-groups', icon: 'GitFork', permKey: '',             i18nKey: 'nav.enterpriseGroups' },
+      { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts', divider: true    },
       { title: 'Addresses',   href: '/addresses',   icon: 'MapPin',        permKey: 'addresses.view',      i18nKey: 'nav.addresses'   },
       { title: 'Audit Log',   href: '/audit-log',   icon: 'ClipboardList', permKey: 'audit_log.view',      i18nKey: 'nav.auditLog'    },
-      { title: 'Enterprise 360', href: '/enterprise-360', icon: 'Orbit',   permKey: '',                    i18nKey: 'nav.enterprise360', divider: true },
+    ],
+  },
+  {
+    id: 'tasks',
+    title: 'Tasks',
+    i18nKey: 'nav.tasks',
+    items: [
+      { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: '', i18nKey: 'nav.attributeChangeRequests' },
+      { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
+      { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
+      { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },
     ],
   },
   {
@@ -62,6 +73,14 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Quality Dashboard',    href: '/quality/dashboard',  icon: 'Gauge',    permKey: '', i18nKey: 'nav.qualityDashboard'    },
       { title: 'Quality Findings',     href: '/quality/findings',   icon: 'Flag',     permKey: '', i18nKey: 'nav.qualityFindings'     },
       { title: 'Regulator Escalation', href: '/quality/escalation', icon: 'Landmark', permKey: '', i18nKey: 'nav.regulatorEscalation' },
+    ],
+  },
+  {
+    id: 'source-data',
+    title: 'Source Data',
+    i18nKey: 'nav.sourceData',
+    items: [
+      { title: 'Source Catalog', href: '/sources', icon: 'Database', permKey: '', i18nKey: 'nav.sourceCatalog' },
     ],
   },
   {
