@@ -10,11 +10,13 @@ export interface PermissionNode {
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'establishments',
-    label: 'Legal Units',
+    label: 'Establishments',
     children: [
-      { key: 'establishments.view',   label: 'View Legal Units' },
-      { key: 'establishments.edit',   label: 'Edit Legal Units' },
-      { key: 'establishments.search', label: 'Search & Filter' },
+      { key: 'establishments.view',         label: 'View Establishments' },
+      { key: 'establishments.view_detail',  label: 'View Establishment Detail' },
+      { key: 'establishments.view_history', label: 'View Update History' },
+      { key: 'establishments.edit',         label: 'Edit Establishments' },
+      { key: 'establishments.search',       label: 'Search & Filter' },
     ],
   },
   {
@@ -31,18 +33,22 @@ export const PERMISSION_TREE: PermissionNode[] = [
     key: 'contacts',
     label: 'Contacts',
     children: [
-      { key: 'contacts.view',   label: 'View Contacts' },
-      { key: 'contacts.edit',   label: 'Edit Contacts' },
-      { key: 'contacts.search', label: 'Search & Filter' },
+      { key: 'contacts.view',         label: 'View Contacts' },
+      { key: 'contacts.view_detail',  label: 'View Contact Detail' },
+      { key: 'contacts.view_history', label: 'View Update History' },
+      { key: 'contacts.edit',         label: 'Edit Contacts' },
+      { key: 'contacts.search',       label: 'Search & Filter' },
     ],
   },
   {
     key: 'addresses',
     label: 'Addresses',
     children: [
-      { key: 'addresses.view',   label: 'View Addresses' },
-      { key: 'addresses.edit',   label: 'Edit Addresses' },
-      { key: 'addresses.search', label: 'Search & Filter' },
+      { key: 'addresses.view',         label: 'View Addresses' },
+      { key: 'addresses.view_detail',  label: 'View Address Detail' },
+      { key: 'addresses.view_history', label: 'View Update History' },
+      { key: 'addresses.edit',         label: 'Edit Addresses' },
+      { key: 'addresses.search',       label: 'Search & Filter' },
     ],
   },
   {

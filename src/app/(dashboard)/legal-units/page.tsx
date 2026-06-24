@@ -1,7 +1,7 @@
-import { LegalUnitsListPage } from '@/features/legalUnits/pages/LegalUnitsListPage';
+import { LegalUnitsPage } from '@/features/legalUnits/pages/LegalUnitsPage';
 
 export const metadata = { title: 'Legal Units — SBR Portal' };
 
 export default function Page() {
-  return <LegalUnitsListPage />;
+  return <LegalUnitsPage />;
 }

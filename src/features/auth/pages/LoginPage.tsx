@@ -74,7 +74,7 @@ export function LoginPage() {
       if ((data.roles?.length ?? 0) > 1) {
         setPendingRoles(data.roles!);
       } else {
-        router.push('/legal-units');
+        router.push('/establishments');
       }
     } catch (err) {
       const apiMsg = (err as { data?: { message?: string } })?.data?.message;
@@ -92,7 +92,7 @@ export function LoginPage() {
       } catch {
         // Ignore storage failures
       }
-      router.push('/legal-units');
+      router.push('/establishments');
     } catch {
       setSwitchingRoleId(null);
       setLoginError('Could not switch to that role. Please try again.');

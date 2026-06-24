@@ -1,5 +1,5 @@
 export * from './api.types';
-export * from './legalUnit.types';
+export * from './establishment.types';
 export * from './enterprise.types';
 export * from './contact.types';
 export * from './address.types';

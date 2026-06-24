@@ -7,6 +7,14 @@ export const contactsApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/contacts', params }),
       providesTags: ['Contacts'],
     }),
+    getContactById: builder.query<ApiResponse<SbrContact>, number>({
+      query: (id) => ({ url: `/contacts/${id}` }),
+      providesTags: ['Contacts'],
+    }),
+    getContactHistory: builder.query<ApiResponse<SbrContact[]>, number>({
+      query: (id) => ({ url: `/contacts/${id}/history` }),
+      providesTags: ['Contacts'],
+    }),
     updateContact: builder.mutation<ApiResponse<SbrContact>, { id: number; data: Partial<SbrContact> & { comment?: string } }>({
       query: ({ id, data }) => ({ url: `/contacts/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Contacts', 'AuditLog'],
@@ -15,4 +23,4 @@ export const contactsApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetContactsListQuery, useUpdateContactMutation } = contactsApi;
+export const { useGetContactsListQuery, useGetContactByIdQuery, useGetContactHistoryQuery, useUpdateContactMutation } = contactsApi;

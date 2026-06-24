@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
@@ -21,6 +22,7 @@ export function AddressesListPage() {
   const [filters, setFilters] = useState<AddressFilters>(ADDRESS_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrAddress | null>(null);
   const { t } = useTranslation();
+  const router = useRouter();
 
   // Debounce search field
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -43,7 +45,9 @@ export function AddressesListPage() {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const { canEdit: canEditAddress, canSearch } = usePermission('addresses');
+  const { canEdit: canEditAddress, canSearch, canViewDetail } = usePermission('addresses');
+  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
+  const canOpenDetail = canViewDetail || canEditAddress;
   const columns = getAddressColumns((row) => setEditTarget(row), t, canEditAddress);
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -95,6 +99,7 @@ export function AddressesListPage() {
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         stickyFirstColumn
+        onRowClick={canOpenDetail ? (row) => router.push(`/addresses/${row.ID}`) : undefined}
       />
 
       <EditAddressModal

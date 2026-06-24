@@ -17,7 +17,7 @@ import type {
   EnterpriseEstablishment,
   EnterpriseChangeHistoryEntry,
   EnterpriseLifecycleEvent,
-  SbrLegalUnit,
+  SbrEstablishment,
 } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
@@ -86,7 +86,7 @@ function FieldWithHistory({ label, value, onHistory }: { label: string; value: R
 function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstablishment; headSbrId: number | null; t: (k: string, o?: { lng?: string }) => string; onOpen: (est: EnterpriseEstablishment) => void }) {
   const isMain = est.SBR_ID === headSbrId || est.MAIN_BRANCH_FLG === 'MAIN';
   const activitiesCount = est.ISIC_CODE ? 1 : 0;
-  const [hist, setHist] = useState<{ key: keyof SbrLegalUnit; label: string } | null>(null);
+  const [hist, setHist] = useState<{ key: keyof SbrEstablishment; label: string } | null>(null);
   return (
     <div className="rounded-lg border border-slate-200">
       {/* header */}
@@ -356,7 +356,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
                   est={est}
                   headSbrId={enterprise.MAIN_LEGAL_UNIT_SBR_ID}
                   t={t}
-                  onOpen={(e) => router.push(`/legal-units?search=${encodeURIComponent(e.NAME_ENU ?? String(e.SBR_ID))}`)}
+                  onOpen={(e) => router.push(`/establishments?search=${encodeURIComponent(e.NAME_ENU ?? String(e.SBR_ID))}`)}
                 />
               ))}
             </div>

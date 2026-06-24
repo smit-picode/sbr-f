@@ -11,6 +11,14 @@ export const addressesApi = baseApi.injectEndpoints({
       query: (sbrId) => `/addresses/${sbrId}`,
       providesTags: ['Addresses'],
     }),
+    getAddressById: builder.query<ApiResponse<SbrAddress>, number>({
+      query: (id) => ({ url: `/addresses/record/${id}` }),
+      providesTags: ['Addresses'],
+    }),
+    getAddressHistory: builder.query<ApiResponse<SbrAddress[]>, number>({
+      query: (id) => ({ url: `/addresses/record/${id}/history` }),
+      providesTags: ['Addresses'],
+    }),
     updateAddress: builder.mutation<ApiResponse<SbrAddress>, { id: number; data: Partial<SbrAddress> & { comment?: string } }>({
       query: ({ id, data }) => ({ url: `/addresses/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Addresses', 'AuditLog'],
@@ -19,4 +27,4 @@ export const addressesApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetAddressesListQuery, useGetAddressesBySbrIdQuery, useUpdateAddressMutation } = addressesApi;
+export const { useGetAddressesListQuery, useGetAddressesBySbrIdQuery, useGetAddressByIdQuery, useGetAddressHistoryQuery, useUpdateAddressMutation } = addressesApi;

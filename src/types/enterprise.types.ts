@@ -31,7 +31,7 @@ export interface SbrEnterprise {
   VALID_TO: string | null;
   CREATED_AT: string | null;
   UPDATED_AT: string | null;
-  // Derived in the API from the head legal unit / member count
+  // Derived in the API from the head establishment / member count
   MAIN_CR: string | null;
   LEGAL_TYPE: string | null;
   ESTABLISHMENT_COUNT: number;

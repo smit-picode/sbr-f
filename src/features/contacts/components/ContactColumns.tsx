@@ -85,7 +85,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
       return val ? (
         <div className="flex items-center gap-1.5 text-sm" style={{ color: '#A71D3A' }}>
           <Globe className="h-3.5 w-3.5" />
-          <a href={val.startsWith('http') ? val : `https://${val}`} target="_blank" rel="noopener noreferrer" className="hover:underline truncate max-w-[140px]">
+          <a href={val.startsWith('http') ? val : `https://${val}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="hover:underline truncate max-w-[140px]">
             {val}
           </a>
         </div>
@@ -133,7 +133,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     id: 'actions',
     header: t('columns.ACTIONS', { lng: 'en' }),
     cell: ({ row }: { row: { original: SbrContact } }) => (
-      <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
+      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
     ),

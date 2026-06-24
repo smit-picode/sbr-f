@@ -1,0 +1,232 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import { PageContainer } from '@/components/common/PageContainer';
+import { Button } from '@/components/ui/button';
+import { PageLoader } from '@/components/common/Loader';
+import { ErrorState } from '@/components/common/ErrorState';
+import { EditContactModal } from '../components/EditContactModal';
+import { useGetContactByIdQuery, useGetContactHistoryQuery } from '../api/contactsApi';
+import { FieldHistoryModal } from '@/components/common/FieldHistoryModal';
+import { formatDate } from '@/utils/format';
+import { usePermission } from '@/hooks';
+import { useLanguage } from '@/i18n';
+import { ChevronLeft, ChevronRight, Pencil, Briefcase, Phone, Database, History } from 'lucide-react';
+
+function isEmpty(v: unknown): boolean {
+  return v === null || v === undefined || v === '';
+}
+
+function DetailField({ label, value, mono, onHistory }: { label: string; value: React.ReactNode; mono?: boolean; onHistory?: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onHistory}
+      disabled={!onHistory}
+      className="group w-full min-w-0 text-start disabled:cursor-default"
+    >
+      <div className="flex items-center gap-1.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+        {onHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+      </div>
+      <div className={`mt-0.5 truncate text-sm font-semibold text-slate-800 ${mono ? 'font-mono' : ''}`}>{value}</div>
+    </button>
+  );
+}
+
+function DetailCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-4 py-2.5">
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{title}</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 p-4 sm:grid-cols-2">{children}</div>
+    </div>
+  );
+}
+
+type StripItem = { icon: React.ReactNode; label: string; value: string | null };
+
+function HighlightStrip({ items }: { items: StripItem[] }) {
+  const visible = items.filter((i) => !isEmpty(i.value));
+  if (!visible.length) return null;
+  return (
+    <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      {visible.map((it, i) => (
+        <div key={i} className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">{it.icon}</span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{it.label}</p>
+            <p className="truncate text-sm font-bold text-slate-800">{String(it.value)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function ContactDetailPage({ contactId }: { contactId: number }) {
+  const { t } = useTranslation();
+  const { isArabic } = useLanguage();
+  const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
+  const [histField, setHistField] = useState<{ key: string; label: string } | null>(null);
+  const { canEdit, canViewDetail, canViewHistory } = usePermission('contacts');
+  // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
+  const canOpenDetail = canViewDetail || canEdit;
+  const { data, isLoading, isError, refetch } = useGetContactByIdQuery(contactId, { skip: !canOpenDetail });
+  // Lazily fetch the record's change history only once the user opens an attribute's history
+  const { data: historyData, isLoading: histLoading, isError: histError } = useGetContactHistoryQuery(contactId, { skip: !histField || !canViewHistory });
+  // The per-attribute history feature is gated by a single dedicated permission (view_history)
+  const openHistory = canViewHistory ? (key: string, label: string) => setHistField({ key, label }) : undefined;
+
+  const lbl = (k: string) => t(`columns.${k}`, { lng: 'en' });
+
+  const BackLink = (
+    <button onClick={() => router.push('/contacts')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
+      {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('contactDetail.allContacts')}
+    </button>
+  );
+
+  if (!canOpenDetail) {
+    return (
+      <PageContainer>
+        <div className="mb-3">{BackLink}</div>
+        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-sm text-slate-500">{t('admin.panel.accessDeniedDesc')}</p>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <PageLoader />
+      </PageContainer>
+    );
+  }
+
+  if (isError || !data?.data) {
+    return (
+      <PageContainer>
+        <div className="mb-3">{BackLink}</div>
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <ErrorState onRetry={refetch} />
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const c = data.data;
+  const title = c.CONTACT_NAME || c.EMAIL || `Contact #${c.ID}`;
+
+  // Only show fields that have a value (empty fields are hidden).
+  const contactFields = [
+    { k: 'SBR_ID', label: lbl('SBR_ID'), value: String(c.SBR_ID), show: !isEmpty(c.SBR_ID), mono: true },
+    { k: 'CONTACT_NAME', label: lbl('CONTACT_NAME'), value: c.CONTACT_NAME, show: !isEmpty(c.CONTACT_NAME), mono: false },
+    { k: 'SOURCE_CODE', label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE, show: !isEmpty(c.SOURCE_CODE), mono: true },
+  ].filter((f) => f.show);
+
+  const channelFields = [
+    { k: 'PHONE', label: lbl('PHONE'), value: c.PHONE, show: !isEmpty(c.PHONE), mono: true },
+    { k: 'MOBILE', label: lbl('MOBILE'), value: c.MOBILE, show: !isEmpty(c.MOBILE), mono: true },
+    { k: 'EMAIL', label: lbl('EMAIL'), value: c.EMAIL, show: !isEmpty(c.EMAIL), mono: false },
+    { k: 'FAX', label: lbl('FAX'), value: c.FAX, show: !isEmpty(c.FAX), mono: true },
+    { k: 'PO_BOX', label: lbl('PO_BOX'), value: c.PO_BOX, show: !isEmpty(c.PO_BOX), mono: true },
+    { k: 'WEBSITE', label: lbl('WEBSITE'), value: c.WEBSITE, show: !isEmpty(c.WEBSITE), mono: false },
+  ].filter((f) => f.show);
+
+  const metaFields = [
+    { k: 'PRIORITY', label: lbl('PRIORITY'), value: c.PRIORITY != null ? String(c.PRIORITY) : null, show: c.PRIORITY != null, mono: false },
+    { k: 'VALID_FROM', label: lbl('VALID_FROM'), value: formatDate(c.VALID_FROM), show: !isEmpty(c.VALID_FROM), mono: false },
+    { k: 'VALID_TO', label: lbl('VALID_TO'), value: formatDate(c.VALID_TO), show: !isEmpty(c.VALID_TO), mono: false },
+  ].filter((f) => f.show);
+
+  return (
+    <PageContainer>
+      {BackLink}
+
+      {/* Header band */}
+      <div className="overflow-hidden rounded-lg shadow-sm">
+        <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <span className="inline-flex items-center rounded bg-white/15 px-2 py-0.5 font-mono text-xs">
+                {`Record #${c.ID} · SBR #${c.SBR_ID}`}
+              </span>
+              <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
+              {c.ROLE && <p className="text-sm text-white/80">{c.ROLE}</p>}
+            </div>
+            {canEdit && (
+              <Button onClick={() => setEditOpen(true)} className="shrink-0 bg-white text-[#A71D3A] hover:bg-white/90">
+                <Pencil className="mr-1.5 h-4 w-4" /> {t('actions.edit')}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {canViewHistory && (
+        <p className="flex items-center gap-1.5 text-xs text-slate-400">
+          <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
+        </p>
+      )}
+
+      <HighlightStrip
+        items={[
+          { icon: <Briefcase className="h-4 w-4" />, label: lbl('ROLE'), value: c.ROLE },
+          { icon: <Phone className="h-4 w-4" />, label: lbl('PHONE'), value: c.PHONE || c.MOBILE },
+          { icon: <Database className="h-4 w-4" />, label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        {contactFields.length > 0 && (
+          <DetailCard title={t('contactDetail.sectionContact')}>
+            {contactFields.map((f) => (
+              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+            ))}
+          </DetailCard>
+        )}
+        {channelFields.length > 0 && (
+          <DetailCard title={t('contactDetail.sectionChannels')}>
+            {channelFields.map((f) => (
+              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+            ))}
+          </DetailCard>
+        )}
+        {metaFields.length > 0 && (
+          <DetailCard title={t('contactDetail.sectionMetadata')}>
+            {metaFields.map((f) => (
+              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+            ))}
+          </DetailCard>
+        )}
+      </div>
+
+      <FieldHistoryModal
+        versions={historyData?.data ?? []}
+        fieldKey={histField?.key ?? null}
+        fieldLabel={histField?.label ?? ''}
+        open={!!histField}
+        isLoading={histLoading}
+        isError={histError}
+        onClose={() => setHistField(null)}
+      />
+
+      <EditContactModal
+        contact={editOpen ? c : null}
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSaved={(updated) => {
+          // Contacts are SCD2 — a save creates a new row id; follow it so the page stays current.
+          if (updated.ID !== c.ID) router.replace(`/contacts/${updated.ID}`);
+          else refetch();
+        }}
+      />
+    </PageContainer>
+  );
+}

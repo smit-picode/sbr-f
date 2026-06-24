@@ -1,8 +1,8 @@
 export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
-  LEGAL_UNITS: '/legal-units',
-  LEGAL_UNIT_DETAIL: (id: string | number) => `/legal-units/${id}`,
+  LEGAL_UNITS: '/establishments',
+  LEGAL_UNIT_DETAIL: (id: string | number) => `/establishments/${id}`,
   CONTACTS: '/contacts',
   ADDRESSES: '/addresses',
 } as const;

@@ -1,4 +1,4 @@
-export interface SbrLegalUnit {
+export interface SbrEstablishment {
   ID: number;
   SBR_ID: number;
   SOURCE_CODE: string | null;
@@ -70,7 +70,7 @@ export interface SbrLegalUnit {
   VALID_TO: string | null;
 }
 
-export interface LegalUnitFilters {
+export interface EstablishmentFilters {
   page?: number;
   limit?: number;
   search?: string;

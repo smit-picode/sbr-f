@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
-import { getLegalUnitsColumns } from '../components/LegalUnitsColumns';
-import { LegalUnitsFiltersBar } from '../components/LegalUnitsFilters';
+import { getEstablishmentsColumns } from '../components/EstablishmentsColumns';
+import { EstablishmentsFiltersBar } from '../components/EstablishmentsFilters';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { EditLegalUnitModal } from '../components/EditLegalUnitModal';
-import { useGetLegalUnitsListQuery } from '../api/legalUnitsApi';
-import { LEGAL_UNITS_DEFAULT_FILTERS } from '../constants';
-import type { LegalUnitFilters, SbrLegalUnit } from '@/types';
+import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
+import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
+import { ESTABLISHMENTS_DEFAULT_FILTERS } from '../constants';
+import type { EstablishmentFilters, SbrEstablishment } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce, usePermission } from '@/hooks';
@@ -28,10 +29,11 @@ function is401(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
 }
 
-export function LegalUnitsListPage() {
-  const [filters, setFilters] = useState<LegalUnitFilters>(LEGAL_UNITS_DEFAULT_FILTERS);
-  const [editTarget, setEditTarget] = useState<SbrLegalUnit | null>(null);
+export function EstablishmentsListPage() {
+  const [filters, setFilters] = useState<EstablishmentFilters>(ESTABLISHMENTS_DEFAULT_FILTERS);
+  const [editTarget, setEditTarget] = useState<SbrEstablishment | null>(null);
   const { t } = useTranslation();
+  const router = useRouter();
 
   // Deep-link support: a `?search=` param (e.g. from the Enterprise detail "open
   // establishment" action) seeds the search filter once on mount.
@@ -53,7 +55,7 @@ export function LegalUnitsListPage() {
     sourceCode: filters.sourceCode === '__all__' ? undefined : filters.sourceCode,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetLegalUnitsListQuery(queryParams);
+  const { data, isLoading, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
 
   const isValidationError = isError && is400(error);
   const isPermissionError = isError && is403(error);
@@ -62,16 +64,16 @@ export function LegalUnitsListPage() {
   useEffect(() => {
     // Skip 400/401/403 — each has its own handler (validation inline, session/permission via global handler)
     if (isError && !isValidationError && !isPermissionError && !isSessionError) {
-      toast.error('Failed to load legal units. Please try again.');
+      toast.error('Failed to load establishments. Please try again.');
     }
   }, [isError, isValidationError, isPermissionError]);
 
-  const handleFilterChange = useCallback((partial: Partial<LegalUnitFilters>) => {
+  const handleFilterChange = useCallback((partial: Partial<EstablishmentFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
   const handleReset = useCallback(() => {
-    setFilters(LEGAL_UNITS_DEFAULT_FILTERS);
+    setFilters(ESTABLISHMENTS_DEFAULT_FILTERS);
   }, []);
 
   // Active-filter chips — value is "active" when it isn't empty or the "__all__" sentinel
@@ -105,8 +107,10 @@ export function LegalUnitsListPage() {
     });
   }
 
-  const { canEdit: canEditLegalUnit, canSearch } = usePermission('establishments');
-  const columns = getLegalUnitsColumns((row) => setEditTarget(row), t, canEditLegalUnit);
+  const { canEdit: canEditEstablishment, canSearch, canViewDetail } = usePermission('establishments');
+  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
+  const canOpenDetail = canViewDetail || canEditEstablishment;
+  const columns = getEstablishmentsColumns((row) => setEditTarget(row), t, canEditEstablishment);
   // On 403: clear data so stale cached records don't appear alongside the error state
   const records = (isValidationError || isPermissionError || isSessionError) ? [] : (data?.data ?? []);
   const total   = (isValidationError || isPermissionError || isSessionError) ? 0 : (data?.total ?? 0);
@@ -114,8 +118,8 @@ export function LegalUnitsListPage() {
   return (
     <PageContainer>
       <PageHeader
-        title={t('pages.legalUnits.title')}
-        description={t('pages.legalUnits.description')}
+        title={t('pages.establishments.title')}
+        description={t('pages.establishments.description')}
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Building2 className="h-4 w-4" />
@@ -125,11 +129,11 @@ export function LegalUnitsListPage() {
       />
 
       {canSearch && (
-        <LegalUnitsFiltersBar
+        <EstablishmentsFiltersBar
           filters={filters}
           onFilterChange={handleFilterChange}
           onReset={handleReset}
-          isDefault={JSON.stringify(filters) === JSON.stringify(LEGAL_UNITS_DEFAULT_FILTERS)}
+          isDefault={JSON.stringify(filters) === JSON.stringify(ESTABLISHMENTS_DEFAULT_FILTERS)}
         />
       )}
 
@@ -147,9 +151,10 @@ export function LegalUnitsListPage() {
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         stickyFirstColumn
+        onRowClick={canOpenDetail ? (row) => router.push(`/establishments/${row.SBR_ID}`) : undefined}
       />
 
-      <EditLegalUnitModal
+      <EditEstablishmentModal
         frame={editTarget}
         open={!!editTarget}
         onClose={() => setEditTarget(null)}

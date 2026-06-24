@@ -116,7 +116,7 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc, c
     id: 'actions',
     header: t('columns.ACTIONS', { lng: 'en' }),
     cell: ({ row }: { row: { original: SbrAddress } }) => (
-      <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
+      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}>
         <Pencil className="h-3.5 w-3.5" />
       </Button>
     ),

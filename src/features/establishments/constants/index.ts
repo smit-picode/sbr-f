@@ -1,5 +1,5 @@
 // Field Labels for error messages and form display
-export const LEGAL_UNITS_FIELD_LABELS: Record<string, string> = {
+export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Name (English)',
   NAME_ARA: 'Name (Arabic)',
   EST_STATUS: 'Est. Status',
@@ -15,10 +15,10 @@ export const LEGAL_UNITS_FIELD_LABELS: Record<string, string> = {
 export const EST_STATUS_OPTIONS: (string | null)[] = ['Active', 'Inactive', null];
 export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'Mixed-Government'];
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
-export const LEGAL_UNITS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
+export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
 
 // Max length validations from backend validator
-export const LEGAL_UNITS_MAX_LENGTHS: Record<string, number> = {
+export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   NAME_ENU: 500,
   NAME_ARA: 500,
   NAME_ENU_SOURCE: 50,
@@ -59,7 +59,7 @@ export const LEGAL_UNITS_MAX_LENGTHS: Record<string, number> = {
   EID_ORIG_SOURCE: 50,
 };
 
-export const LEGAL_UNITS_DEFAULT_FILTERS = {
+export const ESTABLISHMENTS_DEFAULT_FILTERS = {
   page: 1,
   limit: 10,
   search: '',
@@ -73,7 +73,7 @@ export const LEGAL_UNITS_DEFAULT_FILTERS = {
 // Fields that are LOCKED (not user-editable). Everything else is editable.
 // These map to the "Is Editable = false" variables: identifiers, regulator IDs,
 // main regulator (SOURCE_CODE), all CR/CP/registration dates, and the branch flag.
-export const LEGAL_UNIT_LOCKED_FIELDS: string[] = [
+export const ESTABLISHMENT_LOCKED_FIELDS: string[] = [
   'MOCI_ORG_ID',      // Organisation ID
   'SOURCE_CODE',      // Main Regulator
   'MOCI_CR_NUM',      // Commercial Registration ID (CR)
@@ -83,4 +83,4 @@ export const LEGAL_UNIT_LOCKED_FIELDS: string[] = [
   'REG_DATE', 'REG_EXPIRY_DATE', 'REG_CANCEL_DATE',
   'MAIN_BRANCH_FLG',  // Branch Flag
 ];
-export const isLegalUnitFieldEditable = (field: string): boolean => !LEGAL_UNIT_LOCKED_FIELDS.includes(field);
+export const isEstablishmentFieldEditable = (field: string): boolean => !ESTABLISHMENT_LOCKED_FIELDS.includes(field);

@@ -1,13 +1,13 @@
 {
   "nav": {
-    "establishments": "Legal Units",
+    "establishments": "Establishments",
     "contacts": "Contacts",
     "addresses": "Addresses",
     "auditLog": "Audit Log",
     "admin": "Admin Panel",
     "sbrPanel": "SBR Panel",
     "sbrLiveFrame": "SBR Live Frame",
-    "legalUnits": "Legal Units",
+    "establishments": "Establishments",
     "enterprises": "Enterprises",
     "administration": "Administration",
     "home": "Home",
@@ -29,31 +29,32 @@
     "tasksHistory": "Tasks History",
     "profilingHistory": "Profiling History",
     "sourceData": "Source Data",
-    "sourceCatalog": "Source Catalog"
+    "sourceCatalog": "Source Catalog",
+    "legalUnits": "Legal Units"
   },
   "pageBanner": {
-    "frame": "Legal Units Management",
+    "frame": "Establishments Management",
     "contacts": "Contacts Management",
     "addresses": "Addresses Management",
     "auditLog": "Audit Log Management",
     "admin": "Admin Panel"
   },
   "pages": {
-    "legalUnits": {
-      "title": "Legal Units",
-      "description": "Statistical Business Register — Legal unit records"
+    "establishments": {
+      "title": "Establishments",
+      "description": "Statistical Business Register — Establishment records"
     },
     "contacts": {
       "title": "Contacts",
-      "description": "Business contacts associated with registered Legal Units"
+      "description": "Business contacts associated with registered Establishments"
     },
     "addresses": {
       "title": "Addresses",
-      "description": "Physical address records linked to registered Legal Units"
+      "description": "Physical address records linked to registered Establishments"
     },
     "auditLog": {
       "title": "Audit Log",
-      "description": "Track all data changes across Legal Units, Enterprises, Contacts and Addresses"
+      "description": "Track all data changes across Establishments, Enterprises, Contacts and Addresses"
     },
     "admin": {
       "title": "Admin Panel",
@@ -154,6 +155,12 @@
       "description": "Catalog of registered source data systems",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
+    },
+    "legalUnits": {
+      "title": "Legal Units",
+      "description": "Statistical Business Register — Legal Unit records",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
     }
   },
   "filters": {
@@ -206,7 +213,49 @@
     "description": "Provide a reason or description for this change. This will be stored in the Audit Log.",
     "label": "Comment",
     "required": "Comment is required before saving.",
-    "placeholder": "e.g. Corrected legal unit name based on trade license..."
+    "placeholder": "e.g. Corrected establishment name based on trade license..."
+  },
+  "contactDetail": {
+    "allContacts": "Contacts",
+    "sectionContact": "Contact",
+    "sectionChannels": "Channels",
+    "sectionMetadata": "Metadata"
+  },
+  "addressDetail": {
+    "allAddresses": "Addresses",
+    "sectionLocation": "Location",
+    "sectionReferences": "References",
+    "sectionMetadata": "Metadata"
+  },
+  "establishmentDetail": {
+    "allEstablishments": "Establishments",
+    "viewIn360": "View in Enterprise 360",
+    "composedOf": "Composed of (legal units)",
+    "viewInLegalUnits": "View in Legal Units",
+    "current": "Current",
+    "historical": "Historical"
+  },
+  "fieldHistory": {
+    "clickHint": "Click any attribute to see its full change history.",
+    "title": "Attribute history",
+    "changeRecordedOne": "1 change recorded",
+    "changeRecordedMany": "{{count}} changes recorded",
+    "providedByRegulator": "Provided by regulator",
+    "editedByUser": "Edited by user",
+    "approved": "Approved",
+    "changedBy": "Changed by",
+    "approvedBy": "Approved by",
+    "decided": "Decided",
+    "automatic": "Automatic",
+    "reason": "Reason",
+    "ownerReg": "Owner reg.",
+    "asOf": "As of",
+    "sourceProvided": "Value provided directly by the source register.",
+    "historySuffix": "history",
+    "loading": "Loading history…",
+    "failed": "Failed to load history.",
+    "none": "No history recorded.",
+    "current": "CURRENT"
   },
   "enterpriseDetail": {
     "allEnterprises": "All enterprises",
@@ -401,8 +450,8 @@
       "validTo": "Valid To"
     }
   },
-  "editLegalUnit": {
-    "title": "Edit Legal Unit",
+  "editEstablishment": {
+    "title": "Edit Establishment",
     "selectPlaceholder": "— Select —",
     "sections": {
       "identifiers": "Identifiers",
@@ -541,9 +590,9 @@
       "management": "Management"
     },
     "permLabels": {
-      "establishments": "Legal Units",
-      "establishments_view": "View Legal Units",
-      "establishments_edit": "Edit Legal Units",
+      "establishments": "Establishments",
+      "establishments_view": "View Establishments",
+      "establishments_edit": "Edit Establishments",
       "establishments_search": "Search & Filter",
       "contacts": "Contacts",
       "contacts_view": "View Contacts",

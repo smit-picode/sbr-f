@@ -89,7 +89,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           <h2 className="text-lg font-semibold text-slate-900 mb-2">{t('admin.panel.accessDenied')}</h2>
           <p className="text-sm text-slate-500">{t('admin.panel.accessDeniedDesc')}</p>
           <button
-            onClick={() => router.push('/legal-units')}
+            onClick={() => router.push('/establishments')}
             className="mt-6 flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
             style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)' }}
           >

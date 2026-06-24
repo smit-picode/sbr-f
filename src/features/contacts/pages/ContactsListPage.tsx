@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
@@ -31,6 +32,7 @@ export function ContactsListPage() {
   const [filters, setFilters] = useState<ContactFilters>(CONTACT_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrContact | null>(null);
   const { t } = useTranslation();
+  const router = useRouter();
 
   // Debounce search field
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -54,7 +56,9 @@ export function ContactsListPage() {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const { canEdit: canEditContact, canSearch } = usePermission('contacts');
+  const { canEdit: canEditContact, canSearch, canViewDetail } = usePermission('contacts');
+  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
+  const canOpenDetail = canViewDetail || canEditContact;
   const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
@@ -106,6 +110,7 @@ export function ContactsListPage() {
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         stickyFirstColumn
+        onRowClick={canOpenDetail ? (row) => router.push(`/contacts/${row.ID}`) : undefined}
       />
 
       <EditContactModal

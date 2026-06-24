@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useUpdateEnterpriseMutation } from '../api/enterprisesApi';
-import { useGetLegalUnitsListQuery } from '@/features/legalUnits/api/legalUnitsApi';
+import { useGetEstablishmentsListQuery } from '@/features/establishments/api/establishmentsApi';
 import { SECTOR_OPTIONS, EST_STATUS_OPTIONS } from '@/constants';
 import { useDebounce } from '@/hooks';
 import { toast } from '@/utils/toast';
@@ -16,7 +16,7 @@ import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { Building2, X, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { SbrEnterprise, EnterpriseEstablishment, SbrLegalUnit } from '@/types';
+import type { SbrEnterprise, EnterpriseEstablishment, SbrEstablishment } from '@/types';
 
 interface EditEnterpriseModalProps {
   enterprise: SbrEnterprise;
@@ -60,7 +60,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   }, [open, enterprise]);
 
   const debouncedSearch = useDebounce(search, 400);
-  const { data: searchData, isFetching: isSearching } = useGetLegalUnitsListQuery(
+  const { data: searchData, isFetching: isSearching } = useGetEstablishmentsListQuery(
     { search: debouncedSearch, limit: 6, page: 1 },
     { skip: !open || !debouncedSearch }
   );
@@ -75,7 +75,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
   const memberIds = useMemo(() => new Set(currentRows.map((r) => r.SBR_ID)), [currentRows]);
 
-  const searchResults: SbrLegalUnit[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
+  const searchResults: SbrEstablishment[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
 
   const hasChanges =
     name.trim() !== (enterprise.NAME_ENU ?? '').trim() ||
@@ -93,7 +93,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     }
   };
 
-  const addRow = (u: SbrLegalUnit) => {
+  const addRow = (u: SbrEstablishment) => {
     setAdded((prev) => [...prev, { SBR_ID: u.SBR_ID, NAME_ENU: u.NAME_ENU, MOCI_CR_NUM: u.MOCI_CR_NUM }]);
     setSearch('');
   };

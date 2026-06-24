@@ -68,33 +68,33 @@ export interface Translations {
 
 export const en: Translations = {
   nav: {
-    establishments: 'Legal Units',
+    establishments: 'Establishments',
     contacts: 'Contacts',
     addresses: 'Addresses',
     auditLog: 'Audit Log',
   },
   pageBanner: {
-    frame:      'Legal Units Management',
+    frame:      'Establishments Management',
     contacts:   'Contacts Management',
     addresses:  'Addresses Management',
     auditLog:   'Audit Log',
   },
   pages: {
     frame: {
-      title: 'Legal Units',
-      description: 'Statistical Business Register — Legal Unit records',
+      title: 'Establishments',
+      description: 'Statistical Business Register — Establishment records',
     },
     contacts: {
       title: 'Contacts',
-      description: 'Business contacts associated with registered Legal Units',
+      description: 'Business contacts associated with registered Establishments',
     },
     addresses: {
       title: 'Addresses',
-      description: 'Physical address records linked to registered Legal Units',
+      description: 'Physical address records linked to registered Establishments',
     },
     auditLog: {
       title: 'Audit Log',
-      description: 'Track all data changes across Legal Units, Contacts and Addresses',
+      description: 'Track all data changes across Establishments, Contacts and Addresses',
     },
   },
   filters: {
@@ -136,7 +136,7 @@ export const en: Translations = {
     description: 'Provide a reason or description for this change. This will be stored in the Audit Log.',
     label: 'Comment',
     required: 'Comment is required before saving.',
-    placeholder: 'e.g. Corrected legal unit name based on trade license...',
+    placeholder: 'e.g. Corrected establishment name based on trade license...',
   },
   login: {
     title: 'Login',

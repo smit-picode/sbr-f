@@ -1,13 +1,13 @@
 {
   "nav": {
-    "establishments": "الوحدات القانونية",
+    "establishments": "المنشآت",
     "contacts": "جهات الاتصال",
     "addresses": "العناوين",
     "auditLog": "سجل التدقيق",
     "admin": "لوحة الإدارة",
     "sbrPanel": "لوحة SBR",
     "sbrLiveFrame": "الإطار الحي للسجل",
-    "legalUnits": "الوحدات القانونية",
+    "establishments": "المنشآت",
     "enterprises": "المؤسسات",
     "administration": "الإدارة",
     "home": "الرئيسية",
@@ -29,19 +29,20 @@
     "tasksHistory": "سجل المهام",
     "profilingHistory": "سجل التوصيف",
     "sourceData": "بيانات المصدر",
-    "sourceCatalog": "كتالوج المصادر"
+    "sourceCatalog": "كتالوج المصادر",
+    "legalUnits": "الوحدات القانونية"
   },
   "pageBanner": {
-    "frame": "إدارة الوحدات القانونية",
+    "frame": "إدارة المنشآت",
     "contacts": "إدارة جهات الاتصال",
     "addresses": "إدارة العناوين",
     "auditLog": "إدارة سجل التدقيق",
     "admin": "لوحة الإدارة"
   },
   "pages": {
-    "legalUnits": {
-      "title": "الوحدات القانونية",
-      "description": "السجل الإحصائي للأعمال — سجلات الوحدات القانونية"
+    "establishments": {
+      "title": "المنشآت",
+      "description": "السجل الإحصائي للأعمال — سجلات المنشآت"
     },
     "contacts": {
       "title": "جهات الاتصال",
@@ -53,7 +54,7 @@
     },
     "auditLog": {
       "title": "سجل التدقيق",
-      "description": "تتبع جميع تغييرات البيانات عبر الوحدات القانونية والمؤسسات وجهات الاتصال والعناوين"
+      "description": "تتبع جميع تغييرات البيانات عبر المنشآت والمؤسسات وجهات الاتصال والعناوين"
     },
     "admin": {
       "title": "لوحة الإدارة",
@@ -154,6 +155,12 @@
       "description": "كتالوج أنظمة بيانات المصدر المسجلة",
       "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
       "noDataDesc": ""
+    },
+    "legalUnits": {
+      "title": "الوحدات القانونية",
+      "description": "السجل الإحصائي للأعمال — سجلات الوحدات القانونية",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
     }
   },
   "filters": {
@@ -206,7 +213,49 @@
     "description": "قدّم سببًا أو وصفًا لهذا التغيير. سيتم تخزينه في سجل التدقيق.",
     "label": "التعليق",
     "required": "التعليق مطلوب قبل الحفظ.",
-    "placeholder": "مثال: تم تصحيح اسم الوحدة القانونية بناءً على الرخصة التجارية..."
+    "placeholder": "مثال: تم تصحيح اسم المنشأة بناءً على الرخصة التجارية..."
+  },
+  "contactDetail": {
+    "allContacts": "جهات الاتصال",
+    "sectionContact": "جهة الاتصال",
+    "sectionChannels": "قنوات الاتصال",
+    "sectionMetadata": "البيانات الوصفية"
+  },
+  "addressDetail": {
+    "allAddresses": "العناوين",
+    "sectionLocation": "الموقع",
+    "sectionReferences": "المراجع",
+    "sectionMetadata": "البيانات الوصفية"
+  },
+  "establishmentDetail": {
+    "allEstablishments": "المنشآت",
+    "viewIn360": "عرض في المؤسسة 360",
+    "composedOf": "مكوّنة من (وحدات قانونية)",
+    "viewInLegalUnits": "عرض في الوحدات القانونية",
+    "current": "حالي",
+    "historical": "تاريخي"
+  },
+  "fieldHistory": {
+    "clickHint": "انقر على أي خاصية لعرض سجل تغييراتها الكامل.",
+    "title": "سجل الخاصية",
+    "changeRecordedOne": "تغيير واحد مُسجَّل",
+    "changeRecordedMany": "{{count}} تغييرات مُسجَّلة",
+    "providedByRegulator": "مقدَّم من الجهة المنظِّمة",
+    "editedByUser": "تعديل بواسطة المستخدم",
+    "approved": "مُعتمد",
+    "changedBy": "غُيّر بواسطة",
+    "approvedBy": "اعتُمد بواسطة",
+    "decided": "تاريخ القرار",
+    "automatic": "تلقائي",
+    "reason": "السبب",
+    "ownerReg": "الجهة المالكة",
+    "asOf": "اعتبارًا من",
+    "sourceProvided": "قيمة مُقدَّمة مباشرة من السجل المصدر.",
+    "historySuffix": "السجل",
+    "loading": "جارٍ تحميل السجل…",
+    "failed": "فشل تحميل السجل.",
+    "none": "لا يوجد سجل.",
+    "current": "الحالي"
   },
   "enterpriseDetail": {
     "allEnterprises": "كل المؤسسات",
@@ -401,8 +450,8 @@
       "validTo": "صالح حتى"
     }
   },
-  "editLegalUnit": {
-    "title": "تعديل الوحدة القانونية",
+  "editEstablishment": {
+    "title": "تعديل المنشأة",
     "selectPlaceholder": "— اختر —",
     "sections": {
       "identifiers": "المعرّفات",
@@ -541,9 +590,9 @@
       "management": "إدارة"
     },
     "permLabels": {
-      "establishments": "الوحدات القانونية",
-      "establishments_view": "عرض الوحدات القانونية",
-      "establishments_edit": "تعديل الوحدات القانونية",
+      "establishments": "المنشآت",
+      "establishments_view": "عرض المنشآت",
+      "establishments_edit": "تعديل المنشآت",
       "establishments_search": "البحث والتصفية",
       "contacts": "جهات الاتصال",
       "contacts_view": "عرض جهات الاتصال",

@@ -22,6 +22,9 @@ interface Props {
   contact: SbrContact | null;
   open: boolean;
   onClose: () => void;
+  // Optional: fires with the newly-created (SCD2) record after a successful save.
+  // Used by the detail page to follow the new record id; the list page omits it.
+  onSaved?: (updated: SbrContact) => void;
 }
 
 function ReadOnlyField({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -72,7 +75,7 @@ function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<st
   );
 }
 
-export function EditContactModal({ contact, open, onClose }: Props) {
+export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const [form, setForm] = useState<Partial<SbrContact>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -181,10 +184,11 @@ export function EditContactModal({ contact, open, onClose }: Props) {
       Object.entries(form).filter(([key]) => isContactFieldEditable(key))
     );
     try {
-      await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
+      const res = await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
       toast.success('Contact updated successfully!');
       setShowCommentDialog(false);
       onClose();
+      if (res?.data) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
@@ -266,10 +270,10 @@ export function EditContactModal({ contact, open, onClose }: Props) {
               disabled={!isContactFieldEditable('ROLE')}
             >
               <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''} ${!isContactFieldEditable('ROLE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
-                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+                <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
                 {CONTACT_ROLE_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>{option}</SelectItem>
                 ))}
@@ -285,10 +289,10 @@ export function EditContactModal({ contact, open, onClose }: Props) {
               disabled={!isContactFieldEditable('SOURCE_CODE')}
             >
               <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isContactFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
-                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+                <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
                 {CONTACT_SOURCE_CODE_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>{option}</SelectItem>
                 ))}

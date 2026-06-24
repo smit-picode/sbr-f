@@ -129,14 +129,14 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                  className={cn(onRowClick && 'cursor-pointer')}
+                  className={cn('group', onRowClick && 'cursor-pointer')}
                 >
                   {row.getVisibleCells().map((cell, colIndex) => {
                     const isSticky = stickyFirstColumn && colIndex === 0;
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && 'sticky start-0 z-10 bg-white', onRowClick && 'group-hover:bg-slate-50')}
+                      className={cn(isSticky && 'sticky start-0 z-10 bg-white group-hover:bg-slate-50')}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

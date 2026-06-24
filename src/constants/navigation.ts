@@ -28,11 +28,12 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.sbrLiveFrame',
     items: [
       { title: 'Home',        href: '/home',        icon: 'Home',          permKey: '',                    i18nKey: 'nav.home'        },
-      { title: 'Legal Units', href: '/legal-units',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.legalUnits', divider: true  },
+      { title: 'Establishments', href: '/establishments',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.establishments', divider: true  },
       { title: 'Enterprises', href: '/enterprises', icon: 'Orbit',         permKey: 'enterprises.view',    i18nKey: 'nav.enterprises' },
       { title: 'Enterprise Groups', href: '/enterprise-groups', icon: 'GitFork', permKey: '',             i18nKey: 'nav.enterpriseGroups' },
       { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts', divider: true    },
       { title: 'Addresses',   href: '/addresses',   icon: 'MapPin',        permKey: 'addresses.view',      i18nKey: 'nav.addresses'   },
+      { title: 'Legal Units', href: '/legal-units', icon: 'Table',         permKey: '',                    i18nKey: 'nav.legalUnits'  },
       { title: 'Audit Log',   href: '/audit-log',   icon: 'ClipboardList', permKey: 'audit_log.view',      i18nKey: 'nav.auditLog'    },
     ],
   },

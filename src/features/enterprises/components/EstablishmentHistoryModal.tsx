@@ -1,13 +1,13 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useGetLegalUnitHistoryQuery } from '@/features/legalUnits/api/legalUnitsApi';
-import type { SbrLegalUnit } from '@/types';
+import { useGetEstablishmentHistoryQuery } from '@/features/establishments/api/establishmentsApi';
+import type { SbrEstablishment } from '@/types';
 import { formatDate, nullableText } from '@/utils/format';
 
 interface EstablishmentHistoryModalProps {
   sbrId: number | null;
-  field: keyof SbrLegalUnit | null;
+  field: keyof SbrEstablishment | null;
   fieldLabel: string;
   name: string | null;
   open: boolean;
@@ -15,10 +15,10 @@ interface EstablishmentHistoryModalProps {
 }
 
 export function EstablishmentHistoryModal({ sbrId, field, fieldLabel, name, open, onClose }: EstablishmentHistoryModalProps) {
-  const { data, isLoading, isError } = useGetLegalUnitHistoryQuery(sbrId ?? 0, { skip: !open || sbrId == null });
-  const versions = (data?.data ?? []) as SbrLegalUnit[];
+  const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(sbrId ?? 0, { skip: !open || sbrId == null });
+  const versions = (data?.data ?? []) as SbrEstablishment[];
 
-  const renderValue = (v: SbrLegalUnit) => {
+  const renderValue = (v: SbrEstablishment) => {
     if (!field) return '—';
     const raw = v[field] as unknown;
     if (raw == null || raw === '') return '—';

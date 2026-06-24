@@ -21,6 +21,9 @@ interface Props {
   address: SbrAddress | null;
   open: boolean;
   onClose: () => void;
+  // Optional: fires with the newly-created (SCD2) record after a successful save.
+  // Used by the detail page to follow the new record id; the list page omits it.
+  onSaved?: (updated: SbrAddress) => void;
 }
 
 function ReadOnlyField({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -71,7 +74,7 @@ function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<st
   );
 }
 
-export function EditAddressModal({ address, open, onClose }: Props) {
+export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const [form, setForm] = useState<Partial<SbrAddress>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -176,10 +179,11 @@ export function EditAddressModal({ address, open, onClose }: Props) {
       Object.entries(form).filter(([key]) => isAddressFieldEditable(key))
     );
     try {
-      await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
+      const res = await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
       toast.success('Address updated successfully!');
       setShowCommentDialog(false);
       onClose();
+      if (res?.data) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
@@ -276,10 +280,10 @@ export function EditAddressModal({ address, open, onClose }: Props) {
               disabled={!isAddressFieldEditable('SOURCE_CODE')}
             >
               <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isAddressFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
-                <SelectValue placeholder={t('editLegalUnit.selectPlaceholder')} />
+                <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t('editLegalUnit.selectPlaceholder')}</SelectItem>
+                <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
                 {ADDRESS_SOURCE_CODE_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>{option}</SelectItem>
                 ))}

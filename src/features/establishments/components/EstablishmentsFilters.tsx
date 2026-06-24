@@ -4,18 +4,18 @@ import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
-import type { LegalUnitFilters } from '@/types';
+import type { EstablishmentFilters } from '@/types';
 import { EST_STATUS_OPTIONS, SECTOR_OPTIONS, SOURCE_CODE_OPTIONS } from '@/constants';
 import { useTranslation } from 'react-i18next';
 
-interface LegalUnitFiltersProps {
-  filters: LegalUnitFilters;
-  onFilterChange: (filters: Partial<LegalUnitFilters>) => void;
+interface EstablishmentFiltersProps {
+  filters: EstablishmentFilters;
+  onFilterChange: (filters: Partial<EstablishmentFilters>) => void;
   onReset: () => void;
   isDefault?: boolean;
 }
 
-export function LegalUnitsFiltersBar({ filters, onFilterChange, onReset, isDefault = false }: LegalUnitFiltersProps) {
+export function EstablishmentsFiltersBar({ filters, onFilterChange, onReset, isDefault = false }: EstablishmentFiltersProps) {
   const { t } = useTranslation();
 
   return (

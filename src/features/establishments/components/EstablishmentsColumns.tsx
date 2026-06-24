@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrLegalUnit } from '@/types';
+import type { SbrEstablishment } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ function DateCell({ value }: { value: string | null | undefined }) {
 
 type TFunc = (key: string, options?: { lng?: string }) => string;
 
-export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFunc, canEdit = true): ColumnDef<SbrLegalUnit>[] => [
+export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void, t: TFunc, canEdit = true): ColumnDef<SbrEstablishment>[] => [
   // ── Core identifiers
   {
     accessorKey: 'SBR_ID',
@@ -380,10 +380,10 @@ export const getLegalUnitsColumns = (onEdit: (row: SbrLegalUnit) => void, t: TFu
   ...(canEdit ? [{
     id: 'actions',
     header: t('columns.ACTIONS', { lng: 'en' }),
-    cell: ({ row }: { row: { original: SbrLegalUnit } }) => (
-      <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
+    cell: ({ row }: { row: { original: SbrEstablishment } }) => (
+      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}>
         <Pencil className="h-3.5 w-3.5 mr-1" />
       </Button>
     ),
-  } as ColumnDef<SbrLegalUnit>] : []),
+  } as ColumnDef<SbrEstablishment>] : []),
 ];
