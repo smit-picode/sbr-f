@@ -1,41 +1,36 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
-import { useGetEstablishmentHistoryQuery } from '@/features/establishments/api/establishmentsApi';
-import type { SbrEstablishment } from '@/types';
-import { formatDate } from '@/utils/format';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { History, User, Landmark, X } from 'lucide-react';
+import { formatDate } from '@/utils/format';
+import type { HistoryVersion } from './FieldHistoryModal';
 
-interface AuditMeta {
-  columns: string[];
-  reason: string | null;
-  changedBy: string | null;
-  approvedBy: string | null;
-  decidedAt: string | null;
-  approved: boolean;
-  operation: string | null;
-}
-type Version = SbrEstablishment & { _audit?: AuditMeta | null };
-
-interface EstablishmentHistoryPopoverProps {
-  sbrId: number;
-  field: keyof SbrEstablishment;
+interface FieldHistoryPopoverProps {
+  versions: HistoryVersion[];
+  fieldKey: string;
   fieldLabel: string;
+  isLoading?: boolean;
+  isError?: boolean;
   onClose: () => void;
 }
 
-// Anchored attribute-history popover — rendered inside a `relative` field wrapper, opens
-// just below the clicked clock icon (tooltip-style, not a full-screen dialog).
-export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose }: EstablishmentHistoryPopoverProps) {
+// Anchored attribute-history popover (tooltip-style). Rendered inside a `relative` field
+// wrapper, it opens just below the clicked clock icon — replaces the full-screen drawer.
+export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, onClose }: FieldHistoryPopoverProps) {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(sbrId);
-  const versions = (data?.data ?? []) as Version[];
   const ref = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
 
-  // Flip the popover upward when it would spill past the viewport bottom and there's room above.
-  // useLayoutEffect runs before paint so it appears in its final position (no visible jump).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  // If the downward-opening popover spills past the viewport bottom and there's room above
+  // the anchor, flip it to open upward instead. Run BEFORE paint (useLayoutEffect) so the
+  // popover appears directly in its final position — no visible jump from down to up.
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -43,20 +38,20 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
     setOpenUp(rect.bottom > window.innerHeight - 8 && rect.top - rect.height > 8);
   }, [versions, isLoading, isError]);
 
-  const valueOf = (v: Version | undefined) => {
+  const valueOf = (v: HistoryVersion | undefined) => {
     if (!v) return '—';
-    const raw = v[field] as unknown;
+    const raw = (v as Record<string, unknown>)[fieldKey];
     if (raw == null || raw === '') return '—';
     return typeof raw === 'number' ? raw.toLocaleString() : String(raw);
   };
-  const norm = (v: Version) => {
-    const raw = v[field] as unknown;
+  const norm = (v: HistoryVersion) => {
+    const raw = (v as Record<string, unknown>)[fieldKey];
     return raw == null || raw === '' ? '' : String(raw);
   };
   // Collapse versions where this attribute's value did not change (versions arrive newest-first).
   const changes = versions.filter((v, i) => i === versions.length - 1 || norm(v) !== norm(versions[i + 1]));
 
-  const isUserEdit = (v: Version) => !!(v._audit && v._audit.columns.includes(field as string));
+  const isUserEdit = (v: HistoryVersion) => !!(v._audit && v._audit.columns.includes(fieldKey));
 
   return (
     <div
@@ -64,15 +59,15 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
       className={`absolute start-0 z-50 w-80 max-w-[90vw] rounded-lg border border-slate-200 bg-white shadow-xl ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
     >
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
-          <History className="h-4 w-4 text-[#A71D3A]" />
+        <div className="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-800">
+          <History className="h-4 w-4 shrink-0 text-[#A71D3A]" />
           {t('fieldHistory.title', { defaultValue: 'Attribute history' })}
-          <span className="font-normal text-slate-400">{fieldLabel}</span>
+          <span className="truncate font-normal text-slate-400">{fieldLabel}</span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-slate-400 transition-colors hover:text-slate-600"
+          className="shrink-0 text-slate-400 transition-colors hover:text-slate-600"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X className="h-4 w-4" />

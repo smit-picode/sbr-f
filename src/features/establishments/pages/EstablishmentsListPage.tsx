@@ -8,9 +8,10 @@ import { DataTable } from '@/components/table/DataTable';
 import { getEstablishmentsColumns } from '../components/EstablishmentsColumns';
 import { EstablishmentsFiltersBar } from '../components/EstablishmentsFilters';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
-import { ESTABLISHMENTS_DEFAULT_FILTERS } from '../constants';
+import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS } from '../constants';
 import type { EstablishmentFilters, SbrEstablishment } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -31,6 +32,7 @@ function is401(error: unknown): boolean {
 
 export function EstablishmentsListPage() {
   const [filters, setFilters] = useState<EstablishmentFilters>(ESTABLISHMENTS_DEFAULT_FILTERS);
+  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const [editTarget, setEditTarget] = useState<SbrEstablishment | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
@@ -47,12 +49,17 @@ export function EstablishmentsListPage() {
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
+  const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
+
   const queryParams = cleanParams({
     ...filters,
     search: debouncedSearch,
     estStatus: filters.estStatus === '__all__' ? undefined : filters.estStatus,
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
     sourceCode: filters.sourceCode === '__all__' ? undefined : filters.sourceCode,
+    columnFilters: activeColumnFilters.length
+      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
+      : undefined,
   });
 
   const { data, isLoading, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
@@ -74,6 +81,12 @@ export function EstablishmentsListPage() {
 
   const handleReset = useCallback(() => {
     setFilters(ESTABLISHMENTS_DEFAULT_FILTERS);
+    setColumnFilters([]);
+  }, []);
+
+  const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
+    setColumnFilters(rows);
+    setFilters((prev) => ({ ...prev, page: 1 }));
   }, []);
 
   // Active-filter chips — value is "active" when it isn't empty or the "__all__" sentinel
@@ -135,6 +148,10 @@ export function EstablishmentsListPage() {
           onReset={handleReset}
           isDefault={JSON.stringify(filters) === JSON.stringify(ESTABLISHMENTS_DEFAULT_FILTERS)}
         />
+      )}
+
+      {canSearch && (
+        <ColumnFilters columns={ESTABLISHMENT_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

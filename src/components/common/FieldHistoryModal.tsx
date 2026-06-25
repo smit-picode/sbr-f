@@ -131,19 +131,22 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
               <p className="text-[12px] text-slate-400">{countLabel}</p>
 
               {/* Timeline */}
-              <div className="space-y-2">
+              <div className="relative ps-5">
+                <div className="absolute bottom-1.5 start-[6px] top-1.5 w-px bg-slate-200" />
                 {changeVersions.map((v, i) => {
                   const on = i === selected;
                   const userEdit = isUserEdit(v);
+                  const dotColor = userEdit ? (v._audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
                   return (
                     <button
                       key={v.ID ?? i}
                       type="button"
                       onClick={() => setSelected(i)}
-                      className={`block w-full rounded-xl border p-3 text-start transition-colors ${on ? 'border-[#A71D3A]/20 bg-[#FCF4F6]' : 'border-slate-200 hover:bg-slate-50'}`}
+                      className={`relative mb-2 block w-full rounded-xl border px-3 py-2.5 text-start transition-colors ${on ? 'border-[#A71D3A]/20 bg-[#FCF4F6]' : 'border-slate-200 hover:bg-slate-50'}`}
                     >
+                      <span className="absolute -start-[14px] top-3.5 h-2.5 w-2.5 rounded-full border-2 border-white" style={{ background: dotColor }} />
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[13px] font-bold text-slate-800">{userEdit ? editedByUser : providedByRegulator}</span>
+                        <span className={`text-[13px] font-bold ${on ? 'text-[#A71D3A]' : 'text-slate-700'}`}>{userEdit ? editedByUser : providedByRegulator}</span>
                         {userEdit && v._audit?.approved && <ApprovedBadge />}
                       </div>
                       {userEdit ? (

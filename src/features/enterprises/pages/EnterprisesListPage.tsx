@@ -5,10 +5,11 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
 import { getEnterpriseColumns } from '../components/EnterpriseColumns';
 import { EnterprisesFiltersBar } from '../components/EnterprisesFilters';
 import { useGetEnterprisesListQuery } from '../api/enterprisesApi';
-import { ENTERPRISE_DEFAULT_FILTERS } from '../constants';
+import { ENTERPRISE_DEFAULT_FILTERS, ENTERPRISE_FILTER_COLUMNS } from '../constants';
 import type { EnterpriseFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -29,6 +30,7 @@ function is403(error: unknown): boolean {
 
 export function EnterprisesListPage() {
   const [filters, setFilters] = useState<EnterpriseFilters>(ENTERPRISE_DEFAULT_FILTERS);
+  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -37,11 +39,16 @@ export function EnterprisesListPage() {
 
   const { canSearch, canViewDetail } = usePermission('enterprises');
 
+  const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
+
   const queryParams = cleanParams({
     ...filters,
     search: debouncedSearch,
     status: filters.status === '__all__' ? undefined : filters.status,
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
+    columnFilters: activeColumnFilters.length
+      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
+      : undefined,
   });
 
   const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery(queryParams);
@@ -61,6 +68,12 @@ export function EnterprisesListPage() {
 
   const handleReset = useCallback(() => {
     setFilters(ENTERPRISE_DEFAULT_FILTERS);
+    setColumnFilters([]);
+  }, []);
+
+  const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
+    setColumnFilters(rows);
+    setFilters((prev) => ({ ...prev, page: 1 }));
   }, []);
 
   const activeChips: FilterChip[] = [];
@@ -110,6 +123,10 @@ export function EnterprisesListPage() {
           onReset={handleReset}
           isDefault={JSON.stringify(filters) === JSON.stringify(ENTERPRISE_DEFAULT_FILTERS)}
         />
+      )}
+
+      {canSearch && (
+        <ColumnFilters columns={ENTERPRISE_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

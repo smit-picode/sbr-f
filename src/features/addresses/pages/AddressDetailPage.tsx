@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -9,7 +9,7 @@ import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EditAddressModal } from '../components/EditAddressModal';
 import { useGetAddressByIdQuery, useGetAddressHistoryQuery } from '../api/addressesApi';
-import { FieldHistoryModal } from '@/components/common/FieldHistoryModal';
+import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
@@ -19,20 +19,49 @@ function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
 }
 
-function DetailField({ label, value, mono, onHistory }: { label: string; value: React.ReactNode; mono?: boolean; onHistory?: () => void }) {
+function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; mono?: boolean; canViewHistory: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Lazily load the record's change history only while this attribute's popover is open
+  const { data, isLoading, isError } = useGetAddressHistoryQuery(recordId, { skip: !open });
+
+  // Close the anchored popover on outside click (the clock button itself toggles)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
   return (
-    <button
-      type="button"
-      onClick={onHistory}
-      disabled={!onHistory}
-      className="group w-full min-w-0 text-start disabled:cursor-default"
-    >
-      <div className="flex items-center gap-1.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-        {onHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
-      </div>
-      <div className={`mt-0.5 truncate text-sm font-semibold text-slate-800 ${mono ? 'font-mono' : ''}`}>{value}</div>
-    </button>
+    <div className="relative min-w-0" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group w-full min-w-0 text-start disabled:cursor-default"
+      >
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+        </div>
+        <div className={`mt-0.5 truncate text-sm font-semibold text-slate-800 ${mono ? 'font-mono' : ''}`}>{value}</div>
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -72,15 +101,10 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
   const { isArabic } = useLanguage();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
-  const [histField, setHistField] = useState<{ key: string; label: string } | null>(null);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('addresses');
   // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetAddressByIdQuery(addressId, { skip: !canOpenDetail });
-  // Lazily fetch the record's change history only once the user opens an attribute's history
-  const { data: historyData, isLoading: histLoading, isError: histError } = useGetAddressHistoryQuery(addressId, { skip: !histField || !canViewHistory });
-  // The per-attribute history feature is gated by a single dedicated permission (view_history)
-  const openHistory = canViewHistory ? (key: string, label: string) => setHistField({ key, label }) : undefined;
 
   const BackLink = (
     <button onClick={() => router.push('/addresses')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
@@ -187,35 +211,25 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
         {locationFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionLocation')}>
             {locationFields.map((f) => (
-              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
             ))}
           </DetailCard>
         )}
         {referenceFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionReferences')}>
             {referenceFields.map((f) => (
-              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
             ))}
           </DetailCard>
         )}
         {metaFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionMetadata')}>
             {metaFields.map((f) => (
-              <DetailField key={f.k} label={f.label} value={f.value} mono={f.mono} onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
             ))}
           </DetailCard>
         )}
       </div>
-
-      <FieldHistoryModal
-        versions={historyData?.data ?? []}
-        fieldKey={histField?.key ?? null}
-        fieldLabel={histField?.label ?? ''}
-        open={!!histField}
-        isLoading={histLoading}
-        isError={histError}
-        onClose={() => setHistField(null)}
-      />
 
       <EditAddressModal
         address={editOpen ? a : null}

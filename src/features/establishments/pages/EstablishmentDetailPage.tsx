@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -10,12 +10,12 @@ import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentByIdQuery, useGetEstablishmentHistoryQuery } from '../api/establishmentsApi';
-import { FieldHistoryModal } from '@/components/common/FieldHistoryModal';
+import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import type { SbrEstablishment } from '@/types';
-import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight, Activity } from 'lucide-react';
 
 function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
@@ -34,6 +34,9 @@ const SRC_COLOR: Record<string, string> = {
   MOCI: '#A71D3A', QFC: '#1a3a52', QFZ: '#2B7A9E', QSTP: '#B5742B', MOM_FARM: '#1F8A5B',
 };
 
+// Node colours cycled across the horizontal lifecycle timeline (oldest → newest).
+const LIFECYCLE_DOT_COLORS: string[] = ['#A71D3A', '#B5742B', '#1a3a52', '#1F8A5B'];
+
 type LegalUnit = { source: string; table: string; idValue: string; current: boolean };
 
 interface FieldEntry {
@@ -45,16 +48,50 @@ interface FieldEntry {
   show: boolean;
 }
 
-function DetailField({ label, value, source, mono, onHistory }: { label: string; value: React.ReactNode; source?: string | null; mono?: boolean; onHistory?: () => void }) {
+function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHistory }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; source?: string | null; mono?: boolean; canViewHistory: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Lazily load the record's change history only while this attribute's popover is open
+  const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(recordId, { skip: !open });
+
+  // Close the anchored popover on outside click (the clock button itself toggles)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
   return (
-    <button type="button" onClick={onHistory} disabled={!onHistory} className="group w-full min-w-0 text-start disabled:cursor-default">
-      <div className="flex items-center gap-1.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-        {onHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
-      </div>
-      <div className={`mt-0.5 text-sm font-semibold text-slate-800 ${mono ? 'break-all font-mono text-[12px]' : ''}`}>{value}</div>
-      {!isEmpty(source) && <p className="mt-0.5 text-[9.5px] font-semibold uppercase tracking-wide text-slate-400">· {source}</p>}
-    </button>
+    <div className="relative min-w-0" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group w-full min-w-0 text-start disabled:cursor-default"
+      >
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+        </div>
+        <div className={`mt-0.5 text-sm font-semibold text-slate-800 ${mono ? 'break-all font-mono text-[12px]' : ''}`}>{value}</div>
+        {!isEmpty(source) && <p className="mt-0.5 text-[9.5px] font-semibold uppercase tracking-wide text-slate-400">· {source}</p>}
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -94,12 +131,9 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const { isArabic } = useLanguage();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
-  const [histField, setHistField] = useState<{ key: string; label: string } | null>(null);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
-  const { data: historyData, isLoading: histLoading, isError: histError } = useGetEstablishmentHistoryQuery(sbrId, { skip: !histField || !canViewHistory });
-  const openHistory = canViewHistory ? (key: string, label: string) => setHistField({ key, label }) : undefined;
 
   const BackLink = (
     <button onClick={() => router.push('/establishments')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
@@ -148,6 +182,16 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     if (isEmpty(idValue)) return [];
     return [{ source: sc, table: m.table, idValue: String(idValue), current: isEmpty(e.VALID_TO) }];
   })();
+
+  // Lifecycle events — synthesised from this establishment's own register / permit dates.
+  const lifecycleEvents = [
+    { title: 'Entered register', date: e.VALID_FROM },
+    { title: 'Commercial registration issued', date: e.CR_ISSUE_DATE },
+    { title: 'Commercial permit issued', date: e.CP_ISSUE_DATE },
+    { title: 'Registration issued', date: e.REG_DATE },
+  ]
+    .filter((ev) => !isEmpty(ev.date))
+    .sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
 
   // Field builder — hides empty values, attaches the source sub-label and history key.
   const F = (
@@ -212,11 +256,13 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         {fields.map((f) => (
           <DetailField
             key={f.k}
+            recordId={sbrId}
+            fieldKey={f.k}
             label={f.label}
             value={f.value}
             source={f.source}
             mono={f.mono}
-            onHistory={openHistory ? () => openHistory(f.k, f.label) : undefined}
+            canViewHistory={canViewHistory}
           />
         ))}
       </DetailCard>
@@ -236,10 +282,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 {e.EST_STATUS && <StatusBadge status={e.EST_STATUS} className="rounded-md" />}
               </div>
               <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
-              {e.NAME_ARA && <p className="truncate text-sm text-white/80" dir="rtl">{e.NAME_ARA}</p>}
+              {e.NAME_ARA && <p className="truncate text-sm text-white/80">{e.NAME_ARA}</p>}
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <Button variant="outline" onClick={() => router.push('/enterprise-360')} className="border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <Button variant="outline" onClick={() => router.push(e.ASSOCIATED_ENTERPRISE_ID ? `/enterprises/${e.ASSOCIATED_ENTERPRISE_ID}` : '/enterprises')} className="border-white/30 bg-white/10 text-white hover:bg-white/20">
                 <Orbit className="mr-1.5 h-4 w-4" /> {t('establishmentDetail.viewIn360')}
               </Button>
               {canEdit && (
@@ -267,6 +313,38 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
           { icon: <Database className="h-4 w-4" />, label: 'Source', value: e.SOURCE_CODE },
         ]}
       />
+
+      {lifecycleEvents.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+            <Activity className="h-4 w-4 text-[#A71D3A]" />
+            <h2 className="text-sm font-semibold text-slate-800">{t('establishmentDetail.lifecycleEvents')}</h2>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{lifecycleEvents.length}</span>
+          </div>
+          <div className="p-4">
+            <ol className="flex items-start">
+              {lifecycleEvents.map((ev, i) => {
+                const color = LIFECYCLE_DOT_COLORS[i % LIFECYCLE_DOT_COLORS.length];
+                const isLast = i === lifecycleEvents.length - 1;
+                return (
+                  <li key={i} className="relative min-w-0 flex-1">
+                    {/* Connecting rail from this node to the next (hidden on the last node) */}
+                    {!isLast && (
+                      <span className="absolute top-[5px] h-px w-full bg-slate-200 start-[5px]" />
+                    )}
+                    <span
+                      className="relative z-10 block h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                    <p className="mt-2 pe-4 text-sm font-medium" style={{ color }}>{ev.title}</p>
+                    <p className="mt-0.5 pe-4 text-xs text-slate-400">{formatDate(ev.date)}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </div>
+      )}
 
       {legalUnits.length > 0 && (
         <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -324,16 +402,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
           {renderCard('Registration', registration)}
         </div>
       </div>
-
-      <FieldHistoryModal
-        versions={historyData?.data ?? []}
-        fieldKey={histField?.key ?? null}
-        fieldLabel={histField?.label ?? ''}
-        open={!!histField}
-        isLoading={histLoading}
-        isError={histError}
-        onClose={() => setHistField(null)}
-      />
 
       <EditEstablishmentModal frame={editOpen ? e : null} open={editOpen} onClose={() => setEditOpen(false)} />
     </PageContainer>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -11,12 +11,12 @@ import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { useGetEnterpriseByIdQuery } from '../api/enterprisesApi';
 import { getIsicLabel } from '../constants';
-import { EstablishmentHistoryModal } from '../components/EstablishmentHistoryModal';
+import { EstablishmentHistoryPopover } from '../components/EstablishmentHistoryModal';
 import { EditEnterpriseModal } from '../components/EditEnterpriseModal';
 import type {
   EnterpriseEstablishment,
   EnterpriseChangeHistoryEntry,
-  EnterpriseLifecycleEvent,
+  EnterpriseProfilingChange,
   SbrEstablishment,
 } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
@@ -24,7 +24,7 @@ import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import {
   ChevronLeft, ChevronRight, Target, Briefcase, Building2, Users, MapPin,
-  Activity, GitBranch, ClipboardList, ArrowUpRight, History, Pencil,
+  GitBranch, ClipboardList, ArrowUpRight, History, Pencil,
 } from 'lucide-react';
 
 const MAROON = '#A71D3A';
@@ -69,16 +69,43 @@ function IsicChip({ code, fromText, primary }: { code: string; fromText?: string
   );
 }
 
-function FieldWithHistory({ label, value, onHistory }: { label: string; value: React.ReactNode; onHistory: () => void }) {
+function FieldWithHistory({ label, value, sbrId, field, fieldLabel }: {
+  label: string;
+  value: React.ReactNode;
+  sbrId: number;
+  field: keyof SbrEstablishment;
+  fieldLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Close the anchored popover on outside click / Escape (the clock button itself toggles)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   return (
-    <div className="min-w-0">
+    <div className="relative min-w-0" ref={wrapRef}>
       <p className="text-xs text-slate-500">{label}</p>
       <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
         <span className="truncate">{value}</span>
-        <button type="button" onClick={onHistory} className="text-slate-300 transition-colors hover:text-[#A71D3A]" title="View history">
+        <button type="button" onClick={() => setOpen((o) => !o)} className="text-slate-300 transition-colors hover:text-[#A71D3A]" title="View history">
           <History className="h-3.5 w-3.5" />
         </button>
       </div>
+      {open && (
+        <EstablishmentHistoryPopover sbrId={sbrId} field={field} fieldLabel={fieldLabel} onClose={() => setOpen(false)} />
+      )}
     </div>
   );
 }
@@ -86,7 +113,6 @@ function FieldWithHistory({ label, value, onHistory }: { label: string; value: R
 function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstablishment; headSbrId: number | null; t: (k: string, o?: { lng?: string }) => string; onOpen: (est: EnterpriseEstablishment) => void }) {
   const isMain = est.SBR_ID === headSbrId || est.MAIN_BRANCH_FLG === 'MAIN';
   const activitiesCount = est.ISIC_CODE ? 1 : 0;
-  const [hist, setHist] = useState<{ key: keyof SbrEstablishment; label: string } | null>(null);
   return (
     <div className="rounded-lg border border-slate-200">
       {/* header */}
@@ -109,20 +135,11 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
       {/* body */}
       <div className="space-y-3 p-4">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} onHistory={() => setHist({ key: 'SECTOR_ID', label: t('enterpriseDetail.sector') })} />
-          <FieldWithHistory label={t('enterpriseDetail.legalType')} value={nullableText(est.LEGAL_TYPE)} onHistory={() => setHist({ key: 'LEGAL_TYPE', label: t('enterpriseDetail.legalType') })} />
-          <FieldWithHistory label={t('enterpriseDetail.employees')} value={est.EMPLOYMENT_COUNT != null ? est.EMPLOYMENT_COUNT.toLocaleString() : '—'} onHistory={() => setHist({ key: 'EMPLOYMENT_COUNT', label: t('enterpriseDetail.employees') })} />
+          <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} sbrId={est.SBR_ID} field="SECTOR_ID" fieldLabel={t('enterpriseDetail.sector')} />
+          <FieldWithHistory label={t('enterpriseDetail.legalType')} value={nullableText(est.LEGAL_TYPE)} sbrId={est.SBR_ID} field="LEGAL_TYPE" fieldLabel={t('enterpriseDetail.legalType')} />
+          <FieldWithHistory label={t('enterpriseDetail.employees')} value={est.EMPLOYMENT_COUNT != null ? est.EMPLOYMENT_COUNT.toLocaleString() : '—'} sbrId={est.SBR_ID} field="EMPLOYMENT_COUNT" fieldLabel={t('enterpriseDetail.employees')} />
           <SummaryCell label={t('enterpriseDetail.activities')} value={activitiesCount} />
         </div>
-
-        <EstablishmentHistoryModal
-          sbrId={est.SBR_ID}
-          field={hist?.key ?? null}
-          fieldLabel={hist?.label ?? ''}
-          name={est.NAME_ENU}
-          open={!!hist}
-          onClose={() => setHist(null)}
-        />
 
         {est.ISIC_CODE && (
           <div>
@@ -178,21 +195,6 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
   );
 }
 
-function LifecycleTimeline({ events }: { events: EnterpriseLifecycleEvent[] }) {
-  if (!events.length) return <p className="text-sm text-slate-400">—</p>;
-  return (
-    <ul className="space-y-3">
-      {events.map((ev, i) => (
-        <li key={i} className="relative pl-5">
-          <span className="absolute left-0 top-1.5 h-2 w-2 rounded-full" style={{ backgroundColor: MAROON }} />
-          <p className="text-sm font-medium text-slate-800">{ev.TITLE}</p>
-          <p className="text-xs text-slate-500">{formatDate(ev.DATE)} · {ev.REF}</p>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[] }) {
   if (!entries.length) return <p className="text-sm text-slate-400">No change history recorded.</p>;
   return (
@@ -217,6 +219,52 @@ function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[
               {e.changedByUser?.EMAIL && ` · ${e.changedByUser.EMAIL}`}
               {e.approvedByUser?.EMAIL && ` → ${e.approvedByUser.EMAIL}`}
             </p>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[] }) {
+  return (
+    <ul className="mt-3">
+      {entries.map((e, i) => {
+        const added = e.ACTION === 'ADD';
+        const isLast = i === entries.length - 1;
+        return (
+          <li key={e.ID} className="relative flex gap-3 pb-4 last:pb-0">
+            {/* Timeline rail: dot + connecting vertical line to the next entry */}
+            <div className="relative flex w-2.5 flex-shrink-0 justify-center">
+              {!isLast && (
+                <span
+                  className="absolute left-1/2 top-2 w-px -translate-x-1/2 bg-slate-200"
+                  style={{ height: 'calc(100% + 0.5rem)' }}
+                />
+              )}
+              <span
+                className="z-10 mt-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-white"
+                style={{ backgroundColor: added ? '#059669' : '#dc2626' }}
+              />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${added ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                  {added ? '+ Added' : '− Removed'}
+                </span>
+                <span className="text-sm font-medium text-slate-800">
+                  {e.SBR_ID != null && <span className="font-mono text-red-600">#{e.SBR_ID}</span>}
+                  {e.NAME ? ` — ${e.NAME}` : ''}{e.CR ? ` (${e.CR})` : ''}
+                </span>
+              </div>
+              {e.REASON && <p className="mt-0.5 text-xs italic text-slate-500">“{e.REASON}”</p>}
+              <p className="mt-0.5 text-xs text-slate-400">
+                {formatDate(e.CREATED_AT)}
+                {e.changedByUser?.EMAIL && ` · ${e.changedByUser.EMAIL}`}
+                {e.approvedByUser?.EMAIL && ` → ${e.approvedByUser.EMAIL}`}
+              </p>
+            </div>
           </li>
         );
       })}
@@ -268,7 +316,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
     );
   }
 
-  const { enterprise, establishments, secondaryActivities, lifecycleEvents, changeHistory } = data.data;
+  const { enterprise, establishments, secondaryActivities, changeHistory, profilingChanges } = data.data;
 
   return (
     <PageContainer>
@@ -365,13 +413,11 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
 
         {/* Right rail */}
         <div className="space-y-4">
-          <SectionCard title={t('enterpriseDetail.lifecycleEvents')} count={lifecycleEvents.length} icon={<Activity className="h-4 w-4" />}>
-            <LifecycleTimeline events={lifecycleEvents} />
-          </SectionCard>
-
-          <SectionCard title={t('enterpriseDetail.profilingChanges')} count={0} icon={<GitBranch className="h-4 w-4" />}>
+          <SectionCard title={t('enterpriseDetail.profilingChanges')} count={profilingChanges.length} icon={<GitBranch className="h-4 w-4" />}>
             <p className="text-xs text-slate-500">{t('enterpriseDetail.profilingDesc')}</p>
-            <p className="mt-2 text-sm text-slate-400">{t('enterpriseDetail.noProfilingChanges')}</p>
+            {profilingChanges.length > 0
+              ? <ProfilingChangesList entries={profilingChanges} />
+              : <p className="mt-2 text-sm text-slate-400">{t('enterpriseDetail.noProfilingChanges')}</p>}
           </SectionCard>
 
           <SectionCard title={t('enterpriseDetail.changeHistory')} count={changeHistory.length} icon={<ClipboardList className="h-4 w-4" />}>

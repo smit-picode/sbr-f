@@ -68,6 +68,8 @@ export interface SbrEstablishment {
   // Validity
   VALID_FROM: string | null;
   VALID_TO: string | null;
+  // The enterprise this establishment belongs to (returned by the detail endpoint only)
+  ASSOCIATED_ENTERPRISE_ID?: number | null;
 }
 
 export interface EstablishmentFilters {
@@ -79,4 +81,5 @@ export interface EstablishmentFilters {
   isicCode?: string;
   sourceCode?: string;
   mainBranchFLG?: string;
+  columnFilters?: string;
 }

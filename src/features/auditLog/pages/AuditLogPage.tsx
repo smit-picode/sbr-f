@@ -7,7 +7,7 @@ import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAuditLogColumns } from '../components/AuditLogColumns';
+import { getAuditLogColumns, prettyTableName } from '../components/AuditLogColumns';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { useGetAuditLogListQuery } from '../api/auditLogApi';
 import type { AuditLogFilters } from '@/types';
@@ -20,12 +20,11 @@ import { usePermission } from '@/hooks';
 
 const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 10 };
 
+// Values stay as the real table names (sent to the backend); labels are display-only.
+const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
 const TABLE_OPTIONS = [
   { label: 'All Tables', value: '__all__' },
-  { label: 'SBR_ESTABLISHMENTS', value: 'SBR_ESTABLISHMENTS' },
-  { label: 'SBR_ENTERPRISES', value: 'SBR_ENTERPRISES' },
-  { label: 'SBR_CONTACTS', value: 'SBR_CONTACTS' },
-  { label: 'SBR_ADDRESSES', value: 'SBR_ADDRESSES' },
+  ...TABLE_VALUES.map((v) => ({ label: prettyTableName(v), value: v })),
 ];
 
 function is400(error: unknown): boolean {
@@ -73,7 +72,7 @@ export function AuditLogPage() {
   if (filters.tableName) {
     activeChips.push({
       key: 'tableName',
-      label: `${t('filters.table', { defaultValue: 'Table' })}: ${filters.tableName}`,
+      label: `${t('filters.table', { defaultValue: 'Table' })}: ${prettyTableName(filters.tableName)}`,
       onRemove: () => handleFilterChange({ tableName: undefined, page: 1 }),
     });
   }

@@ -6,6 +6,17 @@ export const ENTERPRISE_DEFAULT_FILTERS = {
   sectorId: '',
 } as const;
 
+// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
+// the backend ENTERPRISE_FILTER_COLUMNS allow-list (enterprises.controller).
+export const ENTERPRISE_FILTER_COLUMNS: { value: string; label: string }[] = [
+  { value: 'ENTERPRISE_ID', label: 'Enterprise ID' },
+  { value: 'NAME_ENU', label: 'Name (EN)' },
+  { value: 'NAME_ARA', label: 'Name (AR)' },
+  { value: 'STATUS', label: 'Status' },
+  { value: 'SECTOR_ID', label: 'Sector' },
+  { value: 'MOCI_CR_NUM', label: 'Main CR' },
+];
+
 // ISIC Rev.4 code → activity title. The DB stores only the code, so this provides
 // the human-readable label shown in the Economic activity / Registered activities UI.
 export const ISIC_LABELS: Record<string, string> = {

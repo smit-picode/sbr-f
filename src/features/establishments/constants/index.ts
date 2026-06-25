@@ -70,6 +70,19 @@ export const ESTABLISHMENTS_DEFAULT_FILTERS = {
   mainBranchFLG: '',
 } as const;
 
+// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
+// the backend ESTABLISHMENT_FILTER_COLUMNS allow-list (establishments.controller).
+export const ESTABLISHMENT_FILTER_COLUMNS: { value: string; label: string }[] = [
+  { value: 'SBR_ID', label: 'SBR ID' },
+  { value: 'NAME_ENU', label: 'Name (EN)' },
+  { value: 'NAME_ARA', label: 'Name (AR)' },
+  { value: 'EST_STATUS', label: 'Status' },
+  { value: 'SECTOR_ID', label: 'Sector' },
+  { value: 'LEGAL_TYPE', label: 'Legal type' },
+  { value: 'SOURCE_CODE', label: 'Source' },
+  { value: 'MOCI_CR_NUM', label: 'MOCI CR' },
+];
+
 // Fields that are LOCKED (not user-editable). Everything else is editable.
 // These map to the "Is Editable = false" variables: identifiers, regulator IDs,
 // main regulator (SOURCE_CODE), all CR/CP/registration dates, and the branch flag.

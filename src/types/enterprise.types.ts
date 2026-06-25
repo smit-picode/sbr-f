@@ -43,6 +43,7 @@ export interface EnterpriseFilters {
   search?: string;
   status?: string;
   sectorId?: string;
+  columnFilters?: string;
 }
 
 // ── Enterprise detail (Enterprise 360) ──────────────────────────────────────
@@ -97,11 +98,23 @@ export interface EnterpriseChangeHistoryEntry {
   approvedByUser?: EnterpriseChangeHistoryUser | null;
 }
 
+export interface EnterpriseProfilingChange {
+  ID: number;
+  ACTION: 'ADD' | 'REMOVE';
+  SBR_ID: number | null;
+  NAME: string | null;
+  CR: string | null;
+  REASON: string;
+  CREATED_AT: string;
+  changedByUser?: EnterpriseChangeHistoryUser | null;
+  approvedByUser?: EnterpriseChangeHistoryUser | null;
+}
+
 export interface EnterpriseDetail {
   enterprise: SbrEnterprise;
   establishments: EnterpriseEstablishment[];
   secondaryActivities: EnterpriseSecondaryActivity[];
   lifecycleEvents: EnterpriseLifecycleEvent[];
   changeHistory: EnterpriseChangeHistoryEntry[];
-  profilingChanges: unknown[];
+  profilingChanges: EnterpriseProfilingChange[];
 }

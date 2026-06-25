@@ -9,6 +9,18 @@ const TABLE_COLORS: Record<string, string> = {
   SBR_ADDRESSES:   'bg-purple-100 text-purple-700',
 };
 
+// Display-only: turn the raw table name (e.g. "SBR_CONTACTS") into a friendly
+// label ("Contacts"). The underlying value sent to the backend stays unchanged.
+export function prettyTableName(raw: string): string {
+  if (!raw) return raw;
+  return raw
+    .replace(/^SBR_/, '')
+    .toLowerCase()
+    .split('_')
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(' ');
+}
+
 const OPERATION_COLORS: Record<string, string> = {
   INSERT: 'bg-emerald-100 text-emerald-700',
   UPDATE: 'bg-[#F3DEE4] text-[#A71D3A]',
@@ -54,8 +66,8 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
       const val = getValue<string>();
       const color = TABLE_COLORS[val] ?? 'bg-slate-100 text-slate-600';
       return (
-        <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${color}`}>
-          {val}
+        <span className={`text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+          {prettyTableName(val)}
         </span>
       );
     },

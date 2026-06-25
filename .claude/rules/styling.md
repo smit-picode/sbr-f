@@ -69,6 +69,33 @@ Used internally by DataTable — do not use standalone unless custom layout need
 - `col-span-2` for full-width fields (email, long text)
 - Wrap each field: `<div className="space-y-1"><Label>...</Label><Input .../></div>`
 
+## Dropdowns & Inputs — Theme Rules (ALWAYS follow)
+
+These keep every new dropdown/input on the maroon theme (`#A71D3A`). Match these exactly.
+
+### Dropdowns — ALWAYS the themed `Select`, NEVER native `<select>`
+- Use `Select / SelectTrigger / SelectValue / SelectContent / SelectItem` from `@/components/ui/select`.
+- A native `<select>` renders the OS-default (blue) option list, which is off-theme — never use it for a styled dropdown.
+- The themed `SelectItem` already gives the maroon check + slate hover for the selected/active option; do not re-style those.
+```tsx
+<Select value={val} onValueChange={setVal}>
+  <SelectTrigger className="h-8 w-44 text-xs shadow-none">  {/* size only; keep theme classes */}
+    <SelectValue placeholder="…" />
+  </SelectTrigger>
+  <SelectContent>
+    {options.map((o) => <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>)}
+  </SelectContent>
+</Select>
+```
+
+### Inputs — soft maroon focus ring (filter/search style)
+- The base `Input` ships a hard `focus:ring-2 focus:ring-[#A71D3A]`. For filter/search inputs use the **soft** ring (matches `SearchInput`):
+  ```
+  focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20
+  ```
+- Do NOT change the base `Input` / `Select` components to achieve this — they are shared; override per-instance via `className` (tailwind-merge keeps the later class).
+- Compact filter controls: `h-8 text-xs shadow-none`. Standard form controls: leave defaults (`h-9 text-sm`).
+
 ## Lucide Icons
 Import from `lucide-react`. Common ones used in this project:
 - `Building2` — establishments

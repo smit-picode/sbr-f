@@ -182,6 +182,19 @@
     "filterOne": "مرشح",
     "filterMany": "مرشحات"
   },
+  "columnFilters": {
+    "title": "مرشحات الأعمدة",
+    "empty": "لا توجد مرشحات أعمدة — أضِف واحدًا لتصفية أي عمود.",
+    "add": "إضافة مرشح",
+    "remove": "إزالة المرشح",
+    "valuePlaceholder": "القيمة…",
+    "op": {
+      "contains": "يحتوي",
+      "equals": "يساوي",
+      "starts_with": "يبدأ بـ",
+      "is_not": "لا يساوي"
+    }
+  },
   "table": {
     "showing": "عرض",
     "to": "إلى",
@@ -230,6 +243,7 @@
   "establishmentDetail": {
     "allEstablishments": "المنشآت",
     "viewIn360": "عرض في المؤسسة 360",
+    "lifecycleEvents": "أحداث دورة الحياة",
     "composedOf": "مكوّنة من (وحدات قانونية)",
     "viewInLegalUnits": "عرض في الوحدات القانونية",
     "current": "حالي",

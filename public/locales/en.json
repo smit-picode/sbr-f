@@ -182,6 +182,19 @@
     "filterOne": "filter",
     "filterMany": "filters"
   },
+  "columnFilters": {
+    "title": "Column filters",
+    "empty": "No column filters — add one to narrow by any column.",
+    "add": "Add filter",
+    "remove": "Remove filter",
+    "valuePlaceholder": "Value…",
+    "op": {
+      "contains": "contains",
+      "equals": "equals",
+      "starts_with": "starts with",
+      "is_not": "is not"
+    }
+  },
   "table": {
     "showing": "Showing",
     "to": "to",
@@ -230,6 +243,7 @@
   "establishmentDetail": {
     "allEstablishments": "Establishments",
     "viewIn360": "View in Enterprise 360",
+    "lifecycleEvents": "Lifecycle events",
     "composedOf": "Composed of (legal units)",
     "viewInLegalUnits": "View in Legal Units",
     "current": "Current",
