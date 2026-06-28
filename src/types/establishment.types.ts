@@ -70,6 +70,10 @@ export interface SbrEstablishment {
   VALID_TO: string | null;
   // The enterprise this establishment belongs to (returned by the detail endpoint only)
   ASSOCIATED_ENTERPRISE_ID?: number | null;
+  // True when an open change request targets this record (list endpoint only)
+  HAS_PENDING_REQUEST?: boolean;
+  // Per-field count of PENDING requests (detail endpoint only)
+  PENDING_FIELDS?: Record<string, number>;
 }
 
 export interface EstablishmentFilters {

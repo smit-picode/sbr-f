@@ -44,9 +44,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <div className="h-[58px] bg-white border-b border-slate-200 shrink-0" />
         <div className="flex-1 p-6 space-y-4">
-          <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
-          <div className="h-4 w-96 bg-slate-100 rounded animate-pulse" />
-          <div className="h-64 bg-white border border-slate-200 rounded-lg animate-pulse" />
+          <div className="h-8 w-64 shimmer rounded" />
+          <div className="h-4 w-96 shimmer rounded" />
+          <div className="h-64 shimmer rounded-lg" />
         </div>
       </div>
     </div>

@@ -53,6 +53,39 @@ html[dir='rtl'] body {
   background: #94a3b8;
 }
 
+/* Skeleton shimmer — subtle on-theme sweep used for all loading placeholders.
+   A slate base with a faint maroon-tinted highlight sliding across. */
+@keyframes sbr-shimmer {
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #e2e8f0; /* slate-200 base */
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(167, 29, 58, 0.06) 40%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(167, 29, 58, 0.06) 60%,
+    transparent 100%
+  );
+  animation: sbr-shimmer 1.6s infinite;
+}
+/* Mirror the sweep direction in RTL so it still reads start → end */
+html[dir='rtl'] .shimmer::after {
+  animation-direction: reverse;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after { animation: none; }
+}
+
 /* Native <select> option highlight — use theme gray instead of the OS blue */
 select option {
   background-color: #ffffff;

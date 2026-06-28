@@ -91,6 +91,13 @@ export const PERMISSION_TREE: PermissionNode[] = [
       },
     ],
   },
+  {
+    key: 'approvals',
+    label: 'Approvals',
+    children: [
+      { key: 'approvals.approve', label: 'Approve / Reject Change Requests' },
+    ],
+  },
 ];
 
 // Flat set of all leaf permission keys

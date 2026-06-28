@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { nullableText, formatDate } from '@/utils/format';
 import { Pencil } from 'lucide-react';
+import { PendingBadge } from '@/components/common/PendingBadge';
 
 function MonoCell({ value }: { value: string | null | undefined }) {
   return value ? (
@@ -33,8 +34,11 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
   {
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID', { lng: 'en' }),
-    cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
+    cell: ({ getValue, row }) => (
+      <span className="flex items-center gap-1.5">
+        <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
+        {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
+      </span>
     ),
     enableSorting: true,
   },

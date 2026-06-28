@@ -221,7 +221,9 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          'flex flex-col shrink-0 transition-[width] duration-200 ease-out',
+          // h-screen + sticky keeps the maroon rail full-height and pinned so no gap shows
+          // below it when collapsed content is short and the page scrolls
+          'flex flex-col shrink-0 h-screen sticky top-0 transition-[width] duration-200 ease-out',
           collapsed ? 'w-[68px]' : 'w-[236px]'
         )}
         style={{

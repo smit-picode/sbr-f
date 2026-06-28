@@ -22,7 +22,7 @@ export const enterprisesApi = baseApi.injectEndpoints({
     }),
     updateEnterprise: builder.mutation<ApiResponse<SbrEnterprise>, { enterpriseId: number; data: UpdateEnterprisePayload }>({
       query: ({ enterpriseId, data }) => ({ url: `/enterprises/${enterpriseId}`, method: 'PUT', body: data }),
-      invalidatesTags: ['Enterprises', 'Establishments', 'AuditLog'],
+      invalidatesTags: ['Enterprises', 'Establishments', 'AuditLog', 'ChangeRequests'],
     }),
   }),
   overrideExisting: false,

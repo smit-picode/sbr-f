@@ -13,6 +13,8 @@ export interface SbrContact {
   PRIORITY: number | null;
   VALID_FROM: string | null;
   VALID_TO: string | null;
+  HAS_PENDING_REQUEST?: boolean;
+  PENDING_FIELDS?: Record<string, number>;
 }
 
 export interface ContactFilters {

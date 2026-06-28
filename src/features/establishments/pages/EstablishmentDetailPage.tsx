@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { PendingBadge } from '@/components/common/PendingBadge';
+import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
+import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
@@ -48,8 +51,8 @@ interface FieldEntry {
   show: boolean;
 }
 
-function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHistory }: {
-  recordId: number; fieldKey: string; label: string; value: React.ReactNode; source?: string | null; mono?: boolean; canViewHistory: boolean;
+function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; source?: string | null; mono?: boolean; canViewHistory: boolean; pendingCount?: number;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -76,6 +79,7 @@ function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHi
       >
         <div className="flex items-center gap-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <PendingFieldBadge count={pendingCount} />
           {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
         </div>
         <div className={`mt-0.5 text-sm font-semibold text-slate-800 ${mono ? 'break-all font-mono text-[12px]' : ''}`}>{value}</div>
@@ -172,6 +176,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   }
 
   const e = data.data;
+  const pendingFields = e.PENDING_FIELDS ?? {};
   const title = e.NAME_ENU || e.NPC_NAME_ENU || `Establishment #${e.SBR_ID}`;
 
   // Legal units composing this establishment — derived from its source identifiers.
@@ -263,6 +268,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
             source={f.source}
             mono={f.mono}
             canViewHistory={canViewHistory}
+            pendingCount={pendingFields[f.k]}
           />
         ))}
       </DetailCard>
@@ -277,9 +283,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center rounded bg-white/15 px-2 py-0.5 font-mono text-xs">SBR #{e.SBR_ID}</span>
                 {e.EST_STATUS && <StatusBadge status={e.EST_STATUS} className="rounded-md" />}
+                {e.HAS_PENDING_REQUEST && <PendingBadge />}
               </div>
               <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
               {e.NAME_ARA && <p className="truncate text-sm text-white/80">{e.NAME_ARA}</p>}
@@ -297,6 +304,8 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
           </div>
         </div>
       </div>
+
+      {e.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">

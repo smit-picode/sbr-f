@@ -185,10 +185,12 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     );
     try {
       const res = await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
-      toast.success('Contact updated successfully!');
+      toast.success('Change request submitted for approval.');
       setShowCommentDialog(false);
       onClose();
-      if (res?.data) onSaved?.(res.data);
+      // Edit is now pending approval — only refresh if the API actually applied a record
+      // (it won't under the approval flow, so onSaved stays inert until approval).
+      if (res?.data && typeof res.data === 'object' && 'SBR_ID' in (res.data as object)) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message

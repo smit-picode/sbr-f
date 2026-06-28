@@ -182,6 +182,37 @@
     "filterOne": "filter",
     "filterMany": "filters"
   },
+  "common": {
+    "pending": "Pending",
+    "close": "Close",
+    "noAccess": "You do not have access to this section.",
+    "pendingApprovalBanner": "This record has an edit request awaiting approval. You can still edit it."
+  },
+  "changeRequests": {
+    "pending": "pending",
+    "allTables": "All Tables",
+    "back": "Back to requests",
+    "submittedBy": "Submitted by",
+    "row": "Row",
+    "requestedChanges": "Requested Changes",
+    "reasonForChange": "Reason for Change",
+    "approvalReason": "Approval Reason",
+    "recordContext": "Record Context",
+    "approvalNote": "Approval / rejection note (optional)…",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Request approved.",
+    "rejected": "Request rejected.",
+    "actionFailed": "Action failed. Please try again.",
+    "establishmentAdded": "Establishment Added",
+    "establishmentRemoved": "Establishment Removed",
+    "fieldOne": "field changed",
+    "fieldMany": "fields changed",
+    "cols": {
+      "request": "Request", "table": "Table", "rowId": "Row ID", "entity": "Entity",
+      "changes": "Changes", "requestedBy": "Requested By", "requested": "Requested", "status": "Status"
+    }
+  },
   "columnFilters": {
     "title": "Column filters",
     "empty": "No column filters — add one to narrow by any column.",
@@ -257,6 +288,8 @@
     "providedByRegulator": "Provided by regulator",
     "editedByUser": "Edited by user",
     "approved": "Approved",
+    "pendingApproval": "Pending approval",
+    "rejected": "Rejected",
     "changedBy": "Changed by",
     "approvedBy": "Approved by",
     "decided": "Decided",

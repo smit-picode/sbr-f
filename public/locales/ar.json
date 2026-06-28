@@ -182,6 +182,37 @@
     "filterOne": "مرشح",
     "filterMany": "مرشحات"
   },
+  "common": {
+    "pending": "قيد الانتظار",
+    "close": "إغلاق",
+    "noAccess": "ليس لديك صلاحية الوصول إلى هذا القسم.",
+    "pendingApprovalBanner": "يوجد طلب تعديل على هذا السجل بانتظار الاعتماد. لا يزال بإمكانك تعديله."
+  },
+  "changeRequests": {
+    "pending": "قيد الانتظار",
+    "allTables": "كل الجداول",
+    "back": "العودة إلى الطلبات",
+    "submittedBy": "مُقدَّم من",
+    "row": "السجل",
+    "requestedChanges": "التغييرات المطلوبة",
+    "reasonForChange": "سبب التغيير",
+    "approvalReason": "سبب الاعتماد",
+    "recordContext": "سياق السجل",
+    "approvalNote": "ملاحظة الاعتماد / الرفض (اختياري)…",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "approved": "تم اعتماد الطلب.",
+    "rejected": "تم رفض الطلب.",
+    "actionFailed": "فشل الإجراء. حاول مرة أخرى.",
+    "establishmentAdded": "تمت إضافة منشأة",
+    "establishmentRemoved": "تمت إزالة منشأة",
+    "fieldOne": "حقل تم تغييره",
+    "fieldMany": "حقول تم تغييرها",
+    "cols": {
+      "request": "الطلب", "table": "الجدول", "rowId": "معرّف السجل", "entity": "الكيان",
+      "changes": "التغييرات", "requestedBy": "مُقدَّم بواسطة", "requested": "تاريخ الطلب", "status": "الحالة"
+    }
+  },
   "columnFilters": {
     "title": "مرشحات الأعمدة",
     "empty": "لا توجد مرشحات أعمدة — أضِف واحدًا لتصفية أي عمود.",
@@ -257,6 +288,8 @@
     "providedByRegulator": "مقدَّم من الجهة المنظِّمة",
     "editedByUser": "تعديل بواسطة المستخدم",
     "approved": "مُعتمد",
+    "pendingApproval": "بانتظار الاعتماد",
+    "rejected": "مرفوض",
     "changedBy": "غُيّر بواسطة",
     "approvedBy": "اعتُمد بواسطة",
     "decided": "تاريخ القرار",

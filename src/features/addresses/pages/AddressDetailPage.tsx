@@ -10,6 +10,9 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { EditAddressModal } from '../components/EditAddressModal';
 import { useGetAddressByIdQuery, useGetAddressHistoryQuery } from '../api/addressesApi';
 import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
+import { PendingBadge } from '@/components/common/PendingBadge';
+import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
+import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
 import { formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
@@ -19,8 +22,8 @@ function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
 }
 
-function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory }: {
-  recordId: number; fieldKey: string; label: string; value: React.ReactNode; mono?: boolean; canViewHistory: boolean;
+function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; mono?: boolean; canViewHistory: boolean; pendingCount?: number;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -47,6 +50,7 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory }:
       >
         <div className="flex items-center gap-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <PendingFieldBadge count={pendingCount} />
           {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
         </div>
         <div className={`mt-0.5 truncate text-sm font-semibold text-slate-800 ${mono ? 'font-mono' : ''}`}>{value}</div>
@@ -143,6 +147,7 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
   }
 
   const a = data.data;
+  const pendingFields = a.PENDING_FIELDS ?? {};
   const title = [a.MUNICIPALITY_ID, a.STREET].filter(Boolean).join(' — ') || `Address #${a.ID}`;
 
   const locationFields = [
@@ -178,9 +183,12 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
         <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <span className="inline-flex items-center rounded bg-white/15 px-2 py-0.5 font-mono text-xs">
-                {`Record #${a.ID} · SBR #${a.SBR_ID}`}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded bg-white/15 px-2 py-0.5 font-mono text-xs">
+                  {`Record #${a.ID} · SBR #${a.SBR_ID}`}
+                </span>
+                {a.HAS_PENDING_REQUEST && <PendingBadge />}
+              </div>
               <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
               {a.ZONE && <p className="text-sm text-white/80">{`Zone ${a.ZONE}`}</p>}
             </div>
@@ -192,6 +200,8 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
           </div>
         </div>
       </div>
+
+      {a.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -211,21 +221,21 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
         {locationFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionLocation')}>
             {locationFields.map((f) => (
-              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}
         {referenceFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionReferences')}>
             {referenceFields.map((f) => (
-              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}
         {metaFields.length > 0 && (
           <DetailCard title={t('addressDetail.sectionMetadata')}>
             {metaFields.map((f) => (
-              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} />
+              <DetailField key={f.k} recordId={addressId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}

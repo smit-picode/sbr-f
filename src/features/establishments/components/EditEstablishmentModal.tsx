@@ -255,7 +255,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     );
     try {
       await updateEstablishment({ id: frame.ID, data: { ...editableData, comment } }).unwrap();
-      toast.success('Establishment updated successfully!');
+      toast.success('Change request submitted for approval.');
       setShowCommentDialog(false);
       onClose();
     } catch (error) {
@@ -431,7 +431,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="EMPLOYMENT_COUNT">
             <Label>{t('editEstablishment.fields.employmentCount', { lng: 'en' })}</Label>
-            <Input type="number" className={inp('EMPLOYMENT_COUNT')} value={form.EMPLOYMENT_COUNT ?? ''} onChange={(e) => set('EMPLOYMENT_COUNT', Number(e.target.value))} />
+            <Input type="number" className={inp('EMPLOYMENT_COUNT')} value={form.EMPLOYMENT_COUNT ?? ''} onChange={(e) => set('EMPLOYMENT_COUNT', e.target.value ? Number(e.target.value) : null)} />
             <FieldErr msg={err('EMPLOYMENT_COUNT')} />
           </div>
           <div className="space-y-1">

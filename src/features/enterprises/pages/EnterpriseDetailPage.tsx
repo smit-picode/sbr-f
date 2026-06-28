@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { PendingBadge } from '@/components/common/PendingBadge';
+import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
+import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/common/Loader';
@@ -28,6 +31,14 @@ import {
 } from 'lucide-react';
 
 const MAROON = '#A71D3A';
+
+// Table-name pill colours (same palette as the Attribute Change Requests list)
+const TABLE_BADGE: Record<string, string> = {
+  SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
+  SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
+  SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
+  SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
+};
 
 function SummaryCell({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -69,15 +80,18 @@ function IsicChip({ code, fromText, primary }: { code: string; fromText?: string
   );
 }
 
-function FieldWithHistory({ label, value, sbrId, field, fieldLabel }: {
+function FieldWithHistory({ label, value, sbrId, field, fieldLabel, pendingCount }: {
   label: string;
   value: React.ReactNode;
   sbrId: number;
   field: keyof SbrEstablishment;
   fieldLabel: string;
+  pendingCount?: number;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  // These cards show establishment fields, so history is gated by establishments.view_history
+  const { canViewHistory } = usePermission('establishments');
 
   // Close the anchored popover on outside click / Escape (the clock button itself toggles)
   useEffect(() => {
@@ -96,14 +110,19 @@ function FieldWithHistory({ label, value, sbrId, field, fieldLabel }: {
 
   return (
     <div className="relative min-w-0" ref={wrapRef}>
-      <p className="text-xs text-slate-500">{label}</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-xs text-slate-500">{label}</p>
+        <PendingFieldBadge count={pendingCount} />
+      </div>
       <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
         <span className="truncate">{value}</span>
-        <button type="button" onClick={() => setOpen((o) => !o)} className="text-slate-300 transition-colors hover:text-[#A71D3A]" title="View history">
-          <History className="h-3.5 w-3.5" />
-        </button>
+        {canViewHistory && (
+          <button type="button" onClick={() => setOpen((o) => !o)} className={`cursor-pointer transition-colors hover:text-[#A71D3A] ${pendingCount ? 'text-[#A71D3A]' : 'text-slate-300'}`} title="View history">
+            <History className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
-      {open && (
+      {open && canViewHistory && (
         <EstablishmentHistoryPopover sbrId={sbrId} field={field} fieldLabel={fieldLabel} onClose={() => setOpen(false)} />
       )}
     </div>
@@ -135,9 +154,9 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
       {/* body */}
       <div className="space-y-3 p-4">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} sbrId={est.SBR_ID} field="SECTOR_ID" fieldLabel={t('enterpriseDetail.sector')} />
-          <FieldWithHistory label={t('enterpriseDetail.legalType')} value={nullableText(est.LEGAL_TYPE)} sbrId={est.SBR_ID} field="LEGAL_TYPE" fieldLabel={t('enterpriseDetail.legalType')} />
-          <FieldWithHistory label={t('enterpriseDetail.employees')} value={est.EMPLOYMENT_COUNT != null ? est.EMPLOYMENT_COUNT.toLocaleString() : '—'} sbrId={est.SBR_ID} field="EMPLOYMENT_COUNT" fieldLabel={t('enterpriseDetail.employees')} />
+          <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} sbrId={est.SBR_ID} field="SECTOR_ID" fieldLabel={t('enterpriseDetail.sector')} pendingCount={est.PENDING_FIELDS?.SECTOR_ID} />
+          <FieldWithHistory label={t('enterpriseDetail.legalType')} value={nullableText(est.LEGAL_TYPE)} sbrId={est.SBR_ID} field="LEGAL_TYPE" fieldLabel={t('enterpriseDetail.legalType')} pendingCount={est.PENDING_FIELDS?.LEGAL_TYPE} />
+          <FieldWithHistory label={t('enterpriseDetail.employees')} value={est.EMPLOYMENT_COUNT != null ? est.EMPLOYMENT_COUNT.toLocaleString() : '—'} sbrId={est.SBR_ID} field="EMPLOYMENT_COUNT" fieldLabel={t('enterpriseDetail.employees')} pendingCount={est.PENDING_FIELDS?.EMPLOYMENT_COUNT} />
           <SummaryCell label={t('enterpriseDetail.activities')} value={activitiesCount} />
         </div>
 
@@ -200,18 +219,19 @@ function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[
   return (
     <ul className="space-y-3">
       {entries.map((e) => {
-        const approved = !!e.APPROVAL_DATE || !!e.approvedByUser;
         const recordId = e.NEW_RECORD_ID ?? e.PREV_RECORD_ID;
+        const s = (e.STATUS || 'APPROVED').toUpperCase();
+        const statusCfg = s === 'REJECTED'
+          ? { cls: 'bg-red-50 text-red-700', label: 'Rejected' }
+          : s === 'PENDING'
+          ? { cls: 'bg-amber-50 text-amber-700', label: 'Pending approval' }
+          : { cls: 'bg-emerald-50 text-emerald-700', label: 'Approved' };
         return (
           <li key={e.ID} className="rounded-md border border-slate-100 p-2.5">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-wide text-slate-500">{e.TABLE_NAME}</span>
+              <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[e.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{e.TABLE_NAME}</span>
               {recordId != null && <span className="font-mono text-xs font-medium text-red-600">#{recordId}</span>}
-              <span className="ml-auto">
-                {approved
-                  ? <Badge variant="success" className="text-[10px]">Approved</Badge>
-                  : <Badge variant="secondary" className="text-[10px]">{e.OPERATION}</Badge>}
-              </span>
+              <span className={`ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium ${statusCfg.cls}`}>{statusCfg.label}</span>
             </div>
             <p className="mt-1 text-sm text-slate-700">{nullableText(e.REASON)}</p>
             <p className="mt-0.5 text-xs text-slate-400">
@@ -316,7 +336,8 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
     );
   }
 
-  const { enterprise, establishments, secondaryActivities, changeHistory, profilingChanges } = data.data;
+  // Default arrays to [] so a partial payload can't crash .map/.length on this page
+  const { enterprise, establishments = [], secondaryActivities = [], changeHistory = [], profilingChanges = [] } = data.data;
 
   return (
     <PageContainer>
@@ -330,11 +351,12 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded bg-white/15 px-2 py-0.5 font-mono text-xs">
                   <Target className="h-3.5 w-3.5" /> ENT-{enterprise.ENTERPRISE_ID}
                 </span>
                 <StatusBadge status={enterprise.STATUS} className="rounded-md" />
+                {enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
               </div>
               <h1 className="mt-2 text-2xl font-bold">{nullableText(enterprise.NAME_ENU)}</h1>
               {enterprise.MAIN_CR && <p className="text-sm text-white/80">CR {enterprise.MAIN_CR}</p>}
@@ -356,6 +378,8 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
           <SummaryCell label={t('enterpriseDetail.validFrom')} value={formatDate(enterprise.VALID_FROM)} />
         </div>
       </div>
+
+      {enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {/* Economic activity — full width */}
       <SectionCard title={t('enterpriseDetail.economicActivity')} icon={<Briefcase className="h-4 w-4" />}>

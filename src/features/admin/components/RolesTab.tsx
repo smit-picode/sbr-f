@@ -200,15 +200,15 @@ function PermSection({
 
 function RolesTabSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start animate-pulse">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
       {/* Roles list card */}
       <div className="rounded-xl border border-slate-200 bg-white p-2">
-        <div className="h-3 w-16 bg-slate-200 rounded mx-2 my-2" />
+        <div className="h-3 w-16 shimmer rounded mx-2 my-2" />
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2 px-2.5 py-2">
-            <span className="h-2 w-2 rounded-full bg-slate-200 shrink-0" />
-            <span className="h-3 flex-1 bg-slate-200 rounded" />
-            <span className="h-3 w-4 bg-slate-200 rounded" />
+            <span className="h-2 w-2 rounded-full shimmer shrink-0" />
+            <span className="h-3 flex-1 shimmer rounded" />
+            <span className="h-3 w-4 shimmer rounded" />
           </div>
         ))}
       </div>
@@ -217,23 +217,23 @@ function RolesTabSkeleton() {
       <div className="lg:col-span-3 space-y-3">
         {/* Role header box */}
         <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <span className="h-7 w-7 rounded-lg bg-slate-200 shrink-0" />
+          <span className="h-7 w-7 rounded-lg shimmer shrink-0" />
           <div className="space-y-1.5">
-            <span className="block h-3 w-32 bg-slate-200 rounded" />
-            <span className="block h-2.5 w-20 bg-slate-200 rounded" />
+            <span className="block h-3 w-32 shimmer rounded" />
+            <span className="block h-2.5 w-20 shimmer rounded" />
           </div>
-          <span className="ms-auto h-3 w-24 bg-slate-200 rounded" />
+          <span className="ms-auto h-3 w-24 shimmer rounded" />
         </div>
 
         {/* Section cards */}
         {Array.from({ length: 3 }).map((_, s) => (
           <div key={s} className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="h-2.5 w-24 bg-slate-200 rounded mb-3" />
+            <div className="h-2.5 w-24 shimmer rounded mb-3" />
             <div className="grid sm:grid-cols-2 gap-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2">
-                  <span className="h-4 w-4 rounded bg-slate-200 shrink-0" />
-                  <span className="h-3 flex-1 bg-slate-200 rounded" />
+                  <span className="h-4 w-4 rounded shimmer shrink-0" />
+                  <span className="h-3 flex-1 shimmer rounded" />
                 </div>
               ))}
             </div>

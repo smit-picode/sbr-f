@@ -180,10 +180,11 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
     );
     try {
       const res = await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
-      toast.success('Address updated successfully!');
+      toast.success('Change request submitted for approval.');
       setShowCommentDialog(false);
       onClose();
-      if (res?.data) onSaved?.(res.data);
+      // Pending approval — only refresh if the API actually applied a record (not under approval flow).
+      if (res?.data && typeof res.data === 'object' && 'SBR_ID' in (res.data as object)) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message

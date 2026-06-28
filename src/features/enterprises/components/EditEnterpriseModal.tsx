@@ -119,7 +119,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           comment,
         },
       }).unwrap();
-      toast.success('Enterprise updated successfully!');
+      toast.success('Change request submitted for approval.');
       setShowCommentDialog(false);
       onClose();
     } catch {

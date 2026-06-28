@@ -4,6 +4,7 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { nullableText, formatDate } from '@/utils/format';
 import { Layers } from 'lucide-react';
+import { PendingBadge } from '@/components/common/PendingBadge';
 
 type TFunc = (key: string, options?: { lng?: string }) => string;
 
@@ -11,8 +12,11 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'ENTERPRISE_ID',
     header: t('columns.ENTERPRISE_ID', { lng: 'en' }),
-    cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span>
+    cell: ({ getValue, row }) => (
+      <span className="flex items-center gap-1.5">
+        <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span>
+        {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
+      </span>
     ),
     enableSorting: true,
   },

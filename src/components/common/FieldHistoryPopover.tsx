@@ -48,8 +48,15 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     const raw = (v as Record<string, unknown>)[fieldKey];
     return raw == null || raw === '' ? '' : String(raw);
   };
+  const fmtReq = (x: unknown) => (x == null || x === '' ? '—' : typeof x === 'number' ? x.toLocaleString() : String(x));
+
+  // Open/closed change requests for this field (PENDING / REJECTED), shown above the applied history.
+  const requestEntries = versions.filter((v) => v._request);
+  const realVersions = versions.filter((v) => !v._request);
+  const fieldRequests = requestEntries.filter((r) => r.changes && Object.prototype.hasOwnProperty.call(r.changes, fieldKey));
+
   // Collapse versions where this attribute's value did not change (versions arrive newest-first).
-  const changes = versions.filter((v, i) => i === versions.length - 1 || norm(v) !== norm(versions[i + 1]));
+  const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
   const isUserEdit = (v: HistoryVersion) => !!(v._audit && v._audit.columns.includes(fieldKey));
 
@@ -79,11 +86,37 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
           <p className="py-1 text-sm text-slate-500">{t('fieldHistory.loading', { defaultValue: 'Loading history…' })}</p>
         ) : isError ? (
           <p className="py-1 text-sm text-red-600">{t('fieldHistory.failed', { defaultValue: 'Failed to load history.' })}</p>
-        ) : changes.length === 0 ? (
+        ) : changes.length === 0 && fieldRequests.length === 0 ? (
           <p className="py-1 text-sm text-slate-400">{t('fieldHistory.none', { defaultValue: 'No history recorded.' })}</p>
         ) : (
           <ul className="relative space-y-4">
             <span className="absolute bottom-2 start-[3px] top-2 w-px bg-slate-200" />
+            {fieldRequests.map((r, i) => {
+              const ch = r.changes?.[fieldKey];
+              const rejected = r.status === 'REJECTED';
+              return (
+                <li key={`req-${i}`} className="relative ps-5">
+                  <span className="absolute start-0 top-1.5 h-2 w-2 rounded-full border-2 border-white" style={{ background: rejected ? '#D1495B' : '#E0A23C' }} />
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="text-[13px] font-semibold text-slate-700">{t('fieldHistory.editedByUser', { defaultValue: 'Edited by user' })}</span>
+                    <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-bold uppercase ${rejected ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {rejected ? t('fieldHistory.rejected', { defaultValue: 'Rejected' }) : t('fieldHistory.pendingApproval', { defaultValue: 'Pending approval' })}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-medium text-slate-700">
+                    <span className="text-slate-400 line-through">{fmtReq(ch?.old)}</span>
+                    <span className="mx-1 text-slate-400">→</span>
+                    {fmtReq(ch?.new)}
+                  </p>
+                  {r._audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r._audit.reason}”</p>}
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    {formatDate(r.VALID_FROM)}
+                    {r._audit?.changedBy && ` · by ${r._audit.changedBy}`}
+                  </p>
+                </li>
+              );
+            })}
             {changes.map((v, i) => {
               const userEdit = isUserEdit(v);
               const dotColor = userEdit ? (v._audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';

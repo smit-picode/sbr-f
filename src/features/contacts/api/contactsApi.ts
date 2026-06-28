@@ -17,7 +17,7 @@ export const contactsApi = baseApi.injectEndpoints({
     }),
     updateContact: builder.mutation<ApiResponse<SbrContact>, { id: number; data: Partial<SbrContact> & { comment?: string } }>({
       query: ({ id, data }) => ({ url: `/contacts/${id}`, method: 'PUT', body: data }),
-      invalidatesTags: ['Contacts', 'AuditLog'],
+      invalidatesTags: ['Contacts', 'AuditLog', 'ChangeRequests'],
     }),
   }),
   overrideExisting: false,

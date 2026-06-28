@@ -23,6 +23,10 @@ export interface HistoryVersion {
   VALID_TO?: string | null;
   SOURCE_CODE?: string | null;
   _audit?: AuditMeta | null;
+  // Present on PENDING / REJECTED change-request entries (not applied versions)
+  _request?: boolean;
+  status?: string;
+  changes?: Record<string, { old: unknown; new: unknown }>;
 }
 
 interface FieldHistoryModalProps {

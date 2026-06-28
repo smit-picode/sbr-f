@@ -35,6 +35,7 @@ export interface SbrEnterprise {
   MAIN_CR: string | null;
   LEGAL_TYPE: string | null;
   ESTABLISHMENT_COUNT: number;
+  HAS_PENDING_REQUEST?: boolean;
 }
 
 export interface EnterpriseFilters {
@@ -65,6 +66,7 @@ export interface EnterpriseEstablishment {
   MAIN_BRANCH_SBR_ID: number | null;
   contacts: SbrContact[];
   addresses: SbrAddress[];
+  PENDING_FIELDS?: Record<string, number>;
 }
 
 export interface EnterpriseSecondaryActivity {
@@ -91,6 +93,7 @@ export interface EnterpriseChangeHistoryEntry {
   NEW_RECORD_ID: number | null;
   PREV_RECORD_ID: number | null;
   OPERATION: string;
+  STATUS?: string;
   REASON: string;
   CREATED_AT: string;
   APPROVAL_DATE: string | null;

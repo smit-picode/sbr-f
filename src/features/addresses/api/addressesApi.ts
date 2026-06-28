@@ -21,7 +21,7 @@ export const addressesApi = baseApi.injectEndpoints({
     }),
     updateAddress: builder.mutation<ApiResponse<SbrAddress>, { id: number; data: Partial<SbrAddress> & { comment?: string } }>({
       query: ({ id, data }) => ({ url: `/addresses/${id}`, method: 'PUT', body: data }),
-      invalidatesTags: ['Addresses', 'AuditLog'],
+      invalidatesTags: ['Addresses', 'AuditLog', 'ChangeRequests'],
     }),
   }),
   overrideExisting: false,

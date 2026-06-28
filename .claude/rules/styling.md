@@ -13,6 +13,42 @@
 | Role/category | `<Badge variant="secondary">{val}</Badge>` |
 | Active/Main | `<Badge variant="default">{val}</Badge>` |
 
+## Loading States — Shimmer Skeletons (REQUIRED for every page)
+
+Every page MUST show a **shimmer skeleton** while data is pending — never a spinner, never a bare "Loading…" text.
+
+- Use the `Skeleton` primitive from `@/components/ui/skeleton` — it already applies the on-theme `.shimmer` class (subtle maroon-tinted sweep, RTL-aware, respects `prefers-reduced-motion`). Defined in `globals.css`.
+- NEVER use `animate-spin` spinners or `animate-pulse` for content placeholders. The only spinners allowed are inline button-action indicators (e.g. "Saving…").
+- Build skeletons out of `Skeleton` blocks — never raw `bg-slate-200 animate-pulse` divs.
+
+### Rule — new page ⇒ new skeleton in the common folder
+When you implement a **new page**, you MUST also create its matching shimmer skeleton component and place it in the common folder **`src/components/common/`** (shared, reusable):
+
+- Name it `{Page}Skeleton.tsx` (e.g. `EnterpriseDetailSkeleton.tsx`) exported from `src/components/common/`.
+- The skeleton must **mirror the real page layout** (same cards, columns, header band, strip) so there is no layout shift when data arrives.
+- Render it from the page while `isLoading` is true, inside the page's `PageContainer`.
+- Reuse the existing shared loaders when they already fit:
+  - `PageLoader` (`@/components/common/Loader`) — generic detail-page skeleton (header band → highlight strip → two-column attribute cards).
+  - `TableLoader` (`@/components/common/Loader`) — table-row skeletons (already wired into `DataTable` via `isLoading`).
+  Only create a new `{Page}Skeleton` when neither generic loader matches the page's shape.
+
+```tsx
+// src/components/common/MyThingDetailSkeleton.tsx
+import { Skeleton } from '@/components/ui/skeleton';
+export function MyThingDetailSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-28 w-full rounded-lg" />
+      {/* …mirror the real layout… */}
+    </div>
+  );
+}
+
+// In the page:
+if (isLoading) return <PageContainer><MyThingDetailSkeleton /></PageContainer>;
+```
+
 ## Common Components — When to Use
 
 ### PageContainer
