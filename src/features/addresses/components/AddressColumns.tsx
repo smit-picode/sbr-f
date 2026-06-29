@@ -4,6 +4,7 @@ import { nullableText, formatDate } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
+import env from '@/config/env';
 
 type TFunc = (key: string, options?: { lng?: string }) => string;
 
@@ -116,7 +117,7 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc, c
     header: t('columns.VALID_TO', { lng: 'en' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
-  ...(canEdit ? [{
+  ...(canEdit && env.showActionsColumn ? [{
     id: 'actions',
     header: t('columns.ACTIONS', { lng: 'en' }),
     cell: ({ row }: { row: { original: SbrAddress } }) => (

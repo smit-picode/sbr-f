@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { nullableText, formatDate } from '@/utils/format';
 import { Pencil } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
+import env from '@/config/env';
 
 function MonoCell({ value }: { value: string | null | undefined }) {
   return value ? (
@@ -381,7 +382,7 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
   },
 
   // ── Actions
-  ...(canEdit ? [{
+  ...(canEdit && env.showActionsColumn ? [{
     id: 'actions',
     header: t('columns.ACTIONS', { lng: 'en' }),
     cell: ({ row }: { row: { original: SbrEstablishment } }) => (
