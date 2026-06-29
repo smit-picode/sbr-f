@@ -200,11 +200,18 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
       e.MAIN_BRANCH_FLG = `Must be one of [${MAIN_BRANCH_FLG_OPTIONS.join(', ')}, or empty]`;
     }
 
-    setErrors(e);
+    // Locked / read-only fields are never sent to the backend, so their values must not raise
+    // blocking validation errors.
+    const editableErrors: Record<string, string> = {};
+    for (const [field, msg] of Object.entries(e)) {
+      if (ed(field)) editableErrors[field] = msg;
+    }
+
+    setErrors(editableErrors);
 
     // Auto-scroll to first error field
-    if (Object.keys(e).length > 0) {
-      const firstErrorField = Object.keys(e)[0];
+    if (Object.keys(editableErrors).length > 0) {
+      const firstErrorField = Object.keys(editableErrors)[0];
       setTimeout(() => {
         const element = scrollContainerRef.current?.querySelector(`[data-field="${firstErrorField}"]`);
         if (element) {
@@ -214,7 +221,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
       }, 0);
     }
 
-    return Object.keys(e).length === 0;
+    return Object.keys(editableErrors).length === 0;
   };
 
   const scrollToField = (fieldName: string) => {

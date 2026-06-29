@@ -140,11 +140,18 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
       e.SOURCE_CODE = `Must be one of [${ADDRESS_SOURCE_CODE_OPTIONS.join(', ')}, or empty]`;
     }
 
-    setErrors(e);
+    // Locked / read-only fields (SOURCE_CODE, identifiers, metadata) are never sent to the
+    // backend, so their values must not raise blocking validation errors.
+    const editableErrors: Record<string, string> = {};
+    for (const [field, msg] of Object.entries(e)) {
+      if (isAddressFieldEditable(field)) editableErrors[field] = msg;
+    }
+
+    setErrors(editableErrors);
 
     // Auto-scroll to first error field
-    if (Object.keys(e).length > 0) {
-      const firstErrorField = Object.keys(e)[0];
+    if (Object.keys(editableErrors).length > 0) {
+      const firstErrorField = Object.keys(editableErrors)[0];
       setTimeout(() => {
         const element = scrollContainerRef.current?.querySelector(`[data-field="${firstErrorField}"]`);
         if (element) {
@@ -154,7 +161,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
       }, 0);
     }
 
-    return Object.keys(e).length === 0;
+    return Object.keys(editableErrors).length === 0;
   };
 
   const scrollToField = (fieldName: string) => {

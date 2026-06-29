@@ -34,7 +34,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts', divider: true    },
       { title: 'Addresses',   href: '/addresses',   icon: 'MapPin',        permKey: 'addresses.view',      i18nKey: 'nav.addresses'   },
       { title: 'Legal Units', href: '/legal-units', icon: 'Table',         permKey: '',                    i18nKey: 'nav.legalUnits'  },
-      { title: 'Audit Log',   href: '/audit-log',   icon: 'ClipboardList', permKey: 'audit_log.view',      i18nKey: 'nav.auditLog'    },
     ],
   },
   {
@@ -46,6 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
       { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
       { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },
+      { title: 'Audit Log',                 href: '/audit-log',                        icon: 'ClipboardList',    permKey: 'audit_log.view', i18nKey: 'nav.auditLog'     },
     ],
   },
   {
