@@ -198,7 +198,7 @@
     "reasonForChange": "سبب التغيير",
     "approvalReason": "سبب الاعتماد",
     "recordContext": "سياق السجل",
-    "approvalNote": "ملاحظة الاعتماد / الرفض (اختياري)…",
+    "approvalNote": "سبب الاعتماد / الرفض",
     "approve": "اعتماد",
     "reject": "رفض",
     "approved": "تم اعتماد الطلب.",

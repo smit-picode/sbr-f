@@ -3,7 +3,7 @@
 Statistical Business Register UI for NPC Qatar. **Next.js 14 (App Router) + RTK Query + Tailwind + shadcn/ui.**
 
 > Keep this file lean. It is loaded every turn — so are all the `@import`s below. Put *how-to-work* rules in `.claude/rules/`, design facts in `.claude/references/`, and step-by-step recipes in `.claude/skills/`. Don't duplicate them here; point to them.
- 
+
 ## Imported rules & references (auto-loaded — read them, don't repeat them here)
 @.claude/rules/git-workflow.md
 @.claude/rules/code-standards.md

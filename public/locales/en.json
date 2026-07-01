@@ -198,7 +198,7 @@
     "reasonForChange": "Reason for Change",
     "approvalReason": "Approval Reason",
     "recordContext": "Record Context",
-    "approvalNote": "Approval / rejection note (optional)…",
+    "approvalNote": "Approval / rejection reason",
     "approve": "Approve",
     "reject": "Reject",
     "approved": "Request approved.",
