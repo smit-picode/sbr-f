@@ -28,6 +28,12 @@ const OPERATION_COLORS: Record<string, string> = {
   REVERT: 'bg-amber-100 text-amber-700',
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  PENDING:  'bg-amber-100 text-amber-700',
+  APPROVED: 'bg-emerald-100 text-emerald-700',
+  REJECTED: 'bg-red-100 text-red-700',
+};
+
 function UserCell({ user }: { user: AuditUserRef | null | undefined }) {
   if (!user) return <span className="text-slate-400">-</span>;
   return (
@@ -121,6 +127,27 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
     accessorKey: 'APPROVED_BY',
     header: t('columns.APPROVED_BY', { lng: 'en' }),
     cell: ({ row }) => <UserCell user={row.original.approvedByUser} />,
+  },
+  {
+    accessorKey: 'STATUS',
+    header: t('columns.STATUS', { lng: 'en' }),
+    cell: ({ getValue }) => {
+      const val = getValue<string>();
+      if (!val) return <span className="text-slate-400 text-xs">—</span>;
+      const color = STATUS_COLORS[val] ?? 'bg-slate-100 text-slate-600';
+      return (
+        <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+          {val}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: 'APPROVAL_REASON',
+    header: t('columns.APPROVAL_REASON', { lng: 'en' }),
+    cell: ({ getValue }) => (
+      <span className="text-sm text-slate-700">{getValue<string | null>() || '—'}</span>
+    ),
   },
   {
     accessorKey: 'APPROVAL_DATE',

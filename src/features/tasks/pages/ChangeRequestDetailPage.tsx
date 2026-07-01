@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Check, X, User, Clock, Database, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, X, User, Clock, Database, ArrowRight, Building2, Layers } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -18,6 +18,7 @@ import {
 import { usePermission } from '@/hooks';
 import { formatDate } from '@/utils/format';
 import { toast } from '@/utils/toast';
+import { ROUTES } from '@/constants/routes';
 
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
@@ -80,6 +81,18 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
   const pending = r.STATUS === 'PENDING';
   const changeCount = r.fields.length + r.addEstablishmentSbrIds.length + r.removeEstablishmentSbrIds.length;
   const contextFields = (CONTEXT_FIELDS[r.TABLE_NAME] ?? []).filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '');
+
+  // Parent establishment: child records (addresses/contacts) belong to an establishment via SBR_ID.
+  const PARENT_TABLES = ['SBR_ADDRESSES', 'SBR_CONTACTS'];
+  const parentSbrRaw = PARENT_TABLES.includes(r.TABLE_NAME) ? r.record?.SBR_ID : null;
+  const parentSbrNum = parentSbrRaw == null || parentSbrRaw === '' ? NaN : Number(parentSbrRaw);
+  const parentSbrId = Number.isFinite(parentSbrNum) ? parentSbrNum : null;
+
+  // Related-records context (backend-resolved): establishments link to their enterprise + child counts;
+  // enterprises list their member establishments.
+  const relEnterprise = r.TABLE_NAME === 'SBR_ESTABLISHMENTS' ? r.related?.enterprise ?? null : null;
+  const showRelatedRecords = r.TABLE_NAME === 'SBR_ESTABLISHMENTS';
+  const members = r.TABLE_NAME === 'SBR_ENTERPRISES' ? r.related?.members ?? [] : [];
 
   const doAction = async (kind: 'approve' | 'reject') => {
     if (!note.trim()) {
@@ -196,18 +209,101 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         </div>
 
         {/* Right: record context */}
-        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.recordContext', { defaultValue: 'Record Context' })}</p>
-          {contextFields.length === 0 ? (
-            <p className="text-sm text-slate-400">—</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              {contextFields.map((f) => (
-                <div key={f.key} className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400">{f.label}</p>
-                  <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+        <div className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.recordContext', { defaultValue: 'Record Context' })}</p>
+            {contextFields.length === 0 ? (
+              <p className="text-sm text-slate-400">—</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                {contextFields.map((f) => (
+                  <div key={f.key} className="min-w-0">
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">{f.label}</p>
+                    <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {parentSbrId != null && (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.parentEstablishment', { defaultValue: 'Parent Establishment' })}</p>
+              <button
+                type="button"
+                onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(parentSbrId))}
+                className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+              >
+                <Building2 className="h-4 w-4 shrink-0 text-[#A71D3A]" />
+                <span className="font-mono text-sm font-medium text-[#A71D3A]">SBR #{parentSbrId}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Establishment request → related records (parent enterprise + child counts) */}
+          {showRelatedRecords && (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.relatedRecords', { defaultValue: 'Related Records' })}</p>
+              {relEnterprise && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/enterprises/${relEnterprise.ENTERPRISE_ID}`)}
+                  className="mb-3 flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+                >
+                  <Layers className="h-4 w-4 shrink-0 text-[#A71D3A]" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-slate-800">{relEnterprise.NAME_ENU ?? `#${relEnterprise.ENTERPRISE_ID}`}</span>
+                    <span className="block text-xs text-slate-500">
+                      {t('changeRequests.partOfEnterprise', { defaultValue: 'Part of enterprise' })} · {relEnterprise.ESTABLISHMENT_COUNT} {t('changeRequests.establishments', { defaultValue: 'Establishments' })}
+                    </span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                </button>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-md border border-slate-200 px-3 py-3 text-center">
+                  <p className="text-lg font-bold text-slate-800">{r.related?.contactCount ?? 0}</p>
+                  <p className="text-xs text-slate-500">{t('changeRequests.contacts', { defaultValue: 'Contacts' })}</p>
                 </div>
-              ))}
+                <div className="rounded-md border border-slate-200 px-3 py-3 text-center">
+                  <p className="text-lg font-bold text-slate-800">{r.related?.addressCount ?? 0}</p>
+                  <p className="text-xs text-slate-500">{t('changeRequests.addresses', { defaultValue: 'Addresses' })}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Enterprise request → member establishments */}
+          {r.TABLE_NAME === 'SBR_ENTERPRISES' && (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {t('changeRequests.memberEstablishments', { defaultValue: 'Member Establishments' })} ({members.length})
+              </p>
+              {members.length === 0 ? (
+                <p className="text-sm text-slate-400">—</p>
+              ) : (
+                <div className="space-y-2">
+                  {members.map((m) => (
+                    <button
+                      key={m.SBR_ID}
+                      type="button"
+                      onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(m.SBR_ID))}
+                      className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+                    >
+                      <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-slate-800">{m.NAME_ENU ?? `#${m.SBR_ID}`}</span>
+                        <span className="block text-xs text-slate-500">{m.MOCI_CR_NUM ? `CR ${m.MOCI_CR_NUM} · ` : ''}#{m.SBR_ID}</span>
+                      </span>
+                      {m.MAIN_BRANCH_FLG === 'MAIN' ? (
+                        <span className="shrink-0 rounded bg-[#A71D3A] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
+                      ) : m.MAIN_BRANCH_FLG === 'BRANCH' ? (
+                        <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{t('changeRequests.branch', { defaultValue: 'BRANCH' })}</span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAuditLogColumns, prettyTableName } from '../components/AuditLogColumns';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
 import { useGetAuditLogListQuery } from '../api/auditLogApi';
 import type { AuditLogFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
@@ -27,12 +28,33 @@ const TABLE_OPTIONS = [
   ...TABLE_VALUES.map((v) => ({ label: prettyTableName(v), value: v })),
 ];
 
+// Columns exposed to the dynamic "Column filters" UI. Values match the backend
+// AUDIT_LOG_FILTER_COLUMNS allow-list (auditLog.controller); labels are display-only.
+const AUDIT_LOG_FILTER_COLUMNS: { value: string; label: string }[] = [
+  { value: 'TABLE_NAME', label: 'Table' },
+  { value: 'OPERATION', label: 'Operation' },
+  { value: 'STATUS', label: 'Status' },
+  { value: 'CHANGE_REASON', label: 'Reason' },
+  { value: 'PREV_RECORD_ID', label: 'Prev Record ID' },
+  { value: 'NEW_RECORD_ID', label: 'New Record ID' },
+];
+
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
 }
 
+// RTK Query sets status: 'FETCH_ERROR' when a request is aborted/cancelled (e.g. superseded by a
+// newer query while the user is still typing). These are not real errors — suppress the toast.
+function isFetchError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 'FETCH_ERROR';
+}
+
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
+  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
+  // Debounce column-filter changes so the API is only called 500 ms after the user stops typing,
+  // preventing a request (and cancelled-request error toast) on every keystroke.
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
   const [recordIdInput, setRecordIdInput] = useState<string>('');
   const debouncedRecordId = useDebounce(recordIdInput, 500);
   const { t } = useTranslation();
@@ -45,7 +67,17 @@ export function AuditLogPage() {
 
   const { canSearch } = usePermission('audit_log');
 
-  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(cleanParams(filters), {
+  // Use the debounced value for the API query — the immediate value drives the UI only.
+  const activeColumnFilters = debouncedColumnFilters.filter((r) => r.column && r.value.trim());
+
+  const queryParams = cleanParams({
+    ...filters,
+    columnFilters: activeColumnFilters.length
+      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
+      : undefined,
+  });
+
+  const { data, isLoading, isError, error, refetch } = useGetAuditLogListQuery(queryParams, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -55,13 +87,18 @@ export function AuditLogPage() {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
     const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
     // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
-    if (isError && !is400(error) && !is401 && !is403) {
+    if (isError && !is400(error) && !is401 && !is403 && !isFetchError(error)) {
       toast.error('Failed to load audit log. Please try again.');
     }
   }, [isError, error]);
 
   const handleFilterChange = useCallback((partial: Partial<AuditLogFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
+  }, []);
+
+  const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
+    setColumnFilters(rows);
+    setFilters((prev) => ({ ...prev, page: 1 }));
   }, []);
 
   const records = isValidationError ? [] : (data?.data ?? []);
@@ -83,7 +120,7 @@ export function AuditLogPage() {
       onRemove: () => { setRecordIdInput(''); handleFilterChange({ recordId: undefined, page: 1 }); },
     });
   }
-  const clearAllAudit = () => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); };
+  const clearAllAudit = () => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); setColumnFilters([]); };
 
   return (
     <PageContainer>
@@ -119,7 +156,7 @@ export function AuditLogPage() {
           <Input
             type="number"
             placeholder={t('filters.filterByRecordId')}
-            className="w-48 shadow-none"
+            className="w-48 h-8 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
             min="1"
             value={recordIdInput}
             onKeyDown={(e) => {
@@ -136,13 +173,13 @@ export function AuditLogPage() {
           />
 
           {(() => {
-            const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS);
+            const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS) && columnFilters.length === 0;
             return (
               <div className={isDefault ? 'cursor-not-allowed' : undefined}>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); }}
+                  onClick={clearAllAudit}
                   disabled={isDefault}
                   className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
                 >
@@ -153,6 +190,10 @@ export function AuditLogPage() {
             );
           })()}
         </div>
+      )}
+
+      {canSearch && (
+        <ColumnFilters columns={AUDIT_LOG_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={clearAllAudit} />}

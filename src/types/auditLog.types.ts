@@ -16,6 +16,8 @@ export interface AuditLog {
   CHANGED_BY: number;
   APPROVED_BY: number | null;
   APPROVAL_DATE: string | null;
+  APPROVAL_REASON: string | null;
+  STATUS: string;
   CREATED_AT: string;
   changedByUser?: AuditUserRef | null;
   approvedByUser?: AuditUserRef | null;
@@ -27,4 +29,5 @@ export interface AuditLogFilters {
   tableName?: string;
   recordId?: number;
   changedBy?: number;
+  columnFilters?: string;
 }

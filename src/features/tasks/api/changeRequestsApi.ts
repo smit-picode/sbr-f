@@ -19,6 +19,28 @@ export interface ChangeRequestField {
   new: unknown;
 }
 
+export interface ChangeRequestRelatedEnterprise {
+  ENTERPRISE_ID: number;
+  NAME_ENU: string | null;
+  ESTABLISHMENT_COUNT: number;
+}
+
+export interface ChangeRequestRelatedMember {
+  SBR_ID: number;
+  NAME_ENU: string | null;
+  MOCI_CR_NUM: string | null;
+  MAIN_BRANCH_FLG: string | null;
+}
+
+export interface ChangeRequestRelated {
+  // SBR_ESTABLISHMENTS context
+  enterprise?: ChangeRequestRelatedEnterprise | null;
+  contactCount?: number;
+  addressCount?: number;
+  // SBR_ENTERPRISES context
+  members?: ChangeRequestRelatedMember[];
+}
+
 export interface ChangeRequestDetail {
   ID: number;
   REQUEST_CODE: string;
@@ -36,6 +58,7 @@ export interface ChangeRequestDetail {
   addEstablishmentSbrIds: number[];
   removeEstablishmentSbrIds: number[];
   record: Record<string, unknown> | null;
+  related: ChangeRequestRelated | null;
 }
 
 export interface ChangeRequestFilters {

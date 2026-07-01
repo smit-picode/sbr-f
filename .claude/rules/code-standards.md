@@ -21,6 +21,14 @@ These rules apply to ALL code written in this repo. Claude must follow these wit
 - ALWAYS wrap filter state with `cleanParams()` before passing to RTK Query
 - NEVER call API directly with `fetch()` or `axios` in components — always RTK Query
 
+## Search Rules
+- EVERY new search input MUST use debounce — never call the API on every keystroke
+- Use the existing `useDebounce` hook from `src/hooks/` — NEVER reimplement debounce inline
+- Standard debounce delay: **400 ms** (consistent across the project)
+- Use the existing `<SearchInput>` component from `@/components/common/SearchInput` wherever it fits — it already wires `useDebounce` internally
+- If `SearchInput` doesn't fit (e.g. inline table filter), apply `useDebounce` manually and pass the debounced value to `cleanParams()` / the RTK Query hook
+- ALWAYS reset `page: 1` when the debounced search value changes
+
 ## State Rules
 - `editTarget` state always lives in the Page component — NEVER in column files
 - `handleFilterChange` always wrapped in `useCallback`

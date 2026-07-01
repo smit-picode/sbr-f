@@ -449,7 +449,9 @@
     "NEW_RECORD_ID": "معرف السجل الجديد",
     "OPERATION": "العملية",
     "COLUMN_NAME": "اسم العمود",
-    "APPROVAL_DATE": "تاريخ الموافقة"
+    "APPROVAL_DATE": "تاريخ الموافقة",
+    "STATUS": "الحالة",
+    "APPROVAL_REASON": "سبب الموافقة"
   },
   "editContact": {
     "title": "تعديل جهة الاتصال",
