@@ -128,7 +128,7 @@
     },
     "attributeChangeRequests": {
       "title": "Attribute Change Requests",
-      "description": "Review and process attribute change requests",
+      "description": "Pending attribute change requests awaiting review and approval",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     },

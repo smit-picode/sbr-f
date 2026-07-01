@@ -113,6 +113,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                   <p className="mt-0.5 text-[11px] text-slate-400">
                     {formatDate(r.VALID_FROM)}
                     {r._audit?.changedBy && ` · by ${r._audit.changedBy}`}
+                    {rejected && r._audit?.approvedBy && ` · rejected by ${r._audit.approvedBy}`}
                   </p>
                 </li>
               );

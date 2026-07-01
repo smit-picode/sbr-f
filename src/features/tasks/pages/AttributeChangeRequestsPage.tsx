@@ -87,7 +87,7 @@ export function AttributeChangeRequestsPage() {
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
         return (
-          <span className="rounded-md bg-[#FCF4F6] px-2 py-0.5 text-xs font-medium text-[#A71D3A]">
+          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
             {n} {n === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' })}
           </span>
         );
@@ -97,8 +97,9 @@ export function AttributeChangeRequestsPage() {
       accessorKey: 'REQUESTED_BY',
       header: t('changeRequests.cols.requestedBy', { defaultValue: 'Requested By' }),
       cell: ({ getValue }) => (
-        <span className="flex items-center gap-1.5 text-sm text-slate-600">
-          <User className="h-3.5 w-3.5 text-slate-400" /> {(getValue() as string) ?? '—'}
+        <span className="flex items-center gap-1.5 text-sm">
+          <User className="h-3.5 w-3.5 text-slate-400" />
+          <span className="text-[#A71D3A]">{(getValue() as string) ?? '—'}</span>
         </span>
       ),
     },
