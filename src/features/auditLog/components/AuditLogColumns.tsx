@@ -49,13 +49,15 @@ function RecordIdCell({ value }: { value: number | null }) {
   return <span className="font-mono text-xs font-medium text-[#A71D3A]">{String(value)}</span>;
 }
 
-// COLUMN_NAME holds a JSON-stringified array (e.g. ["NAME_ENU","CP_END_DATE"]);
-// legacy rows hold a single plain column name or null
+// CHANGE_DATA is a JSON object whose keys are the changed column names,
+// e.g. {"EMAIL":{"old":"a@b.com","new":"b@b.com"},"PHONE":{"old":"...","new":"..."}}.
+// Legacy rows may hold a JSON array or a plain column name string.
 function formatColumnNames(value: string | null): string {
   if (!value) return '—';
   try {
     const parsed = JSON.parse(value);
     if (Array.isArray(parsed)) return parsed.join(', ');
+    if (parsed && typeof parsed === 'object') return Object.keys(parsed).join(', ');
   } catch {
     // legacy plain string — fall through
   }
@@ -103,7 +105,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
     },
   },
   {
-    accessorKey: 'COLUMN_NAME',
+    accessorKey: 'CHANGE_DATA',
     header: t('columns.COLUMN_NAME', { lng: 'en' }),
     cell: ({ getValue }) => (
       <span className="font-mono text-xs text-slate-700 whitespace-normal break-words max-w-[260px] inline-block">
@@ -112,10 +114,10 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
     ),
   },
   {
-    accessorKey: 'REASON',
+    accessorKey: 'CHANGE_REASON',
     header: t('columns.REASON', { lng: 'en' }),
     cell: ({ getValue }) => (
-      <span className="text-sm text-slate-700">{getValue<string>() || '—'}</span>
+      <span className="text-sm text-slate-700">{getValue<string | null>() || '—'}</span>
     ),
   },
   {

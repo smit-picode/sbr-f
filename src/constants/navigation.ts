@@ -7,6 +7,7 @@ export type NavItem = {
   sidebarLabel?: string; // Override label shown only in the sidebar
   breadcrumbLabel?: string; // Override label shown only in the breadcrumb
   divider?: boolean;  // Render a thin separator above this item (reference design)
+  showCount?: boolean; // Show live pending-count badge next to this item in the sidebar
   children?: NavItem[];
 };
 
@@ -42,7 +43,7 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.tasks',
     items: [
       // Hidden in frontend until the Attribute Change Requests feature is ready to show to the client. Uncomment to restore.
-      { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: 'approvals.approve', i18nKey: 'nav.attributeChangeRequests' },
+      { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: 'approvals.approve', i18nKey: 'nav.attributeChangeRequests', showCount: true },
       { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
       { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
       { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },

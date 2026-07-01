@@ -32,7 +32,7 @@ const TABLE_BADGE: Record<string, string> = {
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
 };
 
-const DEFAULT_FILTERS: ChangeRequestFilters = { page: 1, limit: 20 };
+const DEFAULT_FILTERS: ChangeRequestFilters = { page: 1, limit: 10 };
 
 export function AttributeChangeRequestsPage() {
   const { t } = useTranslation();

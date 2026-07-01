@@ -11,8 +11,8 @@ export interface AuditLog {
   PREV_RECORD_ID: number | null;
   NEW_RECORD_ID: number | null;
   OPERATION: string;
-  COLUMN_NAME: string | null;
-  REASON: string;
+  CHANGE_DATA: string | null;
+  CHANGE_REASON: string | null;
   CHANGED_BY: number;
   APPROVED_BY: number | null;
   APPROVAL_DATE: string | null;

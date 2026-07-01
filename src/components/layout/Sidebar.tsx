@@ -43,6 +43,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { formatRole } from '@/utils/format';
+import { useGetChangeRequestCountQuery } from '@/features/tasks/api/changeRequestsApi';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Home,
@@ -80,9 +81,10 @@ const SIDEBAR_GROUPS_KEY = 'sbr_sidebar_groups';
 interface NavLinkProps {
   item: NavItem;
   collapsed: boolean;
+  count?: number;
 }
 
-function NavLink({ item, collapsed }: NavLinkProps) {
+function NavLink({ item, collapsed, count }: NavLinkProps) {
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const Icon = ICON_MAP[item.icon];
@@ -92,6 +94,8 @@ function NavLink({ item, collapsed }: NavLinkProps) {
     ? t(item.i18nKey, { defaultValue: item.title })
     : (item.sidebarLabel ?? t(item.i18nKey, { defaultValue: item.title }));
 
+  const countLabel = count && count > 0 ? (count > 99 ? '99+' : String(count)) : null;
+
   if (collapsed) {
     return (
       <Tooltip>
@@ -99,15 +103,20 @@ function NavLink({ item, collapsed }: NavLinkProps) {
           <Link
             href={item.href}
             className={cn(
-              'flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-colors',
+              'relative flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-colors',
               isActive ? 'bg-white text-[#A71D3A]' : 'text-[#f0cdd5] hover:bg-white/10'
             )}
           >
             {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
             <span className="sr-only">{label}</span>
+            {countLabel && (
+              <span className="absolute -top-1 -end-1 min-w-[16px] h-4 rounded-full bg-white text-[#A71D3A] text-[9px] font-bold flex items-center justify-center px-0.5 leading-none shadow-sm">
+                {countLabel}
+              </span>
+            )}
           </Link>
         </TooltipTrigger>
-        <TooltipContent side="right">{label}</TooltipContent>
+        <TooltipContent side="right">{label}{countLabel ? ` (${countLabel})` : ''}</TooltipContent>
       </Tooltip>
     );
   }
@@ -122,6 +131,14 @@ function NavLink({ item, collapsed }: NavLinkProps) {
     >
       {Icon && <Icon className="h-4 w-4 shrink-0" />}
       <span className="truncate">{label}</span>
+      {countLabel && (
+        <span className={cn(
+          'ms-auto min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none',
+          isActive ? 'bg-[#A71D3A] text-white' : 'bg-white/25 text-white'
+        )}>
+          {countLabel}
+        </span>
+      )}
     </Link>
   );
 }
@@ -171,6 +188,10 @@ export function Sidebar() {
     effectiveUser.role === 'Super Admin' ||
     effectiveUser.role?.toUpperCase() === 'SUPER_ADMIN'
   ));
+
+  const canSeeChangeRequestCount = isSuperAdmin || permissions.some((p) => p.permissionName?.toLowerCase() === 'approvals.approve');
+  const { data: changeRequestCountData } = useGetChangeRequestCountQuery(undefined, { skip: !canSeeChangeRequestCount });
+  const pendingCount = changeRequestCountData?.data?.count ?? 0;
 
   const hasPermission = (key: string) =>
     permissions.some((p) => p.permissionName?.toLowerCase() === key.toLowerCase());
@@ -262,6 +283,8 @@ export function Sidebar() {
               (item) => pathname === item.href || pathname.startsWith(item.href + '/')
             );
 
+            const groupPendingCount = visibleItems.some((i) => i.showCount) ? pendingCount : 0;
+
             if (collapsed) {
               return (
                 <div key={group.id} className="py-1.5 border-t first:border-t-0 border-white/10">
@@ -269,7 +292,7 @@ export function Sidebar() {
                     {visibleItems.map((item, idx) => (
                       <div key={item.href} className="contents">
                         {item.divider && idx > 0 && <div className="mx-2 my-1.5 h-px bg-white/15" />}
-                        <NavLink item={item} collapsed />
+                        <NavLink item={item} collapsed count={item.showCount ? pendingCount : undefined} />
                       </div>
                     ))}
                   </div>
@@ -287,6 +310,11 @@ export function Sidebar() {
                   )}
                 >
                   <span className="truncate">{t(group.i18nKey, { defaultValue: group.title })}</span>
+                  {groupPendingCount > 0 && (
+                    <span className="min-w-[16px] h-4 rounded-full bg-white/20 text-white text-[9px] font-bold flex items-center justify-center px-1 leading-none">
+                      {groupPendingCount > 99 ? '99+' : groupPendingCount}
+                    </span>
+                  )}
                   <ChevronDown
                     className={cn('h-[13px] w-[13px] ms-auto transition-transform', !isOpen && '-rotate-90')}
                   />
@@ -296,7 +324,7 @@ export function Sidebar() {
                     {visibleItems.map((item, idx) => (
                       <div key={item.href} className="contents">
                         {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-white/15" />}
-                        <NavLink item={item} collapsed={false} />
+                        <NavLink item={item} collapsed={false} count={item.showCount ? pendingCount : undefined} />
                       </div>
                     ))}
                   </div>
