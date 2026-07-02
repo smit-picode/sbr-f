@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Check, X, User, Clock, Database, ArrowRight,
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -47,7 +48,42 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       fields: [
         { key: 'PHONE', label: 'Phone' },
         { key: 'MOBILE', label: 'Mobile' },
-        { key: 'EMAIL', label: 'Email', span: 2 },
+        { key: 'FAX', label: 'Fax' },
+        { key: 'EMAIL', label: 'Email' },
+        { key: 'WEBSITE', label: 'Website' },
+      ],
+    },
+    {
+      section: 'Metadata',
+      fields: [
+        { key: 'PO_BOX', label: 'PO Box' },
+        { key: 'PRIORITY', label: 'Priority' },
+        { key: 'VALID_FROM', label: 'Valid From' },
+        { key: 'VALID_TO', label: 'Valid To' },
+      ],
+    },
+  ],
+  SBR_ADDRESSES: [
+    {
+      section: 'Location',
+      fields: [
+        { key: 'SBR_ID', label: 'SBR ID' },
+        { key: 'MUNICIPALITY_ID', label: 'Municipality' },
+        { key: 'ZONE', label: 'Zone' },
+        { key: 'STREET', label: 'Street' },
+        { key: 'BUILDING_NO', label: 'Building' },
+        { key: 'UNIT_NO', label: 'Unit' },
+        { key: 'FLOOR_NO', label: 'Floor' },
+      ],
+    },
+    {
+      section: 'References',
+      fields: [
+        { key: 'QARS', label: 'QARS' },
+        { key: 'ELECTRICITY_NO', label: 'Electricity No.' },
+        { key: 'LATITUDE', label: 'Latitude' },
+        { key: 'LONGITUDE', label: 'Longitude' },
+        { key: 'SOURCE_CODE', label: 'Source' },
       ],
     },
     {
@@ -55,26 +91,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       fields: [
         { key: 'PRIORITY', label: 'Priority' },
         { key: 'VALID_FROM', label: 'Valid From' },
-      ],
-    },
-  ],
-  SBR_ADDRESSES: [
-    {
-      section: 'Address',
-      fields: [
-        { key: 'SBR_ID', label: 'SBR ID' },
-        { key: 'SOURCE_CODE', label: 'Source' },
-        { key: 'MUNICIPALITY_ID', label: 'Municipality' },
-        { key: 'ZONE', label: 'Zone' },
-        { key: 'STREET', label: 'Street' },
-        { key: 'BUILDING_NO', label: 'Building' },
-        { key: 'QARS', label: 'QARS' },
-      ],
-    },
-    {
-      section: 'Metadata',
-      fields: [
-        { key: 'VALID_FROM', label: 'Valid From' },
+        { key: 'VALID_TO', label: 'Valid To' },
       ],
     },
   ],
@@ -84,47 +101,77 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       fields: [
         { key: 'SBR_ID', label: 'SBR ID' },
         { key: 'SOURCE_CODE', label: 'Source' },
-        { key: 'NAME_ENU', label: 'Name (EN)', span: 2 },
-        { key: 'NAME_ARA', label: 'Name (AR)', span: 2 },
       ],
     },
     {
-      section: 'Classification',
+      section: 'Names',
+      fields: [
+        { key: 'NAME_ENU', label: 'Name (EN)' },
+        { key: 'NAME_ARA', label: 'Name (AR)' },
+        { key: 'TRADE_NAME_ENU', label: 'Trade Name (EN)' },
+        { key: 'TRADE_NAME_ARA', label: 'Trade Name (AR)' },
+        { key: 'NPC_NAME_ENU', label: 'NPC Name (EN)' },
+        { key: 'NPC_NAME_ARA', label: 'NPC Name (AR)' },
+      ],
+    },
+    {
+      section: 'Status & Classification',
       fields: [
         { key: 'EST_STATUS', label: 'Status' },
         { key: 'LEGAL_TYPE', label: 'Legal Type' },
+        { key: 'MAIN_BRANCH_FLG', label: 'Main / Branch' },
         { key: 'SECTOR_ID', label: 'Sector' },
+        { key: 'ISIC_CODE', label: 'ISIC Code' },
         { key: 'EMPLOYMENT_COUNT', label: 'Employees' },
       ],
     },
     {
-      section: 'Metadata',
+      section: 'Registration',
       fields: [
+        { key: 'MOCI_ORG_ID', label: 'MOCI Org ID' },
         { key: 'MOCI_CR_NUM', label: 'MOCI CR' },
+        { key: 'MOCI_CP_NUM', label: 'MOCI CP' },
+        { key: 'QFC_NUMBER', label: 'QFC Number' },
+        { key: 'QFZ_SOURCE_ID', label: 'QFZ ID' },
+      ],
+    },
+    {
+      section: 'Dates',
+      fields: [
         { key: 'VALID_FROM', label: 'Valid From' },
+        { key: 'VALID_TO', label: 'Valid To' },
       ],
     },
   ],
   SBR_ENTERPRISES: [
     {
-      section: 'Enterprise',
+      section: 'Overview',
       fields: [
         { key: 'ENTERPRISE_ID', label: 'Enterprise ID' },
-        { key: 'NAME_ENU', label: 'Name', span: 2 },
-        { key: 'SECTOR_ID', label: 'Sector' },
+        { key: 'NAME_ENU', label: 'Name (EN)' },
+        { key: 'NAME_ARA', label: 'Name (AR)' },
+        { key: 'TRADE_NAME_ENU', label: 'Trade Name (EN)' },
+        { key: 'LEGAL_TYPE', label: 'Legal Type' },
         { key: 'STATUS', label: 'Status' },
+        { key: 'SECTOR_ID', label: 'Sector' },
+        { key: 'MAIN_LEGAL_UNIT_SBR_ID', label: 'Main Unit SBR ID' },
+        { key: 'ESTABLISHMENT_COUNT', label: 'Establishments' },
       ],
     },
     {
       section: 'Metadata',
       fields: [
+        { key: 'MAIN_CR', label: 'Main CR' },
+        { key: 'ENTERPRISE_GROUP_ID', label: 'Enterprise Group' },
         { key: 'VALID_FROM', label: 'Valid From' },
+        { key: 'VALID_TO', label: 'Valid To' },
       ],
     },
   ],
 };
 
-const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT']);
+const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT', 'ECON_ACTIVITY_START_DATE']);
+const STATUS_KEYS = new Set(['STATUS', 'EST_STATUS']);
 
 const fmt = (key: string, v: unknown): string => {
   if (v == null || v === '') return '—';
@@ -288,26 +335,33 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
         {/* Right: record context */}
         <div className="space-y-4">
-          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}</p>
+          <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}</p>
+            </div>
             {contextSections.length === 0 ? (
-              <p className="text-sm text-slate-400">—</p>
+              <p className="p-4 text-sm text-slate-400">—</p>
             ) : (
-              <div className="space-y-4">
-                {contextSections.map((sec) => (
-                  <div key={sec.section}>
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">{sec.section}</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <>
+                {contextSections.map((sec, idx) => (
+                  <div key={sec.section} className={idx > 0 ? 'border-t border-slate-200' : ''}>
+                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-100">
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{sec.section}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4">
                       {sec.visible.map((f) => (
                         <div key={f.key} className={`min-w-0${f.span === 2 ? ' col-span-2' : ''}`}>
                           <p className="text-[11px] text-slate-400">{f.label}</p>
-                          <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+                          {STATUS_KEYS.has(f.key)
+                            ? <StatusBadge status={r.record?.[f.key] as string | null} />
+                            : <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+                          }
                         </div>
                       ))}
                     </div>
                   </div>
                 ))}
-              </div>
+              </>
             )}
           </div>
 
