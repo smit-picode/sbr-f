@@ -29,7 +29,7 @@ const TABLE_BADGE: Record<string, string> = {
 };
 
 // Curated fields shown in the "Record context" panel per table, organised into sections.
-type CtxField = { key: string; label: string; span?: 2 };
+type CtxField = { key: string; label: string; span?: 2; sourceKey?: string };
 type CtxSection = { section: string; fields: CtxField[] };
 
 const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
@@ -101,28 +101,31 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       fields: [
         { key: 'SBR_ID', label: 'SBR ID' },
         { key: 'SOURCE_CODE', label: 'Source' },
+        { key: 'EID', label: 'EID', span: 2, sourceKey: 'EID_SOURCE' },
       ],
     },
     {
       section: 'Names',
       fields: [
-        { key: 'NAME_ENU', label: 'Name (EN)' },
-        { key: 'NAME_ARA', label: 'Name (AR)' },
-        { key: 'TRADE_NAME_ENU', label: 'Trade Name (EN)' },
-        { key: 'TRADE_NAME_ARA', label: 'Trade Name (AR)' },
-        { key: 'NPC_NAME_ENU', label: 'NPC Name (EN)' },
-        { key: 'NPC_NAME_ARA', label: 'NPC Name (AR)' },
+        { key: 'NAME_ENU', label: 'Name (EN)', sourceKey: 'NAME_ENU_SOURCE' },
+        { key: 'NAME_ARA', label: 'Name (AR)', sourceKey: 'NAME_ARA_SOURCE' },
+        { key: 'TRADE_NAME_ENU', label: 'Trade Name (EN)', sourceKey: 'TRADE_NAME_ENU_SOURCE' },
+        { key: 'TRADE_NAME_ARA', label: 'Trade Name (AR)', sourceKey: 'TRADE_NAME_ARA_SOURCE' },
+        { key: 'NPC_NAME_ENU', label: 'NPC Name (EN)', sourceKey: 'NPC_NAME_ENU_SOURCE' },
+        { key: 'NPC_NAME_ARA', label: 'NPC Name (AR)', sourceKey: 'NPC_NAME_ARA_SOURCE' },
       ],
     },
     {
       section: 'Status & Classification',
       fields: [
-        { key: 'EST_STATUS', label: 'Status' },
-        { key: 'LEGAL_TYPE', label: 'Legal Type' },
-        { key: 'MAIN_BRANCH_FLG', label: 'Main / Branch' },
-        { key: 'SECTOR_ID', label: 'Sector' },
-        { key: 'ISIC_CODE', label: 'ISIC Code' },
-        { key: 'EMPLOYMENT_COUNT', label: 'Employees' },
+        { key: 'EST_STATUS', label: 'Status', sourceKey: 'EST_STATUS_SOURCE' },
+        { key: 'EST_STATUS_CATEGORY', label: 'Status Category', sourceKey: 'EST_STATUS_CATEGORY_SOURCE' },
+        { key: 'LEGAL_TYPE', label: 'Legal Type', sourceKey: 'LEGAL_TYPE_SOURCE' },
+        { key: 'SECTOR_ID', label: 'Sector', sourceKey: 'SECTOR_ID_SOURCE' },
+        { key: 'ISIC_CODE', label: 'ISIC Code', sourceKey: 'ISIC_CODE_SOURCE' },
+        { key: 'EMPLOYMENT_COUNT', label: 'Employees', sourceKey: 'EMPLOYMENT_COUNT_SOURCE' },
+        { key: 'MAIN_BRANCH_FLG', label: 'Main / Branch', sourceKey: 'MAIN_BRANCH_FLG_SOURCE' },
+        { key: 'HOLDING_COMPANY_FLG', label: 'Holding Co.', sourceKey: 'HOLDING_COMPANY_FLG_SOURCE' },
       ],
     },
     {
@@ -133,13 +136,21 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
         { key: 'MOCI_CP_NUM', label: 'MOCI CP' },
         { key: 'QFC_NUMBER', label: 'QFC Number' },
         { key: 'QFZ_SOURCE_ID', label: 'QFZ ID' },
+        { key: 'QSTP_REG_NUM', label: 'QSTP Reg' },
+        { key: 'FARM_NO', label: 'Farm No' },
       ],
     },
     {
       section: 'Dates',
       fields: [
+        { key: 'CR_ISSUE_DATE', label: 'CR Issue' },
+        { key: 'CR_EXPIRY_DATE', label: 'CR Expiry' },
+        { key: 'CP_ISSUE_DATE', label: 'CP Issue' },
+        { key: 'REG_DATE', label: 'Reg Date' },
         { key: 'VALID_FROM', label: 'Valid From' },
         { key: 'VALID_TO', label: 'Valid To' },
+        { key: 'CREATED_AT', label: 'Created' },
+        { key: 'UPDATED_AT', label: 'Updated' },
       ],
     },
   ],
@@ -170,7 +181,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
   ],
 };
 
-const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT', 'ECON_ACTIVITY_START_DATE']);
+const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT', 'ECON_ACTIVITY_START_DATE', 'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CP_ISSUE_DATE', 'REG_DATE']);
 const STATUS_KEYS = new Set(['STATUS', 'EST_STATUS']);
 
 const fmt = (key: string, v: unknown): string => {
@@ -352,10 +363,21 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                       {sec.visible.map((f) => (
                         <div key={f.key} className={`min-w-0${f.span === 2 ? ' col-span-2' : ''}`}>
                           <p className="text-[11px] text-slate-400">{f.label}</p>
-                          {STATUS_KEYS.has(f.key)
-                            ? <StatusBadge status={r.record?.[f.key] as string | null} />
-                            : <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
-                          }
+                          {STATUS_KEYS.has(f.key) ? (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <StatusBadge status={r.record?.[f.key] as string | null} />
+                              {f.sourceKey && r.record?.[f.sourceKey] && (
+                                <span className="shrink-0 font-mono text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md">{String(r.record[f.sourceKey])}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="break-all text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</span>
+                              {f.sourceKey && r.record?.[f.sourceKey] && (
+                                <span className="shrink-0 font-mono text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md">{String(r.record[f.sourceKey])}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
