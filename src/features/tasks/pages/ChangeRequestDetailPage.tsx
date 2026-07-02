@@ -167,13 +167,13 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
         { key: 'STATUS', label: 'Status' },
         { key: 'SECTOR_ID', label: 'Sector' },
         { key: 'MAIN_LEGAL_UNIT_SBR_ID', label: 'Main Unit SBR ID' },
+        { key: 'MAIN_CR', label: 'Main MOCI CR' },
         { key: 'ESTABLISHMENT_COUNT', label: 'Establishments' },
       ],
     },
     {
       section: 'Metadata',
       fields: [
-        { key: 'MAIN_CR', label: 'Main CR' },
         { key: 'ENTERPRISE_GROUP_ID', label: 'Enterprise Group' },
         { key: 'VALID_FROM', label: 'Valid From' },
         { key: 'VALID_TO', label: 'Valid To' },
