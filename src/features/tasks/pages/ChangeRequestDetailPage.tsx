@@ -366,14 +366,14 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                           {STATUS_KEYS.has(f.key) ? (
                             <div className="flex flex-wrap items-center gap-1.5">
                               <StatusBadge status={r.record?.[f.key] as string | null} />
-                              {f.sourceKey && r.record?.[f.sourceKey] && (
+                              {f.sourceKey && r.record?.[f.sourceKey] != null && (
                                 <span className="shrink-0 font-mono text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md">{String(r.record[f.sourceKey])}</span>
                               )}
                             </div>
                           ) : (
                             <div className="flex flex-wrap items-center gap-1.5">
                               <span className="break-all text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</span>
-                              {f.sourceKey && r.record?.[f.sourceKey] && (
+                              {f.sourceKey && r.record?.[f.sourceKey] != null && (
                                 <span className="shrink-0 font-mono text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md">{String(r.record[f.sourceKey])}</span>
                               )}
                             </div>
