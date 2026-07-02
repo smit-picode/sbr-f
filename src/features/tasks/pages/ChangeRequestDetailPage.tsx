@@ -20,6 +20,7 @@ import { usePermission } from '@/hooks';
 import { formatDate, formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { ROUTES } from '@/constants/routes';
+import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
@@ -261,7 +262,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-500">{r.REQUEST_CODE}</span>
-          <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{r.TABLE_NAME}</span>
+          <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
           <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${statusCls}`}>
             <Clock className="h-3 w-3" /> {r.STATUS.charAt(0) + r.STATUS.slice(1).toLowerCase()}
           </span>
