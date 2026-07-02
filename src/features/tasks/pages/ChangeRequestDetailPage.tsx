@@ -16,7 +16,7 @@ import {
   type ChangeRequestField,
 } from '../api/changeRequestsApi';
 import { usePermission } from '@/hooks';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { ROUTES } from '@/constants/routes';
 
@@ -27,28 +27,100 @@ const TABLE_BADGE: Record<string, string> = {
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
 };
 
-// Curated fields shown in the "Record context" panel per table.
-const CONTEXT_FIELDS: Record<string, { key: string; label: string }[]> = {
+// Curated fields shown in the "Record context" panel per table, organised into sections.
+type CtxField = { key: string; label: string; span?: 2 };
+type CtxSection = { section: string; fields: CtxField[] };
+
+const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
   SBR_CONTACTS: [
-    { key: 'SBR_ID', label: 'SBR ID' }, { key: 'SOURCE_CODE', label: 'Source' },
-    { key: 'PHONE', label: 'Phone' }, { key: 'EMAIL', label: 'Email' },
-    { key: 'PO_BOX', label: 'PO Box' }, { key: 'PRIORITY', label: 'Priority' }, { key: 'VALID_FROM', label: 'Valid From' },
+    {
+      section: 'Contact',
+      fields: [
+        { key: 'SBR_ID', label: 'SBR ID' },
+        { key: 'CONTACT_NAME', label: 'Name' },
+        { key: 'ROLE', label: 'Role' },
+        { key: 'SOURCE_CODE', label: 'Source' },
+      ],
+    },
+    {
+      section: 'Channels',
+      fields: [
+        { key: 'PHONE', label: 'Phone' },
+        { key: 'MOBILE', label: 'Mobile' },
+        { key: 'EMAIL', label: 'Email', span: 2 },
+      ],
+    },
+    {
+      section: 'Metadata',
+      fields: [
+        { key: 'PRIORITY', label: 'Priority' },
+        { key: 'VALID_FROM', label: 'Valid From' },
+      ],
+    },
   ],
   SBR_ADDRESSES: [
-    { key: 'SBR_ID', label: 'SBR ID' }, { key: 'SOURCE_CODE', label: 'Source' },
-    { key: 'ZONE', label: 'Zone' }, { key: 'STREET', label: 'Street' },
-    { key: 'BUILDING_NO', label: 'Building' }, { key: 'QARS', label: 'QARS' }, { key: 'VALID_FROM', label: 'Valid From' },
+    {
+      section: 'Address',
+      fields: [
+        { key: 'SBR_ID', label: 'SBR ID' },
+        { key: 'SOURCE_CODE', label: 'Source' },
+        { key: 'MUNICIPALITY_ID', label: 'Municipality' },
+        { key: 'ZONE', label: 'Zone' },
+        { key: 'STREET', label: 'Street' },
+        { key: 'BUILDING_NO', label: 'Building' },
+        { key: 'QARS', label: 'QARS' },
+      ],
+    },
+    {
+      section: 'Metadata',
+      fields: [
+        { key: 'VALID_FROM', label: 'Valid From' },
+      ],
+    },
   ],
   SBR_ESTABLISHMENTS: [
-    { key: 'SBR_ID', label: 'SBR ID' }, { key: 'SOURCE_CODE', label: 'Source' },
-    { key: 'NAME_ENU', label: 'Name (EN)' }, { key: 'NAME_ARA', label: 'Name (AR)' },
-    { key: 'EST_STATUS', label: 'Status' }, { key: 'LEGAL_TYPE', label: 'Legal Type' },
-    { key: 'SECTOR_ID', label: 'Sector' }, { key: 'EMPLOYMENT_COUNT', label: 'Employees' },
-    { key: 'MOCI_CR_NUM', label: 'MOCI CR' }, { key: 'VALID_FROM', label: 'Valid From' },
+    {
+      section: 'Identity',
+      fields: [
+        { key: 'SBR_ID', label: 'SBR ID' },
+        { key: 'SOURCE_CODE', label: 'Source' },
+        { key: 'NAME_ENU', label: 'Name (EN)', span: 2 },
+        { key: 'NAME_ARA', label: 'Name (AR)', span: 2 },
+      ],
+    },
+    {
+      section: 'Classification',
+      fields: [
+        { key: 'EST_STATUS', label: 'Status' },
+        { key: 'LEGAL_TYPE', label: 'Legal Type' },
+        { key: 'SECTOR_ID', label: 'Sector' },
+        { key: 'EMPLOYMENT_COUNT', label: 'Employees' },
+      ],
+    },
+    {
+      section: 'Metadata',
+      fields: [
+        { key: 'MOCI_CR_NUM', label: 'MOCI CR' },
+        { key: 'VALID_FROM', label: 'Valid From' },
+      ],
+    },
   ],
   SBR_ENTERPRISES: [
-    { key: 'ENTERPRISE_ID', label: 'Enterprise ID' }, { key: 'NAME_ENU', label: 'Name' },
-    { key: 'SECTOR_ID', label: 'Sector' }, { key: 'STATUS', label: 'Status' }, { key: 'VALID_FROM', label: 'Valid From' },
+    {
+      section: 'Enterprise',
+      fields: [
+        { key: 'ENTERPRISE_ID', label: 'Enterprise ID' },
+        { key: 'NAME_ENU', label: 'Name', span: 2 },
+        { key: 'SECTOR_ID', label: 'Sector' },
+        { key: 'STATUS', label: 'Status' },
+      ],
+    },
+    {
+      section: 'Metadata',
+      fields: [
+        { key: 'VALID_FROM', label: 'Valid From' },
+      ],
+    },
   ],
 };
 
@@ -80,7 +152,9 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
   const r = data.data;
   const pending = r.STATUS === 'PENDING';
   const changeCount = r.fields.length + r.addEstablishmentSbrIds.length + r.removeEstablishmentSbrIds.length;
-  const contextFields = (CONTEXT_FIELDS[r.TABLE_NAME] ?? []).filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '');
+  const contextSections = (CONTEXT_SECTIONS[r.TABLE_NAME] ?? [])
+    .map((sec) => ({ ...sec, visible: sec.fields.filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '') }))
+    .filter((sec) => sec.visible.length > 0);
 
   // Parent establishment: child records (addresses/contacts) belong to an establishment via SBR_ID.
   const PARENT_TABLES = ['SBR_ADDRESSES', 'SBR_CONTACTS'];
@@ -137,7 +211,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         <h1 className="mt-2 text-2xl font-bold text-slate-900">{r.ENTITY ?? '—'}</h1>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
           <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {t('changeRequests.submittedBy', { defaultValue: 'Submitted by' })} <span className="font-medium text-[#A71D3A]">{r.REQUESTED_BY ?? '—'}</span></span>
-          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDate(r.CREATED_AT)}</span>
+          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDateTime(r.CREATED_AT)}</span>
           <span className="flex items-center gap-1"><Database className="h-3.5 w-3.5" /> {t('changeRequests.row', { defaultValue: 'Row' })} #{r.ROW_ID ?? '—'}</span>
         </div>
       </div>
@@ -149,11 +223,15 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
             <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.requestedChanges', { defaultValue: 'Requested Changes' })}</div>
             <div className="divide-y divide-slate-50">
               {r.fields.map((f: ChangeRequestField) => (
-                <div key={f.field} className="flex items-center gap-3 px-5 py-3 text-sm">
-                  <span className="w-44 shrink-0 text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(f.field)}</span>
-                  <span className="text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                  <span className="font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                <div
+                  key={f.field}
+                  className="grid items-center gap-x-4 px-5 py-3 text-sm"
+                  style={{ gridTemplateColumns: '11rem 1fr auto 1fr' }}
+                >
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(f.field)}</span>
+                  <span className="min-w-0 text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
                 </div>
               ))}
               {r.addEstablishmentSbrIds.map((sid) => (
@@ -211,15 +289,22 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         {/* Right: record context */}
         <div className="space-y-4">
           <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.recordContext', { defaultValue: 'Record Context' })}</p>
-            {contextFields.length === 0 ? (
+            <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}</p>
+            {contextSections.length === 0 ? (
               <p className="text-sm text-slate-400">—</p>
             ) : (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                {contextFields.map((f) => (
-                  <div key={f.key} className="min-w-0">
-                    <p className="text-[11px] uppercase tracking-wide text-slate-400">{f.label}</p>
-                    <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+              <div className="space-y-4">
+                {contextSections.map((sec) => (
+                  <div key={sec.section}>
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">{sec.section}</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                      {sec.visible.map((f) => (
+                        <div key={f.key} className={`min-w-0${f.span === 2 ? ' col-span-2' : ''}`}>
+                          <p className="text-[11px] text-slate-400">{f.label}</p>
+                          <p className="truncate text-sm font-medium text-slate-800">{fmt(f.key, r.record?.[f.key])}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>

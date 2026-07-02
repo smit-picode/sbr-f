@@ -198,6 +198,7 @@
     "reasonForChange": "سبب التغيير",
     "approvalReason": "سبب الاعتماد",
     "recordContext": "سياق السجل",
+    "currentRecord": "السجل الحالي",
     "approvalNote": "سبب الاعتماد / الرفض",
     "approve": "اعتماد",
     "reject": "رفض",

@@ -11,6 +11,18 @@ export function formatDate(value: string | null | undefined): string {
   }
 }
 
+export function formatDateTime(value: string | null | undefined): string {
+  if (!value) return '—';
+  try {
+    const d = new Date(value);
+    const date = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' });
+    const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return `${date}, ${time}`;
+  } catch {
+    return value;
+  }
+}
+
 export function formatNumber(value: number | null | undefined): string {
   if (value == null) return '—';
   return value.toLocaleString('en-GB');
