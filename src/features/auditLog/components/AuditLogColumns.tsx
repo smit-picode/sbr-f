@@ -56,8 +56,14 @@ function formatColumnNames(value: string | null): string {
   if (!value) return '—';
   try {
     const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) return parsed.join(', ');
-    if (parsed && typeof parsed === 'object') return Object.keys(parsed).join(', ');
+    if (Array.isArray(parsed)) return (parsed as string[]).join(', ');
+    if (parsed && typeof parsed === 'object') {
+      const obj = parsed as Record<string, unknown>;
+      return Object.keys(obj).filter((k) => {
+        const v = obj[k];
+        return v !== null && typeof v === 'object' && !Array.isArray(v) && 'old' in (v as object) && 'new' in (v as object);
+      }).join(', ');
+    }
   } catch {
     // legacy plain string — fall through
   }
