@@ -84,6 +84,6 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Establishments', 'Enterprises', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests'],
+  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests'],
   endpoints: () => ({}),
 });

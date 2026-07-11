@@ -45,6 +45,7 @@ export interface EnterpriseFilters {
   status?: string;
   sectorId?: string;
   columnFilters?: string;
+  ungrouped?: boolean;
 }
 
 // ── Enterprise detail (Enterprise 360) ──────────────────────────────────────

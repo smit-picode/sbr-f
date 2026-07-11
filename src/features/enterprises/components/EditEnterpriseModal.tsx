@@ -132,43 +132,43 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t('enterpriseEdit.title')}</DialogTitle>
+          <DialogTitle>{t('enterpriseEdit.title', { defaultValue: 'Edit Enterprise' })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
           {/* Read-only identity row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseId')}</Label>
+              <Label className="text-xs text-slate-500">Enterprise ID</Label>
               <Input value={`ENT-${enterprise.ENTERPRISE_ID}`} disabled className="bg-slate-50 text-slate-500" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.mainMociCr')}</Label>
+              <Label className="text-xs text-slate-500">Main MOCI CR</Label>
               <Input value={enterprise.MAIN_CR ?? '—'} disabled className="bg-slate-50 text-slate-500" />
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName')}</Label>
+            <Label className="text-xs text-slate-500">Enterprise Name</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={500} className="focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
           </div>
 
           {/* Sector + Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.sector')}</Label>
+              <Label className="text-xs text-slate-500">Sector</Label>
               <Select value={sector} onValueChange={setSector}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectSector')} /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select sector" /></SelectTrigger>
                 <SelectContent>
                   {SECTOR_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.status')}</Label>
+              <Label className="text-xs text-slate-500">Status</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectStatus')} /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select status" /></SelectTrigger>
                 <SelectContent>
                   {STATUS_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
@@ -179,7 +179,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           {/* Establishments */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseEdit.establishments')}</Label>
+              <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">Establishments in this enterprise</Label>
               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{currentRows.length} {t('table.units')}</span>
             </div>
 
@@ -194,11 +194,11 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                       <p className="text-xs text-slate-400">CR {r.MOCI_CR_NUM ?? '—'} · #{r.SBR_ID}</p>
                     </div>
                     {isMain ? (
-                      <Badge className="rounded-md bg-[#A71D3A] text-white text-[10px] font-bold">{t('enterpriseEdit.main')}</Badge>
+                      <Badge className="rounded-md bg-[#A71D3A] text-white text-[10px] font-bold">MAIN</Badge>
                     ) : (
                       <>
-                        <Badge variant="secondary" className="rounded-md text-[10px]">{t('enterpriseEdit.branch')}</Badge>
-                        <button type="button" onClick={() => removeRow(r.SBR_ID)} className="text-slate-400 hover:text-red-600" title={t('enterpriseEdit.remove')}>
+                        <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>
+                        <button type="button" onClick={() => removeRow(r.SBR_ID)} className="text-slate-400 hover:text-red-600" title="Remove">
                           <X className="h-4 w-4" />
                         </button>
                       </>
@@ -210,22 +210,22 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
             {/* Add establishment */}
             <div className="rounded-md bg-slate-50 border border-slate-200 p-3 space-y-2">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.addEstablishment')}</Label>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.addEstablishment', { defaultValue: 'Add an establishment to this enterprise' })}</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('enterpriseEdit.searchPlaceholder')}
+                  placeholder={t('enterpriseEdit.searchPlaceholder', { defaultValue: 'Search by SBR ID, name, or CR...' })}
                   className="pl-8 bg-white focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
                 />
               </div>
               {debouncedSearch && (
                 <div className="rounded-md border border-slate-200 bg-white">
                   {isSearching ? (
-                    <p className="px-3 py-2 text-xs text-slate-400">{t('enterpriseEdit.searching')}</p>
+                    <p className="px-3 py-2 text-xs text-slate-400">Searching…</p>
                   ) : searchResults.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-slate-400">{t('enterpriseEdit.noMatching')}</p>
+                    <p className="px-3 py-2 text-xs text-slate-400">No matching establishments.</p>
                   ) : (
                     <ul className="max-h-44 overflow-y-auto">
                       {searchResults.map((u) => (
@@ -247,7 +247,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                   )}
                 </div>
               )}
-              <p className="text-xs text-slate-400">{t('enterpriseEdit.searchHelper')}</p>
+              <p className="text-xs text-slate-400">{t('enterpriseEdit.searchHelper', { defaultValue: 'Search the establishment register by SBR ID, name, or commercial registration number.' })}</p>
             </div>
           </div>
         </div>

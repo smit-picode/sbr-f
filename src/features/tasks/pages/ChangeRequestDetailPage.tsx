@@ -27,6 +27,7 @@ const TABLE_BADGE: Record<string, string> = {
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
+  SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
 };
 
 // Curated fields shown in the "Record context" panel per table, organised into sections.
@@ -180,9 +181,45 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       ],
     },
   ],
+  SBR_ENTERPRISE_GROUPS: [
+    {
+      section: 'Group',
+      fields: [
+        { key: 'GROUP_ID', label: 'Group ID' },
+        { key: 'NAME_ENU', label: 'Name (EN)' },
+        { key: 'NAME_ARA', label: 'Name (AR)' },
+        { key: 'STATUS', label: 'Status' },
+        { key: 'HOLDING_COMPANY_FLG', label: 'Holding Co.' },
+      ],
+    },
+    {
+      section: 'Controlling Institution (UCI)',
+      fields: [
+        { key: 'UCI_NAME', label: 'UCI Name' },
+        { key: 'UCI_TYPE', label: 'UCI Type' },
+        { key: 'UCI_COUNTRY', label: 'UCI Country' },
+        { key: 'UCI_ID', label: 'UCI ID' },
+      ],
+    },
+    {
+      section: 'Classification',
+      fields: [
+        { key: 'ISIC_CODE', label: 'ISIC Code' },
+        { key: 'ISIC_DESCRIPTION', label: 'ISIC Description' },
+      ],
+    },
+    {
+      section: 'Dates',
+      fields: [
+        { key: 'GROUP_START_DATE', label: 'Group Start' },
+        { key: 'CREATED_AT', label: 'Created' },
+        { key: 'UPDATED_AT', label: 'Updated' },
+      ],
+    },
+  ],
 };
 
-const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT', 'ECON_ACTIVITY_START_DATE', 'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CP_ISSUE_DATE', 'REG_DATE']);
+const DATE_KEYS = new Set(['VALID_FROM', 'VALID_TO', 'CREATED_AT', 'UPDATED_AT', 'ECON_ACTIVITY_START_DATE', 'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CP_ISSUE_DATE', 'REG_DATE', 'GROUP_START_DATE']);
 const STATUS_KEYS = new Set(['STATUS', 'EST_STATUS']);
 
 const fmt = (key: string, v: unknown): string => {
@@ -210,7 +247,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
   const r = data.data;
   const pending = r.STATUS === 'PENDING';
-  const changeCount = r.fields.length + r.addEstablishmentSbrIds.length + r.removeEstablishmentSbrIds.length;
+  const changeCount = r.fields.length + r.addMembers.length + r.removeMembers.length;
   const contextSections = (CONTEXT_SECTIONS[r.TABLE_NAME] ?? [])
     .map((sec) => ({ ...sec, visible: sec.fields.filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '') }))
     .filter((sec) => sec.visible.length > 0);
@@ -293,16 +330,18 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                   <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
                 </div>
               ))}
-              {r.addEstablishmentSbrIds.map((sid) => (
-                <div key={`add-${sid}`} className="flex items-center gap-2 px-5 py-3 text-sm">
+              {r.addMembers.map((m) => (
+                <div key={`add-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
                   <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">+ {t('changeRequests.establishmentAdded', { defaultValue: 'Establishment Added' })}</span>
-                  <span className="font-mono text-xs text-red-600">#{sid}</span>
+                  {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
+                  <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>
               ))}
-              {r.removeEstablishmentSbrIds.map((sid) => (
-                <div key={`rem-${sid}`} className="flex items-center gap-2 px-5 py-3 text-sm">
+              {r.removeMembers.map((m) => (
+                <div key={`rem-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
                   <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700">− {t('changeRequests.establishmentRemoved', { defaultValue: 'Establishment Removed' })}</span>
-                  <span className="font-mono text-xs text-red-600">#{sid}</span>
+                  {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
+                  <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>
               ))}
             </div>

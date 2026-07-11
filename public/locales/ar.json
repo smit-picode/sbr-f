@@ -122,7 +122,7 @@
     },
     "enterpriseGroups": {
       "title": "مجموعات المؤسسات",
-      "description": "السجل الإحصائي للأعمال — سجلات مجموعات المؤسسات",
+      "description": "مؤسسات تحت سيطرة مشتركة (UCI). إدارة المجموعات والملكية.",
       "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
       "noDataDesc": ""
     },
@@ -168,6 +168,7 @@
     "searchByContact": "البحث بالاسم أو البريد الإلكتروني أو الهاتف...",
     "searchByAddress": "البحث بالمنطقة أو الشارع أو QARS...",
     "searchByNameOrCr": "البحث بالاسم أو رقم السجل التجاري...",
+    "searchByGroupIdOrUci": "البحث بمعرف المجموعة أو الاسم أو UCI...",
     "filterByRecordId": "تصفية برقم السجل...",
     "status": "الحالة",
     "sector": "القطاع",
@@ -185,6 +186,8 @@
   "common": {
     "pending": "قيد الانتظار",
     "close": "إغلاق",
+    "yes": "نعم",
+    "no": "لا",
     "noAccess": "ليس لديك صلاحية الوصول إلى هذا القسم.",
     "pendingApprovalBanner": "يوجد طلب تعديل على هذا السجل بانتظار الاعتماد. لا يزال بإمكانك تعديله."
   },
@@ -453,6 +456,51 @@
     "APPROVAL_DATE": "تاريخ الموافقة",
     "STATUS": "الحالة",
     "APPROVAL_REASON": "سبب الموافقة"
+  },
+  "enterpriseGroups": {
+    "createGroup": "إنشاء مجموعة",
+    "allTypes": "جميع الأنواع",
+    "allStatuses": "جميع الحالات"
+  },
+  "editEnterpriseGroup": {
+    "title": "تعديل مجموعة المؤسسات",
+    "addMember": "إضافة مؤسسة عضو",
+    "searchPlaceholder": "البحث بالاسم أو رقم ENT..."
+  },
+  "enterpriseGroupDetail": {
+    "backLink": "مجموعات المؤسسات",
+    "holdingCompanyBadge": "شركة قابضة",
+    "controlStructure": "هيكل السيطرة",
+    "hoverHint": "مرّر على العقدة للتفاصيل · انقر على مؤسسة لفتحها",
+    "memberEnterprises": "المؤسسات الأعضاء",
+    "noMemberEnterprises": "لا توجد مؤسسات أعضاء.",
+    "groupHead": "رئيس المجموعة",
+    "establishments": "منشآت",
+    "ownershipControl": "الملكية والسيطرة",
+    "overview": "نظرة عامة",
+    "lifecycleEvents": "أحداث دورة الحياة",
+    "noEvents": "لا توجد أحداث مسجلة.",
+    "groupFormed": "تشكيل المجموعة",
+    "controllingInstitution": "المؤسسة المسيطرة (UCI)",
+    "uciType": "نوع UCI",
+    "uciCountry": "دولة UCI",
+    "principalActivity": "النشاط الرئيسي",
+    "enterprises": "المؤسسات",
+    "employees": "الموظفون",
+    "groupHeadEnterprise": "المؤسسة الرئيسية للمجموعة",
+    "resident": "مقيم",
+    "nonResident": "غير مقيم",
+    "foreignControlled": "مسيطر عليها أجنبياً",
+    "type": "النوع",
+    "holdingCompany": "شركة قابضة",
+    "status": "الحالة",
+    "groupStart": "بداية المجموعة",
+    "allEstablishments": "المنشآت",
+    "sector": "القطاع",
+    "dataSources": "مصادر البيانات",
+    "isicCode": "رمز ISIC",
+    "uciId": "معرف UCI",
+    "created": "تاريخ الإنشاء"
   },
   "editContact": {
     "title": "تعديل جهة الاتصال",

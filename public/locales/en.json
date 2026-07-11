@@ -122,7 +122,7 @@
     },
     "enterpriseGroups": {
       "title": "Enterprise Groups",
-      "description": "Statistical Business Register — Enterprise group records",
+      "description": "Enterprises under common control (a UCI). Manage groupings and ownership.",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     },
@@ -168,6 +168,7 @@
     "searchByContact": "Search by name, email, or phone...",
     "searchByAddress": "Search by zone, street, or QARS...",
     "searchByNameOrCr": "Search by name or CR...",
+    "searchByGroupIdOrUci": "Search by group ID, name, or UCI...",
     "filterByRecordId": "Filter by Record ID...",
     "status": "Status",
     "sector": "Sector",
@@ -185,6 +186,8 @@
   "common": {
     "pending": "Pending",
     "close": "Close",
+    "yes": "Yes",
+    "no": "No",
     "noAccess": "You do not have access to this section.",
     "pendingApprovalBanner": "This record has an edit request awaiting approval. You can still edit it."
   },
@@ -453,6 +456,51 @@
     "APPROVAL_DATE": "APPROVAL DATE",
     "STATUS": "STATUS",
     "APPROVAL_REASON": "APPROVAL REASON"
+  },
+  "enterpriseGroups": {
+    "createGroup": "Create group",
+    "allTypes": "All types",
+    "allStatuses": "All statuses"
+  },
+  "editEnterpriseGroup": {
+    "title": "Edit Enterprise Group",
+    "addMember": "Add a member enterprise",
+    "searchPlaceholder": "Search enterprises by name or ENT ID..."
+  },
+  "enterpriseGroupDetail": {
+    "backLink": "Enterprise Groups",
+    "holdingCompanyBadge": "Holding company",
+    "controlStructure": "Control Structure",
+    "hoverHint": "Hover a node for details · click an enterprise to open it",
+    "memberEnterprises": "Member enterprises",
+    "noMemberEnterprises": "No member enterprises.",
+    "groupHead": "GROUP HEAD",
+    "establishments": "establishments",
+    "ownershipControl": "Ownership & control",
+    "overview": "Overview",
+    "lifecycleEvents": "Lifecycle events",
+    "noEvents": "No events recorded.",
+    "groupFormed": "Group formed",
+    "controllingInstitution": "Controlling institution (UCI)",
+    "uciType": "UCI type",
+    "uciCountry": "UCI country",
+    "principalActivity": "Principal activity",
+    "enterprises": "Enterprises",
+    "employees": "Employees",
+    "groupHeadEnterprise": "Group head enterprise",
+    "resident": "Resident",
+    "nonResident": "Non-resident",
+    "foreignControlled": "Foreign-controlled",
+    "type": "Type",
+    "holdingCompany": "Holding company",
+    "status": "Status",
+    "groupStart": "Group start",
+    "allEstablishments": "Establishments",
+    "sector": "Sector",
+    "dataSources": "Data sources",
+    "isicCode": "ISIC code",
+    "uciId": "UCI ID",
+    "created": "Created"
   },
   "editContact": {
     "title": "Edit Contact",

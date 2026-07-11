@@ -30,6 +30,17 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'enterprise_groups',
+    label: 'Enterprise Groups',
+    children: [
+      { key: 'enterprise_groups.view',        label: 'View Enterprise Groups' },
+      { key: 'enterprise_groups.view_detail', label: 'View Group Detail' },
+      { key: 'enterprise_groups.create',      label: 'Create Enterprise Group' },
+      { key: 'enterprise_groups.edit',        label: 'Edit Enterprise Groups' },
+      { key: 'enterprise_groups.search',      label: 'Search & Filter' },
+    ],
+  },
+  {
     key: 'contacts',
     label: 'Contacts',
     children: [

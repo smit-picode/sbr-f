@@ -19,6 +19,11 @@ export interface ChangeRequestField {
   new: unknown;
 }
 
+export interface ChangeRequestMember {
+  id: number;
+  name: string | null;
+}
+
 export interface ChangeRequestRelatedEnterprise {
   ENTERPRISE_ID: number;
   NAME_ENU: string | null;
@@ -55,8 +60,8 @@ export interface ChangeRequestDetail {
   CREATED_AT: string;
   APPROVAL_DATE: string | null;
   fields: ChangeRequestField[];
-  addEstablishmentSbrIds: number[];
-  removeEstablishmentSbrIds: number[];
+  addMembers: ChangeRequestMember[];
+  removeMembers: ChangeRequestMember[];
   record: Record<string, unknown> | null;
   related: ChangeRequestRelated | null;
 }

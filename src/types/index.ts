@@ -6,3 +6,4 @@ export * from './address.types';
 export * from './auth.types';
 export * from './auditLog.types';
 export * from './admin.types';
+export * from './enterpriseGroup.types';

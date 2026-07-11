@@ -19,7 +19,7 @@ import { usePermission } from '@/hooks';
 
 // Values stay as the real table names (sent to the backend); labels are display-only
 // (friendly names) — same logic as the Audit Log tab.
-const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
+const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_ENTERPRISE_GROUPS', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
 const TABLE_OPTIONS = [
   { value: '__all__', label: 'All Tables' },
   ...TABLE_VALUES.map((v) => ({ value: v, label: prettyTableName(v) })),
@@ -28,6 +28,7 @@ const TABLE_OPTIONS = [
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
+  SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
 };
