@@ -1,7 +1,7 @@
 export interface SbrEnterprise {
   ID: number;
   ENTERPRISE_ID: number;
-  MAIN_LEGAL_UNIT_SBR_ID: number | null;
+  MAIN_ESTABLISHMENT_SBR_ID: number | null;
   NAME_ARA: string | null;
   NAME_ARA_SOURCE: string | null;
   NAME_ENU: string | null;

@@ -78,7 +78,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
     enableSorting: true,
   },
   {
-    accessorKey: 'MAIN_LEGAL_UNIT_SBR_ID',
+    accessorKey: 'MAIN_ESTABLISHMENT_SBR_ID',
     header: t('columns.MAIN_UNIT', { lng: 'en' }),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();

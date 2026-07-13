@@ -22,7 +22,7 @@ import type { EnterpriseGroupFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce, usePermission } from '@/hooks';
-import { RotateCcw, Network, Plus } from 'lucide-react';
+import { RotateCcw, Plus, Network } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 function is400(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 400; }
@@ -34,6 +34,7 @@ export function EnterpriseGroupsListPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const { t } = useTranslation();
+
   const debouncedSearch = useDebounce(filters.search, 400);
 
   const { canSearch, canCreate } = usePermission('enterprise_groups');
@@ -105,6 +106,7 @@ export function EnterpriseGroupsListPage() {
             {canCreate && (
               <Button
                 size="sm"
+                onClick={() => setShowCreate(true)}
                 style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
                 className="text-white gap-1.5"
               >

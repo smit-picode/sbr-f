@@ -373,7 +373,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
           <SummaryCell label={t('enterpriseDetail.sector')} value={nullableText(enterprise.SECTOR_ID)} />
           <SummaryCell label={t('enterpriseDetail.status')} value={nullableText(enterprise.STATUS)} />
           <SummaryCell label={t('enterpriseDetail.legalType')} value={nullableText(enterprise.LEGAL_TYPE)} />
-          <SummaryCell label={t('enterpriseDetail.mainUnit')} value={enterprise.MAIN_LEGAL_UNIT_SBR_ID != null ? <span className="font-mono">#{enterprise.MAIN_LEGAL_UNIT_SBR_ID}</span> : '—'} />
+          <SummaryCell label={t('enterpriseDetail.mainUnit')} value={enterprise.MAIN_ESTABLISHMENT_SBR_ID != null ? <span className="font-mono">#{enterprise.MAIN_ESTABLISHMENT_SBR_ID}</span> : '—'} />
           <SummaryCell label={t('enterpriseDetail.linkedEstablishments')} value={enterprise.ESTABLISHMENT_COUNT} />
           <SummaryCell label={t('enterpriseDetail.validFrom')} value={formatDate(enterprise.VALID_FROM)} />
         </div>
@@ -426,7 +426,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
                 <EstablishmentCard
                   key={est.ID}
                   est={est}
-                  headSbrId={enterprise.MAIN_LEGAL_UNIT_SBR_ID}
+                  headSbrId={enterprise.MAIN_ESTABLISHMENT_SBR_ID}
                   t={t}
                   onOpen={(e) => router.push(`/establishments?search=${encodeURIComponent(e.NAME_ENU ?? String(e.SBR_ID))}`)}
                 />

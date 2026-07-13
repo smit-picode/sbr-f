@@ -167,7 +167,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
         { key: 'LEGAL_TYPE', label: 'Legal Type' },
         { key: 'STATUS', label: 'Status' },
         { key: 'SECTOR_ID', label: 'Sector' },
-        { key: 'MAIN_LEGAL_UNIT_SBR_ID', label: 'Main Unit SBR ID' },
+        { key: 'MAIN_ESTABLISHMENT_SBR_ID', label: 'Main Unit SBR ID' },
         { key: 'MAIN_CR', label: 'Main MOCI CR' },
         { key: 'ESTABLISHMENT_COUNT', label: 'Establishments' },
       ],

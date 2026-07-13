@@ -45,7 +45,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
-  const mainSbrId = enterprise.MAIN_LEGAL_UNIT_SBR_ID;
+  const mainSbrId = enterprise.MAIN_ESTABLISHMENT_SBR_ID;
 
   // Reset form whenever the modal (re)opens
   useEffect(() => {
