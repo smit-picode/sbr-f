@@ -51,7 +51,10 @@ interface MemberRow {
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
 export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onClose }: EditEnterpriseGroupModalProps) {
-  const { t } = useTranslation();
+  // TEMP: force English in this modal regardless of selected language.
+  // Restore to: const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const t = i18n.getFixedT('en');
   const [form, setForm] = useState<FormState>({
     NAME_ENU: '', NAME_ARA: '', UCI_NAME: '', UCI_TYPE: '',
     UCI_COUNTRY: '', UCI_ID: '', ISIC_CODE: '', ISIC_DESCRIPTION: '',

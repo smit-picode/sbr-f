@@ -24,6 +24,7 @@ import { toast } from '@/utils/toast';
 import { useDebounce, usePermission } from '@/hooks';
 import { RotateCcw, Plus, Network } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 
 function is400(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 400; }
 function is401(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 401; }
@@ -33,11 +34,15 @@ export function EnterpriseGroupsListPage() {
   const [filters, setFilters] = useState<EnterpriseGroupFilters>(ENTERPRISE_GROUP_DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  const { t } = useTranslation();
+  // TEMP: force English on this page regardless of selected language.
+  // Restore to: const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const t = i18n.getFixedT('en');
+  const router = useRouter();
 
   const debouncedSearch = useDebounce(filters.search, 400);
 
-  const { canSearch, canCreate } = usePermission('enterprise_groups');
+  const { canSearch, canViewDetail, canEdit, canCreate } = usePermission('enterprise_groups');
 
   const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
 
@@ -187,7 +192,7 @@ export function EnterpriseGroupsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
-        onRowClick={undefined}
+        onRowClick={canViewDetail || canEdit ? (row) => router.push(`/enterprise-groups/${row.ID}`) : undefined}
         stickyFirstColumn
       />
 
