@@ -151,27 +151,27 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
   const title = [a.MUNICIPALITY_ID, a.STREET].filter(Boolean).join(' — ') || `Address #${a.ID}`;
 
   const locationFields = [
-    { k: 'SBR_ID', label: 'SBR ID', value: String(a.SBR_ID), show: !isEmpty(a.SBR_ID), mono: true },
-    { k: 'MUNICIPALITY_ID', label: 'Municipality', value: a.MUNICIPALITY_ID, show: !isEmpty(a.MUNICIPALITY_ID), mono: false },
-    { k: 'ZONE', label: 'Zone', value: a.ZONE, show: !isEmpty(a.ZONE), mono: false },
-    { k: 'STREET', label: 'Street', value: a.STREET, show: !isEmpty(a.STREET), mono: false },
-    { k: 'BUILDING_NO', label: 'Building', value: a.BUILDING_NO, show: !isEmpty(a.BUILDING_NO), mono: false },
-    { k: 'UNIT_NO', label: 'Unit', value: a.UNIT_NO, show: !isEmpty(a.UNIT_NO), mono: false },
-    { k: 'FLOOR_NO', label: 'Floor', value: a.FLOOR_NO, show: !isEmpty(a.FLOOR_NO), mono: false },
+    { k: 'SBR_ID', label: t('addressDetail.fields.sbrId'), value: String(a.SBR_ID), show: !isEmpty(a.SBR_ID), mono: true },
+    { k: 'MUNICIPALITY_ID', label: t('addressDetail.fields.municipality'), value: a.MUNICIPALITY_ID, show: !isEmpty(a.MUNICIPALITY_ID), mono: false },
+    { k: 'ZONE', label: t('addressDetail.fields.zone'), value: a.ZONE, show: !isEmpty(a.ZONE), mono: false },
+    { k: 'STREET', label: t('addressDetail.fields.street'), value: a.STREET, show: !isEmpty(a.STREET), mono: false },
+    { k: 'BUILDING_NO', label: t('addressDetail.fields.building'), value: a.BUILDING_NO, show: !isEmpty(a.BUILDING_NO), mono: false },
+    { k: 'UNIT_NO', label: t('addressDetail.fields.unit'), value: a.UNIT_NO, show: !isEmpty(a.UNIT_NO), mono: false },
+    { k: 'FLOOR_NO', label: t('addressDetail.fields.floor'), value: a.FLOOR_NO, show: !isEmpty(a.FLOOR_NO), mono: false },
   ].filter((f) => f.show);
 
   const referenceFields = [
-    { k: 'QARS', label: 'QARS', value: a.QARS, show: !isEmpty(a.QARS), mono: true },
-    { k: 'ELECTRICITY_NO', label: 'Electricity No', value: a.ELECTRICITY_NO, show: !isEmpty(a.ELECTRICITY_NO), mono: true },
-    { k: 'LATITUDE', label: 'Latitude', value: a.LATITUDE, show: !isEmpty(a.LATITUDE), mono: true },
-    { k: 'LONGITUDE', label: 'Longitude', value: a.LONGITUDE, show: !isEmpty(a.LONGITUDE), mono: true },
-    { k: 'SOURCE_CODE', label: 'Source', value: a.SOURCE_CODE, show: !isEmpty(a.SOURCE_CODE), mono: true },
+    { k: 'QARS', label: t('addressDetail.fields.qars'), value: a.QARS, show: !isEmpty(a.QARS), mono: true },
+    { k: 'ELECTRICITY_NO', label: t('addressDetail.fields.electricityNo'), value: a.ELECTRICITY_NO, show: !isEmpty(a.ELECTRICITY_NO), mono: true },
+    { k: 'LATITUDE', label: t('addressDetail.fields.latitude'), value: a.LATITUDE, show: !isEmpty(a.LATITUDE), mono: true },
+    { k: 'LONGITUDE', label: t('addressDetail.fields.longitude'), value: a.LONGITUDE, show: !isEmpty(a.LONGITUDE), mono: true },
+    { k: 'SOURCE_CODE', label: t('addressDetail.fields.source'), value: a.SOURCE_CODE, show: !isEmpty(a.SOURCE_CODE), mono: true },
   ].filter((f) => f.show);
 
   const metaFields = [
-    { k: 'PRIORITY', label: 'Priority', value: a.PRIORITY != null ? String(a.PRIORITY) : null, show: a.PRIORITY != null, mono: false },
-    { k: 'VALID_FROM', label: 'Valid From', value: formatDate(a.VALID_FROM), show: !isEmpty(a.VALID_FROM), mono: false },
-    { k: 'VALID_TO', label: 'Valid To', value: formatDate(a.VALID_TO), show: !isEmpty(a.VALID_TO), mono: false },
+    { k: 'PRIORITY', label: t('addressDetail.fields.priority'), value: a.PRIORITY != null ? String(a.PRIORITY) : null, show: a.PRIORITY != null, mono: false },
+    { k: 'VALID_FROM', label: t('addressDetail.fields.validFrom'), value: formatDate(a.VALID_FROM), show: !isEmpty(a.VALID_FROM), mono: false },
+    { k: 'VALID_TO', label: t('addressDetail.fields.validTo'), value: formatDate(a.VALID_TO), show: !isEmpty(a.VALID_TO), mono: false },
   ].filter((f) => f.show);
 
   return (
@@ -211,9 +211,9 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
 
       <HighlightStrip
         items={[
-          { icon: <MapPin className="h-4 w-4" />, label: 'Zone', value: a.ZONE },
-          { icon: <MapPin className="h-4 w-4" />, label: 'Street', value: a.STREET },
-          { icon: <Database className="h-4 w-4" />, label: 'Source', value: a.SOURCE_CODE },
+          { icon: <MapPin className="h-4 w-4" />, label: t('addressDetail.fields.zone'), value: a.ZONE },
+          { icon: <MapPin className="h-4 w-4" />, label: t('addressDetail.fields.street'), value: a.STREET },
+          { icon: <Database className="h-4 w-4" />, label: t('addressDetail.fields.source'), value: a.SOURCE_CODE },
         ]}
       />
 

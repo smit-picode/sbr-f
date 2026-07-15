@@ -228,7 +228,33 @@ const fmt = (key: string, v: unknown): string => {
   return String(v);
 };
 
-const fieldLabel = (f: string) => f.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+// Maps a CONTEXT_SECTIONS section title to its changeRequests.sections.* i18n key.
+const SECTION_LABEL_KEYS: Record<string, string> = {
+  'Contact': 'contact',
+  'Channels': 'channels',
+  'Metadata': 'metadata',
+  'Location': 'location',
+  'References': 'references',
+  'Identity': 'identity',
+  'Names': 'names',
+  'Status & Classification': 'statusClassification',
+  'Registration': 'registration',
+  'Dates': 'dates',
+  'Overview': 'overview',
+  'Group': 'group',
+  'Controlling Institution (UCI)': 'controllingInstitution',
+  'Classification': 'classification',
+};
+
+// Resolves a raw field/section key to its translated label — falls back to the curated
+// English text (unknown fields still get a readable title-cased label).
+const trField = (t: (k: string, o?: { defaultValue: string }) => string, key: string, fallback: string) =>
+  t(`changeRequests.fields.${key}`, { defaultValue: fallback });
+const trSection = (t: (k: string, o?: { defaultValue: string }) => string, section: string) =>
+  t(`changeRequests.sections.${SECTION_LABEL_KEYS[section] ?? section}`, { defaultValue: section });
+
+const fieldLabel = (t: (k: string, o?: { defaultValue: string }) => string, f: string) =>
+  t(`changeRequests.fields.${f}`, { defaultValue: f.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) });
 
 export function ChangeRequestDetailPage({ id }: { id: number }) {
   const { t } = useTranslation();
@@ -324,7 +350,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                   className="grid items-center gap-x-4 px-5 py-3 text-sm"
                   style={{ gridTemplateColumns: '11rem 1fr auto 1fr' }}
                 >
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(f.field)}</span>
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(t, f.field)}</span>
                   <span className="min-w-0 text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
                   <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                   <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
@@ -397,12 +423,12 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                 {contextSections.map((sec, idx) => (
                   <div key={sec.section} className={idx > 0 ? 'border-t border-slate-200' : ''}>
                     <div className="bg-slate-50 px-4 py-2 border-b border-slate-100">
-                      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{sec.section}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{trSection(t, sec.section)}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4">
                       {sec.visible.map((f) => (
                         <div key={f.key} className={`min-w-0${f.span === 2 ? ' col-span-2' : ''}`}>
-                          <p className="text-[11px] text-slate-400">{f.label}</p>
+                          <p className="text-[11px] text-slate-400">{trField(t, f.key, f.label)}</p>
                           {STATUS_KEYS.has(f.key) ? (
                             <div className="flex flex-wrap items-center gap-1.5">
                               <StatusBadge status={r.record?.[f.key] as string | null} />

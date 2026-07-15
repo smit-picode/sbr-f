@@ -215,7 +215,8 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
 }
 
 function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[] }) {
-  if (!entries.length) return <p className="text-sm text-slate-400">No change history recorded.</p>;
+  const { t } = useTranslation();
+  if (!entries.length) return <p className="text-sm text-slate-400">{t('enterpriseDetail.noChangeHistory')}</p>;
   return (
     <ul className="space-y-3">
       {entries.map((e) => {

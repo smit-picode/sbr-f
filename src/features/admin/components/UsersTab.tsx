@@ -391,12 +391,12 @@ export function UsersTab({
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colUser', { lng: 'en' })}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles', { lng: 'en' })}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus', { lng: 'en' })}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt', { lng: 'en' })}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colUser')}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles')}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus')}</th>
+              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt')}</th>
               {showActions && (
-                <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions', { lng: 'en' })}</th>
+                <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions')}</th>
               )}
             </tr>
           </thead>

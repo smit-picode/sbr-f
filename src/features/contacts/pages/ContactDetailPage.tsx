@@ -110,7 +110,7 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetContactByIdQuery(contactId, { skip: !canOpenDetail });
 
-  const lbl = (k: string) => t(`columns.${k}`, { lng: 'en' });
+  const lbl = (k: string) => t(`columns.${k}`);
 
   const BackLink = (
     <button onClick={() => router.push('/contacts')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">

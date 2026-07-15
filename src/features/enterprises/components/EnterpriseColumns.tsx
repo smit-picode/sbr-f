@@ -11,7 +11,7 @@ type TFunc = (key: string, options?: { lng?: string }) => string;
 export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'ENTERPRISE_ID',
-    header: t('columns.ENTERPRISE_ID', { lng: 'en' }),
+    header: t('columns.ENTERPRISE_ID'),
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
         <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span>
@@ -22,7 +22,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'NAME_ENU',
-    header: t('columns.NAME', { lng: 'en' }),
+    header: t('columns.NAME'),
     cell: ({ getValue }) => (
       <div className="min-w-[220px]">
         <p className="font-medium text-slate-800 text-sm leading-snug">{nullableText(getValue<string | null>())}</p>
@@ -32,7 +32,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'MAIN_CR',
-    header: t('columns.MAIN_CR', { lng: 'en' }),
+    header: t('columns.MAIN_CR'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -44,7 +44,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
-    header: t('columns.ESTABLISHMENTS', { lng: 'en' }),
+    header: t('columns.ESTABLISHMENTS'),
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -58,14 +58,14 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'LEGAL_TYPE',
-    header: t('columns.LEGAL_TYPE', { lng: 'en' }),
+    header: t('columns.LEGAL_TYPE'),
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>
     ),
   },
   {
     accessorKey: 'SECTOR_ID',
-    header: t('columns.SECTOR', { lng: 'en' }),
+    header: t('columns.SECTOR'),
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? <Badge variant="secondary" className="rounded-md">{val}</Badge> : <span className="text-slate-400">—</span>;
@@ -73,13 +73,13 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'STATUS',
-    header: t('columns.STATUS', { lng: 'en' }),
+    header: t('columns.STATUS'),
     cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" />,
     enableSorting: true,
   },
   {
     accessorKey: 'MAIN_ESTABLISHMENT_SBR_ID',
-    header: t('columns.MAIN_UNIT', { lng: 'en' }),
+    header: t('columns.MAIN_UNIT'),
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
@@ -91,7 +91,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   },
   {
     accessorKey: 'VALID_FROM',
-    header: t('columns.VALID_FROM', { lng: 'en' }),
+    header: t('columns.VALID_FROM'),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDate(getValue<string | null>())}</span>,
   },
 ];

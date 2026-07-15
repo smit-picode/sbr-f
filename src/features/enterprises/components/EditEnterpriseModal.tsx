@@ -139,36 +139,36 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           {/* Read-only identity row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Enterprise ID</Label>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseId', { defaultValue: 'Enterprise ID' })}</Label>
               <Input value={`ENT-${enterprise.ENTERPRISE_ID}`} disabled className="bg-slate-50 text-slate-500" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Main MOCI CR</Label>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.mainMociCr', { defaultValue: 'Main MOCI CR' })}</Label>
               <Input value={enterprise.MAIN_CR ?? '—'} disabled className="bg-slate-50 text-slate-500" />
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">Enterprise Name</Label>
+            <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={500} className="focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
           </div>
 
           {/* Sector + Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Sector</Label>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.sector', { defaultValue: 'Sector' })}</Label>
               <Select value={sector} onValueChange={setSector}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select sector" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectSector', { defaultValue: 'Select sector' })} /></SelectTrigger>
                 <SelectContent>
                   {SECTOR_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Status</Label>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.status', { defaultValue: 'Status' })}</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select status" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
                 <SelectContent>
                   {STATUS_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
@@ -179,7 +179,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           {/* Establishments */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">Establishments in this enterprise</Label>
+              <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseEdit.establishments', { defaultValue: 'Establishments in this enterprise' })}</Label>
               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{currentRows.length} {t('table.units')}</span>
             </div>
 

@@ -233,46 +233,46 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
 
         <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
 
-          <ReadOnlyField label={t('editContact.fields.sbrId', { lng: 'en' })} value={contact?.SBR_ID} />
-          <ReadOnlyField label={t('editContact.fields.recordId', { lng: 'en' })} value={contact?.ID} />
+          <ReadOnlyField label={t('editContact.fields.sbrId')} value={contact?.SBR_ID} />
+          <ReadOnlyField label={t('editContact.fields.recordId')} value={contact?.ID} />
 
           <div className="col-span-2 space-y-1" data-field="CONTACT_NAME">
-            <Label>{t('editContact.fields.contactName', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.contactName')}</Label>
             <Input className={inp('CONTACT_NAME')} value={form.CONTACT_NAME ?? ''} onChange={(e) => handleChange('CONTACT_NAME', e.target.value)} />
             <FieldErr msg={err('CONTACT_NAME')} />
           </div>
           <div className="space-y-1" data-field="PHONE">
-            <Label>{t('editContact.fields.phone', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.phone')}</Label>
             <Input className={inp('PHONE')} value={form.PHONE ?? ''} onChange={(e) => handleChange('PHONE', e.target.value)} />
             <FieldErr msg={err('PHONE')} />
           </div>
           <div className="space-y-1" data-field="MOBILE">
-            <Label>{t('editContact.fields.mobile', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.mobile')}</Label>
             <Input className={inp('MOBILE')} value={form.MOBILE ?? ''} onChange={(e) => handleChange('MOBILE', e.target.value)} />
             <FieldErr msg={err('MOBILE')} />
           </div>
           <div className="col-span-2 space-y-1" data-field="EMAIL">
-            <Label>{t('editContact.fields.email', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.email')}</Label>
             <Input type="email" className={inp('EMAIL')} value={form.EMAIL ?? ''} onChange={(e) => handleChange('EMAIL', e.target.value)} />
             <FieldErr msg={err('EMAIL')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.fax', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.fax')}</Label>
             <Input className={inp('FAX')} value={form.FAX ?? ''} onChange={(e) => handleChange('FAX', e.target.value)} />
             <FieldErr msg={err('FAX')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.poBox', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.poBox')}</Label>
             <Input className={inp('PO_BOX')} value={form.PO_BOX ?? ''} onChange={(e) => handleChange('PO_BOX', e.target.value)} />
             <FieldErr msg={err('PO_BOX')} />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>{t('editContact.fields.website', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.website')}</Label>
             <Input className={inp('WEBSITE')} value={form.WEBSITE ?? ''} onChange={(e) => handleChange('WEBSITE', e.target.value)} />
             <FieldErr msg={err('WEBSITE')} />
           </div>
           <div className="space-y-1" data-field="ROLE">
-            <Label>{t('editContact.fields.role', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.role')}</Label>
             <Select
               value={form.ROLE ? String(form.ROLE) : '__none__'}
               onValueChange={(v) => handleChange('ROLE', v === '__none__' ? '' : v)}
@@ -291,7 +291,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
             <FieldErr msg={err('ROLE')} />
           </div>
           <div className="space-y-1" data-field="SOURCE_CODE">
-            <Label>{t('editContact.fields.sourceCode', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.sourceCode')}</Label>
             <Select
               value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
               onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
@@ -310,7 +310,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
           <div className="space-y-1" data-field="PRIORITY">
-            <Label>{t('editContact.fields.priority', { lng: 'en' })}</Label>
+            <Label>{t('editContact.fields.priority')}</Label>
             <Input
               type="number"
               className={inp('PRIORITY')}
@@ -324,16 +324,16 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
           </div>
 
           <div className="col-span-2 pt-2">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editContact.sections.metadata', { lng: 'en' })}</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editContact.sections.metadata')}</p>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editContact.fields.validFrom', { lng: 'en' })}</label>
+            <label className="text-slate-400 text-xs">{t('editContact.fields.validFrom')}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {contact?.VALID_FROM ? new Date(contact.VALID_FROM).toLocaleDateString('en-GB') : '—'}
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-slate-400 text-xs">{t('editContact.fields.validTo', { lng: 'en' })}</label>
+            <label className="text-slate-400 text-xs">{t('editContact.fields.validTo')}</label>
             <div className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed select-none">
               {contact?.VALID_TO ? new Date(contact.VALID_TO).toLocaleDateString('en-GB') : '—'}
             </div>

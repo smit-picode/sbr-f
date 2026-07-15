@@ -213,46 +213,51 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     return { k: k as string, label, value, source: o.source ? (e[o.source] as string | null) : null, mono: !!o.mono, show: !isEmpty(raw) };
   };
 
+  // Field labels + section titles are localized via establishmentDetail.fields.* / .sections.*
+  // (English fallback text matches what was previously hardcoded here).
+  const fl = (k: string, fallback: string) => t(`establishmentDetail.fields.${k}`, { defaultValue: fallback });
+  const sl = (k: string, fallback: string) => t(`establishmentDetail.sections.${k}`, { defaultValue: fallback });
+
   const identity = [
-    F('SBR_ID', 'SBR ID', { mono: true }),
-    F('SOURCE_CODE', 'Source', { mono: true }),
-    F('EID', 'EID', { source: 'EID_SOURCE', mono: true }),
+    F('SBR_ID', fl('SBR_ID', 'SBR ID'), { mono: true }),
+    F('SOURCE_CODE', fl('SOURCE_CODE', 'Source'), { mono: true }),
+    F('EID', fl('EID', 'EID'), { source: 'EID_SOURCE', mono: true }),
   ].filter((f) => f.show);
 
   const names = [
-    F('NAME_ENU', 'Name (EN)', { source: 'NAME_ENU_SOURCE' }),
-    F('NAME_ARA', 'Name (AR)', { source: 'NAME_ARA_SOURCE' }),
-    F('TRADE_NAME_ENU', 'Trade Name', { source: 'TRADE_NAME_ENU_SOURCE' }),
-    F('NPC_NAME_ENU', 'NPC Name', { source: 'NPC_NAME_ENU_SOURCE' }),
+    F('NAME_ENU', fl('NAME_ENU', 'Name (EN)'), { source: 'NAME_ENU_SOURCE' }),
+    F('NAME_ARA', fl('NAME_ARA', 'Name (AR)'), { source: 'NAME_ARA_SOURCE' }),
+    F('TRADE_NAME_ENU', fl('TRADE_NAME_ENU', 'Trade Name'), { source: 'TRADE_NAME_ENU_SOURCE' }),
+    F('NPC_NAME_ENU', fl('NPC_NAME_ENU', 'NPC Name'), { source: 'NPC_NAME_ENU_SOURCE' }),
   ].filter((f) => f.show);
 
   const statusClass = [
-    F('EST_STATUS', 'Status', { source: 'EST_STATUS_SOURCE', node: <StatusBadge status={e.EST_STATUS} /> }),
-    F('EST_STATUS_CATEGORY', 'Status Category', { source: 'EST_STATUS_CATEGORY_SOURCE' }),
-    F('LEGAL_TYPE', 'Legal Type', { source: 'LEGAL_TYPE_SOURCE' }),
-    F('SECTOR_ID', 'Sector', { source: 'SECTOR_ID_SOURCE' }),
-    F('ISIC_CODE', 'ISIC Code', { source: 'ISIC_CODE_SOURCE', mono: true }),
-    F('EMPLOYMENT_COUNT', 'Employees', { source: 'EMPLOYMENT_COUNT_SOURCE' }),
-    F('MAIN_BRANCH_FLG', 'Main / Branch', { source: 'MAIN_BRANCH_FLG_SOURCE' }),
-    F('HOLDING_COMPANY_FLG', 'Holding Co.', { source: 'HOLDING_COMPANY_FLG_SOURCE' }),
+    F('EST_STATUS', fl('EST_STATUS', 'Status'), { source: 'EST_STATUS_SOURCE', node: <StatusBadge status={e.EST_STATUS} /> }),
+    F('EST_STATUS_CATEGORY', fl('EST_STATUS_CATEGORY', 'Status Category'), { source: 'EST_STATUS_CATEGORY_SOURCE' }),
+    F('LEGAL_TYPE', fl('LEGAL_TYPE', 'Legal Type'), { source: 'LEGAL_TYPE_SOURCE' }),
+    F('SECTOR_ID', fl('SECTOR_ID', 'Sector'), { source: 'SECTOR_ID_SOURCE' }),
+    F('ISIC_CODE', fl('ISIC_CODE', 'ISIC Code'), { source: 'ISIC_CODE_SOURCE', mono: true }),
+    F('EMPLOYMENT_COUNT', fl('EMPLOYMENT_COUNT', 'Employees'), { source: 'EMPLOYMENT_COUNT_SOURCE' }),
+    F('MAIN_BRANCH_FLG', fl('MAIN_BRANCH_FLG', 'Main / Branch'), { source: 'MAIN_BRANCH_FLG_SOURCE' }),
+    F('HOLDING_COMPANY_FLG', fl('HOLDING_COMPANY_FLG', 'Holding Co.'), { source: 'HOLDING_COMPANY_FLG_SOURCE' }),
   ].filter((f) => f.show);
 
   const registration = [
-    F('MOCI_ORG_ID', 'MOCI Org ID', { mono: true }),
-    F('MOCI_CR_NUM', 'MOCI CR', { mono: true }),
-    F('MOCI_CP_NUM', 'MOCI CP', { mono: true }),
-    F('QFC_NUMBER', 'QFC Number', { mono: true }),
-    F('QFZ_SOURCE_ID', 'QFZ Source ID', { mono: true }),
-    F('QSTP_REG_NUM', 'QSTP Reg', { mono: true }),
-    F('FARM_NO', 'Farm No', { mono: true }),
+    F('MOCI_ORG_ID', fl('MOCI_ORG_ID', 'MOCI Org ID'), { mono: true }),
+    F('MOCI_CR_NUM', fl('MOCI_CR_NUM', 'MOCI CR'), { mono: true }),
+    F('MOCI_CP_NUM', fl('MOCI_CP_NUM', 'MOCI CP'), { mono: true }),
+    F('QFC_NUMBER', fl('QFC_NUMBER', 'QFC Number'), { mono: true }),
+    F('QFZ_SOURCE_ID', fl('QFZ_SOURCE_ID', 'QFZ Source ID'), { mono: true }),
+    F('QSTP_REG_NUM', fl('QSTP_REG_NUM', 'QSTP Reg'), { mono: true }),
+    F('FARM_NO', fl('FARM_NO', 'Farm No'), { mono: true }),
   ].filter((f) => f.show);
 
   const dates = [
-    F('CR_ISSUE_DATE', 'CR Issue', { date: true }),
-    F('CR_EXPIRY_DATE', 'CR Expiry', { date: true }),
-    F('CP_ISSUE_DATE', 'CP Issue', { date: true }),
-    F('REG_DATE', 'Reg Date', { date: true }),
-    F('VALID_FROM', 'Valid From', { date: true }),
+    F('CR_ISSUE_DATE', fl('CR_ISSUE_DATE', 'CR Issue'), { date: true }),
+    F('CR_EXPIRY_DATE', fl('CR_EXPIRY_DATE', 'CR Expiry'), { date: true }),
+    F('CP_ISSUE_DATE', fl('CP_ISSUE_DATE', 'CP Issue'), { date: true }),
+    F('REG_DATE', fl('REG_DATE', 'Reg Date'), { date: true }),
+    F('VALID_FROM', fl('VALID_FROM', 'Valid From'), { date: true }),
   ].filter((f) => f.show);
 
   const renderCard = (titleKey: string, fields: FieldEntry[]) =>
@@ -315,11 +320,11 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
 
       <HighlightStrip
         items={[
-          { icon: <Briefcase className="h-4 w-4" />, label: 'Sector', value: e.SECTOR_ID },
-          { icon: <Landmark className="h-4 w-4" />, label: 'Legal Type', value: e.LEGAL_TYPE },
-          { icon: <Users className="h-4 w-4" />, label: 'Employees', value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null },
-          { icon: <GitBranch className="h-4 w-4" />, label: 'Main / Branch', value: e.MAIN_BRANCH_FLG },
-          { icon: <Database className="h-4 w-4" />, label: 'Source', value: e.SOURCE_CODE },
+          { icon: <Briefcase className="h-4 w-4" />, label: fl('SECTOR_ID', 'Sector'), value: e.SECTOR_ID },
+          { icon: <Landmark className="h-4 w-4" />, label: fl('LEGAL_TYPE', 'Legal Type'), value: e.LEGAL_TYPE },
+          { icon: <Users className="h-4 w-4" />, label: fl('EMPLOYMENT_COUNT', 'Employees'), value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null },
+          { icon: <GitBranch className="h-4 w-4" />, label: fl('MAIN_BRANCH_FLG', 'Main / Branch'), value: e.MAIN_BRANCH_FLG },
+          { icon: <Database className="h-4 w-4" />, label: fl('SOURCE_CODE', 'Source'), value: e.SOURCE_CODE },
         ]}
       />
 
@@ -402,13 +407,13 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-4">
-          {renderCard('Identity', identity)}
-          {renderCard('Status & Classification', statusClass)}
-          {renderCard('Dates', dates)}
+          {renderCard(sl('identity', 'Identity'), identity)}
+          {renderCard(sl('statusClassification', 'Status & Classification'), statusClass)}
+          {renderCard(sl('dates', 'Dates'), dates)}
         </div>
         <div className="flex flex-col gap-4">
-          {renderCard('Names', names)}
-          {renderCard('Registration', registration)}
+          {renderCard(sl('names', 'Names'), names)}
+          {renderCard(sl('registration', 'Registration'), registration)}
         </div>
       </div>
 
