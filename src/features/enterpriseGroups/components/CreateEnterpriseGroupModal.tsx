@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,7 @@ const EMPTY_FORM: FormState = {
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
 export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGroupModalProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [memberSearch, setMemberSearch] = useState('');
   const [members, setMembers] = useState<SbrEnterprise[]>([]);
@@ -96,6 +98,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
       toast.error('At least one group name (EN or AR) is required.');
       return;
     }
+    if (members.length === 0) {
+      toast.error('Add at least one member enterprise.');
+      return;
+    }
     setShowCommentDialog(true);
   };
 
@@ -128,24 +134,24 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Enterprise Group</DialogTitle>
+          <DialogTitle>{t('createEnterpriseGroup.title', { defaultValue: 'Create Enterprise Group' })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
           {/* Names */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Group name (EN)</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}</Label>
               <Input
                 value={form.NAME_ENU}
                 onChange={(e) => set('NAME_ENU', e.target.value)}
                 maxLength={500}
-                placeholder="English name"
+                placeholder={t('createEnterpriseGroup.englishNamePlaceholder', { defaultValue: 'English name' })}
                 className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Group name (AR)</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameAr', { defaultValue: 'Group name (AR)' })}</Label>
               <Input
                 value={form.NAME_ARA}
                 onChange={(e) => set('NAME_ARA', e.target.value)}
@@ -160,7 +166,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           {/* UCI fields — no section header, just a subtle separator */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-xs text-slate-500">UCI name</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}</Label>
               <Input
                 value={form.UCI_NAME}
                 onChange={(e) => set('UCI_NAME', e.target.value)}
@@ -169,9 +175,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">UCI type</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}</Label>
               <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select type" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_TYPE_OPTIONS.map((o) => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -180,9 +186,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">UCI country</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciCountry', { defaultValue: 'UCI country' })}</Label>
               <Select value={form.UCI_COUNTRY} onValueChange={(v) => set('UCI_COUNTRY', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select country" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectCountry', { defaultValue: 'Select country' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS.map((o) => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -191,7 +197,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               </Select>
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-xs text-slate-500">UCI ID</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}</Label>
               <Input
                 value={form.UCI_ID}
                 onChange={(e) => set('UCI_ID', e.target.value)}
@@ -204,7 +210,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           {/* Classification */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">ISIC code (2-digit)</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
               <Input
                 value={form.ISIC_CODE}
                 onChange={(e) => set('ISIC_CODE', e.target.value)}
@@ -213,7 +219,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">ISIC description</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicDescription', { defaultValue: 'ISIC description' })}</Label>
               <Input
                 value={form.ISIC_DESCRIPTION}
                 onChange={(e) => set('ISIC_DESCRIPTION', e.target.value)}
@@ -222,9 +228,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Holding company</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.holdingCompany', { defaultValue: 'Holding company' })}</Label>
               <Select value={form.HOLDING_COMPANY_FLG} onValueChange={(v) => set('HOLDING_COMPANY_FLG', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Yes / No" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.yesNoPlaceholder', { defaultValue: 'Yes / No' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_HOLDING_OPTIONS.map((o) => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -233,9 +239,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Status</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.status', { defaultValue: 'Status' })}</Label>
               <Select value={form.STATUS} onValueChange={(v) => set('STATUS', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder="Select status" /></SelectTrigger>
+                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
                 <SelectContent>
                   {STATUS_CHOICES.map((o) => (
                     <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -248,12 +254,12 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           {/* Member Enterprises */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-widest text-slate-400">Member Enterprises</span>
+              <span className="text-xs font-medium uppercase tracking-widest text-slate-400">{t('editEnterpriseGroup.memberEnterprises', { defaultValue: 'Member Enterprises' })}</span>
               <span className="text-xs font-medium text-slate-500">{members.length}</span>
             </div>
 
             {members.length === 0 && (
-              <p className="text-xs text-slate-400">Add at least one enterprise.</p>
+              <p className="text-xs text-slate-400">{t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' })}</p>
             )}
 
             {members.length > 0 && (
@@ -278,13 +284,13 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
 
             {/* Search box */}
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3 space-y-2">
-              <p className="text-xs text-slate-500 font-medium">Add a member enterprise</p>
+              <p className="text-xs text-slate-500 font-medium">{t('editEnterpriseGroup.addMember', { defaultValue: 'Add a member enterprise' })}</p>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
-                  placeholder="Search enterprises by name or ENT ID..."
+                  placeholder={t('editEnterpriseGroup.searchPlaceholder', { defaultValue: 'Search enterprises by name or ENT ID...' })}
                   className="pl-8 shadow-none bg-white focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
                 />
               </div>
@@ -320,14 +326,14 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel', { defaultValue: 'Cancel' })}</Button>
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
             style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
             className="text-white"
           >
-            Create Group
+            {t('createEnterpriseGroup.createButton', { defaultValue: 'Create Group' })}
           </Button>
         </DialogFooter>
       </DialogContent>

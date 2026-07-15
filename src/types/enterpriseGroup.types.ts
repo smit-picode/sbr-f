@@ -21,6 +21,8 @@ export interface SbrEnterpriseGroup {
   EMPLOYEE_COUNT:      number;
   SECTOR:              string | null;
   DATA_SOURCES:        string | null;
+  HAS_PENDING_REQUEST?: boolean;
+  PENDING_FIELDS?:      Record<string, number>;
 }
 
 export interface EnterpriseGroupFilters {

@@ -4,20 +4,24 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { nullableText } from '@/utils/format';
 import { Users, MapPin, Network, Orbit } from 'lucide-react';
+import { PendingBadge } from '@/components/common/PendingBadge';
 
 type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
 
-export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGroup>[] => [
+export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGroup>[] => [
   {
     accessorKey: 'GROUP_ID',
-    header: 'GROUP',
-    cell: ({ getValue }) => (
-      <span className="font-mono text-xs font-medium text-[#77748B]">{String(getValue())}</span>
+    header: t('columns.GROUP', { defaultValue: 'GROUP' }),
+    cell: ({ getValue, row }) => (
+      <span className="flex items-center gap-1.5">
+        <span className="font-mono text-xs font-medium text-[#77748B]">{String(getValue())}</span>
+        {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
+      </span>
     ),
   },
   {
     accessorKey: 'NAME_ENU',
-    header: 'GROUP NAME',
+    header: t('columns.GROUP_NAME', { defaultValue: 'GROUP NAME' }),
     cell: ({ row }) => (
       <div className="min-w-[200px]">
         <p className="font-medium text-slate-800 text-sm leading-snug">{nullableText(row.original.NAME_ENU)}</p>
@@ -29,7 +33,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'TYPE',
-    header: 'TYPE',
+    header: t('columns.TYPE', { defaultValue: 'TYPE' }),
     cell: ({ getValue }) => {
       const type = getValue<string>();
       if (type === 'Domestic') {
@@ -50,7 +54,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'UCI_NAME',
-    header: 'CONTROLLING INSTITUTION (UCI)',
+    header: t('columns.UCI', { defaultValue: 'CONTROLLING INSTITUTION (UCI)' }),
     cell: ({ row }) => {
       const name = row.original.UCI_NAME;
       const type = row.original.UCI_TYPE;
@@ -66,7 +70,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'ISIC_CODE',
-    header: 'PRINCIPAL ACTIVITY',
+    header: t('columns.PRINCIPAL_ACTIVITY', { defaultValue: 'PRINCIPAL ACTIVITY' }),
     cell: ({ row }) => {
       const code = row.original.ISIC_CODE;
       const desc = row.original.ISIC_DESCRIPTION;
@@ -81,7 +85,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'ENTERPRISE_COUNT',
-    header: 'ENTERPRISES',
+    header: t('columns.ENTERPRISES', { defaultValue: 'ENTERPRISES' }),
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -94,7 +98,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
-    header: 'ESTABLISHMENTS',
+    header: t('columns.ESTABLISHMENTS', { defaultValue: 'ESTABLISHMENTS' }),
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -106,7 +110,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'EMPLOYEE_COUNT',
-    header: 'EMPLOYEES',
+    header: t('columns.EMPLOYEES', { defaultValue: 'EMPLOYEES' }),
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -119,7 +123,7 @@ export const getEnterpriseGroupColumns = (_t: TFunc): ColumnDef<SbrEnterpriseGro
   },
   {
     accessorKey: 'STATUS',
-    header: 'STATUS',
+    header: t('columns.STATUS', { defaultValue: 'STATUS' }),
     cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" />,
   },
 ];

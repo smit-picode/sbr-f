@@ -361,6 +361,13 @@
   },
   "columns": {
     "ACTIONS": "الإجراءات",
+    "GROUP": "المجموعة",
+    "GROUP_NAME": "اسم المجموعة",
+    "TYPE": "النوع",
+    "UCI": "الجهة المسيطرة (UCI)",
+    "PRINCIPAL_ACTIVITY": "النشاط الرئيسي",
+    "ENTERPRISES": "المؤسسات",
+    "EMPLOYEES": "الموظفون",
     "ENTERPRISE_ID": "المؤسسة",
     "MAIN_CR": "السجل التجاري الرئيسي",
     "ESTABLISHMENTS": "المنشآت",
@@ -465,7 +472,28 @@
   "editEnterpriseGroup": {
     "title": "تعديل مجموعة المؤسسات",
     "addMember": "إضافة مؤسسة عضو",
-    "searchPlaceholder": "البحث بالاسم أو رقم ENT..."
+    "searchPlaceholder": "البحث بالاسم أو رقم ENT...",
+    "nameEn": "اسم المجموعة (إنجليزي)",
+    "nameAr": "اسم المجموعة (عربي)",
+    "uciName": "اسم الجهة المسيطرة (UCI)",
+    "uciType": "نوع الجهة المسيطرة (UCI)",
+    "uciCountry": "بلد الجهة المسيطرة (UCI)",
+    "uciId": "معرف الجهة المسيطرة (UCI ID)",
+    "isicCode": "رمز ISIC (رقمين)",
+    "isicDescription": "وصف ISIC",
+    "holdingCompany": "شركة قابضة",
+    "status": "الحالة",
+    "memberEnterprises": "المؤسسات الأعضاء",
+    "selectType": "اختر النوع",
+    "selectCountry": "اختر البلد",
+    "selectStatus": "اختر الحالة",
+    "yesNoPlaceholder": "نعم / لا",
+    "addAtLeastOne": "أضف مؤسسة واحدة على الأقل."
+  },
+  "createEnterpriseGroup": {
+    "title": "إنشاء مجموعة مؤسسات",
+    "englishNamePlaceholder": "الاسم بالإنجليزية",
+    "createButton": "إنشاء المجموعة"
   },
   "enterpriseGroupDetail": {
     "backLink": "مجموعات المؤسسات",

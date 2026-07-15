@@ -361,6 +361,13 @@
   },
   "columns": {
     "ACTIONS": "ACTIONS",
+    "GROUP": "GROUP",
+    "GROUP_NAME": "GROUP NAME",
+    "TYPE": "TYPE",
+    "UCI": "CONTROLLING INSTITUTION (UCI)",
+    "PRINCIPAL_ACTIVITY": "PRINCIPAL ACTIVITY",
+    "ENTERPRISES": "ENTERPRISES",
+    "EMPLOYEES": "EMPLOYEES",
     "ENTERPRISE_ID": "ENTERPRISE",
     "MAIN_CR": "MAIN CR",
     "ESTABLISHMENTS": "ESTABLISHMENTS",
@@ -465,7 +472,28 @@
   "editEnterpriseGroup": {
     "title": "Edit Enterprise Group",
     "addMember": "Add a member enterprise",
-    "searchPlaceholder": "Search enterprises by name or ENT ID..."
+    "searchPlaceholder": "Search enterprises by name or ENT ID...",
+    "nameEn": "Group name (EN)",
+    "nameAr": "Group name (AR)",
+    "uciName": "UCI name",
+    "uciType": "UCI type",
+    "uciCountry": "UCI country",
+    "uciId": "UCI ID",
+    "isicCode": "ISIC code (2-digit)",
+    "isicDescription": "ISIC description",
+    "holdingCompany": "Holding company",
+    "status": "Status",
+    "memberEnterprises": "MEMBER ENTERPRISES",
+    "selectType": "Select type",
+    "selectCountry": "Select country",
+    "selectStatus": "Select status",
+    "yesNoPlaceholder": "Yes / No",
+    "addAtLeastOne": "Add at least one enterprise."
+  },
+  "createEnterpriseGroup": {
+    "title": "Create Enterprise Group",
+    "englishNamePlaceholder": "English name",
+    "createButton": "Create Group"
   },
   "enterpriseGroupDetail": {
     "backLink": "Enterprise Groups",
