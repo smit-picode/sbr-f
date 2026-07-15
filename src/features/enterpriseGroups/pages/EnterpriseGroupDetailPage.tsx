@@ -21,9 +21,6 @@ import {
 
 const MAROON = '#A71D3A';
 
-// TEMP: Control Structure section hidden — flip to true to restore it
-const SHOW_CONTROL_STRUCTURE = false as boolean;
-
 function SectionCard({ title, icon, children, badge }: {
   title: string;
   icon: React.ReactNode;
@@ -271,10 +268,7 @@ interface EnterpriseGroupDetailPageProps {
 export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPageProps) {
   const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
-  // TEMP: force English on this page regardless of selected language.
-  // Restore to: const { t } = useTranslation();
-  const { i18n } = useTranslation();
-  const t = i18n.getFixedT('en');
+  const { t } = useTranslation();
   const { canEdit } = usePermission('enterprise_groups');
 
   const { data, isLoading, isError, refetch } = useGetEnterpriseGroupByIdQuery(groupId);
@@ -431,7 +425,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
       </div>{/* end back link + header wrapper */}
 
       {/* Control structure graph — full width */}
-      {SHOW_CONTROL_STRUCTURE && (
       <SectionCard
         title={t('enterpriseGroupDetail.controlStructure', { defaultValue: 'Control Structure' })}
         icon={<GitFork className="h-4 w-4" />}
@@ -449,7 +442,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
           />
         </div>
       </SectionCard>
-      )}
 
       {/* Body: left main (2/3) + right sidebar (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

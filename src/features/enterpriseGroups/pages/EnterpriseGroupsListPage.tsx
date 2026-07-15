@@ -34,10 +34,7 @@ export function EnterpriseGroupsListPage() {
   const [filters, setFilters] = useState<EnterpriseGroupFilters>(ENTERPRISE_GROUP_DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  // TEMP: force English on this page regardless of selected language.
-  // Restore to: const { t } = useTranslation();
-  const { i18n } = useTranslation();
-  const t = i18n.getFixedT('en');
+  const { t } = useTranslation();
   const router = useRouter();
 
   const debouncedSearch = useDebounce(filters.search, 400);
