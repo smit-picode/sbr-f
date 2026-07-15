@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { PendingBadge } from '@/components/common/PendingBadge';
+import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -359,6 +361,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
                     {group.TYPE}
                   </Badge>
                 )}
+                {group.HAS_PENDING_REQUEST && <PendingBadge />}
                 {group.HOLDING_COMPANY_FLG === 'Yes' && (
                   <Badge className="rounded-md bg-white/15 text-white border border-white/30 text-[10px] font-semibold">
                     {t('enterpriseGroupDetail.holdingCompanyBadge', { defaultValue: 'Holding company' })}
@@ -423,6 +426,8 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         </div>
         </div>{/* end hero header card */}
       </div>{/* end back link + header wrapper */}
+
+      {group.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {/* Control structure graph — full width */}
       <SectionCard

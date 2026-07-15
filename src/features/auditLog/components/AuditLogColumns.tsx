@@ -49,9 +49,14 @@ function RecordIdCell({ value }: { value: number | null }) {
   return <span className="font-mono text-xs font-medium text-[#A71D3A]">{String(value)}</span>;
 }
 
+interface MemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }
+
 // CHANGE_DATA is a JSON object whose keys are the changed column names,
 // e.g. {"EMAIL":{"old":"a@b.com","new":"b@b.com"},"PHONE":{"old":"...","new":"..."}}.
-// Legacy rows may hold a JSON array or a plain column name string.
+// Legacy rows may hold a JSON array or a plain column name string. Structural membership
+// changes (Enterprise Groups member add/remove) ride along as memberAdd/memberRemove
+// (raw id arrays) plus memberAddDetails/memberRemoveDetails (display-only name snapshots) —
+// surfaced here as "Name (Added)" / "Name (Removed)" instead of a blank column.
 function formatColumnNames(value: string | null): string {
   if (!value) return '—';
   try {
@@ -59,11 +64,25 @@ function formatColumnNames(value: string | null): string {
     if (Array.isArray(parsed)) return (parsed as string[]).join(', ');
     if (parsed && typeof parsed === 'object') {
       const obj = parsed as Record<string, unknown>;
-      const names = Object.keys(obj).filter((k) => {
+      const parts = Object.keys(obj).filter((k) => {
         const v = obj[k];
         return v !== null && typeof v === 'object' && !Array.isArray(v) && 'old' in (v as object) && 'new' in (v as object);
-      }).join(', ');
-      return names || '—';
+      });
+
+      const memberLabel = (details: unknown, fallbackCount: unknown, suffix: string): string[] => {
+        if (Array.isArray(details) && details.length > 0) {
+          return (details as MemberDetail[]).map((m) => `${m.NAME || `ENT-${m.ENTERPRISE_ID}`} (${suffix})`);
+        }
+        if (Array.isArray(fallbackCount) && fallbackCount.length > 0) {
+          return [`${fallbackCount.length} member${fallbackCount.length > 1 ? 's' : ''} ${suffix.toLowerCase()}`];
+        }
+        return [];
+      };
+
+      parts.push(...memberLabel(obj.memberAddDetails, obj.memberAdd, 'Added'));
+      parts.push(...memberLabel(obj.memberRemoveDetails, obj.memberRemove, 'Removed'));
+
+      return parts.length > 0 ? parts.join(', ') : '—';
     }
   } catch {
     // legacy plain string — fall through
