@@ -7,12 +7,12 @@ export const ENTERPRISE_GROUP_DEFAULT_FILTERS = {
 } as const;
 
 export const ENTERPRISE_GROUP_FILTER_COLUMNS: { value: string; label: string }[] = [
-  { value: 'GROUP_ID',  label: 'Group ID' },
-  { value: 'NAME_ENU',  label: 'Name (EN)' },
-  { value: 'NAME_ARA',  label: 'Name (AR)' },
-  { value: 'UCI_NAME',  label: 'UCI Name' },
-  { value: 'STATUS',    label: 'Status' },
-  { value: 'ISIC_CODE', label: 'ISIC Code' },
+  { value: 'ENTERPRISE_GROUP_ID',  label: 'Group ID' },
+  { value: 'NAME_ENU',             label: 'Name (EN)' },
+  { value: 'NAME_ARA',             label: 'Name (AR)' },
+  { value: 'UCI_NAME',             label: 'UCI Name' },
+  { value: 'STATUS',               label: 'Status' },
+  { value: 'PRINCIPAL_ISIC_2DIGIT', label: 'ISIC Code' },
 ];
 
 export const ENTERPRISE_GROUP_STATUS_OPTIONS: { value: string; label: string }[] = [
@@ -28,7 +28,7 @@ export const ENTERPRISE_GROUP_TYPE_OPTIONS: { value: string; label: string }[] =
   { value: 'Foreign-controlled', label: 'Foreign-controlled' },
 ];
 
-export const ENTERPRISE_GROUP_UCI_TYPE_OPTIONS: string[] = ['Enterprise', 'Natural Person', 'Government', 'Other'];
+export const ENTERPRISE_GROUP_UCI_TYPE_OPTIONS: string[] = ['Enterprise', 'Natural Person', 'Government', 'Foreign Entity', 'Other'];
 
 export const ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS: string[] = [
   'Qatar',

@@ -158,7 +158,7 @@
     },
     "legalUnits": {
       "title": "Legal Units",
-      "description": "Statistical Business Register — Legal Unit records",
+      "description": "Regulator records that compose each establishment — read-only source ledger.",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     }
@@ -505,6 +505,13 @@
     "PRINCIPAL_ACTIVITY": "PRINCIPAL ACTIVITY",
     "ENTERPRISES": "ENTERPRISES",
     "EMPLOYEES": "EMPLOYEES",
+    "LEGAL_UNIT_ID": "LEGAL UNIT ID",
+    "ESTABLISHMENT": "ESTABLISHMENT",
+    "SOURCE_SYSTEM": "SOURCE SYSTEM",
+    "SOURCE_TABLE": "SOURCE TABLE",
+    "IDENTIFIER_TYPE": "IDENTIFIER TYPE",
+    "IDENTIFIER_VALUE": "IDENTIFIER VALUE",
+    "SCD_COMMENT": "SCD COMMENT",
     "ENTERPRISE_ID": "ENTERPRISE",
     "MAIN_CR": "MAIN CR",
     "ESTABLISHMENTS": "ESTABLISHMENTS",
@@ -631,6 +638,12 @@
     "title": "Create Enterprise Group",
     "englishNamePlaceholder": "English name",
     "createButton": "Create Group"
+  },
+  "legalUnits": {
+    "readOnlyLedger": "Read-only ledger",
+    "searchPlaceholder": "Search by LU ID, establishment, or source...",
+    "allRecords": "All records",
+    "current": "Current"
   },
   "enterpriseGroupDetail": {
     "backLink": "Enterprise Groups",

@@ -34,7 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Enterprise Groups', href: '/enterprise-groups', icon: 'GitFork', permKey: 'enterprise_groups.view', i18nKey: 'nav.enterpriseGroups' },
       { title: 'Contacts',    href: '/contacts',    icon: 'Users',         permKey: 'contacts.view',       i18nKey: 'nav.contacts', divider: true    },
       { title: 'Addresses',   href: '/addresses',   icon: 'MapPin',        permKey: 'addresses.view',      i18nKey: 'nav.addresses'   },
-      { title: 'Legal Units', href: '/legal-units', icon: 'Table',         permKey: '',                    i18nKey: 'nav.legalUnits'  },
+      { title: 'Legal Units', href: '/legal-units', icon: 'Table',         permKey: 'legal_units.view',    i18nKey: 'nav.legalUnits'  },
     ],
   },
   {

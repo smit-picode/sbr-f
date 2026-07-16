@@ -28,29 +28,27 @@ interface CreateEnterpriseGroupModalProps {
 }
 
 interface FormState {
-  NAME_ENU:            string;
-  NAME_ARA:            string;
-  UCI_NAME:            string;
-  UCI_TYPE:            string;
-  UCI_COUNTRY:         string;
-  UCI_ID:              string;
-  ISIC_CODE:           string;
-  ISIC_DESCRIPTION:    string;
-  HOLDING_COMPANY_FLG: string;
-  STATUS:              string;
+  NAME_ENU:              string;
+  NAME_ARA:              string;
+  UCI_NAME:              string;
+  UCI_TYPE:              string;
+  UCI_COUNTRY:           string;
+  UCI_IDENTIFIER:        string;
+  PRINCIPAL_ISIC_2DIGIT: string;
+  HOLDING_COMPANY_FLG:   string;
+  STATUS:                string;
 }
 
 const EMPTY_FORM: FormState = {
-  NAME_ENU:            '',
-  NAME_ARA:            '',
-  UCI_NAME:            '',
-  UCI_TYPE:            '',
-  UCI_COUNTRY:         '',
-  UCI_ID:              '',
-  ISIC_CODE:           '',
-  ISIC_DESCRIPTION:    '',
-  HOLDING_COMPANY_FLG: '',
-  STATUS:              'Active',
+  NAME_ENU:              '',
+  NAME_ARA:              '',
+  UCI_NAME:              '',
+  UCI_TYPE:              '',
+  UCI_COUNTRY:           '',
+  UCI_IDENTIFIER:        '',
+  PRINCIPAL_ISIC_2DIGIT: '',
+  HOLDING_COMPANY_FLG:   '',
+  STATUS:                'Active',
 };
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
@@ -108,17 +106,16 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   const handleConfirmWithComment = async (comment: string) => {
     try {
       await createGroup({
-        NAME_ENU:            form.NAME_ENU.trim() || null,
-        NAME_ARA:            form.NAME_ARA.trim() || null,
-        UCI_NAME:            form.UCI_NAME.trim() || null,
-        UCI_TYPE:            form.UCI_TYPE || null,
-        UCI_COUNTRY:         form.UCI_COUNTRY.trim() || null,
-        UCI_ID:              form.UCI_ID.trim() || null,
-        ISIC_CODE:           form.ISIC_CODE.trim() || null,
-        ISIC_DESCRIPTION:    form.ISIC_DESCRIPTION.trim() || null,
-        HOLDING_COMPANY_FLG: form.HOLDING_COMPANY_FLG || null,
-        STATUS:              form.STATUS || null,
-        memberEnterpriseIds: members.map((m) => m.ENTERPRISE_ID),
+        NAME_ENU:              form.NAME_ENU.trim() || null,
+        NAME_ARA:              form.NAME_ARA.trim() || null,
+        UCI_NAME:              form.UCI_NAME.trim() || null,
+        UCI_TYPE:              form.UCI_TYPE || null,
+        UCI_COUNTRY:           form.UCI_COUNTRY.trim() || null,
+        UCI_IDENTIFIER:        form.UCI_IDENTIFIER.trim() || null,
+        PRINCIPAL_ISIC_2DIGIT: form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
+        HOLDING_COMPANY_FLG:   form.HOLDING_COMPANY_FLG || null,
+        STATUS:                form.STATUS || null,
+        memberEnterpriseIds:   members.map((m) => m.ENTERPRISE_ID),
         comment,
       }).unwrap();
       toast.success('Enterprise group creation submitted for approval.');
@@ -199,8 +196,8 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}</Label>
               <Input
-                value={form.UCI_ID}
-                onChange={(e) => set('UCI_ID', e.target.value)}
+                value={form.UCI_IDENTIFIER}
+                onChange={(e) => set('UCI_IDENTIFIER', e.target.value)}
                 maxLength={100}
                 className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
               />
@@ -212,18 +209,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
               <Input
-                value={form.ISIC_CODE}
-                onChange={(e) => set('ISIC_CODE', e.target.value)}
-                maxLength={10}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicDescription', { defaultValue: 'ISIC description' })}</Label>
-              <Input
-                value={form.ISIC_DESCRIPTION}
-                onChange={(e) => set('ISIC_DESCRIPTION', e.target.value)}
-                maxLength={200}
+                value={form.PRINCIPAL_ISIC_2DIGIT}
+                onChange={(e) => set('PRINCIPAL_ISIC_2DIGIT', e.target.value)}
+                maxLength={2}
                 className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
               />
             </div>

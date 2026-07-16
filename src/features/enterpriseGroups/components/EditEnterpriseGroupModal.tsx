@@ -30,16 +30,15 @@ interface EditEnterpriseGroupModalProps {
 }
 
 interface FormState {
-  NAME_ENU:            string;
-  NAME_ARA:            string;
-  UCI_NAME:            string;
-  UCI_TYPE:            string;
-  UCI_COUNTRY:         string;
-  UCI_ID:              string;
-  ISIC_CODE:           string;
-  ISIC_DESCRIPTION:    string;
-  HOLDING_COMPANY_FLG: string;
-  STATUS:              string;
+  NAME_ENU:              string;
+  NAME_ARA:              string;
+  UCI_NAME:              string;
+  UCI_TYPE:              string;
+  UCI_COUNTRY:           string;
+  UCI_IDENTIFIER:        string;
+  PRINCIPAL_ISIC_2DIGIT: string;
+  HOLDING_COMPANY_FLG:   string;
+  STATUS:                string;
 }
 
 interface MemberRow {
@@ -54,7 +53,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   const { t } = useTranslation();
   const [form, setForm] = useState<FormState>({
     NAME_ENU: '', NAME_ARA: '', UCI_NAME: '', UCI_TYPE: '',
-    UCI_COUNTRY: '', UCI_ID: '', ISIC_CODE: '', ISIC_DESCRIPTION: '',
+    UCI_COUNTRY: '', UCI_IDENTIFIER: '', PRINCIPAL_ISIC_2DIGIT: '',
     HOLDING_COMPANY_FLG: '', STATUS: '',
   });
   const [memberSearch, setMemberSearch] = useState('');
@@ -84,16 +83,15 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   useEffect(() => {
     if (open && group) {
       setForm({
-        NAME_ENU:            group.NAME_ENU ?? '',
-        NAME_ARA:            group.NAME_ARA ?? '',
-        UCI_NAME:            group.UCI_NAME ?? '',
-        UCI_TYPE:            group.UCI_TYPE ?? '',
-        UCI_COUNTRY:         group.UCI_COUNTRY ?? '',
-        UCI_ID:              group.UCI_ID ?? '',
-        ISIC_CODE:           group.ISIC_CODE ?? '',
-        ISIC_DESCRIPTION:    group.ISIC_DESCRIPTION ?? '',
-        HOLDING_COMPANY_FLG: group.HOLDING_COMPANY_FLG ?? '',
-        STATUS:              group.STATUS ?? '',
+        NAME_ENU:              group.NAME_ENU ?? '',
+        NAME_ARA:              group.NAME_ARA ?? '',
+        UCI_NAME:              group.UCI_NAME ?? '',
+        UCI_TYPE:              group.UCI_TYPE ?? '',
+        UCI_COUNTRY:           group.UCI_COUNTRY ?? '',
+        UCI_IDENTIFIER:        group.UCI_IDENTIFIER ?? '',
+        PRINCIPAL_ISIC_2DIGIT: group.PRINCIPAL_ISIC_2DIGIT ?? '',
+        HOLDING_COMPANY_FLG:   group.HOLDING_COMPANY_FLG ?? '',
+        STATUS:                group.STATUS ?? '',
       });
       setMemberSearch('');
       setAddedMembers([]);
@@ -126,9 +124,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       n(form.UCI_NAME) !== n(group.UCI_NAME) ||
       n(form.UCI_TYPE) !== n(group.UCI_TYPE) ||
       n(form.UCI_COUNTRY) !== n(group.UCI_COUNTRY) ||
-      n(form.UCI_ID) !== n(group.UCI_ID) ||
-      n(form.ISIC_CODE) !== n(group.ISIC_CODE) ||
-      n(form.ISIC_DESCRIPTION) !== n(group.ISIC_DESCRIPTION) ||
+      n(form.UCI_IDENTIFIER) !== n(group.UCI_IDENTIFIER) ||
+      n(form.PRINCIPAL_ISIC_2DIGIT) !== n(group.PRINCIPAL_ISIC_2DIGIT) ||
       n(form.HOLDING_COMPANY_FLG) !== n(group.HOLDING_COMPANY_FLG) ||
       n(form.STATUS) !== n(group.STATUS) ||
       addedMembers.length > 0 ||
@@ -158,9 +155,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           UCI_NAME:                   form.UCI_NAME.trim() || null,
           UCI_TYPE:                   form.UCI_TYPE || null,
           UCI_COUNTRY:                form.UCI_COUNTRY.trim() || null,
-          UCI_ID:                     form.UCI_ID.trim() || null,
-          ISIC_CODE:                  form.ISIC_CODE.trim() || null,
-          ISIC_DESCRIPTION:           form.ISIC_DESCRIPTION.trim() || null,
+          UCI_IDENTIFIER:             form.UCI_IDENTIFIER.trim() || null,
+          PRINCIPAL_ISIC_2DIGIT:      form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
           HOLDING_COMPANY_FLG:        form.HOLDING_COMPANY_FLG || null,
           STATUS:                     form.STATUS || null,
           addMemberEnterpriseIds:     addedMembers.map((m) => m.ENTERPRISE_ID),
@@ -182,7 +178,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       <DialogContent className="max-w-xl max-h-[90vh] flex flex-col overflow-hidden p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
           <DialogTitle>
-            {t('editEnterpriseGroup.title', { defaultValue: 'Edit Enterprise Group' })} — {group.GROUP_ID}
+            {t('editEnterpriseGroup.title', { defaultValue: 'Edit Enterprise Group' })} — {group.ENTERPRISE_GROUP_ID}
           </DialogTitle>
         </DialogHeader>
 
@@ -228,7 +224,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}</Label>
-              <Input value={form.UCI_ID} onChange={(e) => set('UCI_ID', e.target.value)} maxLength={100} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+              <Input value={form.UCI_IDENTIFIER} onChange={(e) => set('UCI_IDENTIFIER', e.target.value)} maxLength={100} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
             </div>
           </div>
 
@@ -236,11 +232,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
-              <Input value={form.ISIC_CODE} onChange={(e) => set('ISIC_CODE', e.target.value)} maxLength={10} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicDescription', { defaultValue: 'ISIC description' })}</Label>
-              <Input value={form.ISIC_DESCRIPTION} onChange={(e) => set('ISIC_DESCRIPTION', e.target.value)} maxLength={200} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+              <Input value={form.PRINCIPAL_ISIC_2DIGIT} onChange={(e) => set('PRINCIPAL_ISIC_2DIGIT', e.target.value)} maxLength={2} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.holdingCompany', { defaultValue: 'Holding company' })}</Label>

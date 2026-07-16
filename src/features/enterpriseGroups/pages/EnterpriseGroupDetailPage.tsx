@@ -352,7 +352,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#C73050' }}>
                   <GitFork className="h-3 w-3" />
-                  {group.GROUP_ID}
+                  {group.ENTERPRISE_GROUP_ID}
                 </span>
                 <StatusBadge status={group.STATUS} className="rounded-md" />
                 {group.TYPE && (
@@ -410,9 +410,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
           <div>
             <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.principalActivity', { defaultValue: 'Principal activity' })}</p>
             <p className="text-sm font-semibold text-slate-800">
-              {group.ISIC_CODE
-                ? `${group.ISIC_CODE}${group.ISIC_DESCRIPTION ? ' · ' + group.ISIC_DESCRIPTION : ''}`
-                : '—'}
+              {group.PRINCIPAL_ISIC_2DIGIT || '—'}
             </p>
           </div>
           <div>
@@ -530,11 +528,11 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
                 { label: t('enterpriseGroupDetail.holdingCompany', { defaultValue: 'Holding company' }), value: nullableText(group.HOLDING_COMPANY_FLG) },
                 {
                   label: t('enterpriseGroupDetail.isicCode', { defaultValue: 'ISIC code' }),
-                  value: group.ISIC_CODE ? (
-                    <span className="font-mono text-xs">{group.ISIC_CODE}</span>
+                  value: group.PRINCIPAL_ISIC_2DIGIT ? (
+                    <span className="font-mono text-xs">{group.PRINCIPAL_ISIC_2DIGIT}</span>
                   ) : '—',
                 },
-                { label: t('enterpriseGroupDetail.uciId', { defaultValue: 'UCI ID' }),   value: nullableText(group.UCI_ID) },
+                { label: t('enterpriseGroupDetail.uciId', { defaultValue: 'UCI ID' }),   value: nullableText(group.UCI_IDENTIFIER) },
                 { label: t('enterpriseGroupDetail.created', { defaultValue: 'Created' }),  value: formatDate(group.CREATED_AT) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-4 py-2.5 gap-2">

@@ -10,7 +10,7 @@ type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) =>
 
 export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGroup>[] => [
   {
-    accessorKey: 'GROUP_ID',
+    accessorKey: 'ENTERPRISE_GROUP_ID',
     header: t('columns.GROUP', { defaultValue: 'GROUP' }),
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
@@ -69,18 +69,12 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     },
   },
   {
-    accessorKey: 'ISIC_CODE',
+    accessorKey: 'PRINCIPAL_ISIC_2DIGIT',
     header: t('columns.PRINCIPAL_ACTIVITY', { defaultValue: 'PRINCIPAL ACTIVITY' }),
     cell: ({ row }) => {
-      const code = row.original.ISIC_CODE;
-      const desc = row.original.ISIC_DESCRIPTION;
+      const code = row.original.PRINCIPAL_ISIC_2DIGIT;
       if (!code) return <span className="text-slate-400">—</span>;
-      return (
-        <span className="text-xs text-slate-600">
-          <span className="font-mono">{code}</span>
-          {desc && <span className="text-slate-400"> · {desc}</span>}
-        </span>
-      );
+      return <span className="font-mono text-xs text-slate-600">{code}</span>;
     },
   },
   {

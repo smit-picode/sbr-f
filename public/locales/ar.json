@@ -158,7 +158,7 @@
     },
     "legalUnits": {
       "title": "الوحدات القانونية",
-      "description": "السجل الإحصائي للأعمال — سجلات الوحدات القانونية",
+      "description": "سجلات الجهات التنظيمية التي تشكل كل منشأة — سجل مصدري للقراءة فقط.",
       "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
       "noDataDesc": ""
     }
@@ -505,6 +505,13 @@
     "PRINCIPAL_ACTIVITY": "النشاط الرئيسي",
     "ENTERPRISES": "المؤسسات",
     "EMPLOYEES": "الموظفون",
+    "LEGAL_UNIT_ID": "معرف الوحدة القانونية",
+    "ESTABLISHMENT": "المنشأة",
+    "SOURCE_SYSTEM": "نظام المصدر",
+    "SOURCE_TABLE": "جدول المصدر",
+    "IDENTIFIER_TYPE": "نوع المعرف",
+    "IDENTIFIER_VALUE": "قيمة المعرف",
+    "SCD_COMMENT": "ملاحظة SCD",
     "ENTERPRISE_ID": "المؤسسة",
     "MAIN_CR": "السجل التجاري الرئيسي",
     "ESTABLISHMENTS": "المنشآت",
@@ -631,6 +638,12 @@
     "title": "إنشاء مجموعة مؤسسات",
     "englishNamePlaceholder": "الاسم بالإنجليزية",
     "createButton": "إنشاء المجموعة"
+  },
+  "legalUnits": {
+    "readOnlyLedger": "سجل للقراءة فقط",
+    "searchPlaceholder": "البحث برقم الوحدة القانونية أو المنشأة أو المصدر...",
+    "allRecords": "جميع السجلات",
+    "current": "حالي"
   },
   "enterpriseGroupDetail": {
     "backLink": "مجموعات المؤسسات",
