@@ -39,6 +39,7 @@ interface FormState {
   PRINCIPAL_ISIC_2DIGIT: string;
   HOLDING_COMPANY_FLG:   string;
   STATUS:                string;
+  GROUP_START_DATE:      string;
 }
 
 interface MemberRow {
@@ -54,7 +55,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   const [form, setForm] = useState<FormState>({
     NAME_ENU: '', NAME_ARA: '', UCI_NAME: '', UCI_TYPE: '',
     UCI_COUNTRY: '', UCI_IDENTIFIER: '', PRINCIPAL_ISIC_2DIGIT: '',
-    HOLDING_COMPANY_FLG: '', STATUS: '',
+    HOLDING_COMPANY_FLG: '', STATUS: '', GROUP_START_DATE: '',
   });
   const [memberSearch, setMemberSearch] = useState('');
   const [addedMembers, setAddedMembers] = useState<MemberRow[]>([]);
@@ -98,6 +99,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
         PRINCIPAL_ISIC_2DIGIT: group.PRINCIPAL_ISIC_2DIGIT ?? '',
         HOLDING_COMPANY_FLG:   group.HOLDING_COMPANY_FLG ?? '',
         STATUS:                group.STATUS ?? '',
+        GROUP_START_DATE:      group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : '',
       });
       setMemberSearch('');
       setAddedMembers([]);
@@ -136,6 +138,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       n(form.PRINCIPAL_ISIC_2DIGIT) !== n(group.PRINCIPAL_ISIC_2DIGIT) ||
       n(form.HOLDING_COMPANY_FLG) !== n(group.HOLDING_COMPANY_FLG) ||
       n(form.STATUS) !== n(group.STATUS) ||
+      n(form.GROUP_START_DATE) !== n(group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : null) ||
       addedMembers.length > 0 ||
       removedIds.size > 0 ||
       headId !== initialHeadId
@@ -172,6 +175,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           PRINCIPAL_ISIC_2DIGIT:      form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
           HOLDING_COMPANY_FLG:        form.HOLDING_COMPANY_FLG || null,
           STATUS:                     form.STATUS || null,
+          GROUP_START_DATE:           form.GROUP_START_DATE || null,
           GROUP_HEAD_ENTERPRISE_ID:   headId,
           addMemberEnterpriseIds:     addedMembers.map((m) => m.ENTERPRISE_ID),
           removeMemberEnterpriseIds:  Array.from(removedIds),
@@ -265,6 +269,15 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
                   {STATUS_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.groupStartDate', { defaultValue: 'Group start date' })}</Label>
+              <Input
+                type="date"
+                value={form.GROUP_START_DATE}
+                onChange={(e) => set('GROUP_START_DATE', e.target.value)}
+                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+              />
             </div>
           </div>
 

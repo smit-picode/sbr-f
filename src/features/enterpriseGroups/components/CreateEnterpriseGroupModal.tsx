@@ -37,6 +37,7 @@ interface FormState {
   PRINCIPAL_ISIC_2DIGIT: string;
   HOLDING_COMPANY_FLG:   string;
   STATUS:                string;
+  GROUP_START_DATE:      string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -49,6 +50,7 @@ const EMPTY_FORM: FormState = {
   PRINCIPAL_ISIC_2DIGIT: '',
   HOLDING_COMPANY_FLG:   '',
   STATUS:                'Active',
+  GROUP_START_DATE:      '',
 };
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
@@ -123,6 +125,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
         PRINCIPAL_ISIC_2DIGIT: form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
         HOLDING_COMPANY_FLG:   form.HOLDING_COMPANY_FLG || null,
         STATUS:                form.STATUS || null,
+        GROUP_START_DATE:      form.GROUP_START_DATE || null,
         GROUP_HEAD_ENTERPRISE_ID: headId,
         memberEnterpriseIds:   members.map((m) => m.ENTERPRISE_ID),
         comment,
@@ -245,6 +248,15 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.groupStartDate', { defaultValue: 'Group start date' })}</Label>
+              <Input
+                type="date"
+                value={form.GROUP_START_DATE}
+                onChange={(e) => set('GROUP_START_DATE', e.target.value)}
+                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+              />
             </div>
           </div>
 
