@@ -19,7 +19,7 @@ import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
-import { Search, Building2, X } from 'lucide-react';
+import { Search, Building2, X, Star } from 'lucide-react';
 import type { SbrEnterprise } from '@/types';
 
 interface CreateEnterpriseGroupModalProps {
@@ -58,6 +58,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [memberSearch, setMemberSearch] = useState('');
   const [members, setMembers] = useState<SbrEnterprise[]>([]);
+  const [headId, setHeadId] = useState<number | null>(null);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [createGroup, { isLoading }] = useCreateEnterpriseGroupMutation();
 
@@ -76,6 +77,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
       setForm(EMPTY_FORM);
       setMemberSearch('');
       setMembers([]);
+      setHeadId(null);
       setShowCommentDialog(false);
     }
   }, [open]);
@@ -88,8 +90,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     setMemberSearch('');
   };
 
-  const removeMember = (enterpriseId: number) =>
+  const removeMember = (enterpriseId: number) => {
     setMembers((prev) => prev.filter((m) => m.ENTERPRISE_ID !== enterpriseId));
+    setHeadId((prev) => (prev === enterpriseId ? null : prev));
+  };
 
   const handleSubmit = () => {
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
@@ -98,6 +102,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     }
     if (members.length === 0) {
       toast.error('Add at least one member enterprise.');
+      return;
+    }
+    if (headId == null || !members.some((m) => m.ENTERPRISE_ID === headId)) {
+      toast.error(t('editEnterpriseGroup.headRequired', { defaultValue: 'Mark one member enterprise as the group head.' }));
       return;
     }
     setShowCommentDialog(true);
@@ -115,6 +123,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
         PRINCIPAL_ISIC_2DIGIT: form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
         HOLDING_COMPANY_FLG:   form.HOLDING_COMPANY_FLG || null,
         STATUS:                form.STATUS || null,
+        GROUP_HEAD_ENTERPRISE_ID: headId,
         memberEnterpriseIds:   members.map((m) => m.ENTERPRISE_ID),
         comment,
       }).unwrap();
@@ -251,14 +260,37 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             )}
 
             {members.length > 0 && (
+              <>
+              <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Star className="h-3.5 w-3.5 text-[#A71D3A]" />
+                {t('editEnterpriseGroup.markHeadHint', { defaultValue: 'Click the star to mark the group head.' })}
+              </p>
               <div className="space-y-1.5">
-                {members.map((m, idx) => (
-                  <div key={m.ENTERPRISE_ID} className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                {members.map((m) => {
+                  const isHead = headId === m.ENTERPRISE_ID;
+                  return (
+                  <div
+                    key={m.ENTERPRISE_ID}
+                    className={`flex items-center gap-2 rounded-md border px-3 py-2 transition-colors ${
+                      isHead ? 'border-[#A71D3A]/40 bg-[#A71D3A]/5' : 'border-slate-200 bg-slate-50'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setHeadId(m.ENTERPRISE_ID)}
+                      title={t('editEnterpriseGroup.markAsHead', { defaultValue: 'Mark as group head' })}
+                      aria-label={t('editEnterpriseGroup.markAsHead', { defaultValue: 'Mark as group head' })}
+                      className="shrink-0"
+                    >
+                      <Star className={`h-4 w-4 transition-colors ${isHead ? 'fill-[#A71D3A] text-[#A71D3A]' : 'text-slate-300 hover:text-[#A71D3A]'}`} />
+                    </button>
                     <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
                     <div className="min-w-0 flex-1">
                       <span className="font-mono text-xs text-slate-500 mr-2">ENT-{m.ENTERPRISE_ID}</span>
-                      {idx === 0 && (
-                        <span className="text-[10px] font-bold bg-[#A71D3A] text-white rounded px-1 mr-1">HEAD</span>
+                      {isHead && (
+                        <span className="text-[10px] font-bold bg-[#A71D3A] text-white rounded-md px-1 mr-1">
+                          {t('editEnterpriseGroup.headBadge', { defaultValue: 'HEAD' })}
+                        </span>
                       )}
                       <span className="text-sm text-slate-800">{nullableText(m.NAME_ENU)}</span>
                     </div>
@@ -266,8 +298,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
+              </>
             )}
 
             {/* Search box */}

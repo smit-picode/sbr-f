@@ -632,7 +632,11 @@
     "selectCountry": "Select country",
     "selectStatus": "Select status",
     "yesNoPlaceholder": "Yes / No",
-    "addAtLeastOne": "Add at least one enterprise."
+    "addAtLeastOne": "Add at least one enterprise.",
+    "headBadge": "HEAD",
+    "markHeadHint": "Click the star to mark the group head.",
+    "markAsHead": "Mark as group head",
+    "headRequired": "Mark one member enterprise as the group head."
   },
   "createEnterpriseGroup": {
     "title": "Create Enterprise Group",
@@ -678,7 +682,9 @@
     "dataSources": "Data sources",
     "isicCode": "ISIC code",
     "uciId": "UCI ID",
-    "created": "Created"
+    "created": "Created",
+    "nameEnu": "Name (English)",
+    "nameAra": "Name (Arabic)"
   },
   "editContact": {
     "title": "Edit Contact",

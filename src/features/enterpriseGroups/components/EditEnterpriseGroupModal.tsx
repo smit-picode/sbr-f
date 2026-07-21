@@ -19,7 +19,7 @@ import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
-import { Search, Orbit, X } from 'lucide-react';
+import { Search, Orbit, X, Star } from 'lucide-react';
 import type { SbrEnterpriseGroup, EnterpriseGroupMember } from '@/types';
 
 interface EditEnterpriseGroupModalProps {
@@ -59,10 +59,16 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   const [memberSearch, setMemberSearch] = useState('');
   const [addedMembers, setAddedMembers] = useState<MemberRow[]>([]);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
+  const [headId, setHeadId] = useState<number | null>(null);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [updateGroup, { isLoading }] = useUpdateEnterpriseGroupMutation();
 
   const debouncedMemberSearch = useDebounce(memberSearch, 400);
+
+  const initialHeadId = useMemo(
+    () => currentMembers.find((m) => m.IS_GROUP_HEAD)?.ENTERPRISE_ID ?? group.GROUP_HEAD_ENTERPRISE_ID ?? null,
+    [currentMembers, group]
+  );
 
   const currentRows: MemberRow[] = useMemo(() => {
     const kept = currentMembers
@@ -96,9 +102,10 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       setMemberSearch('');
       setAddedMembers([]);
       setRemovedIds(new Set());
+      setHeadId(initialHeadId);
       setShowCommentDialog(false);
     }
-  }, [open, group]);
+  }, [open, group, initialHeadId]);
 
   const set = (field: keyof FormState, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -114,6 +121,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     } else {
       setRemovedIds((prev) => new Set(prev).add(enterpriseId));
     }
+    setHeadId((prev) => (prev === enterpriseId ? null : prev));
   };
 
   const hasChanges = (): boolean => {
@@ -129,7 +137,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       n(form.HOLDING_COMPANY_FLG) !== n(group.HOLDING_COMPANY_FLG) ||
       n(form.STATUS) !== n(group.STATUS) ||
       addedMembers.length > 0 ||
-      removedIds.size > 0
+      removedIds.size > 0 ||
+      headId !== initialHeadId
     );
   };
 
@@ -140,6 +149,10 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     }
     if (currentRows.length === 0) {
       toast.error('Add at least one member enterprise.');
+      return;
+    }
+    if (headId == null || !currentRows.some((m) => m.ENTERPRISE_ID === headId)) {
+      toast.error(t('editEnterpriseGroup.headRequired', { defaultValue: 'Mark one member enterprise as the group head.' }));
       return;
     }
     setShowCommentDialog(true);
@@ -159,6 +172,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           PRINCIPAL_ISIC_2DIGIT:      form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
           HOLDING_COMPANY_FLG:        form.HOLDING_COMPANY_FLG || null,
           STATUS:                     form.STATUS || null,
+          GROUP_HEAD_ENTERPRISE_ID:   headId,
           addMemberEnterpriseIds:     addedMembers.map((m) => m.ENTERPRISE_ID),
           removeMemberEnterpriseIds:  Array.from(removedIds),
           comment,
@@ -262,12 +276,40 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
 
             {currentRows.length > 0 && (
+              <>
+              <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Star className="h-3.5 w-3.5 text-[#A71D3A]" />
+                {t('editEnterpriseGroup.markHeadHint', { defaultValue: 'Click the star to mark the group head.' })}
+              </p>
               <div className="space-y-1.5">
-                {currentRows.map((m) => (
-                  <div key={m.ENTERPRISE_ID} className="flex items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2.5">
+                {currentRows.map((m) => {
+                  const isHead = headId === m.ENTERPRISE_ID;
+                  return (
+                  <div
+                    key={m.ENTERPRISE_ID}
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2.5 transition-colors ${
+                      isHead ? 'border-[#A71D3A]/40 bg-[#A71D3A]/5' : 'border-slate-200 bg-white'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setHeadId(m.ENTERPRISE_ID)}
+                      title={t('editEnterpriseGroup.markAsHead', { defaultValue: 'Mark as group head' })}
+                      aria-label={t('editEnterpriseGroup.markAsHead', { defaultValue: 'Mark as group head' })}
+                      className="shrink-0"
+                    >
+                      <Star className={`h-4 w-4 transition-colors ${isHead ? 'fill-[#A71D3A] text-[#A71D3A]' : 'text-slate-300 hover:text-[#A71D3A]'}`} />
+                    </button>
                     <Orbit className="h-4 w-4 shrink-0 text-slate-400" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-800 leading-snug">{nullableText(m.NAME_ENU)}</p>
+                      <p className="text-sm font-semibold text-slate-800 leading-snug">
+                        {nullableText(m.NAME_ENU)}
+                        {isHead && (
+                          <span className="ml-2 align-middle text-[10px] font-bold bg-[#A71D3A] text-white rounded-md px-1">
+                            {t('editEnterpriseGroup.headBadge', { defaultValue: 'HEAD' })}
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-slate-400 mt-0.5">
                         ENT-{m.ENTERPRISE_ID} · {m.ESTABLISHMENT_COUNT} establishment{m.ESTABLISHMENT_COUNT !== 1 ? 's' : ''}
                       </p>
@@ -276,12 +318,14 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
+              </>
             )}
 
             {currentRows.length === 0 && (
-              <p className="text-xs text-slate-400">Add at least one enterprise.</p>
+              <p className="text-xs text-slate-400">{t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' })}</p>
             )}
 
             {/* Search box */}

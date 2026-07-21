@@ -632,7 +632,11 @@
     "selectCountry": "اختر البلد",
     "selectStatus": "اختر الحالة",
     "yesNoPlaceholder": "نعم / لا",
-    "addAtLeastOne": "أضف مؤسسة واحدة على الأقل."
+    "addAtLeastOne": "أضف مؤسسة واحدة على الأقل.",
+    "headBadge": "الرئيسية",
+    "markHeadHint": "انقر على النجمة لتحديد المؤسسة الرئيسية للمجموعة.",
+    "markAsHead": "تحديد كمؤسسة رئيسية للمجموعة",
+    "headRequired": "حدد مؤسسة عضو واحدة كمؤسسة رئيسية للمجموعة."
   },
   "createEnterpriseGroup": {
     "title": "إنشاء مجموعة مؤسسات",
@@ -678,7 +682,9 @@
     "dataSources": "مصادر البيانات",
     "isicCode": "رمز ISIC",
     "uciId": "معرف UCI",
-    "created": "تاريخ الإنشاء"
+    "created": "تاريخ الإنشاء",
+    "nameEnu": "الاسم (إنجليزي)",
+    "nameAra": "الاسم (عربي)"
   },
   "editContact": {
     "title": "تعديل جهة الاتصال",

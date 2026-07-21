@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -11,17 +11,158 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/common/ErrorState';
-import { useGetEnterpriseGroupByIdQuery } from '../api/enterpriseGroupsApi';
+import { useGetEnterpriseGroupByIdQuery, useGetEnterpriseGroupHistoryQuery } from '../api/enterpriseGroupsApi';
 import { EditEnterpriseGroupModal } from '../components/EditEnterpriseGroupModal';
+import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
+import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
 import { nullableText, formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
 import type { EnterpriseGroupMember } from '@/types';
 import {
   ChevronLeft, Pencil, ArrowUpRight, Orbit,
-  GitFork, ShieldCheck, Activity, Info, Network,
+  GitFork, ShieldCheck, Activity, Info, Network, History,
 } from 'lucide-react';
 
 const MAROON = '#A71D3A';
+
+// Overview-panel row with the per-attribute history popover (same pattern as ContactDetailPage)
+function DetailField({ recordId, fieldKey, label, value, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Lazily load the record's change history only while this attribute's popover is open
+  const { data, isLoading, isError } = useGetEnterpriseGroupHistoryQuery(recordId, { skip: !open });
+
+  // Close the anchored popover on outside click (the clock button itself toggles)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div className="relative flex items-center justify-between gap-2 px-4 py-2.5" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group flex min-w-0 flex-1 items-center justify-between gap-2 text-start disabled:cursor-default"
+      >
+        <span className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
+          {label}
+          <PendingFieldBadge count={pendingCount} />
+        </span>
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 text-right">
+          {value}
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+        </span>
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// White-stats-bar cell with the same popover-toggle logic — keeps the existing label/value styles
+function StatField({ recordId, fieldKey, label, value, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useGetEnterpriseGroupHistoryQuery(recordId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div className="relative min-w-0" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group w-full min-w-0 text-start disabled:cursor-default"
+      >
+        <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
+          {label}
+          <PendingFieldBadge count={pendingCount} />
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+        </p>
+        <p className="text-sm font-semibold text-slate-800">{value}</p>
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Maroon-header name field — same popover-toggle logic with a white-tinted icon for the dark band
+function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useGetEnterpriseGroupHistoryQuery(recordId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group flex items-center gap-1.5 text-start disabled:cursor-default"
+      >
+        {children}
+        <PendingFieldBadge count={pendingCount} />
+        {canViewHistory && <History className="h-3.5 w-3.5 shrink-0 text-white/30 transition-colors group-hover:text-white" />}
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
 
 function SectionCard({ title, icon, children, badge }: {
   title: string;
@@ -271,7 +412,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
   const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
   const { t } = useTranslation();
-  const { canEdit } = usePermission('enterprise_groups');
+  const { canEdit, canViewHistory } = usePermission('enterprise_groups');
 
   const { data, isLoading, isError, refetch } = useGetEnterpriseGroupByIdQuery(groupId);
 
@@ -339,11 +480,13 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
           {t('enterpriseGroupDetail.backLink', { defaultValue: 'Enterprise Groups' })}
         </button>
 
-        {/* Hero header card: maroon top + white stats bar */}
-        <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm mb-4">
+        {/* Hero header card: maroon top + white stats bar. Rounding is applied per-band (not
+            via a parent overflow-hidden) so attribute-history popovers can render outside the
+            card bounds instead of being clipped. */}
+        <div className="rounded-xl border border-slate-200 shadow-sm mb-4">
         {/* Maroon band — badges + name only */}
         <div
-          className="px-6 py-5 text-white"
+          className="rounded-t-xl px-6 py-5 text-white"
           style={{ background: 'linear-gradient(135deg, #A71D3A 0%, #6B1428 100%)' }}
         >
           <div className="flex items-start justify-between gap-4">
@@ -370,12 +513,28 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
               </div>
               {/* Names */}
               {group.NAME_ENU && (
-                <p className="text-2xl font-bold text-white leading-tight">{group.NAME_ENU}</p>
+                <HeaderNameField
+                  recordId={group.ID}
+                  fieldKey="NAME_ENU"
+                  label={t('enterpriseGroupDetail.nameEnu', { defaultValue: 'Name (English)' })}
+                  canViewHistory={canViewHistory}
+                  pendingCount={group.PENDING_FIELDS?.NAME_ENU}
+                >
+                  <p className="text-2xl font-bold text-white leading-tight">{group.NAME_ENU}</p>
+                </HeaderNameField>
               )}
               {group.NAME_ARA && (
-                <p className="text-sm mt-0.5" style={{ color: 'rgba(255,190,200,0.80)' }}>
-                  {group.NAME_ARA}
-                </p>
+                <HeaderNameField
+                  recordId={group.ID}
+                  fieldKey="NAME_ARA"
+                  label={t('enterpriseGroupDetail.nameAra', { defaultValue: 'Name (Arabic)' })}
+                  canViewHistory={canViewHistory}
+                  pendingCount={group.PENDING_FIELDS?.NAME_ARA}
+                >
+                  <p className="text-sm mt-0.5" style={{ color: 'rgba(255,190,200,0.80)' }}>
+                    {group.NAME_ARA}
+                  </p>
+                </HeaderNameField>
               )}
             </div>
 
@@ -394,19 +553,31 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         </div>
 
         {/* White stats bar — outside the maroon band */}
-        <div className="bg-white px-6 py-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3 border-t border-slate-100">
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.controllingInstitution', { defaultValue: 'Controlling institution (UCI)' })}</p>
-            <p className="text-sm font-semibold text-slate-800">{nullableText(group.UCI_NAME)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' })}</p>
-            <p className="text-sm font-semibold text-slate-800">{nullableText(group.UCI_TYPE)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.uciCountry', { defaultValue: 'UCI country' })}</p>
-            <p className="text-sm font-semibold text-slate-800">{nullableText(group.UCI_COUNTRY)}</p>
-          </div>
+        <div className="rounded-b-xl bg-white px-6 py-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3 border-t border-slate-100">
+          <StatField
+            recordId={group.ID}
+            fieldKey="UCI_NAME"
+            label={t('enterpriseGroupDetail.controllingInstitution', { defaultValue: 'Controlling institution (UCI)' })}
+            value={nullableText(group.UCI_NAME)}
+            canViewHistory={canViewHistory}
+            pendingCount={group.PENDING_FIELDS?.UCI_NAME}
+          />
+          <StatField
+            recordId={group.ID}
+            fieldKey="UCI_TYPE"
+            label={t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' })}
+            value={nullableText(group.UCI_TYPE)}
+            canViewHistory={canViewHistory}
+            pendingCount={group.PENDING_FIELDS?.UCI_TYPE}
+          />
+          <StatField
+            recordId={group.ID}
+            fieldKey="UCI_COUNTRY"
+            label={t('enterpriseGroupDetail.uciCountry', { defaultValue: 'UCI country' })}
+            value={nullableText(group.UCI_COUNTRY)}
+            canViewHistory={canViewHistory}
+            pendingCount={group.PENDING_FIELDS?.UCI_COUNTRY}
+          />
           <div>
             <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.principalActivity', { defaultValue: 'Principal activity' })}</p>
             <p className="text-sm font-semibold text-slate-800">
@@ -485,19 +656,39 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
             icon={<ShieldCheck className="h-4 w-4" />}
           >
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
-              {[
+              {([
                 { label: t('enterpriseGroupDetail.groupHeadEnterprise', { defaultValue: 'Group head enterprise' }), value: groupHeadId },
                 { label: t('enterpriseGroupDetail.resident', { defaultValue: 'Resident' }), value: resident },
                 { label: t('enterpriseGroupDetail.foreignControlled', { defaultValue: 'Foreign-controlled' }), value: foreignControlled },
                 { label: t('enterpriseGroupDetail.type', { defaultValue: 'Type' }), value: group.TYPE || '—' },
-                { label: t('enterpriseGroupDetail.holdingCompany', { defaultValue: 'Holding company' }), value: nullableText(group.HOLDING_COMPANY_FLG) },
-                { label: t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' }), value: nullableText(group.UCI_TYPE) },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-xs text-slate-400 mb-0.5">{label}</p>
-                  <p className="text-sm font-semibold text-slate-800">{value}</p>
-                </div>
-              ))}
+                {
+                  label: t('enterpriseGroupDetail.holdingCompany', { defaultValue: 'Holding company' }),
+                  value: nullableText(group.HOLDING_COMPANY_FLG),
+                  fieldKey: 'HOLDING_COMPANY_FLG',
+                },
+                {
+                  label: t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' }),
+                  value: nullableText(group.UCI_TYPE),
+                  fieldKey: 'UCI_TYPE',
+                },
+              ] as { label: string; value: React.ReactNode; fieldKey?: string }[]).map(({ label, value, fieldKey }) =>
+                fieldKey ? (
+                  <StatField
+                    key={label}
+                    recordId={group.ID}
+                    fieldKey={fieldKey}
+                    label={label}
+                    value={value}
+                    canViewHistory={canViewHistory}
+                    pendingCount={group.PENDING_FIELDS?.[fieldKey]}
+                  />
+                ) : (
+                  <div key={label}>
+                    <p className="text-xs text-slate-400 mb-0.5">{label}</p>
+                    <p className="text-sm font-semibold text-slate-800">{value}</p>
+                  </div>
+                )
+              )}
             </div>
           </SectionCard>
         </div>
@@ -513,10 +704,11 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
               </h2>
             </div>
             <div className="divide-y divide-slate-100">
-              {[
+              {([
                 {
                   label: t('enterpriseGroupDetail.status', { defaultValue: 'Status' }),
                   value: <StatusBadge status={group.STATUS} className="rounded-md" />,
+                  fieldKey: 'STATUS',
                 },
                 { label: t('enterpriseGroupDetail.type', { defaultValue: 'Type' }),           value: group.TYPE || '—' },
                 { label: t('enterpriseGroupDetail.groupStart', { defaultValue: 'Group start' }),    value: formatDate(group.GROUP_START_DATE) },
@@ -525,21 +717,42 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
                 { label: t('enterpriseGroupDetail.employees', { defaultValue: 'Employees' }),      value: group.EMPLOYEE_COUNT.toLocaleString() },
                 { label: t('enterpriseGroupDetail.sector', { defaultValue: 'Sector' }),         value: nullableText(group.SECTOR) },
                 { label: t('enterpriseGroupDetail.dataSources', { defaultValue: 'Data sources' }),   value: nullableText(group.DATA_SOURCES) },
-                { label: t('enterpriseGroupDetail.holdingCompany', { defaultValue: 'Holding company' }), value: nullableText(group.HOLDING_COMPANY_FLG) },
+                {
+                  label: t('enterpriseGroupDetail.holdingCompany', { defaultValue: 'Holding company' }),
+                  value: nullableText(group.HOLDING_COMPANY_FLG),
+                  fieldKey: 'HOLDING_COMPANY_FLG',
+                },
                 {
                   label: t('enterpriseGroupDetail.isicCode', { defaultValue: 'ISIC code' }),
                   value: group.PRINCIPAL_ISIC_2DIGIT ? (
                     <span className="font-mono text-xs">{group.PRINCIPAL_ISIC_2DIGIT}</span>
                   ) : '—',
+                  fieldKey: 'PRINCIPAL_ISIC_2DIGIT',
                 },
-                { label: t('enterpriseGroupDetail.uciId', { defaultValue: 'UCI ID' }),   value: nullableText(group.UCI_IDENTIFIER) },
+                {
+                  label: t('enterpriseGroupDetail.uciId', { defaultValue: 'UCI ID' }),
+                  value: nullableText(group.UCI_IDENTIFIER),
+                  fieldKey: 'UCI_IDENTIFIER',
+                },
                 { label: t('enterpriseGroupDetail.created', { defaultValue: 'Created' }),  value: formatDate(group.CREATED_AT) },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between px-4 py-2.5 gap-2">
-                  <span className="text-xs text-slate-500 shrink-0">{label}</span>
-                  <span className="text-xs font-semibold text-slate-800 text-right">{value}</span>
-                </div>
-              ))}
+              ] as { label: string; value: React.ReactNode; fieldKey?: string }[]).map(({ label, value, fieldKey }) =>
+                fieldKey ? (
+                  <DetailField
+                    key={label}
+                    recordId={group.ID}
+                    fieldKey={fieldKey}
+                    label={label}
+                    value={value}
+                    canViewHistory={canViewHistory}
+                    pendingCount={group.PENDING_FIELDS?.[fieldKey]}
+                  />
+                ) : (
+                  <div key={label} className="flex items-center justify-between px-4 py-2.5 gap-2">
+                    <span className="text-xs text-slate-500 shrink-0">{label}</span>
+                    <span className="text-xs font-semibold text-slate-800 text-right">{value}</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
 

@@ -12,6 +12,7 @@ export interface CreateEnterpriseGroupPayload {
   HOLDING_COMPANY_FLG?:   string | null;
   STATUS?:                string | null;
   GROUP_START_DATE?:      string | null;
+  GROUP_HEAD_ENTERPRISE_ID?: number | null;
   memberEnterpriseIds?:   number[];
   comment?:               string | null;
 }
@@ -31,6 +32,10 @@ export const enterpriseGroupsApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/enterprise-groups/${id}` }),
       providesTags: ['EnterpriseGroups'],
     }),
+    getEnterpriseGroupHistory: builder.query<ApiResponse<SbrEnterpriseGroup[]>, number>({
+      query: (id) => ({ url: `/enterprise-groups/${id}/history` }),
+      providesTags: ['EnterpriseGroups'],
+    }),
     createEnterpriseGroup: builder.mutation<ApiResponse<SbrEnterpriseGroup>, CreateEnterpriseGroupPayload>({
       query: (data) => ({ url: '/enterprise-groups', method: 'POST', body: data }),
       invalidatesTags: ['EnterpriseGroups', 'Enterprises', 'AuditLog', 'ChangeRequests'],
@@ -46,6 +51,7 @@ export const enterpriseGroupsApi = baseApi.injectEndpoints({
 export const {
   useGetEnterpriseGroupsListQuery,
   useGetEnterpriseGroupByIdQuery,
+  useGetEnterpriseGroupHistoryQuery,
   useCreateEnterpriseGroupMutation,
   useUpdateEnterpriseGroupMutation,
 } = enterpriseGroupsApi;
