@@ -38,14 +38,15 @@ const DEFAULT_FILTERS: ChangeRequestFilters = { page: 1, limit: 10 };
 export function AttributeChangeRequestsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { canApprove } = usePermission('approvals');
+  const { canView, canApprove } = usePermission('approvals');
+  const canAccess = canView || canApprove;
   const [filters, setFilters] = useState<ChangeRequestFilters>(DEFAULT_FILTERS);
 
   const queryParams = cleanParams({
     ...filters,
     tableName: filters.tableName === '__all__' ? undefined : filters.tableName,
   });
-  const { data, isLoading, isError, refetch } = useGetChangeRequestsQuery(queryParams, { skip: !canApprove });
+  const { data, isLoading, isError, refetch } = useGetChangeRequestsQuery(queryParams, { skip: !canAccess });
 
   const handleFilterChange = useCallback((partial: Partial<ChangeRequestFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -75,7 +76,10 @@ export function AttributeChangeRequestsPage() {
     {
       accessorKey: 'ROW_ID',
       header: t('changeRequests.cols.rowId', { defaultValue: 'Row ID' }),
-      cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-red-600">#{String(getValue() ?? '—')}</span>,
+      cell: ({ getValue }) => {
+        const v = getValue<number | null>();
+        return <span className="font-mono text-xs font-medium text-red-600">{v == null ? '—' : `#${v}`}</span>;
+      },
     },
     {
       accessorKey: 'ENTITY',
@@ -85,11 +89,15 @@ export function AttributeChangeRequestsPage() {
     {
       accessorKey: 'CHANGE_COUNT',
       header: t('changeRequests.cols.changes', { defaultValue: 'Changes' }),
-      cell: ({ getValue }) => {
+      cell: ({ getValue, row }) => {
         const n = Number(getValue() ?? 0);
+        const isCreate = row.original.ROW_ID == null;
+        const label = isCreate
+          ? (n === 1 ? t('changeRequests.fieldOneSet', { defaultValue: 'field set' }) : t('changeRequests.fieldManySet', { defaultValue: 'fields set' }))
+          : (n === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' }));
         return (
           <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-            {n} {n === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' })}
+            {n} {label}
           </span>
         );
       },
@@ -124,7 +132,7 @@ export function AttributeChangeRequestsPage() {
     },
   ];
 
-  if (!canApprove) {
+  if (!canAccess) {
     return (
       <PageContainer>
         <PageHeader title={t('pages.attributeChangeRequests.title')} description={t('pages.attributeChangeRequests.description')} />

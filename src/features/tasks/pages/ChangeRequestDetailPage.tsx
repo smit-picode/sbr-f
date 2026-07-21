@@ -185,7 +185,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
     {
       section: 'Group',
       fields: [
-        { key: 'GROUP_ID', label: 'Group ID' },
+        { key: 'ENTERPRISE_GROUP_ID', label: 'Group ID' },
         { key: 'NAME_ENU', label: 'Name (EN)' },
         { key: 'NAME_ARA', label: 'Name (AR)' },
         { key: 'STATUS', label: 'Status' },
@@ -198,14 +198,13 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
         { key: 'UCI_NAME', label: 'UCI Name' },
         { key: 'UCI_TYPE', label: 'UCI Type' },
         { key: 'UCI_COUNTRY', label: 'UCI Country' },
-        { key: 'UCI_ID', label: 'UCI ID' },
+        { key: 'UCI_IDENTIFIER', label: 'UCI ID' },
       ],
     },
     {
       section: 'Classification',
       fields: [
-        { key: 'ISIC_CODE', label: 'ISIC Code' },
-        { key: 'ISIC_DESCRIPTION', label: 'ISIC Description' },
+        { key: 'PRINCIPAL_ISIC_2DIGIT', label: 'ISIC Code' },
       ],
     },
     {
@@ -259,13 +258,14 @@ const fieldLabel = (t: (k: string, o?: { defaultValue: string }) => string, f: s
 export function ChangeRequestDetailPage({ id }: { id: number }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { canApprove } = usePermission('approvals');
+  const { canView, canApprove } = usePermission('approvals');
+  const canAccess = canView || canApprove;
   const [note, setNote] = useState('');
-  const { data, isLoading, isError, refetch } = useGetChangeRequestByIdQuery(id, { skip: !canApprove });
+  const { data, isLoading, isError, refetch } = useGetChangeRequestByIdQuery(id, { skip: !canAccess });
   const [approve, { isLoading: approving }] = useApproveChangeRequestMutation();
   const [reject, { isLoading: rejecting }] = useRejectChangeRequestMutation();
 
-  if (!canApprove) {
+  if (!canAccess) {
     return <PageContainer><ErrorState message={t('common.noAccess', { defaultValue: 'You do not have access to this section.' })} /></PageContainer>;
   }
   if (isLoading) return <PageContainer><PageLoader /></PageContainer>;
@@ -273,6 +273,9 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
   const r = data.data;
   const pending = r.STATUS === 'PENDING';
+  // ROW_ID is the PREV_RECORD_ID — null only for a brand-new record being created (no prior
+  // row to diff against), never for an edit of an existing one.
+  const isCreate = r.ROW_ID == null;
   const changeCount = r.fields.length + r.addMembers.length + r.removeMembers.length;
   const contextSections = (CONTEXT_SECTIONS[r.TABLE_NAME] ?? [])
     .map((sec) => ({ ...sec, visible: sec.fields.filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '') }))
@@ -326,6 +329,11 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-500">{r.REQUEST_CODE}</span>
           <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
+          {isCreate && (
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+              {t('changeRequests.newRecordBadge', { defaultValue: 'New Record' })}
+            </span>
+          )}
           <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${statusCls}`}>
             <Clock className="h-3 w-3" /> {r.STATUS.charAt(0) + r.STATUS.slice(1).toLowerCase()}
           </span>
@@ -334,7 +342,12 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
           <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {t('changeRequests.submittedBy', { defaultValue: 'Submitted by' })} <span className="font-medium text-[#A71D3A]">{r.REQUESTED_BY ?? '—'}</span></span>
           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDateTime(r.CREATED_AT)}</span>
-          <span className="flex items-center gap-1"><Database className="h-3.5 w-3.5" /> {t('changeRequests.row', { defaultValue: 'Row' })} #{r.ROW_ID ?? '—'}</span>
+          <span className="flex items-center gap-1">
+            <Database className="h-3.5 w-3.5" />
+            {isCreate
+              ? t('changeRequests.newRecord', { defaultValue: 'New record' })
+              : `${t('changeRequests.row', { defaultValue: 'Row' })} #${r.ROW_ID}`}
+          </span>
         </div>
       </div>
 
@@ -342,18 +355,28 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         {/* Left: changes + reason + actions */}
         <div className="space-y-4 lg:col-span-2">
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.requestedChanges', { defaultValue: 'Requested Changes' })}</div>
+            <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {isCreate
+                ? t('changeRequests.newRecordDetails', { defaultValue: 'New Record Details' })
+                : t('changeRequests.requestedChanges', { defaultValue: 'Requested Changes' })}
+            </div>
             <div className="divide-y divide-slate-50">
               {r.fields.map((f: ChangeRequestField) => (
                 <div
                   key={f.field}
                   className="grid items-center gap-x-4 px-5 py-3 text-sm"
-                  style={{ gridTemplateColumns: '11rem 1fr auto 1fr' }}
+                  style={{ gridTemplateColumns: isCreate ? '11rem 1fr' : '11rem 1fr auto 1fr' }}
                 >
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(t, f.field)}</span>
-                  <span className="min-w-0 text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                  <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                  {isCreate ? (
+                    <span className="min-w-0 font-semibold text-slate-800">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                  ) : (
+                    <>
+                      <span className="min-w-0 text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                    </>
+                  )}
                 </div>
               ))}
               {r.addMembers.map((m) => (
@@ -380,7 +403,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
             </div>
           )}
 
-          {pending && (
+          {pending && canApprove && (
             <div className="rounded-lg border border-[#A71D3A]/15 bg-[#FCF4F6] p-4">
               <Input
                 value={note}
@@ -389,7 +412,11 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                 className="mb-3 bg-white focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
               />
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-slate-600">{changeCount} {changeCount === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' })}</span>
+                <span className="text-sm font-medium text-slate-600">
+                  {changeCount} {isCreate
+                    ? (changeCount === 1 ? t('changeRequests.fieldOneSet', { defaultValue: 'field set' }) : t('changeRequests.fieldManySet', { defaultValue: 'fields set' }))
+                    : (changeCount === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' }))}
+                </span>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => doAction('reject')} disabled={approving || rejecting || !note.trim()} className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50">
                     <X className="h-4 w-4" /> {t('changeRequests.reject', { defaultValue: 'Reject' })}
@@ -414,10 +441,18 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         <div className="space-y-4">
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-200 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {isCreate
+                  ? t('changeRequests.recordStatus', { defaultValue: 'Record Status' })
+                  : t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}
+              </p>
             </div>
             {contextSections.length === 0 ? (
-              <p className="p-4 text-sm text-slate-400">—</p>
+              <p className="p-4 text-sm text-slate-400">
+                {isCreate
+                  ? t('changeRequests.newRecordNotice', { defaultValue: 'This is a new record — it will be created once this request is approved.' })
+                  : '—'}
+              </p>
             ) : (
               <>
                 {contextSections.map((sec, idx) => (

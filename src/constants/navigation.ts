@@ -2,7 +2,7 @@ export type NavItem = {
   title: string;
   href: string;
   icon: string;
-  permKey: string;    // The .view permission required to show this nav link ('' = always visible)
+  permKey: string | string[]; // The .view permission required to show this nav link ('' = always visible; array = visible if ANY key is held)
   i18nKey: string;       // Translation key for the link label (page header)
   sidebarLabel?: string; // Override label shown only in the sidebar
   breadcrumbLabel?: string; // Override label shown only in the breadcrumb
@@ -43,7 +43,7 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.tasks',
     items: [
       // Hidden in frontend until the Attribute Change Requests feature is ready to show to the client. Uncomment to restore.
-      { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: 'approvals.approve', i18nKey: 'nav.attributeChangeRequests', showCount: true },
+      { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: ['approvals.view', 'approvals.approve'], i18nKey: 'nav.attributeChangeRequests', showCount: true },
       { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
       { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
       { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },

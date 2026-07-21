@@ -189,7 +189,10 @@ export function Sidebar() {
     effectiveUser.role?.toUpperCase() === 'SUPER_ADMIN'
   ));
 
-  const canSeeChangeRequestCount = isSuperAdmin || permissions.some((p) => p.permissionName?.toLowerCase() === 'approvals.approve');
+  const canSeeChangeRequestCount = isSuperAdmin || permissions.some((p) => {
+    const name = p.permissionName?.toLowerCase();
+    return name === 'approvals.approve' || name === 'approvals.view';
+  });
   const { data: changeRequestCountData } = useGetChangeRequestCountQuery(undefined, { skip: !canSeeChangeRequestCount });
   const pendingCount = changeRequestCountData?.data?.count ?? 0;
 
@@ -197,8 +200,11 @@ export function Sidebar() {
     permissions.some((p) => p.permissionName?.toLowerCase() === key.toLowerCase());
   const hasAnyAdminPermission = permissions.some((p) => p.permissionName?.startsWith('admin_panel.'));
 
-  const isItemVisible = (item: NavItem) =>
-    isSuperAdmin || item.permKey === '' || hasPermission(item.permKey);
+  const isItemVisible = (item: NavItem) => {
+    if (isSuperAdmin || item.permKey === '') return true;
+    const keys = Array.isArray(item.permKey) ? item.permKey : [item.permKey];
+    return keys.some(hasPermission);
+  };
 
   const isGroupVisible = (group: NavGroup) => {
     if (group.id === 'administration') {

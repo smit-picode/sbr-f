@@ -63,6 +63,14 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'legal_units',
+    label: 'Legal Units',
+    children: [
+      { key: 'legal_units.view',   label: 'View Legal Units' },
+      { key: 'legal_units.search', label: 'Search & Filter' },
+    ],
+  },
+  {
     key: 'audit_log',
     label: 'Audit Log',
     children: [
@@ -106,6 +114,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     key: 'approvals',
     label: 'Approvals',
     children: [
+      { key: 'approvals.view',    label: 'View Attribute Change Requests' },
       { key: 'approvals.approve', label: 'Approve / Reject Change Requests' },
     ],
   },
