@@ -60,6 +60,23 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
 
   const isUserEdit = (v: HistoryVersion) => !!(v._audit && v._audit.columns.includes(fieldKey));
 
+  // Single chronological timeline (newest first). Previously requests were always rendered
+  // above applied versions regardless of date — correct when the request is the newest event,
+  // but wrong whenever an older PENDING/REJECTED request still sits above newer APPROVED
+  // edits (e.g. a rejected attempt followed later by a separate, approved one): the older
+  // item appeared first, making the history look out of order / incomplete. Merging both into
+  // one array and sorting by date fixes this without changing how any individual entry renders.
+  type TimelineItem =
+    | { kind: 'request'; date: number; data: HistoryVersion }
+    | { kind: 'version'; date: number; data: HistoryVersion; prev?: HistoryVersion };
+
+  const timeOf = (d: unknown): number => (d ? new Date(d as string).getTime() : 0);
+
+  const timeline: TimelineItem[] = [
+    ...fieldRequests.map((r): TimelineItem => ({ kind: 'request', date: timeOf(r.VALID_FROM), data: r })),
+    ...changes.map((v, i): TimelineItem => ({ kind: 'version', date: timeOf(v.VALID_FROM), data: v, prev: changes[i + 1] })),
+  ].sort((a, b) => b.date - a.date);
+
   return (
     <div
       ref={ref}
@@ -86,39 +103,42 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
           <p className="py-1 text-sm text-slate-500">{t('fieldHistory.loading', { defaultValue: 'Loading history…' })}</p>
         ) : isError ? (
           <p className="py-1 text-sm text-red-600">{t('fieldHistory.failed', { defaultValue: 'Failed to load history.' })}</p>
-        ) : changes.length === 0 && fieldRequests.length === 0 ? (
+        ) : timeline.length === 0 ? (
           <p className="py-1 text-sm text-slate-400">{t('fieldHistory.none', { defaultValue: 'No history recorded.' })}</p>
         ) : (
           <ul className="relative space-y-4">
             <span className="absolute bottom-2 start-[3px] top-2 w-px bg-slate-200" />
-            {fieldRequests.map((r, i) => {
-              const ch = r.changes?.[fieldKey];
-              const rejected = r.status === 'REJECTED';
-              return (
-                <li key={`req-${i}`} className="relative ps-5">
-                  <span className="absolute start-0 top-1.5 h-2 w-2 rounded-full border-2 border-white" style={{ background: rejected ? '#D1495B' : '#E0A23C' }} />
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <User className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="text-[13px] font-semibold text-slate-700">{t('fieldHistory.editedByUser', { defaultValue: 'Edited by user' })}</span>
-                    <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-bold uppercase ${rejected ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {rejected ? t('fieldHistory.rejected', { defaultValue: 'Rejected' }) : t('fieldHistory.pendingApproval', { defaultValue: 'Pending approval' })}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm font-medium text-slate-700">
-                    <span className="text-slate-400 line-through">{fmtReq(ch?.old)}</span>
-                    <span className="mx-1 text-slate-400">→</span>
-                    {fmtReq(ch?.new)}
-                  </p>
-                  {r._audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r._audit.reason}”</p>}
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {formatDate(r.VALID_FROM)}
-                    {r._audit?.changedBy && ` · by ${r._audit.changedBy}`}
-                    {rejected && r._audit?.approvedBy && ` · rejected by ${r._audit.approvedBy}`}
-                  </p>
-                </li>
-              );
-            })}
-            {changes.map((v, i) => {
+            {timeline.map((item, i) => {
+              if (item.kind === 'request') {
+                const r = item.data;
+                const ch = r.changes?.[fieldKey];
+                const rejected = r.status === 'REJECTED';
+                return (
+                  <li key={`req-${i}`} className="relative ps-5">
+                    <span className="absolute start-0 top-1.5 h-2 w-2 rounded-full border-2 border-white" style={{ background: rejected ? '#D1495B' : '#E0A23C' }} />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="text-[13px] font-semibold text-slate-700">{t('fieldHistory.editedByUser', { defaultValue: 'Edited by user' })}</span>
+                      <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-bold uppercase ${rejected ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {rejected ? t('fieldHistory.rejected', { defaultValue: 'Rejected' }) : t('fieldHistory.pendingApproval', { defaultValue: 'Pending approval' })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-medium text-slate-700">
+                      <span className="text-slate-400 line-through">{fmtReq(ch?.old)}</span>
+                      <span className="mx-1 text-slate-400">→</span>
+                      {fmtReq(ch?.new)}
+                    </p>
+                    {r._audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r._audit.reason}”</p>}
+                    <p className="mt-0.5 text-[11px] text-slate-400">
+                      {formatDate(r.VALID_FROM)}
+                      {r._audit?.changedBy && ` · by ${r._audit.changedBy}`}
+                      {rejected && r._audit?.approvedBy && ` · rejected by ${r._audit.approvedBy}`}
+                    </p>
+                  </li>
+                );
+              }
+
+              const v = item.data;
               const userEdit = isUserEdit(v);
               const dotColor = userEdit ? (v._audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
               return (
@@ -143,7 +163,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                   </div>
                   {userEdit ? (
                     <p className="mt-1 text-sm font-medium text-slate-700">
-                      <span className="text-slate-400 line-through">{valueOf(changes[i + 1])}</span>
+                      <span className="text-slate-400 line-through">{valueOf(item.prev)}</span>
                       <span className="mx-1 text-slate-400">→</span>
                       {valueOf(v)}
                     </p>
