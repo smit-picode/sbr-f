@@ -178,7 +178,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
 
   const handleSubmit = () => {
     if (!contact) return;
-    if (!hasChanges()) { toast.info('No changes detected.'); return; }
+    if (!hasChanges()) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
     if (!validate()) return;
     setShowCommentDialog(true);
   };
@@ -192,7 +192,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     );
     try {
       const res = await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
-      toast.success('Change request submitted for approval.');
+      toast.success(t('common.changeRequestSubmitted', { defaultValue: 'Change request submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
       // Edit is now pending approval — only refresh if the API actually applied a record
@@ -201,7 +201,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
-        ?? 'Failed to update contact. Please try again.';
+        ?? t('editContact.updateError', { defaultValue: 'Failed to update contact. Please try again.' });
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
       parts.forEach((part) => {

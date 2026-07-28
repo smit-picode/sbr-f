@@ -78,7 +78,7 @@ export function LoginPage() {
       }
     } catch (err) {
       const apiMsg = (err as { data?: { message?: string } })?.data?.message;
-      setLoginError(apiMsg || 'Invalid email or password. Please try again.');
+      setLoginError(apiMsg || t('login.invalidCredentials', { defaultValue: 'Invalid email or password. Please try again.' }));
     }
   }
 
@@ -95,7 +95,7 @@ export function LoginPage() {
       router.push('/establishments');
     } catch {
       setSwitchingRoleId(null);
-      setLoginError('Could not switch to that role. Please try again.');
+      setLoginError(t('login.roleSwitchFailed', { defaultValue: 'Could not switch to that role. Please try again.' }));
     }
   }
 

@@ -71,9 +71,9 @@ export function EstablishmentsListPage() {
   useEffect(() => {
     // Skip 400/401/403 — each has its own handler (validation inline, session/permission via global handler)
     if (isError && !isValidationError && !isPermissionError && !isSessionError) {
-      toast.error('Failed to load establishments. Please try again.');
+      toast.error(t('pages.establishments.loadError', { defaultValue: 'Failed to load establishments. Please try again.' }));
     }
-  }, [isError, isValidationError, isPermissionError]);
+  }, [isError, isValidationError, isPermissionError, t]);
 
   const handleFilterChange = useCallback((partial: Partial<EstablishmentFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

@@ -58,9 +58,9 @@ export function EnterprisesListPage() {
   useEffect(() => {
     // Skip 400/401/403 — handled inline / by the global handler in services/api.ts
     if (isError && !is400(error) && !is401(error) && !is403(error)) {
-      toast.error('Failed to load enterprises. Please try again.');
+      toast.error(t('pages.enterprises.loadError', { defaultValue: 'Failed to load enterprises. Please try again.' }));
     }
-  }, [isError, error]);
+  }, [isError, error, t]);
 
   const handleFilterChange = useCallback((partial: Partial<EnterpriseFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

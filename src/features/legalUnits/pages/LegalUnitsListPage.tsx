@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -26,7 +26,14 @@ function is401(e: unknown): boolean { return typeof e === 'object' && e !== null
 function is403(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 403; }
 
 export function LegalUnitsListPage() {
-  const [filters, setFilters] = useState<LegalUnitFilters>(LEGAL_UNITS_DEFAULT_FILTERS);
+  const searchParams = useSearchParams();
+  // Deep-link support (e.g. clicking a legal unit on the Establishment detail page):
+  // seed the search filter from ?search=... on first load only; normal navigation to
+  // /legal-units (no query param) behaves exactly as before.
+  const [filters, setFilters] = useState<LegalUnitFilters>(() => {
+    const initialSearch = searchParams.get('search');
+    return initialSearch ? { ...LEGAL_UNITS_DEFAULT_FILTERS, search: initialSearch } : LEGAL_UNITS_DEFAULT_FILTERS;
+  });
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const { t } = useTranslation();
   const router = useRouter();
@@ -55,9 +62,9 @@ export function LegalUnitsListPage() {
 
   useEffect(() => {
     if (isError && !isValidationError && !isPermissionError && !isSessionError) {
-      toast.error('Failed to load legal units. Please try again.');
+      toast.error(t('legalUnits.loadError', { defaultValue: 'Failed to load legal units. Please try again.' }));
     }
-  }, [isError, isValidationError, isPermissionError, isSessionError]);
+  }, [isError, isValidationError, isPermissionError, isSessionError, t]);
 
   const handleFilterChange = useCallback((partial: Partial<LegalUnitFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

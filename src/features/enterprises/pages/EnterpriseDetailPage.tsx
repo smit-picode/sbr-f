@@ -299,6 +299,9 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail } = usePermission('enterprises');
+  // The clickable fields on this page are establishment fields (see FieldWithHistory below),
+  // so the disclaimer is gated by the same establishments.view_history permission they use.
+  const { canViewHistory: canViewEstablishmentHistory } = usePermission('establishments');
   // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEnterpriseByIdQuery(enterpriseId, { skip: !canOpenDetail });
@@ -381,6 +384,12 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
       </div>
 
       {enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
+
+      {canViewEstablishmentHistory && (
+        <p className="flex items-center gap-1.5 text-xs text-slate-400">
+          <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
+        </p>
+      )}
 
       {/* Economic activity — full width */}
       <SectionCard title={t('enterpriseDetail.economicActivity')} icon={<Briefcase className="h-4 w-4" />}>

@@ -59,9 +59,9 @@ export function EnterpriseGroupsListPage() {
 
   useEffect(() => {
     if (isError && !is400(error) && !is401(error) && !is403(error)) {
-      toast.error('Failed to load enterprise groups. Please try again.');
+      toast.error(t('enterpriseGroups.loadError', { defaultValue: 'Failed to load enterprise groups. Please try again.' }));
     }
-  }, [isError, error]);
+  }, [isError, error, t]);
 
   const handleFilterChange = useCallback((partial: Partial<EnterpriseGroupFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

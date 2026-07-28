@@ -30,6 +30,29 @@ const TABLE_BADGE: Record<string, string> = {
   SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
 };
 
+// The backend (sbr-backend) has no i18n layer — approve/reject 400 responses always come back
+// as the fixed English strings in its src/utils/message.ts. Rather than teaching the backend to
+// localize (a much bigger, riskier change), map the handful of known fixed strings this one
+// action can return to a translated version here; anything not recognized (e.g. a dynamic Joi
+// validation message) is shown as-is, same as before this fix.
+const KNOWN_BACKEND_MESSAGE_KEYS: Record<string, string> = {
+  'This request has already been actioned.': 'changeRequests.alreadyActioned',
+  'Cannot approve: another pending request changes the same field(s) on this record. Resolve or reject it first.':
+    'changeRequests.conflictingPendingChange',
+};
+// Matches message.ENTERPRISE_ALREADY_GROUPED(details) — the only templated message this action
+// can return; `details` is left untranslated since it's backend-composed dynamic text.
+const ENTERPRISE_ALREADY_GROUPED_PATTERN =
+  /^Cannot approve this request: (.+)\. An enterprise can only belong to one group — please reject this request instead\.$/;
+
+function translateActionErrorMessage(t: (key: string, opts?: Record<string, unknown>) => string, raw: string): string {
+  const knownKey = KNOWN_BACKEND_MESSAGE_KEYS[raw];
+  if (knownKey) return t(knownKey, { defaultValue: raw });
+  const groupedMatch = raw.match(ENTERPRISE_ALREADY_GROUPED_PATTERN);
+  if (groupedMatch) return t('changeRequests.enterpriseAlreadyGrouped', { defaultValue: raw, details: groupedMatch[1] });
+  return raw;
+}
+
 // Curated fields shown in the "Record context" panel per table, organised into sections.
 type CtxField = { key: string; label: string; span?: 2; sourceKey?: string };
 type CtxSection = { section: string; fields: CtxField[] };
@@ -308,7 +331,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
       // reason and refetch so the now-decided state hides the action panel instead of re-trying.
       const apiErr = err as { status?: number; data?: { message?: string } };
       if (apiErr?.status === 400 && apiErr.data?.message) {
-        toast.error(apiErr.data.message);
+        toast.error(translateActionErrorMessage(t, apiErr.data.message));
         refetch();
       } else {
         toast.error(t('changeRequests.actionFailed', { defaultValue: 'Action failed. Please try again.' }));

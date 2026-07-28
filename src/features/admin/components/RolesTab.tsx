@@ -376,7 +376,7 @@ export function RolesTab({
       if (isAdminChild) {
         const viewAdminPerm = allPermissions.find(p => p.PERMISSION_NAME === 'admin_panel.view');
         if (viewAdminPerm && !grantedIds.has(viewAdminPerm.ID)) {
-          toast.warning('Please enable "View Admin Panel" permission first.');
+          toast.warning(t('admin.roles.enableViewFirst', { defaultValue: 'Please enable "View Admin Panel" permission first.' }));
           return;
         }
       }
@@ -403,35 +403,35 @@ export function RolesTab({
     try {
       await assignPermissions({ roleId, permissions: permIds }).unwrap();
       setOriginalIds(new Set(grantedIds));
-      toast.success('Permissions saved successfully!');
+      toast.success(t('admin.roles.permissionsSaved', { defaultValue: 'Permissions saved successfully!' }));
     } catch (err) {
-      toast.error(getApiError(err, 'Failed to save permissions. Please try again.'));
+      toast.error(getApiError(err, t('admin.roles.saveFailed', { defaultValue: 'Failed to save permissions. Please try again.' })));
     }
   };
 
   const handleCreate = async () => {
-    if (!form.ROLE_NAME.trim()) { toast.error('Role name is required.'); return; }
+    if (!form.ROLE_NAME.trim()) { toast.error(t('admin.roles.nameRequired', { defaultValue: 'Role name is required.' })); return; }
     try {
       await createRole({ ROLE_NAME: form.ROLE_NAME, permissions: [] }).unwrap();
-      toast.success('Role created successfully!');
+      toast.success(t('admin.roles.createdSuccess', { defaultValue: 'Role created successfully!' }));
       setForm({ ROLE_NAME: '' });
       setIsCreateOpen(false);
     } catch (err) {
-      toast.error(getApiError(err, 'Failed to create role. Please try again.'));
+      toast.error(getApiError(err, t('admin.roles.createFailed', { defaultValue: 'Failed to create role. Please try again.' })));
     }
   };
 
   const handleUpdate = async () => {
     if (!editTarget) return;
-    if (!form.ROLE_NAME.trim()) { toast.error('Role name is required.'); return; }
-    if (form.ROLE_NAME === editTarget.ROLE_NAME) { toast.info('No changes detected.'); return; }
+    if (!form.ROLE_NAME.trim()) { toast.error(t('admin.roles.nameRequired', { defaultValue: 'Role name is required.' })); return; }
+    if (form.ROLE_NAME === editTarget.ROLE_NAME) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
     try {
       await updateRole({ id: editTarget.ID, data: { ROLE_NAME: form.ROLE_NAME } }).unwrap();
-      toast.success('Role updated successfully!');
+      toast.success(t('admin.roles.updatedSuccess', { defaultValue: 'Role updated successfully!' }));
       setEditTarget(null);
       setForm({ ROLE_NAME: '' });
     } catch (err) {
-      toast.error(getApiError(err, 'Failed to update role. Please try again.'));
+      toast.error(getApiError(err, t('admin.roles.updateFailed', { defaultValue: 'Failed to update role. Please try again.' })));
     }
   };
 

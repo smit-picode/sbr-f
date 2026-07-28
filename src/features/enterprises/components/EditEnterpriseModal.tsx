@@ -98,9 +98,17 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     setSearch('');
   };
 
+  // Advisory only (not a guard): true when the user is turning this enterprise Inactive while
+  // it's still a member of an enterprise group. Surfaced as a note in the comment dialog below —
+  // it never blocks the save.
+  const groupWarning =
+    status === 'Inactive' && status !== (enterprise.STATUS ?? '') && enterprise.ENTERPRISE_GROUP_ID != null
+      ? 'This enterprise is currently linked to an enterprise group. Please remove it from the group before changing its status.'
+      : undefined;
+
   const handleSubmit = () => {
     if (!hasChanges) {
-      toast.info('No changes detected.');
+      toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' }));
       return;
     }
     setShowCommentDialog(true);
@@ -119,11 +127,11 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           comment,
         },
       }).unwrap();
-      toast.success('Change request submitted for approval.');
+      toast.success(t('common.changeRequestSubmitted', { defaultValue: 'Change request submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
     } catch {
-      toast.error('Failed to update enterprise. Please try again.');
+      toast.error(t('enterpriseEdit.updateError', { defaultValue: 'Failed to update enterprise. Please try again.' }));
     }
   };
 
@@ -135,7 +143,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           <DialogTitle>{t('enterpriseEdit.title', { defaultValue: 'Edit Enterprise' })}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        <div className="space-y-4 max-h-[calc(90vh-180px)] overflow-y-auto py-1 pr-1">
           {/* Read-only identity row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -264,6 +272,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
       isLoading={isLoading}
       onConfirm={handleConfirmWithComment}
       onCancel={() => setShowCommentDialog(false)}
+      warning={groupWarning}
     />
     </>
   );

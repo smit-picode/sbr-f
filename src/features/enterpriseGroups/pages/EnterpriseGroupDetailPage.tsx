@@ -598,6 +598,12 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
 
       {group.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
+      {canViewHistory && (
+        <p className="flex items-center gap-1.5 text-xs text-slate-400">
+          <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
+        </p>
+      )}
+
       {/* Control structure graph — full width */}
       <SectionCard
         title={t('enterpriseGroupDetail.controlStructure', { defaultValue: 'Control Structure' })}

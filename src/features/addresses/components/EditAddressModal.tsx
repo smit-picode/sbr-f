@@ -173,7 +173,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
 
   const handleSubmit = () => {
     if (!address) return;
-    if (!hasChanges()) { toast.info('No changes detected.'); return; }
+    if (!hasChanges()) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
     if (!validate()) return;
     setShowCommentDialog(true);
   };
@@ -187,7 +187,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
     );
     try {
       const res = await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
-      toast.success('Change request submitted for approval.');
+      toast.success(t('common.changeRequestSubmitted', { defaultValue: 'Change request submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
       // Pending approval — only refresh if the API actually applied a record (not under approval flow).
@@ -195,7 +195,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
       const msg = (error as { data?: { message?: string } })?.data?.message
-        ?? 'Failed to update address. Please try again.';
+        ?? t('editAddress.updateError', { defaultValue: 'Failed to update address. Please try again.' });
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
       parts.forEach((part) => {

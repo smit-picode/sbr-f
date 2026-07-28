@@ -88,9 +88,9 @@ export function AuditLogPage() {
     const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
     // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
     if (isError && !is400(error) && !is401 && !is403 && !isFetchError(error)) {
-      toast.error('Failed to load audit log. Please try again.');
+      toast.error(t('pages.auditLog.loadError', { defaultValue: 'Failed to load audit log. Please try again.' }));
     }
-  }, [isError, error]);
+  }, [isError, error, t]);
 
   const handleFilterChange = useCallback((partial: Partial<AuditLogFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -165,7 +165,7 @@ export function AuditLogPage() {
             onChange={(e) => {
               const val = e.target.value;
               if (val !== '' && Number(val) <= 0) {
-                toast.warning('Record ID must be greater than 0.');
+                toast.warning(t('pages.auditLog.recordIdPositive', { defaultValue: 'Record ID must be greater than 0.' }));
                 return;
               }
               setRecordIdInput(val);

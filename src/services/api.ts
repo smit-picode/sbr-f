@@ -3,6 +3,10 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import env from '@/config/env';
 import { toast } from '@/utils/toast';
 import { logout } from '@/features/auth/authSlice';
+// This file runs outside the React tree (RTK Query base query), so it calls the i18next
+// instance directly instead of the useTranslation() hook — same translation resources,
+// current language, and defaultValue fallback behaviour as everywhere else in the app.
+import i18n from '@/i18n/config';
 
 // Prevents multiple 403 errors from stacking duplicate toasts and redirects
 let permissionRedirectInProgress = false;
@@ -42,7 +46,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       if (!sessionExpiredInProgress) {
         sessionExpiredInProgress = true;
         api.dispatch(logout());
-        toast.warning('Your session has expired. Please log in again.');
+        toast.warning(i18n.t('common.sessionExpired', { defaultValue: 'Your session has expired. Please log in again.' }));
         if (typeof window !== 'undefined') {
           setTimeout(() => { window.location.href = '/login'; }, 2000);
         }
@@ -54,7 +58,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       if (!permissionRedirectInProgress && typeof window !== 'undefined') {
         permissionRedirectInProgress = true;
         const errData = result.error.data as { message?: string } | undefined;
-        const msg = errData?.message ?? 'Your access to this section has been revoked.';
+        const msg = errData?.message ?? i18n.t('common.accessRevoked', { defaultValue: 'Your access to this section has been revoked.' });
         // Show the toast BEFORE modifying Redux/localStorage — prevents AdminPage's
         // permission useEffect from racing to navigate first.
         toast.error(msg);
@@ -73,7 +77,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     // suppress generic toasts while a session-expiry or permission redirect is already in progress
     if (status !== 400 && !sessionExpiredInProgress && !permissionRedirectInProgress) {
       const data = result.error.data as { message?: string } | undefined;
-      const msg = data?.message ?? 'Something went wrong. Please try again.';
+      const msg = data?.message ?? i18n.t('common.somethingWentWrong', { defaultValue: 'Something went wrong. Please try again.' });
       toast.error(msg);
     }
   }

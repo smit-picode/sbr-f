@@ -147,11 +147,11 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
 
   const handleSubmit = () => {
     if (!hasChanges()) {
-      toast.info('No changes detected.');
+      toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' }));
       return;
     }
     if (currentRows.length === 0) {
-      toast.error('Add at least one member enterprise.');
+      toast.error(t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' }));
       return;
     }
     if (headId == null || !currentRows.some((m) => m.ENTERPRISE_ID === headId)) {
@@ -182,11 +182,11 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           comment,
         },
       }).unwrap();
-      toast.success('Enterprise group update submitted for approval.');
+      toast.success(t('editEnterpriseGroup.updateSuccess', { defaultValue: 'Enterprise group update submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
     } catch {
-      toast.error('Failed to submit enterprise group update. Please try again.');
+      toast.error(t('editEnterpriseGroup.updateError', { defaultValue: 'Failed to submit enterprise group update. Please try again.' }));
     }
   };
 

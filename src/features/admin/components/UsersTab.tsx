@@ -155,14 +155,14 @@ export function UsersTab({
   };
 
   const validateForm = (requirePassword: boolean): boolean => {
-    if (!form.NAME.trim()) { toast.error('Name is required.'); return false; }
-    if (!form.EMAIL.trim()) { toast.error('Email is required.'); return false; }
-    if (requirePassword && !form.PASSWORD.trim()) { toast.error('Password is required.'); return false; }
+    if (!form.NAME.trim()) { toast.error(t('admin.users.nameRequired', { defaultValue: 'Name is required.' })); return false; }
+    if (!form.EMAIL.trim()) { toast.error(t('admin.users.emailRequired', { defaultValue: 'Email is required.' })); return false; }
+    if (requirePassword && !form.PASSWORD.trim()) { toast.error(t('admin.users.passwordRequired', { defaultValue: 'Password is required.' })); return false; }
     if (requirePassword && PASSWORD_RULES.some((r) => !r.test(form.PASSWORD))) {
-      toast.error('Password does not meet the required criteria.'); return false;
+      toast.error(t('admin.users.passwordCriteria', { defaultValue: 'Password does not meet the required criteria.' })); return false;
     }
-    if (form.NAME.length > ADMIN_MAX_LENGTHS.NAME) { toast.error(`Max ${ADMIN_MAX_LENGTHS.NAME} characters for name.`); return false; }
-    if (form.EMAIL.length > ADMIN_MAX_LENGTHS.EMAIL) { toast.error(`Max ${ADMIN_MAX_LENGTHS.EMAIL} characters for email.`); return false; }
+    if (form.NAME.length > ADMIN_MAX_LENGTHS.NAME) { toast.error(t('admin.users.nameMaxLength', { defaultValue: `Max ${ADMIN_MAX_LENGTHS.NAME} characters for name.`, max: ADMIN_MAX_LENGTHS.NAME })); return false; }
+    if (form.EMAIL.length > ADMIN_MAX_LENGTHS.EMAIL) { toast.error(t('admin.users.emailMaxLength', { defaultValue: `Max ${ADMIN_MAX_LENGTHS.EMAIL} characters for email.`, max: ADMIN_MAX_LENGTHS.EMAIL })); return false; }
     return true;
   };
 
@@ -176,18 +176,18 @@ export function UsersTab({
         IS_ACTIVE: form.IS_ACTIVE === 'Y',
         roles: buildRolesPayload(),
       }).unwrap();
-      toast.success('User created successfully!');
+      toast.success(t('admin.users.createdSuccess', { defaultValue: 'User created successfully!' }));
       resetDialogState();
       setIsCreateOpen(false);
       setFilters({ ...ADMIN_DEFAULT_FILTERS });
     } catch (err) {
-      toast.error(getApiError(err, 'Failed to create user. Please try again.'));
+      toast.error(getApiError(err, t('admin.users.createFailed', { defaultValue: 'Failed to create user. Please try again.' })));
     }
   };
 
   const handleUpdate = async () => {
     if (!editTarget) return;
-    if (!form.NAME.trim()) { toast.error('Name is required.'); return; }
+    if (!form.NAME.trim()) { toast.error(t('admin.users.nameRequired', { defaultValue: 'Name is required.' })); return; }
     try {
       await updateUser({
         id: editTarget.ID,
@@ -197,11 +197,11 @@ export function UsersTab({
           roles: buildRolesPayload(),
         },
       }).unwrap();
-      toast.success('User updated successfully!');
+      toast.success(t('admin.users.updatedSuccess', { defaultValue: 'User updated successfully!' }));
       setEditTarget(null);
       resetDialogState();
     } catch (err) {
-      toast.error(getApiError(err, 'Failed to update user. Please try again.'));
+      toast.error(getApiError(err, t('admin.users.updateFailed', { defaultValue: 'Failed to update user. Please try again.' })));
     }
   };
 

@@ -49,8 +49,8 @@ export function ContactsListPage() {
   useEffect(() => {
     // Skip 403 — global handler in services/api.ts already shows the permission toast
     // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
-    if (isError && !is400(error) && !is401(error) && !is403(error)) toast.error('Failed to load contacts. Please try again.');
-  }, [isError, error]);
+    if (isError && !is400(error) && !is401(error) && !is403(error)) toast.error(t('pages.contacts.loadError', { defaultValue: 'Failed to load contacts. Please try again.' }));
+  }, [isError, error, t]);
 
   const handleFilterChange = useCallback((partial: Partial<ContactFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

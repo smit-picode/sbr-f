@@ -45,6 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
       // Hidden in frontend until the Attribute Change Requests feature is ready to show to the client. Uncomment to restore.
       { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: ['approvals.view', 'approvals.approve'], i18nKey: 'nav.attributeChangeRequests', showCount: true },
       { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
+      { title: 'Bulk Change',                href: '/tasks/bulk-change',                icon: 'Layers',           permKey: '', i18nKey: 'nav.bulkChange'              },
       { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
       { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },
       { title: 'Audit Log',                 href: '/audit-log',                        icon: 'ClipboardList',    permKey: 'audit_log.view', i18nKey: 'nav.auditLog'     },

@@ -99,11 +99,11 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
 
   const handleSubmit = () => {
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
-      toast.error('At least one group name (EN or AR) is required.');
+      toast.error(t('createEnterpriseGroup.nameRequired', { defaultValue: 'At least one group name (EN or AR) is required.' }));
       return;
     }
     if (members.length === 0) {
-      toast.error('Add at least one member enterprise.');
+      toast.error(t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' }));
       return;
     }
     if (headId == null || !members.some((m) => m.ENTERPRISE_ID === headId)) {
@@ -130,11 +130,11 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
         memberEnterpriseIds:   members.map((m) => m.ENTERPRISE_ID),
         comment,
       }).unwrap();
-      toast.success('Enterprise group creation submitted for approval.');
+      toast.success(t('createEnterpriseGroup.submitSuccess', { defaultValue: 'Enterprise group creation submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
     } catch {
-      toast.error('Failed to submit enterprise group. Please try again.');
+      toast.error(t('createEnterpriseGroup.submitError', { defaultValue: 'Failed to submit enterprise group. Please try again.' }));
     }
   };
 

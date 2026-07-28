@@ -30,7 +30,8 @@
     "profilingHistory": "Profiling History",
     "sourceData": "Source Data",
     "sourceCatalog": "Source Catalog",
-    "legalUnits": "Legal Units"
+    "legalUnits": "Legal Units",
+    "bulkChange": "Bulk Change"
   },
   "pageBanner": {
     "frame": "Establishments Management",
@@ -42,19 +43,24 @@
   "pages": {
     "establishments": {
       "title": "Establishments",
-      "description": "Statistical Business Register — Establishment records"
+      "description": "Statistical Business Register — Establishment records",
+      "loadError": "Failed to load establishments. Please try again."
     },
     "contacts": {
       "title": "Contacts",
-      "description": "Business contacts associated with registered Establishments"
+      "description": "Business contacts associated with registered Establishments",
+      "loadError": "Failed to load contacts. Please try again."
     },
     "addresses": {
       "title": "Addresses",
-      "description": "Physical address records linked to registered Establishments"
+      "description": "Physical address records linked to registered Establishments",
+      "loadError": "Failed to load addresses. Please try again."
     },
     "auditLog": {
       "title": "Audit Log",
-      "description": "Track all data changes across Establishments, Enterprises, Contacts and Addresses"
+      "description": "Track all data changes across Establishments, Enterprises, Contacts and Addresses",
+      "loadError": "Failed to load audit log. Please try again.",
+      "recordIdPositive": "Record ID must be greater than 0."
     },
     "admin": {
       "title": "Admin Panel",
@@ -64,7 +70,8 @@
       "title": "Enterprises",
       "description": "Groups of establishments under common control (a main branch and its branches)",
       "noData": "No enterprises found",
-      "noDataDesc": "Try adjusting your search or filter criteria."
+      "noDataDesc": "Try adjusting your search or filter criteria.",
+      "loadError": "Failed to load enterprises. Please try again."
     },
     "home": {
       "title": "Home",
@@ -161,6 +168,10 @@
       "description": "Regulator records that compose each establishment — read-only source ledger.",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
+    },
+    "bulkChange": {
+      "title": "Bulk Change",
+      "description": "Update many establishments at once from an Excel file — submitted as one approval task."
     }
   },
   "filters": {
@@ -189,7 +200,12 @@
     "yes": "Yes",
     "no": "No",
     "noAccess": "You do not have access to this section.",
-    "pendingApprovalBanner": "This record has an edit request awaiting approval. You can still edit it."
+    "pendingApprovalBanner": "This record has an edit request awaiting approval. You can still edit it.",
+    "noChangesDetected": "No changes detected.",
+    "changeRequestSubmitted": "Change request submitted for approval.",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "accessRevoked": "Your access to this section has been revoked.",
+    "somethingWentWrong": "Something went wrong. Please try again."
   },
   "changeRequests": {
     "pending": "pending",
@@ -208,6 +224,9 @@
     "approved": "Request approved.",
     "rejected": "Request rejected.",
     "actionFailed": "Action failed. Please try again.",
+    "alreadyActioned": "This request has already been actioned.",
+    "conflictingPendingChange": "Cannot approve: another pending request changes the same field(s) on this record. Resolve or reject it first.",
+    "enterpriseAlreadyGrouped": "Cannot approve this request: {{details}}. An enterprise can only belong to one group — please reject this request instead.",
     "establishmentAdded": "Establishment Added",
     "establishmentRemoved": "Establishment Removed",
     "fieldOne": "field changed",
@@ -487,7 +506,8 @@
     "searchPlaceholder": "Search by SBR ID, name, or CR...",
     "searchHelper": "Search the establishment register by SBR ID, name, or commercial registration number.",
     "searching": "Searching…",
-    "noMatching": "No matching establishments."
+    "noMatching": "No matching establishments.",
+    "updateError": "Failed to update enterprise. Please try again."
   },
   "columnsToggle": {
     "columns": "Columns",
@@ -611,7 +631,8 @@
   "enterpriseGroups": {
     "createGroup": "Create group",
     "allTypes": "All types",
-    "allStatuses": "All statuses"
+    "allStatuses": "All statuses",
+    "loadError": "Failed to load enterprise groups. Please try again."
   },
   "editEnterpriseGroup": {
     "title": "Edit Enterprise Group",
@@ -636,16 +657,22 @@
     "headBadge": "HEAD",
     "markHeadHint": "Click the star to mark the group head.",
     "markAsHead": "Mark as group head",
-    "headRequired": "Mark one member enterprise as the group head."
+    "headRequired": "Mark one member enterprise as the group head.",
+    "updateSuccess": "Enterprise group update submitted for approval.",
+    "updateError": "Failed to submit enterprise group update. Please try again."
   },
   "createEnterpriseGroup": {
     "title": "Create Enterprise Group",
     "englishNamePlaceholder": "English name",
-    "createButton": "Create Group"
+    "createButton": "Create Group",
+    "nameRequired": "At least one group name (EN or AR) is required.",
+    "submitSuccess": "Enterprise group creation submitted for approval.",
+    "submitError": "Failed to submit enterprise group. Please try again."
   },
   "legalUnits": {
     "readOnlyLedger": "Read-only ledger",
     "searchPlaceholder": "Search by LU ID, establishment, or source...",
+    "loadError": "Failed to load legal units. Please try again.",
     "allRecords": "All records",
     "current": "Current"
   },
@@ -688,6 +715,7 @@
   },
   "editContact": {
     "title": "Edit Contact",
+    "updateError": "Failed to update contact. Please try again.",
     "sections": {
       "metadata": "Metadata"
     },
@@ -710,6 +738,7 @@
   },
   "editAddress": {
     "title": "Edit Address",
+    "updateError": "Failed to update address. Please try again.",
     "sections": {
       "metadata": "Metadata"
     },
@@ -734,6 +763,7 @@
   },
   "editEstablishment": {
     "title": "Edit Establishment",
+    "updateError": "Failed to update establishment. Please try again.",
     "selectPlaceholder": "— Select —",
     "sections": {
       "identifiers": "Identifiers",
@@ -816,6 +846,8 @@
     "password": "Password",
     "signIn": "Sign In",
     "signingIn": "Signing in...",
+    "invalidCredentials": "Invalid email or password. Please try again.",
+    "roleSwitchFailed": "Could not switch to that role. Please try again.",
     "branding": "Statistical Business Register",
     "brandingSub": "National Planning Council",
     "brandingCountry": "State of Qatar",
@@ -948,7 +980,15 @@
       "scopedRole": "Scoped Role",
       "globalRole": "Global Role",
       "permissions": "permissions",
-      "selectRolePrompt": "Select a role to view permissions"
+      "selectRolePrompt": "Select a role to view permissions",
+      "enableViewFirst": "Please enable \"View Admin Panel\" permission first.",
+      "permissionsSaved": "Permissions saved successfully!",
+      "saveFailed": "Failed to save permissions. Please try again.",
+      "nameRequired": "Role name is required.",
+      "createdSuccess": "Role created successfully!",
+      "createFailed": "Failed to create role. Please try again.",
+      "updatedSuccess": "Role updated successfully!",
+      "updateFailed": "Failed to update role. Please try again."
     },
     "users": {
       "searchPlaceholder": "Search users by name, email",
@@ -986,7 +1026,129 @@
       "assignedRolesHint": "A user can hold multiple roles; effective permissions follow the active role. Set an optional per-role expiry date.",
       "scopedBadge": "SCOPED",
       "expiryTitle": "Optional expiry date for this role",
-      "noRoles": "No roles available"
+      "noRoles": "No roles available",
+      "nameRequired": "Name is required.",
+      "emailRequired": "Email is required.",
+      "passwordRequired": "Password is required.",
+      "passwordCriteria": "Password does not meet the required criteria.",
+      "nameMaxLength": "Max {{max}} characters for name.",
+      "emailMaxLength": "Max {{max}} characters for email.",
+      "createdSuccess": "User created successfully!",
+      "createFailed": "Failed to create user. Please try again.",
+      "updatedSuccess": "User updated successfully!",
+      "updateFailed": "Failed to update user. Please try again."
+    }
+  },
+  "bulkChange": {
+    "cols": {
+      "task": "Bulk Task",
+      "submittedBy": "Submitted By",
+      "submitted": "Submitted",
+      "table": "Table",
+      "records": "Records",
+      "changes": "Changes",
+      "status": "Status"
+    },
+    "review": "Review",
+    "history": "History",
+    "newBulkUpdate": "New bulk update",
+    "awaitingApproval": "Bulk change tasks awaiting approval.",
+    "decidedHistory": "Approved and rejected bulk changes.",
+    "backToBulkChanges": "Back to bulk changes",
+    "view": "View",
+    "back": "Back to bulk changes",
+    "notFound": "Bulk change task not found.",
+    "approved": "Bulk change approved.",
+    "rejected": "Bulk change rejected.",
+    "reasonForChange": "Reason for Change",
+    "confirmTitle": "Confirm Bulk Change",
+    "noChange": "No change",
+    "reject": "Reject",
+    "approve": "Approve",
+    "decidedBy": "Decided by",
+    "changes": "Changes",
+    "statusPending": "Pending",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "reviewColumns": {
+      "SBR_ID": "SBR ID",
+      "NAME_ENU": "Name (English)",
+      "EST_STATUS": "Status",
+      "SECTOR_ID": "Sector",
+      "EMPLOYMENT_COUNT": "Employees",
+      "CR_EXPIRY_DATE": "CR Expiry Date"
+    },
+    "wizard": {
+      "steps": {
+        "setUp": "Set up",
+        "upload": "Upload",
+        "validate": "Validate",
+        "confirm": "Confirm"
+      },
+      "backToBulkChanges": "Back to bulk changes",
+      "title": "New bulk update",
+      "description": "Update many {{table}} at once from an Excel file — submitted as one approval task.",
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "submitForApproval": "Submit for approval",
+      "submitting": "Submitting…",
+      "submitSuccess": "Bulk update submitted for approval.",
+      "setup": {
+        "chooseData": "Choose the data to update",
+        "chooseDataDesc": "Pick which table your Excel file targets.",
+        "columnDictionary": "Column dictionary",
+        "columnDictionaryDesc": "Use these exact column headers in your file.",
+        "downloadTemplate": "Download template",
+        "excelHeader": "Excel header",
+        "attribute": "Attribute",
+        "type": "Type",
+        "required": "Required",
+        "allowedValues": "Allowed values",
+        "mandatory": "Mandatory",
+        "optional": "Optional",
+        "note": "Only SBR_ID is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched."
+      },
+      "upload": {
+        "title": "Upload your file",
+        "description": "Upload the Excel file with your updates for {{table}}.",
+        "dragDrop": "Drag and drop your file here, or click to browse",
+        "acceptedFormats": "Accepted formats: .xlsx, .xls, .csv",
+        "unsupportedFile": "Unsupported file type. Please upload an .xlsx, .xls or .csv file.",
+        "removeFile": "Remove file"
+      },
+      "validate": {
+        "title": "Validation results",
+        "description": "{{fileName}} was checked against the {{table}} column dictionary.",
+        "yourFile": "Your file",
+        "totalRows": "Total rows",
+        "valid": "Valid",
+        "errors": "Errors",
+        "errorsWarning": "Rows with errors will be excluded from the bulk update. Fix them in your file and re-upload, or continue with only the valid rows.",
+        "rowDetails": "Row details",
+        "row": "Row",
+        "status": "Status",
+        "errorLabel": "Error",
+        "messages": {
+          "sbrIdMandatory": "SBR_ID is mandatory.",
+          "sbrIdNotFound": "SBR_ID does not match an existing record.",
+          "estStatusInvalid": "Must be one of Active, Inactive.",
+          "sectorInvalid": "Not a recognized sector.",
+          "employmentNegative": "Must be 0 or greater.",
+          "roleInvalid": "Must be one of Owner, Manager.",
+          "emailInvalid": "Not a valid email address."
+        }
+      },
+      "confirm": {
+        "title": "Confirm bulk update",
+        "table": "Table",
+        "file": "File",
+        "recordsToUpdate": "Records to update",
+        "excludedErrors": "Excluded (errors)",
+        "reasonLabel": "Reason for change",
+        "reasonPlaceholder": "Briefly describe why these records are being updated…",
+        "recordsThatWillBeUpdated": "Records that will be updated"
+      }
     }
   }
 }

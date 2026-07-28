@@ -38,8 +38,8 @@ export function AddressesListPage() {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
     const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
     // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
-    if (isError && !is401 && !is403) toast.error('Failed to load addresses. Please try again.');
-  }, [isError, error]);
+    if (isError && !is401 && !is403) toast.error(t('pages.addresses.loadError', { defaultValue: 'Failed to load addresses. Please try again.' }));
+  }, [isError, error, t]);
 
   const handleFilterChange = useCallback((partial: Partial<AddressFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));

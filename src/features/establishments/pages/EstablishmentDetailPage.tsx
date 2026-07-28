@@ -110,22 +110,117 @@ function DetailCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-type StripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null };
+type StripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null; fieldKey: string };
 
-function HighlightStrip({ items }: { items: StripItem[] }) {
+// Same click-to-history behaviour as DetailField, styled to match the highlight-strip cell.
+function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; icon: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(recordId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div className="relative flex min-w-0 items-center gap-2.5" ref={wrapRef}>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">{icon}</span>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group min-w-0 text-start disabled:cursor-default"
+      >
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <PendingFieldBadge count={pendingCount} />
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+        </div>
+        <div className="truncate text-sm font-bold text-slate-800">{value}</div>
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function HighlightStrip({ recordId, items, canViewHistory, pendingFields }: {
+  recordId: number; items: StripItem[]; canViewHistory: boolean; pendingFields: Record<string, number | undefined>;
+}) {
   const visible = items.filter((i) => !isEmpty(i.value));
   if (!visible.length) return null;
   return (
     <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
-      {visible.map((it, i) => (
-        <div key={i} className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">{it.icon}</span>
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{it.label}</p>
-            <div className="truncate text-sm font-bold text-slate-800">{it.value}</div>
-          </div>
-        </div>
+      {visible.map((it) => (
+        <StripField
+          key={it.fieldKey}
+          recordId={recordId}
+          fieldKey={it.fieldKey}
+          label={it.label}
+          value={it.value}
+          icon={it.icon}
+          canViewHistory={canViewHistory}
+          pendingCount={pendingFields[it.fieldKey]}
+        />
       ))}
+    </div>
+  );
+}
+
+// Header maroon-band name field — same click-to-history behaviour, white-tinted icon for the dark band.
+function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(recordId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div className="relative min-w-0" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group flex min-w-0 items-center gap-1.5 text-start disabled:cursor-default"
+      >
+        {children}
+        <PendingFieldBadge count={pendingCount} />
+        {canViewHistory && <History className="h-3.5 w-3.5 shrink-0 text-white/30 transition-colors group-hover:text-white" />}
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -283,9 +378,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     <PageContainer>
       {BackLink}
 
-      {/* Header band */}
-      <div className="overflow-hidden rounded-lg shadow-sm">
-        <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
+      {/* Header band — rounded directly (no overflow-hidden wrapper) so the attribute-history
+          popover on the name fields can render outside the band instead of being clipped. */}
+      <div>
+        <div className="rounded-lg bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -293,8 +389,30 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 {e.EST_STATUS && <StatusBadge status={e.EST_STATUS} className="rounded-md" />}
                 {e.HAS_PENDING_REQUEST && <PendingBadge />}
               </div>
-              <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
-              {e.NAME_ARA && <p className="truncate text-sm text-white/80">{e.NAME_ARA}</p>}
+              {e.NAME_ENU ? (
+                <HeaderNameField
+                  recordId={sbrId}
+                  fieldKey="NAME_ENU"
+                  label={fl('NAME_ENU', 'Name (EN)')}
+                  canViewHistory={canViewHistory}
+                  pendingCount={pendingFields.NAME_ENU}
+                >
+                  <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
+                </HeaderNameField>
+              ) : (
+                <h1 className="mt-2 truncate text-2xl font-bold">{title}</h1>
+              )}
+              {e.NAME_ARA && (
+                <HeaderNameField
+                  recordId={sbrId}
+                  fieldKey="NAME_ARA"
+                  label={fl('NAME_ARA', 'Name (AR)')}
+                  canViewHistory={canViewHistory}
+                  pendingCount={pendingFields.NAME_ARA}
+                >
+                  <p className="truncate text-sm text-white/80">{e.NAME_ARA}</p>
+                </HeaderNameField>
+              )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Button variant="outline" onClick={() => router.push(e.ASSOCIATED_ENTERPRISE_ID ? `/enterprises/${e.ASSOCIATED_ENTERPRISE_ID}` : '/enterprises')} className="border-white/30 bg-white/10 text-white hover:bg-white/20">
@@ -319,12 +437,15 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
       )}
 
       <HighlightStrip
+        recordId={sbrId}
+        canViewHistory={canViewHistory}
+        pendingFields={pendingFields}
         items={[
-          { icon: <Briefcase className="h-4 w-4" />, label: fl('SECTOR_ID', 'Sector'), value: e.SECTOR_ID },
-          { icon: <Landmark className="h-4 w-4" />, label: fl('LEGAL_TYPE', 'Legal Type'), value: e.LEGAL_TYPE },
-          { icon: <Users className="h-4 w-4" />, label: fl('EMPLOYMENT_COUNT', 'Employees'), value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null },
-          { icon: <GitBranch className="h-4 w-4" />, label: fl('MAIN_BRANCH_FLG', 'Main / Branch'), value: e.MAIN_BRANCH_FLG },
-          { icon: <Database className="h-4 w-4" />, label: fl('SOURCE_CODE', 'Source'), value: e.SOURCE_CODE },
+          { fieldKey: 'SECTOR_ID', icon: <Briefcase className="h-4 w-4" />, label: fl('SECTOR_ID', 'Sector'), value: e.SECTOR_ID },
+          { fieldKey: 'LEGAL_TYPE', icon: <Landmark className="h-4 w-4" />, label: fl('LEGAL_TYPE', 'Legal Type'), value: e.LEGAL_TYPE },
+          { fieldKey: 'EMPLOYMENT_COUNT', icon: <Users className="h-4 w-4" />, label: fl('EMPLOYMENT_COUNT', 'Employees'), value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null },
+          { fieldKey: 'MAIN_BRANCH_FLG', icon: <GitBranch className="h-4 w-4" />, label: fl('MAIN_BRANCH_FLG', 'Main / Branch'), value: e.MAIN_BRANCH_FLG },
+          { fieldKey: 'SOURCE_CODE', icon: <Database className="h-4 w-4" />, label: fl('SOURCE_CODE', 'Source'), value: e.SOURCE_CODE },
         ]}
       />
 
@@ -376,9 +497,11 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
           </div>
           <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2">
             {legalUnits.map((lu, i) => (
-              <div
+              <button
                 key={i}
-                className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 ${lu.current ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50'}`}
+                type="button"
+                onClick={() => router.push(`/legal-units?search=${encodeURIComponent(lu.idValue)}`)}
+                className={`flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6] ${lu.current ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50'}`}
               >
                 <span
                   className="shrink-0 rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white"
@@ -399,7 +522,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                     {t('establishmentDetail.historical')}
                   </span>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>
