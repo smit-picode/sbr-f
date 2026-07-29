@@ -34,6 +34,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'TYPE',
     header: t('columns.TYPE', { defaultValue: 'TYPE' }),
+    // Derived in JS from UCI_COUNTRY, not a real column — not sortable server-side.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const type = getValue<string>();
       if (type === 'Domestic') {
@@ -80,6 +82,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ENTERPRISE_COUNT',
     header: t('columns.ENTERPRISES', { defaultValue: 'ENTERPRISES' }),
+    // Computed in JS after the query — not sortable server-side.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -93,6 +97,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
     header: t('columns.ESTABLISHMENTS', { defaultValue: 'ESTABLISHMENTS' }),
+    // Computed in JS after the query — not sortable server-side.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -105,6 +111,10 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'EMPLOYEE_COUNT',
     header: t('columns.EMPLOYEES', { defaultValue: 'EMPLOYEES' }),
+    // Response field is EMPLOYEE_COUNT (computed in JS) but the real, sortable column is
+    // TOTAL_EMPLOYEES — accessorKey mismatch means this can't be wired to server-side sort
+    // directly, so it's disabled here rather than silently sending an invalid sortBy.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (

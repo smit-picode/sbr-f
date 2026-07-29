@@ -11,7 +11,7 @@ import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
-import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS } from '../constants';
+import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISHMENTS_SORTABLE_COLUMNS } from '../constants';
 import type { EstablishmentFilters, SbrEstablishment } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -167,6 +167,8 @@ export function EstablishmentsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        onSortChange={(field, order) => handleFilterChange({ sortBy: field, sortOrder: order, page: 1 })}
+        sortableColumns={ESTABLISHMENTS_SORTABLE_COLUMNS}
         stickyFirstColumn
         onRowClick={canOpenDetail ? (row) => router.push(`/establishments/${row.SBR_ID}`) : undefined}
       />

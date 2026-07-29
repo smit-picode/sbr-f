@@ -26,4 +26,6 @@ export interface AddressFilters {
   sourceCode?: string;
   municipalityId?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

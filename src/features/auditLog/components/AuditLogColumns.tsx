@@ -133,6 +133,9 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {
     accessorKey: 'CHANGE_DATA',
     header: t('columns.COLUMN_NAME'),
+    // Large JSON diff blob — sorting by it is meaningless and it's deliberately left out
+    // of AUDIT_LOG_SORTABLE_COLUMNS, so disable it here rather than send an invalid sortBy.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const text = formatColumnNames(getValue<string | null>());
       if (text === '—') return <span className="text-slate-400 text-sm">—</span>;

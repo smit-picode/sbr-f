@@ -86,4 +86,6 @@ export interface EstablishmentFilters {
   sourceCode?: string;
   mainBranchFLG?: string;
   columnFilters?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

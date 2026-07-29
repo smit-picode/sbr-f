@@ -20,4 +20,6 @@ export interface LegalUnitFilters {
   source?:        string;
   recordFilter?:  string;
   columnFilters?: string;
+  sortBy?:        string;
+  sortOrder?:     'asc' | 'desc';
 }

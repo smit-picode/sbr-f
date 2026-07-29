@@ -97,3 +97,12 @@ export const ESTABLISHMENT_LOCKED_FIELDS: string[] = [
   'MAIN_BRANCH_FLG',  // Branch Flag
 ];
 export const isEstablishmentFieldEditable = (field: string): boolean => !ESTABLISHMENT_LOCKED_FIELDS.includes(field);
+
+// Columns SBR_ESTABLISHMENTS_API.GET_LIST accepts for full-dataset sorting — must match
+// ESTABLISHMENTS_SORTABLE_COLUMNS in sbr-backend/src/utils/enums.ts exactly. The table shows
+// 50+ columns but only these are real, indexable columns the procedure's dynamic ORDER BY
+// can sort by; everything else is disabled via DataTable's `sortableColumns` prop.
+export const ESTABLISHMENTS_SORTABLE_COLUMNS: string[] = [
+  'SBR_ID', 'NAME_ENU', 'NAME_ARA', 'EST_STATUS', 'SECTOR_ID', 'LEGAL_TYPE',
+  'SOURCE_CODE', 'MOCI_CR_NUM',
+];

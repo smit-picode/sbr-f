@@ -30,4 +30,6 @@ export interface AuditLogFilters {
   recordId?: number;
   changedBy?: number;
   columnFilters?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

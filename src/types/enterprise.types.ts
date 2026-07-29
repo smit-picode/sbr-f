@@ -46,6 +46,8 @@ export interface EnterpriseFilters {
   sectorId?: string;
   columnFilters?: string;
   ungrouped?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 // ── Enterprise detail (Enterprise 360) ──────────────────────────────────────

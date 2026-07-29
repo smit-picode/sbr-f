@@ -189,6 +189,7 @@ export function EnterpriseGroupsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        onSortChange={(field, order) => handleFilterChange({ sortBy: field, sortOrder: order, page: 1 })}
         onRowClick={canViewDetail || canEdit ? (row) => router.push(`/enterprise-groups/${row.ID}`) : undefined}
         stickyFirstColumn
       />

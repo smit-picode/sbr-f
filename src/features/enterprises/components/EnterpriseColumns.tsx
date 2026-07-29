@@ -33,6 +33,9 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'MAIN_CR',
     header: t('columns.MAIN_CR'),
+    // Comes from the joined mainUnit establishment, not a column on SbrEnterprises —
+    // the backend can't ORDER BY it, so don't offer sorting on it here.
+    enableSorting: false,
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -54,11 +57,15 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
         </span>
       );
     },
-    enableSorting: true,
+    // Computed in JS after the query (per-enterprise establishment count) — not a real
+    // column, so the backend can't sort by it.
+    enableSorting: false,
   },
   {
     accessorKey: 'LEGAL_TYPE',
     header: t('columns.LEGAL_TYPE'),
+    // Comes from the joined mainUnit establishment, not a column on SbrEnterprises.
+    enableSorting: false,
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>
     ),

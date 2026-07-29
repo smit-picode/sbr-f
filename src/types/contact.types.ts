@@ -24,4 +24,6 @@ export interface ContactFilters {
   role?: string;
   sourceCode?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

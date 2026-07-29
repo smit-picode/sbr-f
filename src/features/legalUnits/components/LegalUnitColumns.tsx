@@ -24,6 +24,9 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
   {
     accessorKey: 'ESTABLISHMENT_NAME',
     header: t('columns.ESTABLISHMENT', { defaultValue: 'ESTABLISHMENT' }),
+    // Comes from the joined establishment association, not a column on SbrLegalUnits —
+    // not sortable server-side.
+    enableSorting: false,
     cell: ({ row }) => {
       const sbrId = row.original.ESTABLISHMENT_SBR_ID;
       const name = row.original.ESTABLISHMENT_NAME;

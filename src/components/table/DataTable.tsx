@@ -38,6 +38,10 @@ interface DataTableProps<TData, TValue> {
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   onSortChange?: (field: string, order: 'asc' | 'desc') => void;
+  // Restricts which columns can be sorted when the server only accepts a subset of them
+  // (e.g. a table with 50+ display columns but a backend allowlist of ~8 sortable ones).
+  // Omit to fall back to each column's own `enableSorting` (the previous behavior).
+  sortableColumns?: string[];
   stickyFirstColumn?: boolean;
   onRowClick?: (row: TData) => void;
 }
@@ -53,6 +57,8 @@ export function DataTable<TData, TValue>({
   total,
   onPageChange,
   onLimitChange,
+  onSortChange,
+  sortableColumns,
   stickyFirstColumn,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
@@ -61,14 +67,29 @@ export function DataTable<TData, TValue>({
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // When the caller supplies onSortChange, the server does the sorting across the
+  // whole dataset — `data` is just the current page, so client-side getSortedRowModel
+  // must be disabled here (manualSorting) or TanStack would re-sort only that page.
+  const isServerSorted = !!onSortChange;
+
   const table = useReactTable({
     data,
     columns,
     state: { sorting, columnVisibility },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      // Compute the next value up front and pass setSorting a plain value rather than an
+      // updater function — React treats updater functions as pure and may invoke them
+      // outside a normal event context (e.g. Strict Mode's double-invoke check), so calling
+      // the parent's onSortChange (a different component's setState) from inside one throws
+      // "Cannot update a component while rendering a different component".
+      const next = typeof updater === 'function' ? updater(sorting) : updater;
+      setSorting(next);
+      if (isServerSorted && next[0]) onSortChange(next[0].id, next[0].desc ? 'desc' : 'asc');
+    },
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: isServerSorted ? undefined : getSortedRowModel(),
+    manualSorting: isServerSorted,
     manualPagination: true,
     pageCount: Math.ceil(total / limit),
     sortDescFirst: false,
@@ -88,7 +109,9 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id} className="hover:bg-slate-50">
                 {headerGroup.headers.map((header, colIndex) => {
                   const sorted = header.column.getIsSorted();
-                  const canSort = header.column.getCanSort();
+                  const canSort = sortableColumns
+                    ? sortableColumns.includes(header.column.id) && header.column.getCanSort()
+                    : header.column.getCanSort();
                   const isSticky = stickyFirstColumn && colIndex === 0;
                   return (
                     <TableHead

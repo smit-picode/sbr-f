@@ -40,6 +40,8 @@ export interface EnterpriseGroupFilters {
   status?:        string;
   type?:          string;
   columnFilters?: string;
+  sortBy?:        string;
+  sortOrder?:     'asc' | 'desc';
 }
 
 export interface EnterpriseGroupMember {

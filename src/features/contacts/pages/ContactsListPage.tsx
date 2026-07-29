@@ -109,6 +109,7 @@ export function ContactsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        onSortChange={(field, order) => handleFilterChange({ sortBy: field, sortOrder: order, page: 1 })}
         stickyFirstColumn
         onRowClick={canOpenDetail ? (row) => router.push(`/contacts/${row.ID}`) : undefined}
       />
