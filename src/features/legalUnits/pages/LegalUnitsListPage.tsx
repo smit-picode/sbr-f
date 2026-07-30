@@ -180,7 +180,7 @@ export function LegalUnitsListPage() {
         total={total}
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
-        onSortChange={(field, order) => handleFilterChange({ sortBy: field, sortOrder: order, page: 1 })}
+        onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
         stickyFirstColumn
       />
     </PageContainer>

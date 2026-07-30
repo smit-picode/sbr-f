@@ -37,7 +37,10 @@ interface DataTableProps<TData, TValue> {
   total: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
-  onSortChange?: (field: string, order: 'asc' | 'desc') => void;
+  // Called with (field, order) when a column is sorted, or (null, null) when the user's
+  // third click cycles a column back to "no sort" — the caller must clear its own
+  // sortBy/sortOrder filter state in that case, or the list stays stuck on the last order.
+  onSortChange?: (field: string | null, order: 'asc' | 'desc' | null) => void;
   // Restricts which columns can be sorted when the server only accepts a subset of them
   // (e.g. a table with 50+ display columns but a backend allowlist of ~8 sortable ones).
   // Omit to fall back to each column's own `enableSorting` (the previous behavior).
@@ -84,7 +87,14 @@ export function DataTable<TData, TValue>({
       // "Cannot update a component while rendering a different component".
       const next = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(next);
-      if (isServerSorted && next[0]) onSortChange(next[0].id, next[0].desc ? 'desc' : 'asc');
+      // TanStack's own 3-click cycle (asc -> desc -> unsorted) resolves `next` to an empty
+      // array on the 3rd click. Skipping the callback in that case (as before) left the
+      // table's internal sort visually cleared while the parent's sortBy/sortOrder filter
+      // state kept its last value — the query never stopped requesting descending order.
+      if (isServerSorted) {
+        if (next[0]) onSortChange(next[0].id, next[0].desc ? 'desc' : 'asc');
+        else onSortChange(null, null);
+      }
     },
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
