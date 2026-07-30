@@ -51,12 +51,21 @@ function RecordIdCell({ value }: { value: number | null }) {
 
 interface MemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }
 
-// CHANGE_DATA is a JSON object whose keys are the changed column names,
-// e.g. {"EMAIL":{"old":"a@b.com","new":"b@b.com"},"PHONE":{"old":"...","new":"..."}}.
-// Legacy rows may hold a JSON array or a plain column name string. Structural membership
-// changes (Enterprise Groups member add/remove) ride along as memberAdd/memberRemove
-// (raw id arrays) plus memberAddDetails/memberRemoveDetails (display-only name snapshots) —
-// surfaced here as "Name (Added)" / "Name (Removed)" instead of a blank column.
+// CHANGE_DATA's per-key value shape differs by which layer wrote it: the ORM path
+// (Enterprises/Enterprise Groups, via audit.helper.ts buildChangeData) writes
+// {"EMAIL":{"old":"a@b.com","new":"b@b.com"}}, while the stored-procedure path
+// (Contacts/Addresses/Establishments, via SBR_PORTAL_PKG) writes flat {"EMAIL":"b@b.com"} —
+// a plain scalar, not an {old,new} object. Filtering on the {old,new} shape alone silently
+// dropped every flat-shape key, so Contacts/Addresses/Establishments audit rows always showed
+// "—" in COLUMN NAME regardless of which field actually changed. CHANGE_DATA only ever
+// contains keys that changed (comment/reason is stored separately as CHANGE_REASON), so any
+// key that isn't one of the structural membership keys below is itself a changed column name,
+// independent of its value's shape. Structural membership changes (Enterprise Groups member
+// add/remove) ride along as memberAdd/memberRemove (raw id arrays) plus
+// memberAddDetails/memberRemoveDetails (display-only name snapshots) — surfaced here as
+// "Name (Added)" / "Name (Removed)" instead of a blank column.
+const STRUCTURAL_CHANGE_DATA_KEYS = new Set(['memberAdd', 'memberRemove', 'memberAddDetails', 'memberRemoveDetails']);
+
 function formatColumnNames(value: string | null): string {
   if (!value) return '—';
   try {
@@ -64,10 +73,7 @@ function formatColumnNames(value: string | null): string {
     if (Array.isArray(parsed)) return (parsed as string[]).join(', ');
     if (parsed && typeof parsed === 'object') {
       const obj = parsed as Record<string, unknown>;
-      const parts = Object.keys(obj).filter((k) => {
-        const v = obj[k];
-        return v !== null && typeof v === 'object' && !Array.isArray(v) && 'old' in (v as object) && 'new' in (v as object);
-      });
+      const parts = Object.keys(obj).filter((k) => !STRUCTURAL_CHANGE_DATA_KEYS.has(k));
 
       const memberLabel = (details: unknown, fallbackCount: unknown, suffix: string): string[] => {
         if (Array.isArray(details) && details.length > 0) {
