@@ -13,7 +13,8 @@ import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
 import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
-import { formatDate } from '@/utils/format';
+import { formatDate, nullableText } from '@/utils/format';
+import { isContactFieldHistoryEnabled } from '../constants';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { ChevronLeft, ChevronRight, Pencil, Briefcase, Phone, Database, History } from 'lucide-react';
@@ -152,26 +153,31 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   const pendingFields = c.PENDING_FIELDS ?? {};
   const title = c.CONTACT_NAME || c.EMAIL || `Contact #${c.ID}`;
 
-  // Only show fields that have a value (empty fields are hidden).
+  // A history-enabled (= editable) field always stays on screen, rendering "—" when empty:
+  // hiding it would make its history popover unreachable, which is how an empty CONTACT_NAME
+  // lost its View History affordance. Locked fields keep the original hide-when-empty rule.
+  const showField = (k: string, value: unknown): boolean =>
+    isContactFieldHistoryEnabled(k) || !isEmpty(value);
+
   const contactFields = [
-    { k: 'SBR_ID', label: lbl('SBR_ID'), value: String(c.SBR_ID), show: !isEmpty(c.SBR_ID), mono: true },
-    { k: 'CONTACT_NAME', label: lbl('CONTACT_NAME'), value: c.CONTACT_NAME, show: !isEmpty(c.CONTACT_NAME), mono: false },
-    { k: 'SOURCE_CODE', label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE, show: !isEmpty(c.SOURCE_CODE), mono: true },
+    { k: 'SBR_ID', label: lbl('SBR_ID'), value: String(c.SBR_ID), show: showField('SBR_ID', c.SBR_ID), mono: true },
+    { k: 'CONTACT_NAME', label: lbl('CONTACT_NAME'), value: nullableText(c.CONTACT_NAME), show: showField('CONTACT_NAME', c.CONTACT_NAME), mono: false },
+    { k: 'SOURCE_CODE', label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE, show: showField('SOURCE_CODE', c.SOURCE_CODE), mono: true },
   ].filter((f) => f.show);
 
   const channelFields = [
-    { k: 'PHONE', label: lbl('PHONE'), value: c.PHONE, show: !isEmpty(c.PHONE), mono: true },
-    { k: 'MOBILE', label: lbl('MOBILE'), value: c.MOBILE, show: !isEmpty(c.MOBILE), mono: true },
-    { k: 'EMAIL', label: lbl('EMAIL'), value: c.EMAIL, show: !isEmpty(c.EMAIL), mono: false },
-    { k: 'FAX', label: lbl('FAX'), value: c.FAX, show: !isEmpty(c.FAX), mono: true },
-    { k: 'PO_BOX', label: lbl('PO_BOX'), value: c.PO_BOX, show: !isEmpty(c.PO_BOX), mono: true },
-    { k: 'WEBSITE', label: lbl('WEBSITE'), value: c.WEBSITE, show: !isEmpty(c.WEBSITE), mono: false },
+    { k: 'PHONE', label: lbl('PHONE'), value: nullableText(c.PHONE), show: showField('PHONE', c.PHONE), mono: true },
+    { k: 'MOBILE', label: lbl('MOBILE'), value: nullableText(c.MOBILE), show: showField('MOBILE', c.MOBILE), mono: true },
+    { k: 'EMAIL', label: lbl('EMAIL'), value: nullableText(c.EMAIL), show: showField('EMAIL', c.EMAIL), mono: false },
+    { k: 'FAX', label: lbl('FAX'), value: nullableText(c.FAX), show: showField('FAX', c.FAX), mono: true },
+    { k: 'PO_BOX', label: lbl('PO_BOX'), value: nullableText(c.PO_BOX), show: showField('PO_BOX', c.PO_BOX), mono: true },
+    { k: 'WEBSITE', label: lbl('WEBSITE'), value: nullableText(c.WEBSITE), show: showField('WEBSITE', c.WEBSITE), mono: false },
   ].filter((f) => f.show);
 
   const metaFields = [
-    { k: 'PRIORITY', label: lbl('PRIORITY'), value: c.PRIORITY != null ? String(c.PRIORITY) : null, show: c.PRIORITY != null, mono: false },
-    { k: 'VALID_FROM', label: lbl('VALID_FROM'), value: formatDate(c.VALID_FROM), show: !isEmpty(c.VALID_FROM), mono: false },
-    { k: 'VALID_TO', label: lbl('VALID_TO'), value: formatDate(c.VALID_TO), show: !isEmpty(c.VALID_TO), mono: false },
+    { k: 'PRIORITY', label: lbl('PRIORITY'), value: c.PRIORITY != null ? String(c.PRIORITY) : nullableText(null), show: showField('PRIORITY', c.PRIORITY), mono: false },
+    { k: 'VALID_FROM', label: lbl('VALID_FROM'), value: formatDate(c.VALID_FROM), show: showField('VALID_FROM', c.VALID_FROM), mono: false },
+    { k: 'VALID_TO', label: lbl('VALID_TO'), value: formatDate(c.VALID_TO), show: showField('VALID_TO', c.VALID_TO), mono: false },
   ].filter((f) => f.show);
 
   return (
@@ -221,21 +227,21 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
         {contactFields.length > 0 && (
           <DetailCard title={t('contactDetail.sectionContact')}>
             {contactFields.map((f) => (
-              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
+              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory && isContactFieldHistoryEnabled(f.k)} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}
         {channelFields.length > 0 && (
           <DetailCard title={t('contactDetail.sectionChannels')}>
             {channelFields.map((f) => (
-              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
+              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory && isContactFieldHistoryEnabled(f.k)} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}
         {metaFields.length > 0 && (
           <DetailCard title={t('contactDetail.sectionMetadata')}>
             {metaFields.map((f) => (
-              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory} pendingCount={pendingFields[f.k]} />
+              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory && isContactFieldHistoryEnabled(f.k)} pendingCount={pendingFields[f.k]} />
             ))}
           </DetailCard>
         )}

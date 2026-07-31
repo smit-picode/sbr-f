@@ -303,16 +303,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
   {
-    accessorKey: 'EID_SOURCE',
-    header: t('columns.EID_SOURCE'),
-    cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
-  },
-  {
-    accessorKey: 'EID_ORIG',
-    header: t('columns.EID_ORIG'),
-    cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
-  },
-  {
     accessorKey: 'EID_ORIG_SOURCE',
     header: t('columns.EID_ORIG_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,

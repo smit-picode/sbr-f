@@ -76,6 +76,20 @@ export interface SbrEstablishment {
   PENDING_FIELDS?: Record<string, number>;
 }
 
+// Rows from GET /establishments/attachable — establishments not yet linked to any enterprise,
+// used by the Enterprise-edit "add an establishment" picker. A deliberate subset of the full
+// establishment record (only what the picker renders), so it is its own type, not SbrEstablishment.
+export interface AttachableEstablishment {
+  ID: number;
+  SBR_ID: number;
+  NAME_ENU: string | null;
+  NAME_ARA: string | null;
+  MOCI_CR_NUM: string | null;
+  EST_STATUS: string | null;
+  SECTOR_ID: string | null;
+  LEGAL_TYPE: string | null;
+}
+
 export interface EstablishmentFilters {
   page?: number;
   limit?: number;

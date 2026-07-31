@@ -1,7 +1,10 @@
 // Field Labels for error messages and form display
 export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
-  NAME_ENU: 'Name (English)',
-  NAME_ARA: 'Name (Arabic)',
+  NAME_ENU: 'Regulatory Name (English)',
+  NAME_ARA: 'Regulatory Name (Arabic)',
+  // Pseudo-field: the shared "English or Arabic name required" rule (see NAMES_FIELD in
+  // EditEstablishmentModal) — listed once in the error summary rather than per input.
+  NAMES: 'Regulatory Name',
   EST_STATUS: 'Est. Status',
   SECTOR_ID: 'Sector',
   MAIN_BRANCH_FLG: 'Main Branch Flag',
@@ -54,8 +57,6 @@ export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   QSTP_PARENT_REG_NUM: 100,
   FARM_NO: 100,
   EID: 200,
-  EID_SOURCE: 50,
-  EID_ORIG: 20,
   EID_ORIG_SOURCE: 50,
 };
 

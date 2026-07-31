@@ -14,11 +14,14 @@ import {
   ENTERPRISE_GROUP_UCI_TYPE_OPTIONS,
   ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS,
   ENTERPRISE_GROUP_HOLDING_OPTIONS,
+  ENTERPRISE_GROUP_FIELD_LABELS,
 } from '../constants';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import { Search, Orbit, X, Star } from 'lucide-react';
 import type { SbrEnterpriseGroup, EnterpriseGroupMember } from '@/types';
 
@@ -46,6 +49,7 @@ interface MemberRow {
   ENTERPRISE_ID:      number;
   NAME_ENU:           string | null;
   ESTABLISHMENT_COUNT: number;
+  STATUS:             string | null;
 }
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
@@ -57,6 +61,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     UCI_COUNTRY: '', UCI_IDENTIFIER: '', PRINCIPAL_ISIC_2DIGIT: '',
     HOLDING_COMPANY_FLG: '', STATUS: '', GROUP_START_DATE: '',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [memberSearch, setMemberSearch] = useState('');
   const [addedMembers, setAddedMembers] = useState<MemberRow[]>([]);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
@@ -74,7 +79,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   const currentRows: MemberRow[] = useMemo(() => {
     const kept = currentMembers
       .filter((m) => !removedIds.has(m.ENTERPRISE_ID))
-      .map((m) => ({ ENTERPRISE_ID: m.ENTERPRISE_ID, NAME_ENU: m.NAME_ENU, ESTABLISHMENT_COUNT: m.ESTABLISHMENT_COUNT ?? 0 }));
+      .map((m) => ({ ENTERPRISE_ID: m.ENTERPRISE_ID, NAME_ENU: m.NAME_ENU, ESTABLISHMENT_COUNT: m.ESTABLISHMENT_COUNT ?? 0, STATUS: m.STATUS }));
     return [...kept, ...addedMembers];
   }, [currentMembers, removedIds, addedMembers]);
 
@@ -101,6 +106,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
         STATUS:                group.STATUS ?? '',
         GROUP_START_DATE:      group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : '',
       });
+      setErrors({});
       setMemberSearch('');
       setAddedMembers([]);
       setRemovedIds(new Set());
@@ -109,11 +115,15 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     }
   }, [open, group, initialHeadId]);
 
-  const set = (field: keyof FormState, value: string) =>
+  const set = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    // NAMES is one rule across the EN/AR pair, so typing in either clears it.
+    const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
+    if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+  };
 
-  const addMember = (enterprise: { ENTERPRISE_ID: number; NAME_ENU: string | null }) => {
-    setAddedMembers((prev) => [...prev, { ENTERPRISE_ID: enterprise.ENTERPRISE_ID, NAME_ENU: enterprise.NAME_ENU, ESTABLISHMENT_COUNT: 0 }]);
+  const addMember = (enterprise: { ENTERPRISE_ID: number; NAME_ENU: string | null; STATUS: string | null }) => {
+    setAddedMembers((prev) => [...prev, { ENTERPRISE_ID: enterprise.ENTERPRISE_ID, NAME_ENU: enterprise.NAME_ENU, ESTABLISHMENT_COUNT: 0, STATUS: enterprise.STATUS }]);
     setMemberSearch('');
   };
 
@@ -146,6 +156,16 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   };
 
   const handleSubmit = () => {
+    const e: Record<string, string> = {};
+    if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
+      e.NAMES = t('editEnterpriseGroup.nameRequired', { defaultValue: 'Enter a group name in English or Arabic.' });
+    }
+    if (!form.UCI_NAME.trim()) {
+      e.UCI_NAME = t('editEnterpriseGroup.uciNameRequired', { defaultValue: 'UCI name is required.' });
+    }
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
+
     if (!hasChanges()) {
       toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' }));
       return;
@@ -194,11 +214,17 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     <>
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-xl max-h-[90vh] flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+        <DialogHeader className="px-6 pt-6 pb-3 border-b border-slate-100 shrink-0">
           <DialogTitle>
             {t('editEnterpriseGroup.title', { defaultValue: 'Edit Enterprise Group' })} — {group.ENTERPRISE_GROUP_ID}
           </DialogTitle>
         </DialogHeader>
+
+        {Object.keys(errors).length > 0 && (
+          <div className="px-6 pt-3 shrink-0">
+            <ErrorSummary errors={errors} fieldLabels={ENTERPRISE_GROUP_FIELD_LABELS} />
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-4">
@@ -206,19 +232,37 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}</Label>
-              <Input value={form.NAME_ENU} onChange={(e) => set('NAME_ENU', e.target.value)} maxLength={500} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+              <Input
+                value={form.NAME_ENU}
+                onChange={(e) => set('NAME_ENU', e.target.value)}
+                maxLength={500}
+                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+              />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameAr', { defaultValue: 'Group name (AR)' })}</Label>
-              <Input value={form.NAME_ARA} onChange={(e) => set('NAME_ARA', e.target.value)} maxLength={500} dir="rtl" className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+              <Input
+                value={form.NAME_ARA}
+                onChange={(e) => set('NAME_ARA', e.target.value)}
+                maxLength={500}
+                dir="rtl"
+                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+              />
             </div>
+            {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
           </div>
 
           {/* UCI fields */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}</Label>
-              <Input value={form.UCI_NAME} onChange={(e) => set('UCI_NAME', e.target.value)} maxLength={200} className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+              <Input
+                value={form.UCI_NAME}
+                onChange={(e) => set('UCI_NAME', e.target.value)}
+                maxLength={200}
+                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.UCI_NAME ? 'border-red-400' : ''}`}
+              />
+              {errors.UCI_NAME && <p className="text-xs text-red-500 mt-0.5">{errors.UCI_NAME}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}</Label>
@@ -327,6 +371,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
                         ENT-{m.ENTERPRISE_ID} · {m.ESTABLISHMENT_COUNT} establishment{m.ESTABLISHMENT_COUNT !== 1 ? 's' : ''}
                       </p>
                     </div>
+                    <StatusBadge status={m.STATUS} className="shrink-0 text-[10px]" />
                     <button type="button" onClick={() => removeMember(m.ENTERPRISE_ID)} className="text-slate-400 hover:text-red-600">
                       <X className="h-4 w-4" />
                     </button>
@@ -375,6 +420,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
                               <span className="block text-sm text-slate-800">{nullableText(e.NAME_ENU)}</span>
                               <span className="block text-xs text-slate-400">ENT-{e.ENTERPRISE_ID}</span>
                             </span>
+                            <StatusBadge status={e.STATUS} className="shrink-0 text-[10px]" />
                           </button>
                         </li>
                       ))}

@@ -7,7 +7,6 @@
     "admin": "Admin Panel",
     "sbrPanel": "SBR Panel",
     "sbrLiveFrame": "SBR Live Frame",
-    "establishments": "Establishments",
     "enterprises": "Enterprises",
     "administration": "Administration",
     "home": "Home",
@@ -233,8 +232,14 @@
     "fieldMany": "fields changed",
     "memberEstablishments": "Member Establishments",
     "cols": {
-      "request": "Request", "table": "Table", "rowId": "Row ID", "entity": "Entity",
-      "changes": "Changes", "requestedBy": "Requested By", "requested": "Requested", "status": "Status"
+      "request": "Request",
+      "table": "Table",
+      "rowId": "Row ID",
+      "entity": "Entity",
+      "changes": "Changes",
+      "requestedBy": "Requested By",
+      "requested": "Requested",
+      "status": "Status"
     },
     "sections": {
       "contact": "Contact",
@@ -396,7 +401,7 @@
   },
   "establishmentDetail": {
     "allEstablishments": "Establishments",
-    "viewIn360": "View in Enterprise 360",
+    "viewIn360": "View in Enterprise",
     "lifecycleEvents": "Lifecycle events",
     "composedOf": "Composed of (legal units)",
     "viewInLegalUnits": "View in Legal Units",
@@ -413,8 +418,8 @@
       "SBR_ID": "SBR ID",
       "SOURCE_CODE": "Source",
       "EID": "EID",
-      "NAME_ENU": "Name (EN)",
-      "NAME_ARA": "Name (AR)",
+      "NAME_ENU": "Regulatory Name (EN)",
+      "NAME_ARA": "Regulatory Name (AR)",
       "TRADE_NAME_ENU": "Trade Name",
       "NPC_NAME_ENU": "NPC Name",
       "EST_STATUS": "Status",
@@ -507,6 +512,8 @@
     "searchHelper": "Search the establishment register by SBR ID, name, or commercial registration number.",
     "searching": "Searching…",
     "noMatching": "No matching establishments.",
+    "addAtLeastOneEstablishment": "At least one Establishment is required.",
+    "mainReassignedOnRemoval": "Removing the main establishment promotes the next one in the list to main.",
     "updateError": "Failed to update enterprise. Please try again."
   },
   "columnsToggle": {
@@ -541,9 +548,9 @@
     "NAME": "NAME",
     "SBR_ID": "SBR ID",
     "SOURCE_CODE": "SOURCE CODE",
-    "NAME_ENU": "NAME ENU",
-    "NAME_ENU_SOURCE": "NAME ENU SOURCE",
-    "NAME_ARA_SOURCE": "NAME ARA SOURCE",
+    "NAME_ENU": "REGULATORY NAME ENU",
+    "NAME_ENU_SOURCE": "REGULATORY NAME ENU SOURCE",
+    "NAME_ARA_SOURCE": "REGULATORY NAME ARA SOURCE",
     "TRADE_NAME_ENU": "TRADE NAME ENU",
     "TRADE_NAME_ENU_SOURCE": "TRADE NAME ENU SOURCE",
     "TRADE_NAME_ARA": "TRADE NAME ARA",
@@ -580,8 +587,6 @@
     "QSTP_PARENT_REG_NUM": "QSTP PARENT REG NUM",
     "FARM_NO": "FARM NO",
     "EID": "EID",
-    "EID_SOURCE": "EID SOURCE",
-    "EID_ORIG": "EID ORIG",
     "EID_ORIG_SOURCE": "EID ORIG SOURCE",
     "CR_ISSUE_DATE": "CR ISSUE DATE",
     "CR_EXPIRY_DATE": "CR EXPIRY DATE",
@@ -625,7 +630,6 @@
     "OPERATION": "OPERATION",
     "COLUMN_NAME": "COLUMN NAME",
     "APPROVAL_DATE": "APPROVAL DATE",
-    "STATUS": "STATUS",
     "APPROVAL_REASON": "APPROVAL REASON"
   },
   "enterpriseGroups": {
@@ -776,10 +780,10 @@
     "fields": {
       "sbrId": "SBR ID",
       "recordId": "Record ID",
-      "nameEnu": "Name (English)",
-      "nameAra": "Name (Arabic)",
-      "nameEnuSource": "Name ENU Source",
-      "nameAraSource": "Name ARA Source",
+      "nameEnu": "Regulatory Name (English)",
+      "nameAra": "Regulatory Name (Arabic)",
+      "nameEnuSource": "Regulatory Name ENU Source",
+      "nameAraSource": "Regulatory Name ARA Source",
       "tradeNameEnu": "Trade Name (English)",
       "tradeNameAra": "Trade Name (Arabic)",
       "tradeNameEnuSource": "Trade Name ENU Source",
@@ -817,8 +821,6 @@
       "qstpParentRegNum": "QSTP Parent Reg Num",
       "farmNo": "Farm No",
       "eid": "EID",
-      "eidSource": "EID Source",
-      "eidOrig": "EID (Original / Unhashed)",
       "eidOrigSource": "EID Original Source",
       "crIssueDate": "CR Issue Date",
       "crExpiryDate": "CR Expiry Date",
@@ -977,6 +979,12 @@
       "selectAll": "Select All",
       "roleNamePlaceholder": "e.g., Analyst",
       "rolesLabel": "Roles",
+      "sortLabel": "Sort roles",
+      "sortDefault": "Default",
+      "sortNameAsc": "Name (A–Z)",
+      "sortNameDesc": "Name (Z–A)",
+      "sortNewest": "Newest first",
+      "sortOldest": "Oldest first",
       "scopedRole": "Scoped Role",
       "globalRole": "Global Role",
       "permissions": "permissions",
@@ -1013,6 +1021,8 @@
       "creating": "Creating...",
       "saving": "Saving...",
       "close": "Close",
+      "filterByRole": "Filter by role",
+      "allRoles": "All Roles",
       "colUser": "USER",
       "colRoles": "ROLES",
       "colStatus": "STATUS",
@@ -1150,5 +1160,10 @@
         "recordsThatWillBeUpdated": "Records that will be updated"
       }
     }
+  },
+  "validation": {
+    "errorCountOne": "1 validation error found",
+    "errorCountMany": "{{count}} validation errors found",
+    "correctBeforeSaving": "Please correct the errors below before saving"
   }
 }

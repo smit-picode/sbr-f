@@ -14,11 +14,13 @@ import {
   ENTERPRISE_GROUP_UCI_TYPE_OPTIONS,
   ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS,
   ENTERPRISE_GROUP_HOLDING_OPTIONS,
+  ENTERPRISE_GROUP_FIELD_LABELS,
 } from '../constants';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import { Search, Building2, X, Star } from 'lucide-react';
 import type { SbrEnterprise } from '@/types';
 
@@ -61,6 +63,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   const [memberSearch, setMemberSearch] = useState('');
   const [members, setMembers] = useState<SbrEnterprise[]>([]);
   const [headId, setHeadId] = useState<number | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [createGroup, { isLoading }] = useCreateEnterpriseGroupMutation();
 
@@ -77,6 +80,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   useEffect(() => {
     if (open) {
       setForm(EMPTY_FORM);
+      setErrors({});
       setMemberSearch('');
       setMembers([]);
       setHeadId(null);
@@ -84,8 +88,12 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     }
   }, [open]);
 
-  const set = (field: keyof FormState, value: string) =>
+  const set = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    // NAMES is one rule across the EN/AR pair, so typing in either clears it.
+    const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
+    if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+  };
 
   const addMember = (enterprise: SbrEnterprise) => {
     setMembers((prev) => [...prev, enterprise]);
@@ -98,18 +106,19 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   };
 
   const handleSubmit = () => {
+    // Collect every failure so the summary lists them all, rather than one toast at a time.
+    const e: Record<string, string> = {};
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
-      toast.error(t('createEnterpriseGroup.nameRequired', { defaultValue: 'At least one group name (EN or AR) is required.' }));
-      return;
+      e.NAMES = t('createEnterpriseGroup.nameRequired', { defaultValue: 'At least one group name (EN or AR) is required.' });
     }
     if (members.length === 0) {
-      toast.error(t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' }));
-      return;
+      e.MEMBERS = t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' });
     }
     if (headId == null || !members.some((m) => m.ENTERPRISE_ID === headId)) {
-      toast.error(t('editEnterpriseGroup.headRequired', { defaultValue: 'Mark one member enterprise as the group head.' }));
-      return;
+      e.GROUP_HEAD = t('editEnterpriseGroup.headRequired', { defaultValue: 'Mark one member enterprise as the group head.' });
     }
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
     setShowCommentDialog(true);
   };
 
@@ -141,12 +150,18 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   return (
     <>
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-xl max-h-[90vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-3 border-b border-slate-100 shrink-0">
           <DialogTitle>{t('createEnterpriseGroup.title', { defaultValue: 'Create Enterprise Group' })}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        {Object.keys(errors).length > 0 && (
+          <div className="px-6 pt-3 shrink-0">
+            <ErrorSummary errors={errors} fieldLabels={ENTERPRISE_GROUP_FIELD_LABELS} />
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* Names */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -156,7 +171,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 onChange={(e) => set('NAME_ENU', e.target.value)}
                 maxLength={500}
                 placeholder={t('createEnterpriseGroup.englishNamePlaceholder', { defaultValue: 'English name' })}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
               />
             </div>
             <div className="space-y-1.5">
@@ -167,9 +182,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 maxLength={500}
                 dir="rtl"
                 placeholder="الاسم بالعربية"
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
               />
             </div>
+            {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
           </div>
 
           {/* UCI fields — no section header, just a subtle separator */}
@@ -359,7 +375,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 py-4 border-t border-slate-100 shrink-0">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel', { defaultValue: 'Cancel' })}</Button>
           <Button
             onClick={handleSubmit}

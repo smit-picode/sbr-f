@@ -316,12 +316,12 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const identity = [
     F('SBR_ID', fl('SBR_ID', 'SBR ID'), { mono: true }),
     F('SOURCE_CODE', fl('SOURCE_CODE', 'Source'), { mono: true }),
-    F('EID', fl('EID', 'EID'), { source: 'EID_SOURCE', mono: true }),
+    F('EID', fl('EID', 'EID'), { mono: true }),
   ].filter((f) => f.show);
 
   const names = [
-    F('NAME_ENU', fl('NAME_ENU', 'Name (EN)'), { source: 'NAME_ENU_SOURCE' }),
-    F('NAME_ARA', fl('NAME_ARA', 'Name (AR)'), { source: 'NAME_ARA_SOURCE' }),
+    F('NAME_ENU', fl('NAME_ENU', 'Regulatory Name (EN)'), { source: 'NAME_ENU_SOURCE' }),
+    F('NAME_ARA', fl('NAME_ARA', 'Regulatory Name (AR)'), { source: 'NAME_ARA_SOURCE' }),
     F('TRADE_NAME_ENU', fl('TRADE_NAME_ENU', 'Trade Name'), { source: 'TRADE_NAME_ENU_SOURCE' }),
     F('NPC_NAME_ENU', fl('NPC_NAME_ENU', 'NPC Name'), { source: 'NPC_NAME_ENU_SOURCE' }),
   ].filter((f) => f.show);
@@ -393,7 +393,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 <HeaderNameField
                   recordId={sbrId}
                   fieldKey="NAME_ENU"
-                  label={fl('NAME_ENU', 'Name (EN)')}
+                  label={fl('NAME_ENU', 'Regulatory Name (EN)')}
                   canViewHistory={canViewHistory}
                   pendingCount={pendingFields.NAME_ENU}
                 >
@@ -406,7 +406,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 <HeaderNameField
                   recordId={sbrId}
                   fieldKey="NAME_ARA"
-                  label={fl('NAME_ARA', 'Name (AR)')}
+                  label={fl('NAME_ARA', 'Regulatory Name (AR)')}
                   canViewHistory={canViewHistory}
                   pendingCount={pendingFields.NAME_ARA}
                 >

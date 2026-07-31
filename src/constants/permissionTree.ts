@@ -23,10 +23,11 @@ export const PERMISSION_TREE: PermissionNode[] = [
     key: 'enterprises',
     label: 'Enterprises',
     children: [
-      { key: 'enterprises.view',        label: 'View Enterprises' },
-      { key: 'enterprises.view_detail', label: 'View Enterprise Detail' },
-      { key: 'enterprises.edit',        label: 'Edit Enterprises' },
-      { key: 'enterprises.search',      label: 'Search & Filter' },
+      { key: 'enterprises.view',         label: 'View Enterprises' },
+      { key: 'enterprises.view_detail',  label: 'View Enterprise Detail' },
+      { key: 'enterprises.view_history', label: 'View Update History' },
+      { key: 'enterprises.edit',         label: 'Edit Enterprises' },
+      { key: 'enterprises.search',       label: 'Search & Filter' },
     ],
   },
   {

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Pencil, ShieldCheck, Info, Check } from 'lucide-react';
 import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { SearchInput } from '@/components/common/SearchInput';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import {
   adminApi,
@@ -17,7 +18,7 @@ import {
   useGetRolePermissionsQuery,
   useAssignRolePermissionsMutation,
 } from '../api/adminApi';
-import { ADMIN_DEFAULT_FILTERS } from '../constants';
+import { ADMIN_DEFAULT_FILTERS, ROLES_SORT_OPTIONS, ROLES_SORT_DEFAULT } from '../constants';
 import type { SbrRole, SbrPermission } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -265,6 +266,7 @@ export function RolesTab({
   const [editTarget, setEditTarget]       = useState<SbrRole | null>(null);
   const [form, setForm]                   = useState({ ROLE_NAME: '' });
   const [permSearch, setPermSearch]       = useState('');
+  const [roleSort, setRoleSort]           = useState<string>(ROLES_SORT_DEFAULT);
 
   // ── permission gate ──
   const dispatch    = useAppDispatch();
@@ -281,8 +283,16 @@ export function RolesTab({
   const canSearchPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.search');
 
   // ── queries ──
+  // The chosen option carries sortBy/sortOrder; the Default option carries neither, so
+  // cleanParams drops them and the API falls back to its own ID ASC ordering.
+  const activeRoleSort = ROLES_SORT_OPTIONS.find((o) => o.value === roleSort);
   const { data: rolesData, isLoading: isRolesLoading } = useGetRolesListQuery(
-    cleanParams({ ...ADMIN_DEFAULT_FILTERS, limit: 100 }),
+    cleanParams({
+      ...ADMIN_DEFAULT_FILTERS,
+      limit: 100,
+      sortBy: activeRoleSort?.sortBy,
+      sortOrder: activeRoleSort?.sortOrder,
+    }),
     { refetchOnMountOrArgChange: true },
   );
   const { data: permData, isLoading: isPermsLoading } = useGetPermissionsListQuery(
@@ -454,8 +464,25 @@ export function RolesTab({
 
         {/* ══ Roles list card ══ */}
         <div className="rounded-xl border border-slate-200 bg-white p-2">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400 px-2 py-1.5">
-            {t('admin.roles.rolesLabel', { defaultValue: 'Roles' })}
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {t('admin.roles.rolesLabel', { defaultValue: 'Roles' })}
+            </span>
+            <Select value={roleSort} onValueChange={setRoleSort}>
+              <SelectTrigger
+                className="h-7 w-[124px] text-[11px] shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                aria-label={t('admin.roles.sortLabel', { defaultValue: 'Sort roles' })}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLES_SORT_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-[11px]">
+                    {t(o.i18nKey, { defaultValue: o.label })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {roles.map((role) => {
             const isSelected = selectedRole?.ID === role.ID;

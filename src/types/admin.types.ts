@@ -62,10 +62,20 @@ export interface AdminRoleFilters {
   page?: number;
   limit?: number;
   search?: string;
+  // Server-side sort — sortBy must be one of ROLES_SORTABLE_COLUMNS (matches the
+  // backend allowlist in src/utils/enums.ts)
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface AdminUserFilters {
   page?: number;
   limit?: number;
   search?: string;
+  // Narrows the list to users holding this role (SBR_ROLE.ID)
+  roleId?: number;
+  // Server-side sort — sortBy must be one of USERS_SORTABLE_COLUMNS (matches the
+  // backend allowlist in src/utils/enums.ts)
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

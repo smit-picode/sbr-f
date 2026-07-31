@@ -7,7 +7,6 @@
     "admin": "لوحة الإدارة",
     "sbrPanel": "لوحة SBR",
     "sbrLiveFrame": "الإطار الحي للسجل",
-    "establishments": "المنشآت",
     "enterprises": "المؤسسات",
     "administration": "الإدارة",
     "home": "الرئيسية",
@@ -233,8 +232,14 @@
     "fieldMany": "حقول تم تغييرها",
     "memberEstablishments": "المنشآت الأعضاء",
     "cols": {
-      "request": "الطلب", "table": "الجدول", "rowId": "معرّف السجل", "entity": "الكيان",
-      "changes": "التغييرات", "requestedBy": "مُقدَّم بواسطة", "requested": "تاريخ الطلب", "status": "الحالة"
+      "request": "الطلب",
+      "table": "الجدول",
+      "rowId": "معرّف السجل",
+      "entity": "الكيان",
+      "changes": "التغييرات",
+      "requestedBy": "مُقدَّم بواسطة",
+      "requested": "تاريخ الطلب",
+      "status": "الحالة"
     },
     "sections": {
       "contact": "جهة الاتصال",
@@ -396,7 +401,7 @@
   },
   "establishmentDetail": {
     "allEstablishments": "المنشآت",
-    "viewIn360": "عرض في المؤسسة 360",
+    "viewIn360": "عرض في المؤسسة",
     "lifecycleEvents": "أحداث دورة الحياة",
     "composedOf": "مكوّنة من (وحدات قانونية)",
     "viewInLegalUnits": "عرض في الوحدات القانونية",
@@ -413,8 +418,8 @@
       "SBR_ID": "رقم SBR",
       "SOURCE_CODE": "المصدر",
       "EID": "رقم الهوية (EID)",
-      "NAME_ENU": "الاسم (إنجليزي)",
-      "NAME_ARA": "الاسم (عربي)",
+      "NAME_ENU": "الاسم التنظيمي (إنجليزي)",
+      "NAME_ARA": "الاسم التنظيمي (عربي)",
       "TRADE_NAME_ENU": "الاسم التجاري",
       "NPC_NAME_ENU": "اسم NPC",
       "EST_STATUS": "الحالة",
@@ -507,6 +512,8 @@
     "searchHelper": "ابحث في سجل المنشآت برقم SBR أو الاسم أو رقم السجل التجاري.",
     "searching": "جارٍ البحث…",
     "noMatching": "لا توجد منشآت مطابقة.",
+    "addAtLeastOneEstablishment": "مطلوب منشأة واحدة على الأقل.",
+    "mainReassignedOnRemoval": "إزالة المنشأة الرئيسية تجعل المنشأة التالية في القائمة رئيسية.",
     "updateError": "فشل تحديث المؤسسة. الرجاء المحاولة مرة أخرى."
   },
   "columnsToggle": {
@@ -541,9 +548,9 @@
     "NAME": "الاسم",
     "SBR_ID": "رقم SBR",
     "SOURCE_CODE": "رمز المصدر",
-    "NAME_ENU": "الاسم الإنجليزي",
-    "NAME_ENU_SOURCE": "مصدر الاسم الإنجليزي",
-    "NAME_ARA_SOURCE": "مصدر الاسم العربي",
+    "NAME_ENU": "الاسم التنظيمي الإنجليزي",
+    "NAME_ENU_SOURCE": "مصدر الاسم التنظيمي الإنجليزي",
+    "NAME_ARA_SOURCE": "مصدر الاسم التنظيمي العربي",
     "TRADE_NAME_ENU": "الاسم التجاري الإنجليزي",
     "TRADE_NAME_ENU_SOURCE": "مصدر الاسم التجاري الإنجليزي",
     "TRADE_NAME_ARA": "الاسم التجاري العربي",
@@ -580,8 +587,6 @@
     "QSTP_PARENT_REG_NUM": "رقم الشركة الأم QSTP",
     "FARM_NO": "رقم المزرعة",
     "EID": "رقم الهوية",
-    "EID_SOURCE": "مصدر الهوية",
-    "EID_ORIG": "الهوية الأصلية",
     "EID_ORIG_SOURCE": "مصدر الهوية الأصلية",
     "CR_ISSUE_DATE": "تاريخ إصدار CR",
     "CR_EXPIRY_DATE": "تاريخ انتهاء CR",
@@ -625,7 +630,6 @@
     "OPERATION": "العملية",
     "COLUMN_NAME": "اسم العمود",
     "APPROVAL_DATE": "تاريخ الموافقة",
-    "STATUS": "الحالة",
     "APPROVAL_REASON": "سبب الموافقة"
   },
   "enterpriseGroups": {
@@ -776,10 +780,10 @@
     "fields": {
       "sbrId": "رقم SBR",
       "recordId": "رقم السجل",
-      "nameEnu": "الاسم (إنجليزي)",
-      "nameAra": "الاسم (عربي)",
-      "nameEnuSource": "مصدر الاسم الإنجليزي",
-      "nameAraSource": "مصدر الاسم العربي",
+      "nameEnu": "الاسم التنظيمي (إنجليزي)",
+      "nameAra": "الاسم التنظيمي (عربي)",
+      "nameEnuSource": "مصدر الاسم التنظيمي الإنجليزي",
+      "nameAraSource": "مصدر الاسم التنظيمي العربي",
       "tradeNameEnu": "الاسم التجاري (إنجليزي)",
       "tradeNameAra": "الاسم التجاري (عربي)",
       "tradeNameEnuSource": "مصدر الاسم التجاري الإنجليزي",
@@ -817,8 +821,6 @@
       "qstpParentRegNum": "رقم تسجيل الشركة الأم QSTP",
       "farmNo": "رقم المزرعة",
       "eid": "رقم الهوية",
-      "eidSource": "مصدر رقم الهوية",
-      "eidOrig": "رقم الهوية (الأصلي)",
       "eidOrigSource": "مصدر رقم الهوية الأصلي",
       "crIssueDate": "تاريخ إصدار CR",
       "crExpiryDate": "تاريخ انتهاء CR",
@@ -977,6 +979,12 @@
       "selectAll": "تحديد الكل",
       "roleNamePlaceholder": "مثال: محلل",
       "rolesLabel": "الأدوار",
+      "sortLabel": "ترتيب الأدوار",
+      "sortDefault": "الافتراضي",
+      "sortNameAsc": "الاسم (أ–ي)",
+      "sortNameDesc": "الاسم (ي–أ)",
+      "sortNewest": "الأحدث أولاً",
+      "sortOldest": "الأقدم أولاً",
       "scopedRole": "دور محدود النطاق",
       "globalRole": "دور عام",
       "permissions": "صلاحيات",
@@ -1013,6 +1021,8 @@
       "creating": "جاري الإنشاء...",
       "saving": "جاري الحفظ...",
       "close": "إغلاق",
+      "filterByRole": "تصفية حسب الدور",
+      "allRoles": "جميع الأدوار",
       "colUser": "المستخدم",
       "colRoles": "الأدوار",
       "colStatus": "الحالة",
@@ -1150,5 +1160,10 @@
         "recordsThatWillBeUpdated": "السجلات التي سيتم تحديثها"
       }
     }
+  },
+  "validation": {
+    "errorCountOne": "تم العثور على خطأ تحقق واحد",
+    "errorCountMany": "تم العثور على {{count}} أخطاء تحقق",
+    "correctBeforeSaving": "يرجى تصحيح الأخطاء أدناه قبل الحفظ"
   }
 }

@@ -1,3 +1,14 @@
+// Field labels for the create/edit modals' validation summary. NAMES is the shared
+// "group name in EN or AR" rule that spans both name inputs.
+export const ENTERPRISE_GROUP_FIELD_LABELS: Record<string, string> = {
+  NAMES: 'Group Name',
+  NAME_ENU: 'Group Name (EN)',
+  NAME_ARA: 'Group Name (AR)',
+  UCI_NAME: 'UCI Name',
+  MEMBERS: 'Member Enterprises',
+  GROUP_HEAD: 'Group Head',
+};
+
 export const ENTERPRISE_GROUP_DEFAULT_FILTERS = {
   page:   1,
   limit:  10,

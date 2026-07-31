@@ -89,5 +89,15 @@ export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
   tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits'],
+  // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
+  // multi-user portal: another user's edit turns a record PENDING in the DB without this
+  // session ever knowing, so cached list data goes stale the moment someone else saves.
+  // These three defaults re-fetch whenever the user could be looking at stale rows —
+  // remounting a page (sidebar navigation), returning to the tab, or coming back online.
+  // Cached data still paints immediately; the refetch runs in the background and swaps in,
+  // so navigation stays instant and no skeleton flashes.
+  refetchOnMountOrArgChange: true,
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
   endpoints: () => ({}),
 });

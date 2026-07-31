@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { Pencil, Eye, EyeOff, RefreshCw, Search } from 'lucide-react';
+import { DataTable } from '@/components/table/DataTable';
+import { Eye, EyeOff, RefreshCw, Search } from 'lucide-react';
 import {
   useGetUsersListQuery,
   useCreateUserMutation,
@@ -15,11 +16,11 @@ import {
   useGetRolesListQuery,
   useGetRegulatorScopesQuery,
 } from '../api/adminApi';
-import { ADMIN_MAX_LENGTHS, ADMIN_DEFAULT_FILTERS, NO_SCOPE_VALUE } from '../constants';
-import type { SbrUser, SbrRole, UserRoleInput } from '@/types';
+import { getUsersColumns, userRoleNames } from './UsersColumns';
+import { ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS, NO_SCOPE_VALUE, ALL_ROLES_VALUE } from '../constants';
+import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { formatDate } from '@/utils/format';
 import { useDebounce } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 
@@ -31,33 +32,10 @@ function getApiError(err: unknown, fallback: string): string {
   return fallback;
 }
 
-// distinct role names a user holds (for chips + super-admin guard)
-function userRoleNames(user: SbrUser): string[] {
-  const names = (user.roleAssignments ?? []).map((a) => a.role?.ROLE_NAME ?? '').filter(Boolean);
-  return [...new Set(names)];
-}
-
-const ROLE_BADGE_PALETTE = [
-  'bg-[#A71D3A] text-white',   // maroon
-  'bg-slate-600 text-white',   // charcoal
-  'bg-emerald-700 text-white', // green
-  'bg-[#6B4FA0] text-white',   // purple
-  'bg-orange-600 text-white',  // orange
-  'bg-rose-700 text-white',    // rose/pink
-];
-
-function getRoleBadgeClass(roleName: string): string {
-  if (roleName === 'SUPER_ADMIN') return 'bg-slate-800 text-white';
-  const hash = roleName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return ROLE_BADGE_PALETTE[hash % ROLE_BADGE_PALETTE.length];
-}
-
 // Display-only: "SYS_ADMIN" → "Sys Admin". Does not affect the stored value.
 function toTitleCaseRole(roleName: string): string {
   return roleName.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
-
-const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes('SUPER_ADMIN');
 
 const PASSWORD_RULES = [
   { key: 'minLength',  label: 'At least 6 characters',         test: (p: string) => p.length >= 6 },
@@ -82,7 +60,7 @@ export function UsersTab({
   onRegisterCreate?: (fn: () => void) => void;
 }) {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState({ ...ADMIN_DEFAULT_FILTERS });
+  const [filters, setFilters] = useState<AdminUserFilters>({ ...USERS_DEFAULT_FILTERS });
   const [editTarget, setEditTarget] = useState<SbrUser | null>(null);
   const [viewTarget, setViewTarget] = useState<SbrUser | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -116,14 +94,19 @@ export function UsersTab({
   // Debounce only the text search — typing no longer fires an API call per keystroke
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const { data, isLoading } = useGetUsersListQuery(
+  const { data, isLoading, isError, refetch } = useGetUsersListQuery(
     cleanParams({ ...filters, search: debouncedSearch }),
     { skip: isCreateOpen }
   );
-  // Roles + scopes are only needed for the create/edit dialogs — skip if user can't edit
+
+  const handleFilterChange = useCallback((partial: Partial<AdminUserFilters>) => {
+    setFilters((prev) => ({ ...prev, ...partial }));
+  }, []);
+  // Roles feed the create/edit dialogs and the Role filter dropdown, so fetch them for
+  // anyone who can edit OR search — not just editors.
   const { data: rolesData } = useGetRolesListQuery(
     { page: 1, limit: 100 },
-    { refetchOnMountOrArgChange: true, skip: !canEdit }
+    { refetchOnMountOrArgChange: true, skip: !canEdit && !canSearch }
   );
   const { data: scopesData } = useGetRegulatorScopesQuery(undefined, { skip: !canEdit });
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
@@ -179,7 +162,7 @@ export function UsersTab({
       toast.success(t('admin.users.createdSuccess', { defaultValue: 'User created successfully!' }));
       resetDialogState();
       setIsCreateOpen(false);
-      setFilters({ ...ADMIN_DEFAULT_FILTERS });
+      setFilters({ ...USERS_DEFAULT_FILTERS });
     } catch (err) {
       toast.error(getApiError(err, t('admin.users.createFailed', { defaultValue: 'Failed to create user. Please try again.' })));
     }
@@ -219,8 +202,16 @@ export function UsersTab({
   };
 
   const users = data?.data ?? [];
-  // Hide the Actions column entirely when the user can neither view details nor edit
-  const showActions = canViewDetail || canEdit;
+  const total = data?.total ?? 0;
+
+  const columns = getUsersColumns({
+    t,
+    canViewDetail,
+    canEdit,
+    isUpdating,
+    onView: setViewTarget,
+    onEdit: openEdit,
+  });
 
   const roleRow = (role: SbrRole) => {
     const checked = selectedRoles === role.ID;
@@ -367,101 +358,72 @@ export function UsersTab({
               <Input
                 placeholder={t('admin.users.searchPlaceholder')}
                 value={filters.search}
-                onChange={(e) => setFilters(p => ({ ...p, search: e.target.value, page: 1 }))}
+                onChange={(e) => handleFilterChange({ search: e.target.value, page: 1 })}
                 className="pl-9 w-80 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
                 autoComplete="off"
               />
             </div>
+
+            <Select
+              value={filters.roleId ? String(filters.roleId) : ALL_ROLES_VALUE}
+              onValueChange={(v) =>
+                handleFilterChange({ roleId: v === ALL_ROLES_VALUE ? undefined : Number(v), page: 1 })
+              }
+            >
+              <SelectTrigger
+                className="w-52 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                aria-label={t('admin.users.filterByRole', { defaultValue: 'Filter by role' })}
+              >
+                <SelectValue placeholder={t('admin.users.allRoles', { defaultValue: 'All Roles' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_ROLES_VALUE}>{t('admin.users.allRoles', { defaultValue: 'All Roles' })}</SelectItem>
+                {roles.map((role) => (
+                  <SelectItem key={role.ID} value={String(role.ID)}>
+                    {toTitleCaseRole(role.ROLE_NAME)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <FilterChips
-            chips={filters.search ? [{
-              key: 'search',
-              label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
-              onRemove: () => setFilters(p => ({ ...p, search: '', page: 1 })),
-            } as FilterChip] : []}
-            onClearAll={() => setFilters(p => ({ ...p, search: '', page: 1 }))}
+            chips={[
+              ...(filters.search ? [{
+                key: 'search',
+                label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+                onRemove: () => handleFilterChange({ search: '', page: 1 }),
+              } as FilterChip] : []),
+              ...(filters.roleId ? [{
+                key: 'roleId',
+                label: `${t('admin.users.colRoles')}: ${
+                  toTitleCaseRole(roles.find((r) => r.ID === filters.roleId)?.ROLE_NAME ?? String(filters.roleId))
+                }`,
+                onRemove: () => handleFilterChange({ roleId: undefined, page: 1 }),
+              } as FilterChip] : []),
+            ]}
+            onClearAll={() => handleFilterChange({ search: '', roleId: undefined, page: 1 })}
           />
         </>
       )}
 
       {/* Card 2 — Table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colUser')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colRoles')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colStatus')}</th>
-              <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colCreatedAt')}</th>
-              {showActions && (
-                <th className="h-10 px-4 text-start align-middle text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{t('admin.users.colActions')}</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={showActions ? 5 : 4} className="px-6 py-8 text-center text-slate-500">{t('admin.users.loading')}</td></tr>
-            ) : users.length === 0 ? (
-              <tr><td colSpan={showActions ? 5 : 4} className="px-6 py-8 text-center text-slate-500">{t('admin.users.noUsers')}</td></tr>
-            ) : (
-              users.map((user) => (
-                <tr key={user.ID} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-4 text-start align-middle">
-                    <p className="text-sm font-semibold text-slate-900">{user.NAME}</p>
-                    <p className="text-xs text-slate-400">{user.EMAIL}</p>
-                  </td>
-                  <td className="px-4 py-4 text-start align-middle">
-                    <div className="flex flex-wrap gap-1">
-                      {userRoleNames(user).length === 0 ? (
-                        <span className="text-slate-400">—</span>
-                      ) : (
-                        userRoleNames(user).map((name) => (
-                          <span key={name} className={`rounded px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${getRoleBadgeClass(name)}`}>
-                            {name}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-start align-middle">
-                    <span className={`rounded px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap uppercase ${
-                      user.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {user.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-start align-middle">
-                    <span className="text-sm text-slate-700">{formatDate(user.CREATED_AT)}</span>
-                  </td>
-                  {showActions && (
-                    <td className="px-4 py-4 align-middle flex gap-2 justify-start items-center">
-                      {canViewDetail && (
-                        <Button size="sm" variant="outline" onClick={() => setViewTarget(user)} title={t('admin.users.viewUserTitle')} className="h-8 w-8 p-0">
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                      {canEdit && (
-                        <Button
-                          size="sm" variant="outline"
-                          onClick={() => openEdit(user)}
-                          disabled={isUpdating || isSuperAdminUser(user)}
-                          title={isSuperAdminUser(user) ? t('admin.users.superAdminCannotEdit') : t('admin.users.editUserTitle')}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={users}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+        page={filters.page ?? 1}
+        limit={filters.limit ?? USERS_DEFAULT_FILTERS.limit}
+        total={total}
+        onPageChange={(p) => handleFilterChange({ page: p })}
+        onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
+        onSortChange={(field, order) =>
+          handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })
+        }
+        sortableColumns={USERS_SORTABLE_COLUMNS}
+      />
 
     {/* Create (Onboard user) Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={(o) => { if (!o) { setIsCreateOpen(false); resetDialogState(); } }}>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUpdateAddressMutation } from '../api/addressesApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrAddress } from '@/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -41,38 +42,6 @@ function FieldErr({ msg }: { msg?: string }) {
   return msg ? <p className="text-xs text-red-500 mt-0.5">{msg}</p> : null;
 }
 
-function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<string, string>; onErrorClick: (field: string) => void; fieldLabels: Record<string, string> }) {
-  const errorCount = Object.keys(errors).length;
-
-  return (
-    <div className="sticky top-0 z-20 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <div className="flex items-start gap-2 mb-2">
-        <div className="h-5 w-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <span className="text-xs font-bold text-red-700">!</span>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-red-900">
-            {errorCount} validation {errorCount === 1 ? 'error' : 'errors'} found
-          </p>
-          <p className="text-xs text-red-700 mt-0.5">Please correct the errors below before saving</p>
-        </div>
-      </div>
-      <ul className="space-y-1.5 ml-7">
-        {Object.entries(errors).map(([field, message]) => (
-          <li key={field}>
-            <button
-              type="button"
-              onClick={() => onErrorClick(field)}
-              className="text-xs text-red-700 hover:text-red-900 hover:underline text-left font-medium transition-colors"
-            >
-              • {fieldLabels[field] || field}: {message}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
   const { t } = useTranslation();
@@ -119,7 +88,8 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
     const e: Record<string, string> = {};
     const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
-    if (str(form.MUNICIPALITY_ID).length > 20) e.MUNICIPALITY_ID = 'Max 20 characters allowed';
+    if (!str(form.MUNICIPALITY_ID).trim())     e.MUNICIPALITY_ID = 'Municipality ID is required';
+    else if (str(form.MUNICIPALITY_ID).length > 20) e.MUNICIPALITY_ID = 'Max 20 characters allowed';
     if (str(form.ZONE).length > 20)            e.ZONE            = 'Max 20 characters allowed';
     if (str(form.STREET).length > 200)         e.STREET          = 'Max 200 characters allowed';
     if (str(form.BUILDING_NO).length > 20)     e.BUILDING_NO     = 'Max 20 characters allowed';

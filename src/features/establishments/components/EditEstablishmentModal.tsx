@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUpdateEstablishmentMutation } from '../api/establishmentsApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -52,40 +53,13 @@ function SectionDivider({ title }: { title: string }) {
   );
 }
 
-function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<string, string>; onErrorClick: (field: string) => void; fieldLabels: Record<string, string> }) {
-  const errorCount = Object.keys(errors).length;
-
-  return (
-    <div className="sticky top-0 z-20 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <div className="flex items-start gap-2 mb-2">
-        <div className="h-5 w-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <span className="text-xs font-bold text-red-700">!</span>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-red-900">
-            {errorCount} validation {errorCount === 1 ? 'error' : 'errors'} found
-          </p>
-          <p className="text-xs text-red-700 mt-0.5">Please correct the errors below before saving</p>
-        </div>
-      </div>
-      <ul className="space-y-1.5 ml-7">
-        {Object.entries(errors).map(([field, message]) => (
-          <li key={field}>
-            <button
-              type="button"
-              onClick={() => onErrorClick(field)}
-              className="text-xs text-red-700 hover:text-red-900 hover:underline text-left font-medium transition-colors"
-            >
-              • {fieldLabels[field] || field}: {message}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 type FormState = Omit<Partial<SbrEstablishment>, 'ID' | 'SBR_ID' | 'VALID_FROM' | 'VALID_TO'>;
+
+// Pseudo-field key for the "NAME_ENU or NAME_ARA is required" rule — one error covering two
+// inputs. Not a real column, so it is never part of the saved payload.
+const NAMES_FIELD = 'NAMES';
+const NAMES_PAIR = ['NAME_ENU', 'NAME_ARA'];
 
 export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const { t } = useTranslation();
@@ -143,8 +117,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         QSTP_PARENT_REG_NUM:        frame.QSTP_PARENT_REG_NUM ?? '',
         FARM_NO:                    frame.FARM_NO ?? '',
         EID:                        frame.EID ?? '',
-        EID_SOURCE:                 frame.EID_SOURCE ?? '',
-        EID_ORIG:                   frame.EID_ORIG ?? '',
         EID_ORIG_SOURCE:            frame.EID_ORIG_SOURCE ?? '',
         // Dates
         CR_ISSUE_DATE:              frame.CR_ISSUE_DATE ?? '',
@@ -166,13 +138,29 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const set = (field: keyof FormState, value: string | number | null) => {
     if (!ed(field as string)) return; // locked field — ignore edits
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field as string]) setErrors((e) => { const n = { ...e }; delete n[field as string]; return n; });
+    // Typing in either name input satisfies the shared NAMES rule, so clear that key too.
+    const clearNames = NAMES_PAIR.includes(field as string) && !!errors[NAMES_FIELD];
+    if (errors[field as string] || clearNames) {
+      setErrors((e) => {
+        const n = { ...e };
+        delete n[field as string];
+        if (clearNames) delete n[NAMES_FIELD];
+        return n;
+      });
+    }
   };
 
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+
+    // At least one of Name (English) / Name (Arabic) is required. It's one rule spanning two
+    // inputs, so it's stored under the single NAMES_FIELD key (not once per input) — that way it
+    // counts as one error, lists once in the summary, and renders once below the pair.
+    if (!str(form.NAME_ENU).trim() && !str(form.NAME_ARA).trim()) {
+      e[NAMES_FIELD] = 'Enter a name in English or Arabic';
+    }
 
     // String length validations
     Object.entries(ESTABLISHMENTS_MAX_LENGTHS).forEach(([field, max]) => {
@@ -239,7 +227,9 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     );
   };
 
-  const err = (f: string) => errors[f];
+  // Both name inputs resolve to the shared NAMES error so each still gets the invalid border,
+  // even though the message itself is rendered once below the pair.
+  const err = (f: string) => errors[f] ?? (NAMES_PAIR.includes(f) ? errors[NAMES_FIELD] : undefined);
   const inp = (f: string) => {
     if (!ed(f)) return 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none';
     return err(f)
@@ -304,16 +294,19 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
           {/* Names */}
           <SectionDivider title={t('editEstablishment.sections.names')} />
-          <div className="space-y-1" data-field="NAME_ENU">
+          {/* NAME_ENU / NAME_ARA are one "either/or" rule: both inputs turn red but the message
+              prints once across the pair, so it isn't duplicated per column. */}
+          <div className="space-y-1" data-field={NAMES_FIELD}>
             <Label>{t('editEstablishment.fields.nameEnu')}</Label>
             <Input className={inp('NAME_ENU')} value={sel('NAME_ENU')} onChange={(e) => set('NAME_ENU', e.target.value)} />
-            <FieldErr msg={err('NAME_ENU')} />
           </div>
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.nameAra')}</Label>
             <Input dir="rtl" className={inp('NAME_ARA')} value={sel('NAME_ARA')} onChange={(e) => set('NAME_ARA', e.target.value)} />
-            <FieldErr msg={err('NAME_ARA')} />
           </div>
+          {errors[NAMES_FIELD] && (
+            <p className="col-span-2 -mt-2 text-xs text-red-500">{errors[NAMES_FIELD]}</p>
+          )}
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.nameEnuSource')}</Label>
             <Input className={inp('NAME_ENU_SOURCE')} value={sel('NAME_ENU_SOURCE')} onChange={(e) => set('NAME_ENU_SOURCE', e.target.value)} />
@@ -552,16 +545,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Label>{t('editEstablishment.fields.eid')}</Label>
             <Input className={inp('EID')} value={sel('EID')} onChange={(e) => set('EID', e.target.value)} />
             <FieldErr msg={err('EID')} />
-          </div>
-          <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.eidSource')}</Label>
-            <Input className={inp('EID_SOURCE')} value={sel('EID_SOURCE')} onChange={(e) => set('EID_SOURCE', e.target.value)} />
-            <FieldErr msg={err('EID_SOURCE')} />
-          </div>
-          <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.eidOrig')}</Label>
-            <Input className={inp('EID_ORIG')} value={sel('EID_ORIG')} onChange={(e) => set('EID_ORIG', e.target.value)} />
-            <FieldErr msg={err('EID_ORIG')} />
           </div>
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.eidOrigSource')}</Label>

@@ -1,3 +1,10 @@
+// Field labels for the edit modal's validation summary.
+export const ENTERPRISE_FIELD_LABELS: Record<string, string> = {
+  NAME_ENU: 'Enterprise Name',
+  SECTOR_ID: 'Sector',
+  STATUS: 'Status',
+};
+
 export const ENTERPRISE_DEFAULT_FILTERS = {
   page: 1,
   limit: 10,

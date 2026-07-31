@@ -126,7 +126,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       fields: [
         { key: 'SBR_ID', label: 'SBR ID' },
         { key: 'SOURCE_CODE', label: 'Source' },
-        { key: 'EID', label: 'EID', span: 2, sourceKey: 'EID_SOURCE' },
+        { key: 'EID', label: 'EID', span: 2 },
       ],
     },
     {

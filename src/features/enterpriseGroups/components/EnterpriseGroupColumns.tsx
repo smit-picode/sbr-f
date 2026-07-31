@@ -34,8 +34,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'TYPE',
     header: t('columns.TYPE', { defaultValue: 'TYPE' }),
-    // Derived in JS from UCI_COUNTRY, not a real column — not sortable server-side.
-    enableSorting: false,
+    // Derived in JS from UCI_COUNTRY, but UCI_COUNTRY is a real column on the same table, so
+    // the backend sorts this on an equivalent CASE expression (EG_DERIVED_SORT_SQL.TYPE).
     cell: ({ getValue }) => {
       const type = getValue<string>();
       if (type === 'Domestic') {

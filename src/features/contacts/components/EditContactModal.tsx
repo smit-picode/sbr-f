@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUpdateContactMutation } from '../api/contactsApi';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrContact } from '@/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -42,38 +43,6 @@ function FieldErr({ msg }: { msg?: string }) {
   return msg ? <p className="text-xs text-red-500 mt-0.5">{msg}</p> : null;
 }
 
-function ErrorSummary({ errors, onErrorClick, fieldLabels }: { errors: Record<string, string>; onErrorClick: (field: string) => void; fieldLabels: Record<string, string> }) {
-  const errorCount = Object.keys(errors).length;
-
-  return (
-    <div className="sticky top-0 z-20 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <div className="flex items-start gap-2 mb-2">
-        <div className="h-5 w-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <span className="text-xs font-bold text-red-700">!</span>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-red-900">
-            {errorCount} validation {errorCount === 1 ? 'error' : 'errors'} found
-          </p>
-          <p className="text-xs text-red-700 mt-0.5">Please correct the errors below before saving</p>
-        </div>
-      </div>
-      <ul className="space-y-1.5 ml-7">
-        {Object.entries(errors).map(([field, message]) => (
-          <li key={field}>
-            <button
-              type="button"
-              onClick={() => onErrorClick(field)}
-              className="text-xs text-red-700 hover:text-red-900 hover:underline text-left font-medium transition-colors"
-            >
-              • {fieldLabels[field] || field}: {message}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
   const { t } = useTranslation();
@@ -119,7 +88,8 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
     const name = str(form.CONTACT_NAME).trim();
-    if (name && name.length < 2) e.CONTACT_NAME = 'Min 2 characters required';
+    if (!name) e.CONTACT_NAME = 'Contact name is required';
+    else if (name.length < 2) e.CONTACT_NAME = 'Min 2 characters required';
     if (name.length > 200) e.CONTACT_NAME = 'Max 200 characters allowed';
 
     const email = str(form.EMAIL).trim();

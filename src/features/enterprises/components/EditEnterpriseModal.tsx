@@ -8,15 +8,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useUpdateEnterpriseMutation } from '../api/enterprisesApi';
-import { useGetEstablishmentsListQuery } from '@/features/establishments/api/establishmentsApi';
+import { useGetAttachableEstablishmentsQuery } from '@/features/establishments/api/establishmentsApi';
 import { SECTOR_OPTIONS, EST_STATUS_OPTIONS } from '@/constants';
+import { ENTERPRISE_FIELD_LABELS } from '../constants';
 import { useDebounce } from '@/hooks';
 import { toast } from '@/utils/toast';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { ErrorSummary } from '@/components/common/ErrorSummary';
 import { Building2, X, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { SbrEnterprise, EnterpriseEstablishment, SbrEstablishment } from '@/types';
+import type { SbrEnterprise, EnterpriseEstablishment, AttachableEstablishment } from '@/types';
 
 interface EditEnterpriseModalProps {
   enterprise: SbrEnterprise;
@@ -29,6 +32,7 @@ interface EstabRow {
   SBR_ID: number;
   NAME_ENU: string | null;
   MOCI_CR_NUM: string | null;
+  EST_STATUS: string | null;
 }
 
 const SECTOR_CHOICES = SECTOR_OPTIONS.filter((o) => o.value);
@@ -36,6 +40,7 @@ const STATUS_CHOICES = EST_STATUS_OPTIONS.filter((o) => o.value);
 
 export function EditEnterpriseModal({ enterprise, establishments, open, onClose }: EditEnterpriseModalProps) {
   const [name, setName] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [sector, setSector] = useState('');
   const [status, setStatus] = useState('');
   const [removed, setRemoved] = useState<Set<number>>(new Set());
@@ -45,12 +50,13 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
-  const mainSbrId = enterprise.MAIN_ESTABLISHMENT_SBR_ID;
+  const initialHeadSbrId = enterprise.MAIN_ESTABLISHMENT_SBR_ID;
 
   // Reset form whenever the modal (re)opens
   useEffect(() => {
     if (open) {
       setName(enterprise.NAME_ENU ?? '');
+      setErrors({});
       setSector(enterprise.SECTOR_ID ?? '');
       setStatus(enterprise.STATUS ?? '');
       setRemoved(new Set());
@@ -60,7 +66,9 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   }, [open, enterprise]);
 
   const debouncedSearch = useDebounce(search, 400);
-  const { data: searchData, isFetching: isSearching } = useGetEstablishmentsListQuery(
+  // Only offers establishments that aren't already attached to an enterprise, so a unit owned by
+  // another enterprise can't be attached twice (the backend applies ASSOCIATED_ENTERPRISE_ID IS NULL).
+  const { data: searchData, isFetching: isSearching } = useGetAttachableEstablishmentsQuery(
     { search: debouncedSearch, limit: 6, page: 1 },
     { skip: !open || !debouncedSearch }
   );
@@ -69,13 +77,23 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const currentRows: EstabRow[] = useMemo(() => {
     const kept = establishments
       .filter((e) => !removed.has(e.SBR_ID))
-      .map((e) => ({ SBR_ID: e.SBR_ID, NAME_ENU: e.NAME_ENU, MOCI_CR_NUM: e.MOCI_CR_NUM }));
+      .map((e) => ({ SBR_ID: e.SBR_ID, NAME_ENU: e.NAME_ENU, MOCI_CR_NUM: e.MOCI_CR_NUM, EST_STATUS: e.EST_STATUS }));
     return [...kept, ...added];
   }, [establishments, removed, added]);
 
   const memberIds = useMemo(() => new Set(currentRows.map((r) => r.SBR_ID)), [currentRows]);
 
-  const searchResults: SbrEstablishment[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
+  // The head the enterprise will have after this edit. Derived rather than held in state so
+  // removing the current head automatically promotes the next remaining establishment, and
+  // adding it back restores it — the enterprise can never point at a non-member.
+  const headSbrId = useMemo(
+    () => (initialHeadSbrId != null && currentRows.some((r) => r.SBR_ID === initialHeadSbrId)
+      ? initialHeadSbrId
+      : currentRows[0]?.SBR_ID ?? null),
+    [initialHeadSbrId, currentRows]
+  );
+
+  const searchResults: AttachableEstablishment[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
 
   const hasChanges =
     name.trim() !== (enterprise.NAME_ENU ?? '').trim() ||
@@ -93,8 +111,8 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     }
   };
 
-  const addRow = (u: SbrEstablishment) => {
-    setAdded((prev) => [...prev, { SBR_ID: u.SBR_ID, NAME_ENU: u.NAME_ENU, MOCI_CR_NUM: u.MOCI_CR_NUM }]);
+  const addRow = (u: AttachableEstablishment) => {
+    setAdded((prev) => [...prev, { SBR_ID: u.SBR_ID, NAME_ENU: u.NAME_ENU, MOCI_CR_NUM: u.MOCI_CR_NUM, EST_STATUS: u.EST_STATUS }]);
     setSearch('');
   };
 
@@ -107,8 +125,16 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
       : undefined;
 
   const handleSubmit = () => {
+    const e: Record<string, string> = {};
+    if (!name.trim()) e.NAME_ENU = t('enterpriseEdit.nameRequired', { defaultValue: 'Enterprise name is required.' });
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
     if (!hasChanges) {
       toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' }));
+      return;
+    }
+    if (currentRows.length === 0) {
+      toast.error(t('enterpriseEdit.addAtLeastOneEstablishment', { defaultValue: 'At least one Establishment is required.' }));
       return;
     }
     setShowCommentDialog(true);
@@ -122,6 +148,9 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           NAME_ENU: name,
           SECTOR_ID: sector,
           STATUS: status,
+          // Only sent when this edit moves the head (i.e. the current head was removed and
+          // another member was promoted) — the backend rejects a head that isn't a member.
+          ...(headSbrId != null && headSbrId !== initialHeadSbrId ? { MAIN_ESTABLISHMENT_SBR_ID: headSbrId } : {}),
           addEstablishmentSbrIds: added.map((a) => a.SBR_ID),
           removeEstablishmentSbrIds: Array.from(removed),
           comment,
@@ -138,12 +167,18 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   return (
     <>
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-xl max-h-[90vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-3 border-b border-slate-100 shrink-0">
           <DialogTitle>{t('enterpriseEdit.title', { defaultValue: 'Edit Enterprise' })}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[calc(90vh-180px)] overflow-y-auto py-1 pr-1">
+        {Object.keys(errors).length > 0 && (
+          <div className="px-6 pt-3 shrink-0">
+            <ErrorSummary errors={errors} fieldLabels={ENTERPRISE_FIELD_LABELS} />
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* Read-only identity row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -159,7 +194,16 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           {/* Name */}
           <div className="space-y-1.5">
             <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={500} className="focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40" />
+            <Input
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.NAME_ENU) setErrors((prev) => { const n = { ...prev }; delete n.NAME_ENU; return n; });
+              }}
+              maxLength={500}
+              className={`focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
+            />
+            {errors.NAME_ENU && <p className="text-xs text-red-500 mt-0.5">{errors.NAME_ENU}</p>}
           </div>
 
           {/* Sector + Status */}
@@ -191,9 +235,15 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{currentRows.length} {t('table.units')}</span>
             </div>
 
+            {currentRows.length > 0 && (
+              <p className="text-xs text-slate-400">
+                {t('enterpriseEdit.mainReassignedOnRemoval', { defaultValue: 'Removing the main establishment promotes the next one in the list to main.' })}
+              </p>
+            )}
+
             <div className="space-y-2">
               {currentRows.map((r) => {
-                const isMain = r.SBR_ID === mainSbrId;
+                const isMain = r.SBR_ID === headSbrId;
                 return (
                   <div key={r.SBR_ID} className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2">
                     <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
@@ -201,20 +251,26 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                       <p className="truncate text-sm font-medium text-slate-800">{nullableText(r.NAME_ENU)}</p>
                       <p className="text-xs text-slate-400">CR {r.MOCI_CR_NUM ?? '—'} · #{r.SBR_ID}</p>
                     </div>
-                    {isMain ? (
-                      <Badge className="rounded-md bg-[#A71D3A] text-white text-[10px] font-bold">MAIN</Badge>
-                    ) : (
-                      <>
-                        <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>
-                        <button type="button" onClick={() => removeRow(r.SBR_ID)} className="text-slate-400 hover:text-red-600" title="Remove">
-                          <X className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
+                    <StatusBadge status={r.EST_STATUS} className="shrink-0 text-[10px]" />
+                    {isMain
+                      ? <Badge className="rounded-md bg-[#A71D3A] text-white text-[10px] font-bold">MAIN</Badge>
+                      : <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>}
+                    <button
+                      type="button"
+                      onClick={() => removeRow(r.SBR_ID)}
+                      className="text-slate-400 hover:text-red-600"
+                      title={t('enterpriseEdit.remove', { defaultValue: 'Remove' })}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 );
               })}
             </div>
+
+            {currentRows.length === 0 && (
+              <p className="text-xs text-slate-400">{t('enterpriseEdit.addAtLeastOneEstablishment', { defaultValue: 'At least one Establishment is required.' })}</p>
+            )}
 
             {/* Add establishment */}
             <div className="rounded-md bg-slate-50 border border-slate-200 p-3 space-y-2">
@@ -248,6 +304,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                               <span className="block truncate text-sm text-slate-800">{nullableText(u.NAME_ENU)}</span>
                               <span className="block text-xs text-slate-400">CR {u.MOCI_CR_NUM ?? '—'} · #{u.SBR_ID}</span>
                             </span>
+                            <StatusBadge status={u.EST_STATUS} className="shrink-0 text-[10px]" />
                           </button>
                         </li>
                       ))}
@@ -260,7 +317,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 py-4 border-t border-slate-100 shrink-0">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
           <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
         </DialogFooter>

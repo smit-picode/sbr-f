@@ -33,9 +33,9 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'MAIN_CR',
     header: t('columns.MAIN_CR'),
-    // Comes from the joined mainUnit establishment, not a column on SbrEnterprises —
-    // the backend can't ORDER BY it, so don't offer sorting on it here.
-    enableSorting: false,
+    // Comes from the joined mainUnit establishment; the backend orders it through that
+    // include (ENTERPRISE_MAIN_UNIT_SORT_COLUMNS in enterprises.controller.ts).
+    enableSorting: true,
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
@@ -64,8 +64,8 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'LEGAL_TYPE',
     header: t('columns.LEGAL_TYPE'),
-    // Comes from the joined mainUnit establishment, not a column on SbrEnterprises.
-    enableSorting: false,
+    // Comes from the joined mainUnit establishment; ordered via that include on the backend.
+    enableSorting: true,
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>
     ),

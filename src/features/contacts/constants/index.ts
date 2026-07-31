@@ -30,6 +30,14 @@ export const CONTACT_EDITABLE_FIELDS: string[] = [
 ];
 export const isContactFieldEditable = (field: string): boolean => CONTACT_EDITABLE_FIELDS.includes(field);
 
+// Attribute history is offered for exactly the fields the edit modal lets a user change.
+// A locked field (SBR_ID, SOURCE_CODE, ROLE, VALID_FROM/VALID_TO) can never be the subject
+// of a portal change request, so its per-attribute popover would always come back empty.
+// Deliberately delegates to isContactFieldEditable so the two sets cannot drift apart — if
+// a field ever needs history WITHOUT being editable, give this its own list instead of
+// widening CONTACT_EDITABLE_FIELDS (that list also drives the update payload).
+export const isContactFieldHistoryEnabled = (field: string): boolean => isContactFieldEditable(field);
+
 export const CONTACT_DEFAULT_FILTERS = {
   page: 1,
   limit: 10,

@@ -12,8 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
-import { useGetEnterpriseByIdQuery } from '../api/enterprisesApi';
+import { useGetEnterpriseByIdQuery, useGetEnterpriseHistoryQuery } from '../api/enterprisesApi';
 import { getIsicLabel } from '../constants';
+import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { EstablishmentHistoryPopover } from '../components/EstablishmentHistoryModal';
 import { EditEnterpriseModal } from '../components/EditEnterpriseModal';
 import type {
@@ -45,6 +46,123 @@ function SummaryCell({ label, value }: { label: string; value: React.ReactNode }
     <div className="min-w-0">
       <p className="text-xs text-slate-500">{label}</p>
       <div className="mt-0.5 text-sm font-medium text-slate-800 truncate">{value}</div>
+    </div>
+  );
+}
+
+// Summary-strip cell for ENTERPRISE-level attributes (SBR_ENTERPRISES columns), as opposed to
+// FieldWithHistory below which shows establishment fields. Only attributes that are editable in
+// EditEnterpriseModal get a history affordance — derived/read-only cells stay plain SummaryCells.
+function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canViewHistory }: {
+  enterpriseId: number;
+  fieldKey: string;
+  label: string;
+  value: React.ReactNode;
+  canViewHistory: boolean;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Lazily load the enterprise's change history only while this attribute's popover is open
+  const { data, isLoading, isError } = useGetEnterpriseHistoryQuery(enterpriseId, { skip: !open });
+
+  // Close the anchored popover on outside click / Escape (the clock button itself toggles)
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative min-w-0" ref={wrapRef}>
+      <p className="text-xs text-slate-500">{label}</p>
+      <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
+        <span className="truncate">{value}</span>
+        {canViewHistory && (
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="cursor-pointer text-slate-300 transition-colors hover:text-[#A71D3A]"
+            title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
+          >
+            <History className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      {open && canViewHistory && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Maroon-header name field — same lazy-load + toggle logic as EnterpriseFieldWithHistory, with a
+// white-tinted icon so it stays legible on the dark gradient band.
+function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHistory }: {
+  enterpriseId: number;
+  label: string;
+  value: React.ReactNode;
+  canViewHistory: boolean;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useGetEnterpriseHistoryQuery(enterpriseId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <div className="mt-2 flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{value}</h1>
+        {canViewHistory && (
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="cursor-pointer text-white/50 transition-colors hover:text-white"
+            title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
+          >
+            <History className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      {open && canViewHistory && (
+        <FieldHistoryPopover
+          versions={data?.data ?? []}
+          fieldKey="NAME_ENU"
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -298,9 +416,9 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
   const { isArabic } = useLanguage();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
-  const { canEdit, canViewDetail } = usePermission('enterprises');
-  // The clickable fields on this page are establishment fields (see FieldWithHistory below),
-  // so the disclaimer is gated by the same establishments.view_history permission they use.
+  // canViewHistory here gates the ENTERPRISE-level attribute history (summary strip + name);
+  // the establishment cards below use their own establishments.view_history permission.
+  const { canEdit, canViewDetail, canViewHistory: canViewEnterpriseHistory } = usePermission('enterprises');
   const { canViewHistory: canViewEstablishmentHistory } = usePermission('establishments');
   // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
@@ -351,8 +469,10 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
       </button>
 
       {/* Header card */}
-      <div className="overflow-hidden rounded-lg shadow-sm">
-        <div className="bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
+      {/* Rounding lives on the two children instead of an `overflow-hidden` wrapper — the wrapper
+          would clip the attribute-history popovers opened from the name and the summary strip. */}
+      <div className="rounded-lg shadow-sm">
+        <div className="rounded-t-lg bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -362,7 +482,12 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
                 <StatusBadge status={enterprise.STATUS} className="rounded-md" />
                 {enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
               </div>
-              <h1 className="mt-2 text-2xl font-bold">{nullableText(enterprise.NAME_ENU)}</h1>
+              <EnterpriseHeaderNameWithHistory
+                enterpriseId={enterprise.ENTERPRISE_ID}
+                label={t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}
+                value={nullableText(enterprise.NAME_ENU)}
+                canViewHistory={canViewEnterpriseHistory}
+              />
               {enterprise.MAIN_CR && <p className="text-sm text-white/80">CR {enterprise.MAIN_CR}</p>}
             </div>
             {canEdit && (
@@ -373,9 +498,21 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
           </div>
         </div>
         {/* Summary strip */}
-        <div className="grid grid-cols-2 gap-4 border border-t-0 border-slate-200 bg-white px-6 py-4 md:grid-cols-3 lg:grid-cols-6">
-          <SummaryCell label={t('enterpriseDetail.sector')} value={nullableText(enterprise.SECTOR_ID)} />
-          <SummaryCell label={t('enterpriseDetail.status')} value={nullableText(enterprise.STATUS)} />
+        <div className="grid grid-cols-2 gap-4 rounded-b-lg border border-t-0 border-slate-200 bg-white px-6 py-4 md:grid-cols-3 lg:grid-cols-6">
+          <EnterpriseFieldWithHistory
+            enterpriseId={enterprise.ENTERPRISE_ID}
+            fieldKey="SECTOR_ID"
+            label={t('enterpriseDetail.sector')}
+            value={nullableText(enterprise.SECTOR_ID)}
+            canViewHistory={canViewEnterpriseHistory}
+          />
+          <EnterpriseFieldWithHistory
+            enterpriseId={enterprise.ENTERPRISE_ID}
+            fieldKey="STATUS"
+            label={t('enterpriseDetail.status')}
+            value={nullableText(enterprise.STATUS)}
+            canViewHistory={canViewEnterpriseHistory}
+          />
           <SummaryCell label={t('enterpriseDetail.legalType')} value={nullableText(enterprise.LEGAL_TYPE)} />
           <SummaryCell label={t('enterpriseDetail.mainUnit')} value={enterprise.MAIN_ESTABLISHMENT_SBR_ID != null ? <span className="font-mono">#{enterprise.MAIN_ESTABLISHMENT_SBR_ID}</span> : '—'} />
           <SummaryCell label={t('enterpriseDetail.linkedEstablishments')} value={enterprise.ESTABLISHMENT_COUNT} />
@@ -385,7 +522,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
 
       {enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
-      {canViewEstablishmentHistory && (
+      {(canViewEstablishmentHistory || canViewEnterpriseHistory) && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
           <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
         </p>
