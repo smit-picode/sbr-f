@@ -231,12 +231,19 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
             ))}
           </DetailCard>
         )}
+        {/* Channels is the tallest card, so on a 2-column grid it alone sets row 1's height and
+            Metadata (which wraps to row 2) leaves a dead gap under Contact. Spanning both rows
+            lets Metadata sit directly beneath Contact instead. The wrapper carries the span so
+            DetailCard's signature stays untouched; DOM order is unchanged, so the single-column
+            stacking order below lg is exactly as before. */}
         {channelFields.length > 0 && (
-          <DetailCard title={t('contactDetail.sectionChannels')}>
-            {channelFields.map((f) => (
-              <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory && isContactFieldHistoryEnabled(f.k)} pendingCount={pendingFields[f.k]} />
-            ))}
-          </DetailCard>
+          <div className="lg:row-span-2">
+            <DetailCard title={t('contactDetail.sectionChannels')}>
+              {channelFields.map((f) => (
+                <DetailField key={f.k} recordId={contactId} fieldKey={f.k} label={f.label} value={f.value} mono={f.mono} canViewHistory={canViewHistory && isContactFieldHistoryEnabled(f.k)} pendingCount={pendingFields[f.k]} />
+              ))}
+            </DetailCard>
+          </div>
         )}
         {metaFields.length > 0 && (
           <DetailCard title={t('contactDetail.sectionMetadata')}>
