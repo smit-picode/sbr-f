@@ -83,20 +83,21 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
 
   return (
     <div className="relative min-w-0" ref={wrapRef}>
-      <p className="text-xs text-slate-500">{label}</p>
-      <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
-        <span className="truncate">{value}</span>
+      {/* Icon sits on the label line, matching the Establishments detail strip */}
+      <div className="flex items-center gap-1.5">
+        <p className="text-xs text-slate-500">{label}</p>
         {canViewHistory && (
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="cursor-pointer text-slate-300 transition-colors hover:text-[#A71D3A]"
+            className="shrink-0 cursor-pointer text-slate-200 transition-colors hover:text-[#A71D3A]"
             title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
           >
-            <History className="h-3.5 w-3.5" />
+            <History className="h-3 w-3" />
           </button>
         )}
       </div>
+      <div className="mt-0.5 truncate text-sm font-medium text-slate-800">{value}</div>
       {open && canViewHistory && (
         <FieldHistoryPopover
           versions={data?.data ?? []}
