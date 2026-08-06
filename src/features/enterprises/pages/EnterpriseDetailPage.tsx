@@ -356,8 +356,8 @@ function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[
             <p className="mt-1 text-sm text-slate-700">{nullableText(e.REASON)}</p>
             <p className="mt-0.5 text-xs text-slate-400">
               {formatDate(e.CREATED_AT)}
-              {e.changedByUser?.EMAIL && ` · ${e.changedByUser.EMAIL}`}
-              {e.approvedByUser?.EMAIL && ` → ${e.approvedByUser.EMAIL}`}
+              {e.CHANGED_BY_EMAIL && ` · ${e.CHANGED_BY_EMAIL}`}
+              {e.APPROVED_BY_EMAIL && ` → ${e.APPROVED_BY_EMAIL}`}
             </p>
           </li>
         );
@@ -401,8 +401,8 @@ function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[
               {e.REASON && <p className="mt-0.5 text-xs italic text-slate-500">“{e.REASON}”</p>}
               <p className="mt-0.5 text-xs text-slate-400">
                 {formatDate(e.CREATED_AT)}
-                {e.changedByUser?.EMAIL && ` · ${e.changedByUser.EMAIL}`}
-                {e.approvedByUser?.EMAIL && ` → ${e.approvedByUser.EMAIL}`}
+                {e.CHANGED_BY_EMAIL && ` · ${e.CHANGED_BY_EMAIL}`}
+                {e.APPROVED_BY_EMAIL && ` → ${e.APPROVED_BY_EMAIL}`}
               </p>
             </div>
           </li>
@@ -481,7 +481,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
                   <Target className="h-3.5 w-3.5" /> ENT-{enterprise.ENTERPRISE_ID}
                 </span>
                 <StatusBadge status={enterprise.STATUS} className="rounded-md" />
-                {enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
+                {!!enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
               </div>
               <EnterpriseHeaderNameWithHistory
                 enterpriseId={enterprise.ENTERPRISE_ID}
@@ -521,7 +521,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         </div>
       </div>
 
-      {enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
+      {!!enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {(canViewEstablishmentHistory || canViewEnterpriseHistory) && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">

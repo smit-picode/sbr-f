@@ -15,6 +15,7 @@ import {
   ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS,
   ENTERPRISE_GROUP_HOLDING_OPTIONS,
   ENTERPRISE_GROUP_FIELD_LABELS,
+  formatGroupCode,
 } from '../constants';
 import { toast } from '@/utils/toast';
 import { useDebounce } from '@/hooks';
@@ -216,7 +217,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       <DialogContent className="max-w-xl max-h-[90vh] flex flex-col overflow-hidden p-0">
         <DialogHeader className="px-6 pt-6 pb-3 border-b border-slate-100 shrink-0">
           <DialogTitle>
-            {t('editEnterpriseGroup.title', { defaultValue: 'Edit Enterprise Group' })} — {group.ENTERPRISE_GROUP_ID}
+            {t('editEnterpriseGroup.title', { defaultValue: 'Edit Enterprise Group' })} — {formatGroupCode(group.ENTERPRISE_GROUP_ID)}
           </DialogTitle>
         </DialogHeader>
 

@@ -299,7 +299,27 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
   // ROW_ID is the PREV_RECORD_ID — null only for a brand-new record being created (no prior
   // row to diff against), never for an edit of an existing one.
   const isCreate = r.ROW_ID == null;
+  // addMembers/removeMembers is shared across tables: SBR_ENTERPRISES attaches establishments,
+  // SBR_ENTERPRISE_GROUPS attaches enterprises — the chip label must match what was actually
+  // added, or an approver reviewing an enterprise-group request sees "Establishment Added" for
+  // an enterprise.
+  const memberLabel = r.TABLE_NAME === 'SBR_ENTERPRISE_GROUPS'
+    ? { added: t('changeRequests.enterpriseAdded', { defaultValue: 'Enterprise Added' }), removed: t('changeRequests.enterpriseRemoved', { defaultValue: 'Enterprise Removed' }) }
+    : { added: t('changeRequests.establishmentAdded', { defaultValue: 'Establishment Added' }), removed: t('changeRequests.establishmentRemoved', { defaultValue: 'Establishment Removed' }) };
   const changeCount = r.fields.length + r.addMembers.length + r.removeMembers.length;
+  // ENTITY is resolved by looking up the CURRENT row (via PREV_RECORD_ID) — for a brand-new
+  // record there is no current row yet, so ENTITY is legitimately null and the title used to
+  // fall back to a bare "—", which read as a stray line rather than a name. Prefer whatever
+  // name-like field the submitter actually typed (already in r.fields since CHANGE_DATA is
+  // flat for creates), and only fall back to a plain-language placeholder if none was set.
+  const NAME_FIELD_CANDIDATES = ['NAME_ENU', 'NAME_ARA', 'UCI_NAME', 'CONTACT_NAME'];
+  const newRecordName = isCreate
+    ? r.fields.find((f) => NAME_FIELD_CANDIDATES.includes(f.field) && f.new != null && f.new !== '')?.new
+    : null;
+  const title = r.ENTITY
+    ?? (isCreate
+      ? (newRecordName != null ? String(newRecordName) : t('changeRequests.unnamedNewRecord', { defaultValue: 'Unnamed new record' }))
+      : t('changeRequests.unknownRecord', { defaultValue: 'Unknown record' }));
   const contextSections = (CONTEXT_SECTIONS[r.TABLE_NAME] ?? [])
     .map((sec) => ({ ...sec, visible: sec.fields.filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '') }))
     .filter((sec) => sec.visible.length > 0);
@@ -361,7 +381,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
             <Clock className="h-3 w-3" /> {r.STATUS.charAt(0) + r.STATUS.slice(1).toLowerCase()}
           </span>
         </div>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">{r.ENTITY ?? '—'}</h1>
+        <h1 className={`mt-2 text-2xl font-bold ${r.ENTITY || newRecordName ? 'text-slate-900' : 'italic text-slate-400'}`}>{title}</h1>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
           <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {t('changeRequests.submittedBy', { defaultValue: 'Submitted by' })} <span className="font-medium text-[#A71D3A]">{r.REQUESTED_BY ?? '—'}</span></span>
           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDateTime(r.CREATED_AT)}</span>
@@ -404,14 +424,14 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
               ))}
               {r.addMembers.map((m) => (
                 <div key={`add-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
-                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">+ {t('changeRequests.establishmentAdded', { defaultValue: 'Establishment Added' })}</span>
+                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">+ {memberLabel.added}</span>
                   {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
                   <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>
               ))}
               {r.removeMembers.map((m) => (
                 <div key={`rem-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
-                  <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700">− {t('changeRequests.establishmentRemoved', { defaultValue: 'Establishment Removed' })}</span>
+                  <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700">− {memberLabel.removed}</span>
                   {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
                   <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>

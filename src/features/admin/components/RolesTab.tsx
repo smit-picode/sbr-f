@@ -464,7 +464,7 @@ export function RolesTab({
 
         {/* ══ Roles list card ══ */}
         <div className="rounded-xl border border-slate-200 bg-white p-2">
-          <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+          <div className="mb-1 flex items-center justify-between gap-2 border-b border-slate-100 px-2 pb-2 pt-1">
             <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
               {t('admin.roles.rolesLabel', { defaultValue: 'Roles' })}
             </span>
@@ -484,48 +484,70 @@ export function RolesTab({
               </SelectContent>
             </Select>
           </div>
-          {roles.map((role) => {
-            const isSelected = selectedRole?.ID === role.ID;
-            const count      = cachedCounts[role.ID];
-            return (
-              <button
-                key={role.ID}
-                onClick={() => setSelectedRole(role)}
-                className={`group flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-start text-[12.5px] transition-colors ${
-                  isSelected ? 'bg-[#FAEDF0]' : 'hover:bg-slate-50'
-                }`}
-              >
-                <span
-                  className="h-2 w-2 rounded-full shrink-0"
-                  style={{ background: isSelected ? '#A71D3A' : '#94a3b8' }}
-                />
-                <span className={`flex-1 truncate ${
-                  isSelected ? 'font-bold text-[#A71D3A]' : 'text-slate-700'
-                }`}>
-                  {role.ROLE_NAME}
-                </span>
-
-                {canEdit && role.ROLE_NAME !== 'SUPER_ADMIN' && (
-                  <span
-                    role="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setForm({ ROLE_NAME: role.ROLE_NAME });
-                      setEditTarget(role);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200"
-                    title={t('admin.roles.editRoleTitle')}
+          <div className="space-y-0.5">
+            {roles.map((role) => {
+              const isSelected = selectedRole?.ID === role.ID;
+              const count      = cachedCounts[role.ID];
+              const userCount  = role.USER_COUNT ?? 0;
+              const isEditable = canEdit && role.ROLE_NAME !== 'SUPER_ADMIN';
+              return (
+                // Row is a plain container holding two sibling buttons — select and edit —
+                // rather than an edit control nested inside the select button (invalid HTML,
+                // and it forced a stopPropagation to keep the two actions apart).
+                <div
+                  key={role.ID}
+                  className={`flex items-center rounded-lg transition-colors ${
+                    isSelected ? 'bg-[#FAEDF0]' : 'hover:bg-slate-50'
+                  }`}
+                >
+                  <button
+                    onClick={() => setSelectedRole(role)}
+                    className="min-w-0 flex-1 rounded-lg py-2 pe-1 ps-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
                   >
-                    <Pencil className="h-3 w-3 text-slate-400" />
-                  </span>
-                )}
+                    <span className={`block truncate text-[12.5px] ${
+                      isSelected ? 'font-semibold text-[#A71D3A]' : 'font-medium text-slate-700'
+                    }`}>
+                      {role.ROLE_NAME}
+                    </span>
 
-                {count !== undefined && (
-                  <span className="text-[10.5px] text-slate-400 tabular-nums">{count}</span>
-                )}
-              </button>
-            );
-          })}
+                    {/* Both counts sit together so they read as one line of metadata about
+                        this role; weight and tone separate them instead of distance. */}
+                    <span className="mt-1 flex items-center gap-1.5 text-[10.5px]" dir="auto">
+                      <span className="font-medium tabular-nums text-slate-600">
+                        {userCount} {userCount === 1
+                          ? t('admin.roles.userOne', { defaultValue: 'user' })
+                          : t('admin.roles.userMany', { defaultValue: 'users' })}
+                      </span>
+                      {count !== undefined && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span className="tabular-nums text-slate-400">
+                            {count} {count === 1
+                              ? t('admin.roles.permissionOne', { defaultValue: 'permission' })
+                              : t('admin.roles.permissions', { defaultValue: 'permissions' })}
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </button>
+
+                  {isEditable && (
+                    <button
+                      onClick={() => {
+                        setForm({ ROLE_NAME: role.ROLE_NAME });
+                        setEditTarget(role);
+                      }}
+                      className="me-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-black/5 hover:text-[#A71D3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
+                      title={t('admin.roles.editRoleTitle')}
+                      aria-label={t('admin.roles.editRoleTitle')}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* ══ Permission matrix (3 cols) ══ */}

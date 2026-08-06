@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { DataTable } from '@/components/table/DataTable';
-import { Eye, EyeOff, RefreshCw, Search } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, Search, Shield, Calendar, IdCard } from 'lucide-react';
 import {
   useGetUsersListQuery,
   useCreateUserMutation,
@@ -16,11 +16,15 @@ import {
   useGetRolesListQuery,
   useGetRegulatorScopesQuery,
 } from '../api/adminApi';
-import { getUsersColumns, userRoleNames } from './UsersColumns';
-import { ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS, NO_SCOPE_VALUE, ALL_ROLES_VALUE } from '../constants';
+import { getUsersColumns, userRoleNames, getRoleBadgeClass, isSuperAdminUser } from './UsersColumns';
+import {
+  ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS, NO_SCOPE_VALUE,
+  ALL_ROLES_VALUE, ALL_STATUS_VALUE, USER_STATUS_FILTER_OPTIONS,
+} from '../constants';
 import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
+import { formatDate } from '@/utils/format';
 import { useDebounce } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 
@@ -371,7 +375,11 @@ export function UsersTab({
               }
             >
               <SelectTrigger
-                className="w-52 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                // Sentinel-valued selects never hit Radix's data-[placeholder] state, so the
+                // unfiltered label is muted explicitly to read as a placeholder.
+                className={`w-52 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${
+                  filters.roleId ? '' : 'text-slate-400'
+                }`}
                 aria-label={t('admin.users.filterByRole', { defaultValue: 'Filter by role' })}
               >
                 <SelectValue placeholder={t('admin.users.allRoles', { defaultValue: 'All Roles' })} />
@@ -382,6 +390,28 @@ export function UsersTab({
                   <SelectItem key={role.ID} value={String(role.ID)}>
                     {toTitleCaseRole(role.ROLE_NAME)}
                   </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.status ?? ALL_STATUS_VALUE}
+              onValueChange={(v) =>
+                handleFilterChange({ status: v === ALL_STATUS_VALUE ? undefined : v, page: 1 })
+              }
+            >
+              <SelectTrigger
+                className={`w-44 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${
+                  filters.status ? '' : 'text-slate-400'
+                }`}
+                aria-label={t('admin.users.filterByStatus', { defaultValue: 'Filter by status' })}
+              >
+                <SelectValue placeholder={t('admin.users.allStatuses', { defaultValue: 'Status' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_STATUS_VALUE}>{t('admin.users.allStatuses', { defaultValue: 'Status' })}</SelectItem>
+                {USER_STATUS_FILTER_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{t(o.i18nKey, { defaultValue: o.label })}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -401,8 +431,18 @@ export function UsersTab({
                 }`,
                 onRemove: () => handleFilterChange({ roleId: undefined, page: 1 }),
               } as FilterChip] : []),
+              ...(filters.status ? [{
+                key: 'status',
+                label: `${t('admin.users.colStatus')}: ${
+                  t(
+                    USER_STATUS_FILTER_OPTIONS.find((o) => o.value === filters.status)?.i18nKey ?? '',
+                    { defaultValue: filters.status },
+                  )
+                }`,
+                onRemove: () => handleFilterChange({ status: undefined, page: 1 }),
+              } as FilterChip] : []),
             ]}
-            onClearAll={() => handleFilterChange({ search: '', roleId: undefined, page: 1 })}
+            onClearAll={() => handleFilterChange({ search: '', roleId: undefined, status: undefined, page: 1 })}
           />
         </>
       )}
@@ -439,33 +479,82 @@ export function UsersTab({
 
       {/* View Dialog */}
       <Dialog open={!!viewTarget} onOpenChange={(o) => { if (!o) setViewTarget(null); }}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900 rtl:pr-2">
-              <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-[#F3DEE4] text-[#A71D3A] font-bold text-sm">
-                {viewTarget?.NAME?.charAt(0)?.toUpperCase()}
-              </span>
-              {viewTarget?.NAME}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto gap-0 p-0">
+          {viewTarget && (() => {
+            const roleNames = userRoleNames(viewTarget);
+            // Display-only identifier, same convention as REQ-/EGR- codes elsewhere.
+            const userCode = `USR-${String(viewTarget.ID).padStart(4, '0')}`;
+            const rows = [
+              { key: 'role',    icon: Shield,   label: t('admin.users.roleIdLabel', { defaultValue: 'Role ID' }), value: roleNames.join(', ') || '—', mono: true },
+              { key: 'created', icon: Calendar, label: t('admin.users.createdLabel', { defaultValue: 'Created' }), value: formatDate(viewTarget.CREATED_AT), mono: false },
+              { key: 'id',      icon: IdCard,   label: t('admin.users.userIdLabel', { defaultValue: 'User ID' }), value: userCode, mono: true },
+            ];
+            return (
+              <>
+                {/* Identity block — pe-12 keeps the name clear of the dialog's close button */}
+                <div className="p-5 pb-4 pe-12">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-3 text-start">
+                      <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F3DEE4] text-lg font-bold text-[#A71D3A]">
+                        {viewTarget.NAME?.charAt(0)?.toUpperCase()}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-base font-semibold text-slate-900">{viewTarget.NAME}</span>
+                        <span className="block truncate text-sm font-normal text-slate-500">{viewTarget.EMAIL}</span>
+                      </span>
+                    </DialogTitle>
+                  </DialogHeader>
 
-          <div className="py-2 space-y-3">
-            {[
-              { label: t('admin.users.nameLabel'),  value: viewTarget?.NAME },
-              { label: t('admin.users.emailLabel'), value: viewTarget?.EMAIL },
-              { label: t('admin.users.colRoles'),   value: viewTarget ? userRoleNames(viewTarget).join(', ') : '' },
-              { label: t('admin.users.colStatus'),  value: viewTarget ? (viewTarget.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')) : '' },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider w-16 shrink-0">{label}</span>
-                <span className="text-sm font-medium text-slate-800">{value || '—'}</span>
-              </div>
-            ))}
-          </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    {roleNames.map((name) => (
+                      <span key={name} className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${getRoleBadgeClass(name)}`}>
+                        {toTitleCaseRole(name)}
+                      </span>
+                    ))}
+                    <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                      viewTarget.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {viewTarget.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')}
+                    </span>
+                  </div>
+                </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setViewTarget(null)}>{t('admin.users.close')}</Button>
-          </DialogFooter>
+                {/* Attribute rows — full-bleed dividers give the label/value pairs a shared
+                    baseline, replacing the stack of individually-bordered grey cards. */}
+                <div className="border-y border-slate-200">
+                  {rows.map(({ key, icon: Icon, label, value, mono }) => (
+                    <div key={key} className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 last:border-b-0">
+                      <span className="flex shrink-0 items-center gap-2 text-sm text-slate-500">
+                        <Icon className="h-4 w-4 text-slate-400" />
+                        {label}
+                      </span>
+                      <span className={`truncate text-slate-900 ${mono ? 'font-mono text-xs font-semibold' : 'text-sm font-semibold'}`}>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <DialogFooter className="p-4">
+                  {canEdit && !isSuperAdminUser(viewTarget) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => { const target = viewTarget; setViewTarget(null); openEdit(target); }}
+                    >
+                      {t('admin.users.editUser', { defaultValue: 'Edit user' })}
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setViewTarget(null)}
+                    style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+                    className="text-white"
+                  >
+                    {t('admin.users.close')}
+                  </Button>
+                </DialogFooter>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

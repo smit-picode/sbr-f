@@ -13,6 +13,8 @@ export interface SbrRole {
   ROLE_NAME: string;
   // true = assignments may carry a regulator scope; false = always global
   IS_SCOPED?: boolean;
+  // Number of distinct users currently assigned this role (computed by the list endpoint)
+  USER_COUNT?: number;
   CREATED_AT: string;
   UPDATED_AT: string;
 }
@@ -74,6 +76,8 @@ export interface AdminUserFilters {
   search?: string;
   // Narrows the list to users holding this role (SBR_ROLE.ID)
   roleId?: number;
+  // Narrows the list by account status — must match USER_STATUS_FILTER in the backend enums
+  status?: string;
   // Server-side sort — sortBy must be one of USERS_SORTABLE_COLUMNS (matches the
   // backend allowlist in src/utils/enums.ts)
   sortBy?: string;

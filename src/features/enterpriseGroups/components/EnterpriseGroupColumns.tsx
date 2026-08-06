@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { nullableText } from '@/utils/format';
 import { Users, MapPin, Network, Orbit } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
+import { formatGroupCode } from '../constants';
 
 type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
 
@@ -14,8 +15,10 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     header: t('columns.GROUP', { defaultValue: 'GROUP' }),
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
-        <span className="font-mono text-xs font-medium text-[#77748B]">{String(getValue())}</span>
-        {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
+        <span className="font-mono text-xs font-medium text-[#77748B]">{formatGroupCode(getValue<number>())}</span>
+        {/* Coerce with !!: the procedure returns 1/0, and JSX renders a literal 0 for `0 && x`
+            (unlike `false && x`, which renders nothing). */}
+        {!!row.original.HAS_PENDING_REQUEST && <PendingBadge />}
       </span>
     ),
   },

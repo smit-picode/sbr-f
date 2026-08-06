@@ -17,6 +17,7 @@ import {
   ENTERPRISE_GROUP_FILTER_COLUMNS,
   ENTERPRISE_GROUP_STATUS_OPTIONS,
   ENTERPRISE_GROUP_TYPE_OPTIONS,
+  stripGroupCodePrefix,
 } from '../constants';
 import type { EnterpriseGroupFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
@@ -45,7 +46,9 @@ export function EnterpriseGroupsListPage() {
 
   const queryParams = cleanParams({
     ...filters,
-    search: debouncedSearch,
+    // The group code is displayed as "EGR-7001" but stored as the number 7001, so drop the
+    // display prefix and let either form match.
+    search: stripGroupCodePrefix(debouncedSearch ?? ''),
     status: filters.status === '__all__' ? undefined : filters.status,
     type:   filters.type === '__all__' ? undefined : filters.type,
     columnFilters: activeColumnFilters.length

@@ -16,15 +16,15 @@ interface AuditMeta {
 }
 
 // A version row carries VALID_FROM/VALID_TO/SOURCE_CODE plus the audited fields, and
-// optionally `_audit` metadata when the version resulted from a user edit.
+// optionally `audit` metadata when the version resulted from a user edit.
 export interface HistoryVersion {
   ID?: number;
   VALID_FROM?: string | null;
   VALID_TO?: string | null;
   SOURCE_CODE?: string | null;
-  _audit?: AuditMeta | null;
+  audit?: AuditMeta | null;
   // Present on PENDING / REJECTED change-request entries (not applied versions)
-  _request?: boolean;
+  request?: boolean;
   status?: string;
   changes?: Record<string, { old: unknown; new: unknown }>;
 }
@@ -69,14 +69,14 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
     return raw == null || raw === '' ? '—' : String(raw);
   };
   const sourceOf = (v: HistoryVersion) => v.SOURCE_CODE ?? null;
-  const isUserEdit = (v: HistoryVersion) => !!(v._audit && fieldKey && v._audit.columns.includes(fieldKey));
+  const isUserEdit = (v: HistoryVersion) => !!(v.audit && fieldKey && v.audit.columns.includes(fieldKey));
   const asOf = (v: HistoryVersion) => {
     if (!v.VALID_FROM) return '—';
     const d = new Date(v.VALID_FROM);
     return isNaN(d.getTime()) ? formatDate(v.VALID_FROM) : d.toLocaleString('en-GB');
   };
   const decidedOf = (v: HistoryVersion) => {
-    const raw = v._audit?.decidedAt;
+    const raw = v.audit?.decidedAt;
     if (!raw) return '—';
     const d = new Date(raw);
     return isNaN(d.getTime()) ? formatDate(raw) : d.toLocaleString('en-GB');
@@ -140,7 +140,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                 {changeVersions.map((v, i) => {
                   const on = i === selected;
                   const userEdit = isUserEdit(v);
-                  const dotColor = userEdit ? (v._audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
+                  const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
                   return (
                     <button
                       key={v.ID ?? i}
@@ -151,7 +151,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                       <span className="absolute -start-[14px] top-3.5 h-2.5 w-2.5 rounded-full border-2 border-white" style={{ background: dotColor }} />
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[13px] font-bold ${on ? 'text-[#A71D3A]' : 'text-slate-700'}`}>{userEdit ? editedByUser : providedByRegulator}</span>
-                        {userEdit && v._audit?.approved && <ApprovedBadge />}
+                        {userEdit && v.audit?.approved && <ApprovedBadge />}
                       </div>
                       {userEdit ? (
                         <p className="mt-0.5 truncate text-sm font-semibold text-slate-700">
@@ -161,7 +161,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                         <p className="mt-0.5 truncate text-sm font-semibold text-slate-700">{valueOf(v)}</p>
                       )}
                       <p className="mt-0.5 text-[11px] text-slate-400">
-                        {formatDate(v.VALID_FROM)} · {userEdit ? (v._audit?.changedBy ?? '—') : (sourceOf(v) ?? '—')}
+                        {formatDate(v.VALID_FROM)} · {userEdit ? (v.audit?.changedBy ?? '—') : (sourceOf(v) ?? '—')}
                       </p>
                     </button>
                   );
@@ -174,7 +174,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                   <div className="mb-2.5 flex items-center gap-2">
                     <User className="h-4 w-4 text-[#A71D3A]" />
                     <span className="text-[13px] font-bold text-slate-800">{editedByUser}</span>
-                    {current._audit?.approved && <span className="ms-auto"><ApprovedBadge /></span>}
+                    {current.audit?.approved && <span className="ms-auto"><ApprovedBadge /></span>}
                   </div>
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[12px] text-slate-400 line-through">{valueOf(changeVersions[selected + 1])}</span>
@@ -182,9 +182,9 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                     <span className="rounded-md border border-slate-300 bg-white px-2 py-1 text-[12px] font-bold text-slate-800">{valueOf(current)}</span>
                   </div>
                   <div className="space-y-1.5">
-                    {current._audit?.reason && <MetaRow label={t('fieldHistory.reason', { defaultValue: 'Reason' })} value={<span className="italic">“{current._audit.reason}”</span>} />}
-                    <MetaRow label={t('fieldHistory.changedBy', { defaultValue: 'Changed by' })} value={current._audit?.changedBy ?? '—'} />
-                    <MetaRow label={t('fieldHistory.approvedBy', { defaultValue: 'Approved by' })} value={current._audit?.approvedBy ?? t('fieldHistory.automatic', { defaultValue: 'Automatic' })} />
+                    {current.audit?.reason && <MetaRow label={t('fieldHistory.reason', { defaultValue: 'Reason' })} value={<span className="italic">“{current.audit.reason}”</span>} />}
+                    <MetaRow label={t('fieldHistory.changedBy', { defaultValue: 'Changed by' })} value={current.audit?.changedBy ?? '—'} />
+                    <MetaRow label={t('fieldHistory.approvedBy', { defaultValue: 'Approved by' })} value={current.audit?.approvedBy ?? t('fieldHistory.automatic', { defaultValue: 'Automatic' })} />
                     <MetaRow label={t('fieldHistory.decided', { defaultValue: 'Decided' })} value={decidedOf(current)} />
                   </div>
                 </div>

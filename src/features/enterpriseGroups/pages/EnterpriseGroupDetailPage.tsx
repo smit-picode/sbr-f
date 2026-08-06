@@ -16,6 +16,7 @@ import { EditEnterpriseGroupModal } from '../components/EditEnterpriseGroupModal
 import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { PendingFieldBadge } from '@/components/common/PendingFieldBadge';
 import { nullableText, formatDate } from '@/utils/format';
+import { formatGroupCode } from '../constants';
 import { usePermission } from '@/hooks';
 import type { EnterpriseGroupMember } from '@/types';
 import {
@@ -388,7 +389,7 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
           <p className="text-sm font-semibold text-slate-800 leading-snug">
             {nullableText(member.NAME_ENU)}
           </p>
-          {member.IS_GROUP_HEAD && (
+          {!!member.IS_GROUP_HEAD && (
             <span className="inline-flex items-center rounded-md bg-[#A71D3A] px-2 py-0.5 text-[10px] font-bold text-white">
               {groupHeadLabel}
             </span>
@@ -495,7 +496,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#C73050' }}>
                   <GitFork className="h-3 w-3" />
-                  {group.ENTERPRISE_GROUP_ID}
+                  {formatGroupCode(group.ENTERPRISE_GROUP_ID)}
                 </span>
                 <StatusBadge status={group.STATUS} className="rounded-md" />
                 {group.TYPE && (
@@ -504,7 +505,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
                     {group.TYPE}
                   </Badge>
                 )}
-                {group.HAS_PENDING_REQUEST && <PendingBadge />}
+                {!!group.HAS_PENDING_REQUEST && <PendingBadge />}
                 {group.HOLDING_COMPANY_FLG === 'Yes' && (
                   <Badge className="rounded-md bg-white/15 text-white border border-white/30 text-[10px] font-semibold">
                     {t('enterpriseGroupDetail.holdingCompanyBadge', { defaultValue: 'Holding company' })}
@@ -596,7 +597,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         </div>{/* end hero header card */}
       </div>{/* end back link + header wrapper */}
 
-      {group.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
+      {!!group.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -612,7 +613,12 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         <div className="overflow-x-auto">
           <ControlTree
             uci={controlStructure.uci}
-            group={{ ...controlStructure.group, type: group.TYPE, enterpriseCount: group.ENTERPRISE_COUNT }}
+            group={{
+              ...controlStructure.group,
+              groupId: formatGroupCode(controlStructure.group.groupId),
+              type: group.TYPE,
+              enterpriseCount: group.ENTERPRISE_COUNT,
+            }}
             members={controlStructure.members.map((m) => ({
               ...m,
               estCount: memberEnterprises.find((e) => e.ENTERPRISE_ID === m.enterpriseId)?.ESTABLISHMENT_COUNT ?? 0,

@@ -35,7 +35,10 @@ export interface SbrEnterprise {
   MAIN_CR: string | null;
   LEGAL_TYPE: string | null;
   ESTABLISHMENT_COUNT: number;
-  HAS_PENDING_REQUEST?: boolean;
+  // Oracle SQL has no BOOLEAN type, so SBR_ENTERPRISES_API returns this flag as 1/0 and the
+  // list endpoint passes it straight through. The detail endpoint and the ORM fallback still
+  // send a real boolean, so both shapes are accepted — always read it via `!!`.
+  HAS_PENDING_REQUEST?: boolean | number;
 }
 
 export interface EnterpriseFilters {
@@ -77,17 +80,13 @@ export interface EnterpriseSecondaryActivity {
   FROM_SBR_ID: number;
 }
 
+// Shape as SBR_ENTERPRISES_API.GET_DETAIL returns it — the API passes these rows through
+// unmodified. Not currently rendered anywhere; kept so the payload stays typed.
 export interface EnterpriseLifecycleEvent {
   TYPE: string;
   TITLE: string;
-  DATE: string | null;
+  EVENT_DATE: string | null;
   REF: string;
-}
-
-export interface EnterpriseChangeHistoryUser {
-  ID: number;
-  NAME: string | null;
-  EMAIL: string | null;
 }
 
 export interface EnterpriseChangeHistoryEntry {
@@ -100,8 +99,10 @@ export interface EnterpriseChangeHistoryEntry {
   REASON: string;
   CREATED_AT: string;
   APPROVAL_DATE: string | null;
-  changedByUser?: EnterpriseChangeHistoryUser | null;
-  approvedByUser?: EnterpriseChangeHistoryUser | null;
+  // Flat columns exactly as SBR_ENTERPRISES_API.GET_DETAIL returns them — the API no longer
+  // re-nests these into changedByUser / approvedByUser objects.
+  CHANGED_BY_EMAIL?: string | null;
+  APPROVED_BY_EMAIL?: string | null;
 }
 
 export interface EnterpriseProfilingChange {
@@ -112,8 +113,10 @@ export interface EnterpriseProfilingChange {
   CR: string | null;
   REASON: string;
   CREATED_AT: string;
-  changedByUser?: EnterpriseChangeHistoryUser | null;
-  approvedByUser?: EnterpriseChangeHistoryUser | null;
+  // Flat columns exactly as SBR_ENTERPRISES_API.GET_DETAIL returns them — the API no longer
+  // re-nests these into changedByUser / approvedByUser objects.
+  CHANGED_BY_EMAIL?: string | null;
+  APPROVED_BY_EMAIL?: string | null;
 }
 
 export interface EnterpriseDetail {

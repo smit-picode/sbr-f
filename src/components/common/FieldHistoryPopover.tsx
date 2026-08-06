@@ -51,14 +51,14 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
   const fmtReq = (x: unknown) => (x == null || x === '' ? '—' : typeof x === 'number' ? x.toLocaleString() : String(x));
 
   // Open/closed change requests for this field (PENDING / REJECTED), shown above the applied history.
-  const requestEntries = versions.filter((v) => v._request);
-  const realVersions = versions.filter((v) => !v._request);
+  const requestEntries = versions.filter((v) => v.request);
+  const realVersions = versions.filter((v) => !v.request);
   const fieldRequests = requestEntries.filter((r) => r.changes && Object.prototype.hasOwnProperty.call(r.changes, fieldKey));
 
   // Collapse versions where this attribute's value did not change (versions arrive newest-first).
   const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
-  const isUserEdit = (v: HistoryVersion) => !!(v._audit && v._audit.columns.includes(fieldKey));
+  const isUserEdit = (v: HistoryVersion) => !!(v.audit && v.audit.columns.includes(fieldKey));
 
   // Single chronological timeline (newest first). Previously requests were always rendered
   // above applied versions regardless of date — correct when the request is the newest event,
@@ -128,11 +128,11 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                       <span className="mx-1 text-slate-400">→</span>
                       {fmtReq(ch?.new)}
                     </p>
-                    {r._audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r._audit.reason}”</p>}
+                    {r.audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r.audit.reason}”</p>}
                     <p className="mt-0.5 text-[11px] text-slate-400">
                       {formatDate(r.VALID_FROM)}
-                      {r._audit?.changedBy && ` · by ${r._audit.changedBy}`}
-                      {rejected && r._audit?.approvedBy && ` · rejected by ${r._audit.approvedBy}`}
+                      {r.audit?.changedBy && ` · by ${r.audit.changedBy}`}
+                      {rejected && r.audit?.approvedBy && ` · rejected by ${r.audit.approvedBy}`}
                     </p>
                   </li>
                 );
@@ -140,7 +140,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
 
               const v = item.data;
               const userEdit = isUserEdit(v);
-              const dotColor = userEdit ? (v._audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
+              const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
               return (
                 <li key={v.ID ?? i} className="relative ps-5">
                   <span className="absolute start-0 top-1.5 h-2 w-2 rounded-full border-2 border-white" style={{ background: dotColor }} />
@@ -154,7 +154,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                         : t('fieldHistory.providedByRegulator', { defaultValue: 'Provided by regulator' })}
                     </span>
                     {userEdit
-                      ? (v._audit?.approved && (
+                      ? (v.audit?.approved && (
                           <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold uppercase text-emerald-700">
                             {t('fieldHistory.approved', { defaultValue: 'Approved' })}
                           </span>
@@ -170,13 +170,13 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                   ) : (
                     <p className="mt-1 text-sm font-medium text-slate-700">{valueOf(v)}</p>
                   )}
-                  {userEdit && v._audit?.reason && (
-                    <p className="mt-0.5 text-xs italic text-slate-500">“{v._audit.reason}”</p>
+                  {userEdit && v.audit?.reason && (
+                    <p className="mt-0.5 text-xs italic text-slate-500">“{v.audit.reason}”</p>
                   )}
                   <p className="mt-0.5 text-[11px] text-slate-400">
                     {formatDate(v.VALID_FROM)}
-                    {userEdit && v._audit?.changedBy && ` · by ${v._audit.changedBy}`}
-                    {userEdit && v._audit?.approvedBy && ` · approved by ${v._audit.approvedBy}`}
+                    {userEdit && v.audit?.changedBy && ` · by ${v.audit.changedBy}`}
+                    {userEdit && v.audit?.approvedBy && ` · approved by ${v.audit.approvedBy}`}
                   </p>
                 </li>
               );

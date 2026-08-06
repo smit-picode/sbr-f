@@ -55,9 +55,16 @@ export const USERS_DEFAULT_FILTERS: {
   search: '',
 };
 
-// Select sentinel for the Users "Role" filter meaning "no role filter". A Radix SelectItem
-// cannot have an empty-string value, hence a sentinel rather than ''.
+// Select sentinels for the Users "Role" / "Status" filters meaning "no filter". A Radix
+// SelectItem cannot have an empty-string value, hence a sentinel rather than ''.
 export const ALL_ROLES_VALUE: string = '__all__';
+export const ALL_STATUS_VALUE: string = '__all__';
+
+// Values must match USER_STATUS_FILTER in the backend's src/utils/enums.ts
+export const USER_STATUS_FILTER_OPTIONS: { value: string; i18nKey: string; label: string }[] = [
+  { value: 'active',   i18nKey: 'admin.users.statusActive',   label: 'Active'   },
+  { value: 'inactive', i18nKey: 'admin.users.statusInactive', label: 'Inactive' },
+];
 
 // Column ids the Users table exposes as sortable headers. A subset of the backend allowlist
 // (USERS_SORTABLE_COLUMNS in src/utils/enums.ts, which also accepts EMAIL): the User column

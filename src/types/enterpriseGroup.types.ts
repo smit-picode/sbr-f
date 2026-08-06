@@ -1,6 +1,8 @@
 export interface SbrEnterpriseGroup {
   ID:                       number;
-  ENTERPRISE_GROUP_ID:      string;
+  // Canonical NUMBER business key from SBR_ENTERPRISE_GROUP_SEQ (e.g. 7001), stable across SCD2
+  // versions. Rendered as "EGR-7001" via formatGroupCode() — the prefix is display-only.
+  ENTERPRISE_GROUP_ID:      number;
   GROUP_HEAD_ENTERPRISE_ID: number | null;
   NAME_ENU:                 string | null;
   NAME_ARA:                 string | null;
@@ -29,7 +31,9 @@ export interface SbrEnterpriseGroup {
   EMPLOYEE_COUNT:      number;
   SECTOR:              string | null;
   DATA_SOURCES:        string | null;
-  HAS_PENDING_REQUEST?: boolean;
+  // The stored procedure sends 1/0 (a ref cursor cannot carry a BOOLEAN); the ORM backup path
+  // sends a real boolean. Always coerce with !! before rendering — `{0 && <X/>}` prints "0".
+  HAS_PENDING_REQUEST?: boolean | number;
   PENDING_FIELDS?:      Record<string, number>;
 }
 
@@ -55,7 +59,8 @@ export interface EnterpriseGroupMember {
   EMPLOYMENT_COUNT: number | null;
   ESTABLISHMENT_COUNT: number;
   ENTERPRISE_GROUP_ID: number | null;
-  IS_GROUP_HEAD:  boolean;
+  // 1/0 from the procedure, boolean from the ORM backup — coerce with !! before rendering.
+  IS_GROUP_HEAD:  boolean | number;
 }
 
 export interface EnterpriseGroupControlStructure {

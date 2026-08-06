@@ -15,7 +15,8 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
         <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span>
-        {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
+        {/* `!!` is required: the API sends Oracle's 1/0, and React renders a bare 0 as text. */}
+        {!!row.original.HAS_PENDING_REQUEST && <PendingBadge />}
       </span>
     ),
     enableSorting: true,

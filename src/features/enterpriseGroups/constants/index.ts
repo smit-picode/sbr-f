@@ -57,3 +57,16 @@ export const ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS: string[] = [
 ];
 
 export const ENTERPRISE_GROUP_HOLDING_OPTIONS: string[] = ['Yes', 'No'];
+
+// The DB stores the canonical NUMBER business key (7001); the UI has always shown "EGR-7001", so
+// the prefix is added at render time only. Kept local to this feature rather than in the shared
+// utils/format.ts, which every other tab imports.
+export const ENTERPRISE_GROUP_CODE_PREFIX = 'EGR-';
+
+export const formatGroupCode = (id: number | string | null | undefined): string =>
+  id === null || id === undefined || id === '' ? '' : `${ENTERPRISE_GROUP_CODE_PREFIX}${id}`;
+
+// Users may type either "7001" or "EGR-7001"; the backend matches the numeric column, so drop the
+// prefix before it goes into the search param.
+export const stripGroupCodePrefix = (term: string): string =>
+  term.replace(new RegExp(`^${ENTERPRISE_GROUP_CODE_PREFIX}`, 'i'), '');
