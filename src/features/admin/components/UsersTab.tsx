@@ -485,9 +485,9 @@ export function UsersTab({
             // Display-only identifier, same convention as REQ-/EGR- codes elsewhere.
             const userCode = `USR-${String(viewTarget.ID).padStart(4, '0')}`;
             const rows = [
-              { key: 'role',    icon: Shield,   label: t('admin.users.roleIdLabel', { defaultValue: 'Role ID' }), value: roleNames.join(', ') || '—', mono: true },
-              { key: 'created', icon: Calendar, label: t('admin.users.createdLabel', { defaultValue: 'Created' }), value: formatDate(viewTarget.CREATED_AT), mono: false },
-              { key: 'id',      icon: IdCard,   label: t('admin.users.userIdLabel', { defaultValue: 'User ID' }), value: userCode, mono: true },
+              { key: 'role',    icon: Shield,   label: t('admin.users.roleIdLabel', { defaultValue: 'Role ID' }), value: roleNames.join(', ') || '—' },
+              { key: 'created', icon: Calendar, label: t('admin.users.createdLabel', { defaultValue: 'Created' }), value: formatDate(viewTarget.CREATED_AT) },
+              { key: 'id',      icon: IdCard,   label: t('admin.users.userIdLabel', { defaultValue: 'User ID' }), value: userCode },
             ];
             return (
               <>
@@ -522,13 +522,13 @@ export function UsersTab({
                 {/* Attribute rows — full-bleed dividers give the label/value pairs a shared
                     baseline, replacing the stack of individually-bordered grey cards. */}
                 <div className="border-y border-slate-200">
-                  {rows.map(({ key, icon: Icon, label, value, mono }) => (
+                  {rows.map(({ key, icon: Icon, label, value }) => (
                     <div key={key} className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 last:border-b-0">
                       <span className="flex shrink-0 items-center gap-2 text-sm text-slate-500">
                         <Icon className="h-4 w-4 text-slate-400" />
                         {label}
                       </span>
-                      <span className={`truncate text-slate-900 ${mono ? 'font-mono text-xs font-semibold' : 'text-sm font-semibold'}`}>
+                      <span className="truncate text-sm font-semibold text-slate-900">
                         {value}
                       </span>
                     </div>
