@@ -22,11 +22,14 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
     enableSorting: true,
   },
   {
-    accessorKey: 'ESTABLISHMENT_NAME',
+    // Sorts by ESTABLISHMENT_SBR_ID (numeric), not the displayed name — SBR_LEGAL_UNITS_API.GET_LIST's
+    // sort_expr does support the joined ESTABLISHMENT_NAME too, but the backend validator's
+    // LEGAL_UNITS_SORTABLE_COLUMNS whitelist only allows ESTABLISHMENT_SBR_ID, matching the column
+    // filter's "Establishment (SBR ID)" semantics. The cell below ignores getValue() and renders
+    // both the SBR ID and the name from row.original directly.
+    accessorKey: 'ESTABLISHMENT_SBR_ID',
     header: t('columns.ESTABLISHMENT', { defaultValue: 'ESTABLISHMENT' }),
-    // Comes from the joined establishment association, not a column on SbrLegalUnits —
-    // not sortable server-side.
-    enableSorting: false,
+    enableSorting: true,
     cell: ({ row }) => {
       const sbrId = row.original.ESTABLISHMENT_SBR_ID;
       const name = row.original.ESTABLISHMENT_NAME;
@@ -51,7 +54,7 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
       const color = SOURCE_COLOR[val] ?? '#64748b';
       return (
         <span
-          className="inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white"
+          className="inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-xs font-semibold text-white"
           style={{ background: color }}
         >
           {val}
@@ -62,12 +65,15 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
   {
     accessorKey: 'SOURCE_TABLE',
     header: t('columns.SOURCE_TABLE', { defaultValue: 'SOURCE TABLE' }),
-    cell: ({ getValue }) => <span className="font-mono text-[11px] text-slate-400">{nullableText(getValue<string | null>())}</span>,
+    cell: ({ getValue }) => <span className="font-mono text-xs text-slate-400">{nullableText(getValue<string | null>())}</span>,
   },
   {
+    // font-mono text-xs to match IDENTIFIER_VALUE — type and value are the two halves of the
+    // same regulator-issued identifier (CR_NUM / 50048-P), so they render in the same
+    // code/ID style per the design system's "ID / code" cell convention, not as prose.
     accessorKey: 'IDENTIFIER_TYPE',
     header: t('columns.IDENTIFIER_TYPE', { defaultValue: 'IDENTIFIER TYPE' }),
-    cell: ({ getValue }) => <span className="text-sm text-slate-600">{nullableText(getValue<string | null>())}</span>,
+    cell: ({ getValue }) => <span className="font-mono text-xs text-slate-600">{nullableText(getValue<string | null>())}</span>,
   },
   {
     accessorKey: 'IDENTIFIER_VALUE',
@@ -86,7 +92,7 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
       const val = getValue<string | null>();
       if (!val) {
         return (
-          <span className="inline-flex items-center rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+          <span className="inline-flex items-center rounded-md bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-700">
             {t('legalUnits.current', { defaultValue: 'Current' })}
           </span>
         );

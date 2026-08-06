@@ -72,7 +72,7 @@ export const getUsersColumns = ({
             {names.map((name) => (
               <span
                 key={name}
-                className={`rounded px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${getRoleBadgeClass(name)}`}
+                className={`rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${getRoleBadgeClass(name)}`}
               >
                 {name}
               </span>
@@ -87,7 +87,7 @@ export const getUsersColumns = ({
       header: t('admin.users.colStatus'),
       cell: ({ row }) => (
         <span
-          className={`rounded px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap uppercase ${
+          className={`rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap uppercase ${
             row.original.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
           }`}
         >

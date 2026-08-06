@@ -93,7 +93,28 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     [initialHeadSbrId, currentRows]
   );
 
-  const searchResults: AttachableEstablishment[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
+  // Establishments removed in this session but not yet saved are local-only state — they are
+  // still attached to THIS enterprise in the database, so the /establishments/attachable search
+  // (which only offers units with ASSOCIATED_ENTERPRISE_ID IS NULL) can never find them again.
+  // Match them client-side from data the modal already has, so a removal can be undone before
+  // saving. Matched against the same "SBR ID, name, or CR" fields the picker searches by.
+  const localRestoreMatches: AttachableEstablishment[] = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    if (!q) return [];
+    return establishments
+      .filter((e) => removed.has(e.SBR_ID))
+      .filter((e) =>
+        String(e.SBR_ID).includes(q) ||
+        (e.NAME_ENU ?? '').toLowerCase().includes(q) ||
+        (e.MOCI_CR_NUM ?? '').toLowerCase().includes(q))
+      .map((e) => ({
+        ID: e.ID, SBR_ID: e.SBR_ID, NAME_ENU: e.NAME_ENU, NAME_ARA: e.NAME_ARA,
+        MOCI_CR_NUM: e.MOCI_CR_NUM, EST_STATUS: e.EST_STATUS, SECTOR_ID: e.SECTOR_ID, LEGAL_TYPE: e.LEGAL_TYPE,
+      }));
+  }, [establishments, removed, debouncedSearch]);
+
+  const remoteResults: AttachableEstablishment[] = (searchData?.data ?? []).filter((u) => !memberIds.has(u.SBR_ID));
+  const searchResults: AttachableEstablishment[] = [...localRestoreMatches, ...remoteResults];
 
   const hasChanges =
     name.trim() !== (enterprise.NAME_ENU ?? '').trim() ||
@@ -112,7 +133,14 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   };
 
   const addRow = (u: AttachableEstablishment) => {
-    setAdded((prev) => [...prev, { SBR_ID: u.SBR_ID, NAME_ENU: u.NAME_ENU, MOCI_CR_NUM: u.MOCI_CR_NUM, EST_STATUS: u.EST_STATUS }]);
+    // A result that is still in `removed` is an original member the user is un-removing, not a
+    // new attachment — clear the removal instead of pushing a duplicate onto `added` (which would
+    // send it in both removeEstablishmentSbrIds and addEstablishmentSbrIds on save).
+    if (removed.has(u.SBR_ID)) {
+      setRemoved((prev) => { const n = new Set(prev); n.delete(u.SBR_ID); return n; });
+    } else {
+      setAdded((prev) => [...prev, { SBR_ID: u.SBR_ID, NAME_ENU: u.NAME_ENU, MOCI_CR_NUM: u.MOCI_CR_NUM, EST_STATUS: u.EST_STATUS }]);
+    }
     setSearch('');
   };
 

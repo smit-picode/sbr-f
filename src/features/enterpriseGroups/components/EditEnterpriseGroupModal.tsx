@@ -91,7 +91,24 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     { skip: !open || !debouncedMemberSearch }
   );
 
-  const searchResults = (searchData?.data ?? []).filter((e) => !memberIds.has(e.ENTERPRISE_ID));
+  // The `ungrouped: true` search only returns enterprises with no group at all — an enterprise
+  // removed from THIS group a moment ago is still grouped in the database until Save Changes is
+  // clicked, so the API correctly (from its point of view) excludes it too, and it becomes
+  // unsearchable until the edit is saved (NPC-215). Since the modal already has this group's full
+  // original membership via `currentMembers`, prepend any removed member whose name matches the
+  // query — no extra request, and no backend change needed.
+  const removedMemberSearchMatches: MemberRow[] = useMemo(() => {
+    const q = debouncedMemberSearch.trim().toUpperCase();
+    if (!q) return [];
+    return currentMembers
+      .filter((m) => removedIds.has(m.ENTERPRISE_ID) && (m.NAME_ENU ?? '').toUpperCase().includes(q))
+      .map((m) => ({ ENTERPRISE_ID: m.ENTERPRISE_ID, NAME_ENU: m.NAME_ENU, ESTABLISHMENT_COUNT: m.ESTABLISHMENT_COUNT ?? 0, STATUS: m.STATUS }));
+  }, [currentMembers, removedIds, debouncedMemberSearch]);
+
+  const searchResults = [
+    ...removedMemberSearchMatches,
+    ...(searchData?.data ?? []).filter((e) => !removedMemberSearchMatches.some((r) => r.ENTERPRISE_ID === e.ENTERPRISE_ID)),
+  ].filter((e) => !memberIds.has(e.ENTERPRISE_ID));
 
   useEffect(() => {
     if (open && group) {
@@ -124,6 +141,16 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   };
 
   const addMember = (enterprise: { ENTERPRISE_ID: number; NAME_ENU: string | null; STATUS: string | null }) => {
+    // Re-adding an enterprise removed earlier in this same (unsaved) session is a pure undo:
+    // clear the removal instead of ALSO queuing it as a fresh add, or the submit payload would
+    // send the same ID in both addMemberEnterpriseIds and removeMemberEnterpriseIds. Clearing
+    // removedIds also restores the original currentMembers row (with its real ESTABLISHMENT_COUNT)
+    // instead of re-adding it as a new member defaulted to 0.
+    if (removedIds.has(enterprise.ENTERPRISE_ID)) {
+      setRemovedIds((prev) => { const next = new Set(prev); next.delete(enterprise.ENTERPRISE_ID); return next; });
+      setMemberSearch('');
+      return;
+    }
     setAddedMembers((prev) => [...prev, { ENTERPRISE_ID: enterprise.ENTERPRISE_ID, NAME_ENU: enterprise.NAME_ENU, ESTABLISHMENT_COUNT: 0, STATUS: enterprise.STATUS }]);
     setMemberSearch('');
   };
@@ -137,23 +164,52 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     setHeadId((prev) => (prev === enterpriseId ? null : prev));
   };
 
+  // Shared by hasChanges() and the submit payload builder below, so both agree on what
+  // "changed" means field-by-field — never send a field to the backend that this same
+  // normalization says is unchanged (see changedFields()).
+  const normalize = (v: string | null | undefined) => (v == null ? '' : String(v).trim());
+  const originalGroupStartDate = group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : '';
+
   const hasChanges = (): boolean => {
-    const n = (v: string | null | undefined) => (v == null ? '' : String(v).trim());
     return (
-      n(form.NAME_ENU) !== n(group.NAME_ENU) ||
-      n(form.NAME_ARA) !== n(group.NAME_ARA) ||
-      n(form.UCI_NAME) !== n(group.UCI_NAME) ||
-      n(form.UCI_TYPE) !== n(group.UCI_TYPE) ||
-      n(form.UCI_COUNTRY) !== n(group.UCI_COUNTRY) ||
-      n(form.UCI_IDENTIFIER) !== n(group.UCI_IDENTIFIER) ||
-      n(form.PRINCIPAL_ISIC_2DIGIT) !== n(group.PRINCIPAL_ISIC_2DIGIT) ||
-      n(form.HOLDING_COMPANY_FLG) !== n(group.HOLDING_COMPANY_FLG) ||
-      n(form.STATUS) !== n(group.STATUS) ||
-      n(form.GROUP_START_DATE) !== n(group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : null) ||
+      normalize(form.NAME_ENU) !== normalize(group.NAME_ENU) ||
+      normalize(form.NAME_ARA) !== normalize(group.NAME_ARA) ||
+      normalize(form.UCI_NAME) !== normalize(group.UCI_NAME) ||
+      normalize(form.UCI_TYPE) !== normalize(group.UCI_TYPE) ||
+      normalize(form.UCI_COUNTRY) !== normalize(group.UCI_COUNTRY) ||
+      normalize(form.UCI_IDENTIFIER) !== normalize(group.UCI_IDENTIFIER) ||
+      normalize(form.PRINCIPAL_ISIC_2DIGIT) !== normalize(group.PRINCIPAL_ISIC_2DIGIT) ||
+      normalize(form.HOLDING_COMPANY_FLG) !== normalize(group.HOLDING_COMPANY_FLG) ||
+      normalize(form.STATUS) !== normalize(group.STATUS) ||
+      normalize(form.GROUP_START_DATE) !== normalize(originalGroupStartDate) ||
       addedMembers.length > 0 ||
       removedIds.size > 0 ||
       headId !== initialHeadId
     );
+  };
+
+  // Only the fields the user actually touched — never the full form. SBR_ENTERPRISE_GROUPS_API.
+  // SUBMIT_UPDATE diffs whatever keys are PRESENT in the payload against the current stored row
+  // and reports any string mismatch as a change; sending every field unconditionally (the
+  // previous behaviour) made an untouched field appear as "changed" the moment its resubmitted
+  // value didn't byte-for-byte match the stored value — the fixed bug (NPC-213): Holding Co. was
+  // the only edit, but Group Start still showed up in the change request because the date value
+  // round-tripped through the API and back with a different string representation than what is
+  // stored. Now the field is simply never sent when unchanged, so no round-trip mismatch — of any
+  // field, not just dates — can ever surface as a false change again.
+  const changedFields = (): Partial<Record<keyof FormState, string | null>> => {
+    const out: Partial<Record<keyof FormState, string | null>> = {};
+    if (normalize(form.NAME_ENU) !== normalize(group.NAME_ENU)) out.NAME_ENU = form.NAME_ENU.trim() || null;
+    if (normalize(form.NAME_ARA) !== normalize(group.NAME_ARA)) out.NAME_ARA = form.NAME_ARA.trim() || null;
+    if (normalize(form.UCI_NAME) !== normalize(group.UCI_NAME)) out.UCI_NAME = form.UCI_NAME.trim() || null;
+    if (normalize(form.UCI_TYPE) !== normalize(group.UCI_TYPE)) out.UCI_TYPE = form.UCI_TYPE || null;
+    if (normalize(form.UCI_COUNTRY) !== normalize(group.UCI_COUNTRY)) out.UCI_COUNTRY = form.UCI_COUNTRY.trim() || null;
+    if (normalize(form.UCI_IDENTIFIER) !== normalize(group.UCI_IDENTIFIER)) out.UCI_IDENTIFIER = form.UCI_IDENTIFIER.trim() || null;
+    if (normalize(form.PRINCIPAL_ISIC_2DIGIT) !== normalize(group.PRINCIPAL_ISIC_2DIGIT)) out.PRINCIPAL_ISIC_2DIGIT = form.PRINCIPAL_ISIC_2DIGIT.trim() || null;
+    if (normalize(form.HOLDING_COMPANY_FLG) !== normalize(group.HOLDING_COMPANY_FLG)) out.HOLDING_COMPANY_FLG = form.HOLDING_COMPANY_FLG || null;
+    if (normalize(form.STATUS) !== normalize(group.STATUS)) out.STATUS = form.STATUS || null;
+    if (normalize(form.GROUP_START_DATE) !== normalize(originalGroupStartDate)) out.GROUP_START_DATE = form.GROUP_START_DATE || null;
+    return out;
   };
 
   const handleSubmit = () => {
@@ -187,17 +243,11 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       await updateGroup({
         id: group.ID,
         data: {
-          NAME_ENU:                   form.NAME_ENU.trim() || null,
-          NAME_ARA:                   form.NAME_ARA.trim() || null,
-          UCI_NAME:                   form.UCI_NAME.trim() || null,
-          UCI_TYPE:                   form.UCI_TYPE || null,
-          UCI_COUNTRY:                form.UCI_COUNTRY.trim() || null,
-          UCI_IDENTIFIER:             form.UCI_IDENTIFIER.trim() || null,
-          PRINCIPAL_ISIC_2DIGIT:      form.PRINCIPAL_ISIC_2DIGIT.trim() || null,
-          HOLDING_COMPANY_FLG:        form.HOLDING_COMPANY_FLG || null,
-          STATUS:                     form.STATUS || null,
-          GROUP_START_DATE:           form.GROUP_START_DATE || null,
-          GROUP_HEAD_ENTERPRISE_ID:   headId,
+          ...changedFields(),
+          // Same principle for the head: only send it when it actually changed. When omitted,
+          // SUBMIT_UPDATE falls back to the current stored head for its "head must remain a
+          // member" validation, so a membership-only edit is still validated correctly.
+          ...(headId !== initialHeadId ? { GROUP_HEAD_ENTERPRISE_ID: headId } : {}),
           addMemberEnterpriseIds:     addedMembers.map((m) => m.ENTERPRISE_ID),
           removeMemberEnterpriseIds:  Array.from(removedIds),
           comment,
