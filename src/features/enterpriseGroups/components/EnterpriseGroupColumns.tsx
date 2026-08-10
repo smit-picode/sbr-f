@@ -85,8 +85,9 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ENTERPRISE_COUNT',
     header: t('columns.ENTERPRISES', { defaultValue: 'ENTERPRISES' }),
-    // Computed in JS after the query — not sortable server-side.
-    enableSorting: false,
+    // Derived, but the list procedure now orders by the same roll-up subquery it projects
+    // (NPC-187), so server-side sort is exact over the full dataset.
+    enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -100,8 +101,9 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
     header: t('columns.ESTABLISHMENTS', { defaultValue: 'ESTABLISHMENTS' }),
-    // Computed in JS after the query — not sortable server-side.
-    enableSorting: false,
+    // Derived, but the list procedure now orders by the same roll-up subquery it projects
+    // (NPC-187), so server-side sort is exact over the full dataset.
+    enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
@@ -114,10 +116,11 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'EMPLOYEE_COUNT',
     header: t('columns.EMPLOYEES', { defaultValue: 'EMPLOYEES' }),
-    // Response field is EMPLOYEE_COUNT (computed in JS) but the real, sortable column is
-    // TOTAL_EMPLOYEES — accessorKey mismatch means this can't be wired to server-side sort
-    // directly, so it's disabled here rather than silently sending an invalid sortBy.
-    enableSorting: false,
+    // EMPLOYEE_COUNT is the LIVE sum over current members, deliberately NOT the stored
+    // TOTAL_EMPLOYEES column — the two can disagree when the stored value is stale. The list
+    // procedure accepts EMPLOYEE_COUNT as its own sort key (NPC-187), so the header sorts by
+    // exactly the number the cell displays.
+    enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (

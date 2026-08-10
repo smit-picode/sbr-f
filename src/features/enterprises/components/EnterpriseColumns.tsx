@@ -58,9 +58,9 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
         </span>
       );
     },
-    // Computed in JS after the query (per-enterprise establishment count) — not a real
-    // column, so the backend can't sort by it.
-    enableSorting: false,
+    // Derived, not a real column, but the list procedure now orders by the same member-count
+    // subquery it projects (NPC-184), so server-side sort is exact over the full dataset.
+    enableSorting: true,
   },
   {
     accessorKey: 'LEGAL_TYPE',
