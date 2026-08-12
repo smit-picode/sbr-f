@@ -460,6 +460,8 @@
     "rejected": "مرفوض",
     "changedBy": "غُيّر بواسطة",
     "approvedBy": "اعتُمد بواسطة",
+    "updatedBy": "حُدِّث بواسطة",
+    "rejectedBy": "رُفض بواسطة",
     "decided": "تاريخ القرار",
     "automatic": "تلقائي",
     "reason": "السبب",

@@ -460,6 +460,8 @@
     "rejected": "Rejected",
     "changedBy": "Changed by",
     "approvedBy": "Approved by",
+    "updatedBy": "Updated by",
+    "rejectedBy": "Rejected by",
     "decided": "Decided",
     "automatic": "Automatic",
     "reason": "Reason",

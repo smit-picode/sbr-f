@@ -20,6 +20,16 @@ export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'Mixed-G
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
 export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
 
+// Legal Type SUGGESTIONS, deliberately not a closed enum. The 2026-08-11 requirements call
+// asked for a dropdown of the known values while still allowing a value that is not in the
+// list, because no verified exhaustive list of Qatari legal types exists. So this drives a
+// datalist (type-ahead suggestions on a normal text input), NOT a Select, and LEGAL_TYPE is
+// deliberately absent from the validate() checks — anything the user types is accepted.
+// Values are the distinct LEGAL_TYPE values currently present on active establishments.
+export const LEGAL_TYPE_SUGGESTIONS: string[] = [
+  'Sole Proprietorship', 'Partnership', 'Branch', 'WLL', 'LLC', 'Single Person Company',
+];
+
 // Max length validations from backend validator
 export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   NAME_ENU: 500,
@@ -97,7 +107,17 @@ export const ESTABLISHMENT_LOCKED_FIELDS: string[] = [
   'REG_DATE', 'REG_EXPIRY_DATE', 'REG_CANCEL_DATE',
   'MAIN_BRANCH_FLG',  // Branch Flag
 ];
-export const isEstablishmentFieldEditable = (field: string): boolean => !ESTABLISHMENT_LOCKED_FIELDS.includes(field);
+
+// Every `*_SOURCE` column is provenance the database owns — it records which system or user
+// last set the paired value, so the application must never write it. Matched by suffix rather
+// than listed one by one: SBR_ESTABLISHMENTS carries 17 of them today and the pipeline adds
+// more over time, and a suffix rule cannot fall out of date the way a hand-kept list would.
+// Requirement from the 2026-08-11 requirements call ("all source columns read-only, all over
+// the project"). The paired non-source field stays editable; only the provenance is locked.
+const SOURCE_FIELD_SUFFIX = '_SOURCE';
+
+export const isEstablishmentFieldEditable = (field: string): boolean =>
+  !field.endsWith(SOURCE_FIELD_SUFFIX) && !ESTABLISHMENT_LOCKED_FIELDS.includes(field);
 
 // Columns SBR_ESTABLISHMENTS_API.GET_LIST accepts for full-dataset sorting — must match
 // ESTABLISHMENTS_SORTABLE_COLUMNS in sbr-backend/src/utils/enums.ts exactly. The table shows

@@ -14,17 +14,21 @@ export function userRoleNames(user: SbrUser): string[] {
 
 export const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes('SUPER_ADMIN');
 
+// Soft tint badges (light fill, dark text) instead of the previous solid saturated fills —
+// reads calmer in a dense table and stays inside the design-system palette (slate, blue,
+// emerald, amber) plus the maroon theme accent, dropping the off-palette purple/orange/rose.
 const ROLE_BADGE_PALETTE = [
-  'bg-[#A71D3A] text-white',   // maroon
-  'bg-slate-600 text-white',   // charcoal
-  'bg-emerald-700 text-white', // green
-  'bg-[#6B4FA0] text-white',   // purple
-  'bg-orange-600 text-white',  // orange
-  'bg-rose-700 text-white',    // rose/pink
+  'bg-[#A71D3A]/10 text-[#A71D3A]', // maroon (theme accent)
+  'bg-slate-100 text-slate-700',    // slate
+  'bg-emerald-50 text-emerald-700', // emerald
+  'bg-blue-50 text-blue-700',       // blue
+  'bg-amber-50 text-amber-700',     // amber
 ];
 
 export function getRoleBadgeClass(roleName: string): string {
-  if (roleName === 'SUPER_ADMIN') return 'bg-slate-800 text-white';
+  // Same light-red tint as the Status column's INACTIVE badge, so SUPER_ADMIN reads as the
+  // one role that stands out from every other role's soft tint.
+  if (roleName === 'SUPER_ADMIN') return 'bg-red-100 text-red-700';
   const hash = roleName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return ROLE_BADGE_PALETTE[hash % ROLE_BADGE_PALETTE.length];
 }

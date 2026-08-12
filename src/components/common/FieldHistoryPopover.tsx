@@ -131,8 +131,8 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                     {r.audit?.reason && <p className="mt-0.5 text-xs italic text-slate-500">“{r.audit.reason}”</p>}
                     <p className="mt-0.5 text-[11px] text-slate-400">
                       {formatDate(r.VALID_FROM)}
-                      {r.audit?.changedBy && ` · by ${r.audit.changedBy}`}
-                      {rejected && r.audit?.approvedBy && ` · rejected by ${r.audit.approvedBy}`}
+                      {r.audit?.changedBy && ` · ${t('fieldHistory.updatedBy', { defaultValue: 'Updated by' })} ${r.audit.changedBy}`}
+                      {rejected && r.audit?.approvedBy && ` · ${t('fieldHistory.rejectedBy', { defaultValue: 'Rejected by' })} ${r.audit.approvedBy}`}
                     </p>
                   </li>
                 );
@@ -175,8 +175,8 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                   )}
                   <p className="mt-0.5 text-[11px] text-slate-400">
                     {formatDate(v.VALID_FROM)}
-                    {userEdit && v.audit?.changedBy && ` · by ${v.audit.changedBy}`}
-                    {userEdit && v.audit?.approvedBy && ` · approved by ${v.audit.approvedBy}`}
+                    {userEdit && v.audit?.changedBy && ` · ${t('fieldHistory.updatedBy', { defaultValue: 'Updated by' })} ${v.audit.changedBy}`}
+                    {userEdit && v.audit?.approvedBy && ` · ${t('fieldHistory.approvedBy', { defaultValue: 'Approved by' })} ${v.audit.approvedBy}`}
                   </p>
                 </li>
               );

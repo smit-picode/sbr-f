@@ -19,8 +19,10 @@ import {
   MAIN_BRANCH_FLG_OPTIONS,
   ESTABLISHMENTS_SOURCE_CODE_OPTIONS,
   ESTABLISHMENTS_MAX_LENGTHS,
+  LEGAL_TYPE_SUGGESTIONS,
   isEstablishmentFieldEditable,
 } from '../constants';
+import { SbrIdSearchInput } from '@/components/common/SbrIdSearchInput';
 
 interface Props {
   frame: SbrEstablishment | null;
@@ -391,7 +393,20 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.legalType')}</Label>
-            <Input className={inp('LEGAL_TYPE')} value={sel('LEGAL_TYPE')} onChange={(e) => set('LEGAL_TYPE', e.target.value)} />
+            {/* Suggestions, not a closed list: a datalist offers the known legal types while
+                still accepting anything typed, per the "dropdown but allow manual entry"
+                requirement. A Select would reject unknown values, which is the one thing this
+                field must not do. */}
+            <Input
+              className={inp('LEGAL_TYPE')}
+              value={sel('LEGAL_TYPE')}
+              onChange={(e) => set('LEGAL_TYPE', e.target.value)}
+              list="establishment-legal-type-options"
+              autoComplete="off"
+            />
+            <datalist id="establishment-legal-type-options">
+              {LEGAL_TYPE_SUGGESTIONS.map((v) => <option key={v} value={v} />)}
+            </datalist>
             <FieldErr msg={err('LEGAL_TYPE')} />
           </div>
           <div className="space-y-1">
@@ -455,7 +470,15 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
             <Label>{t('editEstablishment.fields.mainBranchSbrId')}</Label>
-            <Input type="number" className={inp('MAIN_BRANCH_SBR_ID')} value={form.MAIN_BRANCH_SBR_ID ?? ''} onChange={(e) => set('MAIN_BRANCH_SBR_ID', e.target.value ? Number(e.target.value) : null)} />
+            {/* Search-and-select rather than free-text entry, so the ID always belongs to a
+                real establishment. Same guarantee the enterprise search gives on the group
+                modals. */}
+            <SbrIdSearchInput
+              value={form.MAIN_BRANCH_SBR_ID ?? null}
+              onChange={(sbrId) => set('MAIN_BRANCH_SBR_ID', sbrId)}
+              disabled={!ed('MAIN_BRANCH_SBR_ID')}
+              className={err('MAIN_BRANCH_SBR_ID') ? 'border-red-400' : ''}
+            />
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID')} />
           </div>
           <div className="space-y-1">
