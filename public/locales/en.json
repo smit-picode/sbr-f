@@ -16,6 +16,7 @@
     "frozenFrames": "Frozen Frames",
     "createSnapshot": "Create Snapshot",
     "browseSnapshots": "Browse Snapshots",
+    "analysis": "Analysis",
     "dataQuality": "Data Quality",
     "qualityDashboard": "Quality Dashboard",
     "qualityFindings": "Quality Findings",
@@ -99,6 +100,12 @@
     "browseSnapshots": {
       "title": "Browse Snapshots",
       "description": "Browse previously created frame snapshots",
+      "noData": "This feature will be implemented in the next phase",
+      "noDataDesc": ""
+    },
+    "analysis": {
+      "title": "Analysis",
+      "description": "Build custom analyses and visualisations on any frame table.",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     },
@@ -1092,16 +1099,12 @@
     "approve": "Approve",
     "decidedBy": "Decided by",
     "changes": "Changes",
-    "statusPending": "Pending",
-    "statusApproved": "Approved",
-    "statusRejected": "Rejected",
     "reviewColumns": {
       "SBR_ID": "SBR ID",
       "NAME_ENU": "Name (English)",
       "EST_STATUS": "Status",
       "SECTOR_ID": "Sector",
-      "EMPLOYMENT_COUNT": "Employees",
-      "CR_EXPIRY_DATE": "CR Expiry Date"
+      "EMPLOYMENT_COUNT": "Employees"
     },
     "wizard": {
       "steps": {
@@ -1126,13 +1129,18 @@
         "columnDictionaryDesc": "Use these exact column headers in your file.",
         "downloadTemplate": "Download template",
         "excelHeader": "Excel header",
-        "attribute": "Attribute",
         "type": "Type",
         "required": "Required",
         "allowedValues": "Allowed values",
         "mandatory": "Mandatory",
         "optional": "Optional",
-        "note": "Only SBR_ID is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched."
+        "templateFailed": "Could not build the template file.",
+        "mustMatch": "Must match an existing record",
+        "minValue": "{{min}} or greater",
+        "wholeNumber": "Whole number",
+        "maxChars": "Text up to {{max}} characters",
+        "anyText": "Any text",
+        "noteIdColumn": "Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched."
       },
       "upload": {
         "title": "Upload your file",
@@ -1154,14 +1162,25 @@
         "row": "Row",
         "status": "Status",
         "errorLabel": "Error",
-        "messages": {
-          "sbrIdMandatory": "SBR_ID is mandatory.",
-          "sbrIdNotFound": "SBR_ID does not match an existing record.",
-          "estStatusInvalid": "Must be one of Active, Inactive.",
-          "sectorInvalid": "Not a recognized sector.",
-          "employmentNegative": "Must be 0 or greater.",
-          "roleInvalid": "Must be one of Owner, Manager.",
-          "emailInvalid": "Not a valid email address."
+        "emptyFile": "The file contains no data rows.",
+        "tooManyRows": "The file has {{count}} rows; the maximum is {{max}}. Please split it.",
+        "missingIdColumn": "The file has no {{idColumn}} column, so no row can be matched to a record.",
+        "unknownHeaders": "These columns are not part of the template and will be reported as errors: {{headers}}",
+        "parseFailed": "The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.",
+        "waiting": "Waiting for a file to validate…",
+        "codes": {
+          "ID_MISSING": "The record identifier is required.",
+          "ID_NOT_NUMERIC": "The record identifier must be a positive whole number.",
+          "RECORD_NOT_FOUND": "No active record matches this identifier.",
+          "DUPLICATE_ID": "This record appears more than once in the file.",
+          "UNKNOWN_COLUMN": "This column is not part of the template.",
+          "NOT_EDITABLE": "This column cannot be changed.",
+          "INVALID_ENUM": "Not one of the allowed values.",
+          "INVALID_INTEGER": "Must be a whole number.",
+          "BELOW_MIN": "Value is below the minimum allowed.",
+          "TOO_LONG": "Value is too long.",
+          "NO_CHANGES": "This row matches the stored record — nothing to change.",
+          "ROW_TOO_LARGE": "This row changes too much data to submit at once."
         }
       },
       "confirm": {
@@ -1172,9 +1191,21 @@
         "excludedErrors": "Excluded (errors)",
         "reasonLabel": "Reason for change",
         "reasonPlaceholder": "Briefly describe why these records are being updated…",
-        "recordsThatWillBeUpdated": "Records that will be updated"
-      }
-    }
+        "recordsThatWillBeUpdated": "Records that will be updated",
+        "reasonHint": "This reason is recorded on every change request created by this upload."
+      },
+      "submitPartial": "{{submitted}} of {{total}} rows submitted for approval; {{failed}} failed."
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "PARTIALLY_APPROVED": "Partially approved",
+      "PARTIALLY_REJECTED": "Partially rejected",
+      "FAILED": "Failed"
+    },
+    "decidedPartial": "{{succeeded}} of {{total}} changes {{decision}}; {{failed}} could not be applied.",
+    "failedItemsTitle": "{{count}} row(s) from the upload could not be submitted."
   },
   "validation": {
     "errorCountOne": "1 validation error found",

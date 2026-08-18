@@ -3,14 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, X, CheckCircle2, User, Clock } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, User, X, XCircle } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { ErrorState } from '@/components/common/ErrorState';
+import { PageLoader } from '@/components/common/Loader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n';
-import { MOCK_BULK_DETAILS } from '../mocks/bulkChangeMocks';
+import { usePermission } from '@/hooks';
+import { formatDate } from '@/utils/format';
 import { toast } from '@/utils/toast';
+import { useDecideBulkChangeMutation, useGetBulkChangeByIdQuery } from '../api/bulkChangeApi';
+import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
+import { TABLE_BY_ENTITY_TYPE } from '../constants';
+import type { BulkChangeDecision } from '../types';
 
 const STATUS_KEYS = new Set(['EST_STATUS']);
 
@@ -21,41 +27,70 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { isArabic } = useLanguage();
-  const [submitting, setSubmitting] = useState<'approve' | 'reject' | null>(null);
+  const [pendingAction, setPendingAction] = useState<BulkChangeDecision | null>(null);
 
-  // No backend/API exists for this feature yet (pending DBA procedures) — read from static mock data.
-  const task = MOCK_BULK_DETAILS[id];
+  const batchId = Number(id);
+  const { data, isLoading, isError, refetch } = useGetBulkChangeByIdQuery(batchId, { skip: !Number.isInteger(batchId) });
+  const [decideBulkChange] = useDecideBulkChangeMutation();
+  // Deciding needs both layers the API enforces: module access (bulk_change.approve) AND the
+  // general approver right (approvals.approve), which SBR_PORTAL_PKG.DECIDE_BULK also checks.
+  const approvals = usePermission('approvals');
+  const bulkChange = usePermission('bulk_change');
+  const canApprove = bulkChange.canApprove && approvals.canApprove;
 
-  if (!task) {
+  if (isLoading) {
+    return <PageContainer><PageLoader /></PageContainer>;
+  }
+
+  const task = data?.data;
+  if (isError || !task) {
     return (
       <PageContainer>
-        <ErrorState message={t('bulkChange.notFound', { defaultValue: 'Bulk change task not found.' })} />
+        <ErrorState
+          message={t('bulkChange.notFound', { defaultValue: 'Bulk change task not found.' })}
+          onRetry={refetch}
+        />
       </PageContainer>
     );
   }
 
-  const pending = task.STATUS === 'Pending';
-  const statusCls = task.STATUS === 'Approved' ? 'bg-emerald-50 text-emerald-700' : task.STATUS === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
-  const statusLabel =
-    task.STATUS === 'Approved'
-      ? t('bulkChange.statusApproved', { defaultValue: 'Approved' })
-      : task.STATUS === 'Rejected'
-        ? t('bulkChange.statusRejected', { defaultValue: 'Rejected' })
-        : t('bulkChange.statusPending', { defaultValue: 'Pending' });
+  const isPending = task.STATUS === 'PENDING';
   // Decided tasks are reached via the History list, not the pending queue — send Back there.
-  const backHref = pending ? '/tasks/bulk-change' : '/tasks/bulk-change/history';
+  const backHref = isPending ? '/tasks/bulk-change' : '/tasks/bulk-change/history';
+  const tableKey = TABLE_BY_ENTITY_TYPE[task.ENTITY_TYPE];
 
-  const doAction = async (kind: 'approve' | 'reject') => {
-    // Not wired to a backend yet — simulate the round-trip so the interaction reads as real.
-    setSubmitting(kind);
-    await new Promise((res) => setTimeout(res, 400));
-    setSubmitting(null);
-    toast.success(
-      kind === 'approve'
-        ? t('bulkChange.approved', { defaultValue: 'Bulk change approved.' })
-        : t('bulkChange.rejected', { defaultValue: 'Bulk change rejected.' })
-    );
-    router.push('/tasks/bulk-change');
+  const doAction = async (decision: BulkChangeDecision) => {
+    setPendingAction(decision);
+    try {
+      const response = await decideBulkChange({ id: task.BATCH_ID, decision }).unwrap();
+      const result = response.data;
+
+      // DECIDE_BULK is best-effort: individual rows can fail on a row lock (ORA-20009) or a
+      // conflicting pending change (ORA-20012) while the rest go through. Report that honestly
+      // instead of claiming the whole batch succeeded.
+      if (result && result.failed > 0) {
+        toast.warning(
+          t('bulkChange.decidedPartial', {
+            defaultValue: '{{succeeded}} of {{total}} changes {{decision}}; {{failed}} could not be applied.',
+            succeeded: result.succeeded,
+            total: result.total,
+            failed: result.failed,
+            decision: decision.toLowerCase(),
+          })
+        );
+      } else {
+        toast.success(
+          decision === 'APPROVED'
+            ? t('bulkChange.approved', { defaultValue: 'Bulk change approved.' })
+            : t('bulkChange.rejected', { defaultValue: 'Bulk change rejected.' })
+        );
+      }
+      router.push('/tasks/bulk-change');
+    } catch {
+      // The base query already surfaced the server message as a toast.
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   return (
@@ -71,8 +106,9 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-500">{task.ID}</span>
-          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${statusCls}`}>
-            <Clock className="h-3 w-3" /> {statusLabel}
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3 w-3 text-slate-400" />
+            <BulkChangeStatusBadge status={task.STATUS} />
           </span>
         </div>
 
@@ -85,11 +121,13 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
           </div>
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.submitted', { defaultValue: 'Submitted' })}</p>
-            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{task.SUBMITTED_AT}</p>
+            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{formatDate(task.SUBMITTED_AT)}</p>
           </div>
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.table', { defaultValue: 'Table' })}</p>
-            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{task.TABLE_NAME}</p>
+            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">
+              {t(`nav.${tableKey.toLowerCase()}`, { defaultValue: tableKey })}
+            </p>
           </div>
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.records', { defaultValue: 'Records' })}</p>
@@ -100,15 +138,37 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         </div>
       </div>
 
+      {/* Rows the procedure could not create at all — no change request exists for these. */}
+      {task.FAILED_ITEMS.length > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div>
+            <p className="font-medium">
+              {t('bulkChange.failedItemsTitle', {
+                defaultValue: '{{count}} row(s) from the upload could not be submitted.',
+                count: task.FAILED_ITEMS.length,
+              })}
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {task.FAILED_ITEMS.map((item) => (
+                <li key={item.index}>
+                  {t('bulkChange.wizard.validate.row', { defaultValue: 'Row' })} {item.index + 1}: {item.error ?? item.error_code}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Reason */}
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.reasonForChange', { defaultValue: 'Reason for Change' })}
         </div>
-        <p className="px-5 py-3 text-sm text-slate-700">{task.REASON}</p>
+        <p className="px-5 py-3 text-sm text-slate-700">{fmt(task.REASON)}</p>
       </div>
 
-      {/* Confirm bulk change table */}
+      {/* Per-record diff */}
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.confirmTitle', { defaultValue: 'Confirm Bulk Change' })}
@@ -126,54 +186,73 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {task.ROWS.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-3 py-3 align-top">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  </td>
-                  {row.fields.map((f) => (
-                    <td key={f.key} className={`px-3 py-3 align-top ${f.changed ? 'bg-amber-50/70 rounded-md' : ''}`}>
-                      {f.changed ? (
-                        <div className="min-w-0">
-                          <p className="truncate text-xs text-slate-400 line-through">{fmt(f.oldValue)}</p>
-                          {STATUS_KEYS.has(f.key) ? (
-                            <StatusBadge status={f.value as string | null} />
-                          ) : (
-                            <p className="truncate text-sm font-semibold text-slate-800">{fmt(f.value)}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="min-w-0">
-                          {STATUS_KEYS.has(f.key) ? (
-                            <StatusBadge status={f.value as string | null} />
-                          ) : (
-                            <p className="truncate text-sm font-medium text-slate-800">{fmt(f.value)}</p>
-                          )}
-                          <p className="text-[10px] uppercase tracking-wide text-slate-400">{t('bulkChange.noChange', { defaultValue: 'No change' })}</p>
-                        </div>
-                      )}
+              {task.ROWS.map((row) => {
+                // A row's own status can diverge from the batch's when it was decided
+                // individually from the Attribute Change Requests screen, or when it failed
+                // during a partial bulk decision.
+                const rowRejected = row.status === 'REJECTED';
+                return (
+                  <tr key={row.auditLogId} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-3 py-3 align-top">
+                      {rowRejected
+                        ? <XCircle className="h-4 w-4 text-red-500" />
+                        : <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
                     </td>
-                  ))}
-                </tr>
-              ))}
+                    {task.COLUMNS.map((col) => {
+                      const field = row.fields.find((f) => f.key === col.key);
+                      // The identifier column isn't part of CHANGE_DATA — show the record id.
+                      if (!field) {
+                        return (
+                          <td key={col.key} className="px-3 py-3 align-top">
+                            <p className="truncate text-sm font-medium text-slate-800">
+                              {col.key === task.COLUMNS[0].key ? row.id : '—'}
+                            </p>
+                          </td>
+                        );
+                      }
+                      return (
+                        <td key={col.key} className={`px-3 py-3 align-top ${field.changed ? 'bg-amber-50/70 rounded-md' : ''}`}>
+                          <div className="min-w-0">
+                            {field.changed && (
+                              <p className="truncate text-xs text-slate-400 line-through">{fmt(field.oldValue)}</p>
+                            )}
+                            {STATUS_KEYS.has(field.key) ? (
+                              <StatusBadge status={field.value as string | null} />
+                            ) : (
+                              <p className={`truncate text-sm text-slate-800 ${field.changed ? 'font-semibold' : 'font-medium'}`}>
+                                {fmt(field.value)}
+                              </p>
+                            )}
+                            {!field.changed && (
+                              <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                                {t('bulkChange.noChange', { defaultValue: 'No change' })}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {pending && (
+      {isPending && canApprove && (
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="outline"
-            onClick={() => doAction('reject')}
-            disabled={submitting !== null}
+            onClick={() => doAction('REJECTED')}
+            disabled={pendingAction !== null}
             className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
           >
             <X className="h-4 w-4" /> {t('bulkChange.reject', { defaultValue: 'Reject' })}
           </Button>
           <Button
-            onClick={() => doAction('approve')}
-            disabled={submitting !== null}
+            onClick={() => doAction('APPROVED')}
+            disabled={pendingAction !== null}
             className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
           >
             <Check className="h-4 w-4" /> {t('bulkChange.approve', { defaultValue: 'Approve' })}

@@ -30,6 +30,7 @@ import {
   Columns2,
   DatabaseZap,
   History,
+  ChartColumn,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
@@ -71,6 +72,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Columns2,
   DatabaseZap,
   History,
+  ChartColumn,
 };
 
 const RAIL_GRADIENT = 'linear-gradient(180deg, #6B1428 0%, #6B1428 42%, #7E1830 68%, #A71D3A 100%)';

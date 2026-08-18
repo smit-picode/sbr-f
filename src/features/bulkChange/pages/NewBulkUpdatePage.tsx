@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -12,9 +12,9 @@ import { BulkChangeSetupStep } from '../components/BulkChangeSetupStep';
 import { BulkChangeUploadStep } from '../components/BulkChangeUploadStep';
 import { BulkChangeValidateStep } from '../components/BulkChangeValidateStep';
 import { BulkChangeConfirmStep } from '../components/BulkChangeConfirmStep';
-import { MOCK_BULK_TASKS } from '../mocks/bulkChangeMocks';
-import { BULK_CHANGE_TABLES, type BulkChangeTableKey } from '../constants';
-import type { BulkChangeValidationResult } from '../types';
+import { useSubmitBulkChangeMutation } from '../api/bulkChangeApi';
+import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
+import type { BulkChangeItemInput, BulkChangeValidationResult } from '../types';
 
 const STEP_SETUP = 0;
 const STEP_UPLOAD = 1;
@@ -28,14 +28,68 @@ export function NewBulkUpdatePage() {
   const [selectedTable, setSelectedTable] = useState<BulkChangeTableKey>('Establishments');
   const [file, setFile] = useState<File | null>(null);
   const [validation, setValidation] = useState<BulkChangeValidationResult | null>(null);
+  const [items, setItems] = useState<BulkChangeItemInput[]>([]);
   const [reason, setReason] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+
+  const [submitBulkChange, { isLoading: submitting }] = useSubmitBulkChangeMutation();
 
   const canGoNext =
     (step === STEP_SETUP && !!selectedTable) ||
     (step === STEP_UPLOAD && !!file) ||
     (step === STEP_VALIDATE && !!validation && validation.validRows > 0) ||
     (step === STEP_CONFIRM && reason.trim().length > 0);
+
+  // Changing the table or the file invalidates any validation already computed — otherwise
+  // Next could carry a previous file's valid-row set into the confirm step.
+  const handleSelectTable = useCallback((table: BulkChangeTableKey) => {
+    setSelectedTable(table);
+    setValidation(null);
+    setItems([]);
+  }, []);
+
+  const handleFileSelected = useCallback((next: File | null) => {
+    setFile(next);
+    setValidation(null);
+    setItems([]);
+  }, []);
+
+  const handleValidated = useCallback((result: BulkChangeValidationResult | null, parsed: BulkChangeItemInput[]) => {
+    setValidation(result);
+    setItems(parsed);
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!validation || items.length === 0) return;
+    try {
+      const response = await submitBulkChange({
+        entityType: ENTITY_TYPE_BY_TABLE[selectedTable],
+        // Every parsed row is posted; the API re-validates and submits only the rows that
+        // still pass, so the client's verdict is never trusted as the gate.
+        items,
+        reason: reason.trim(),
+        fileName: file?.name,
+      }).unwrap();
+
+      const result = response.data;
+      // SUBMIT_BULK is best-effort: some rows can fail inside the procedure while the rest
+      // commit. Say so rather than reporting a clean success.
+      if (result && result.failed > 0) {
+        toast.warning(
+          t('bulkChange.wizard.submitPartial', {
+            defaultValue: '{{submitted}} of {{total}} rows submitted for approval; {{failed}} failed.',
+            submitted: result.submitted,
+            total: result.submitted + result.failed,
+            failed: result.failed,
+          })
+        );
+      } else {
+        toast.success(t('bulkChange.wizard.submitSuccess', { defaultValue: 'Bulk update submitted for approval.' }));
+      }
+      router.push('/tasks/bulk-change');
+    } catch {
+      // The base query already surfaced the server message as a toast.
+    }
+  };
 
   const handleNext = () => {
     if (step === STEP_CONFIRM) {
@@ -51,28 +105,6 @@ export function NewBulkUpdatePage() {
       return;
     }
     setStep((s) => Math.max(s - 1, STEP_SETUP));
-  };
-
-  const handleSubmit = async () => {
-    if (!validation) return;
-    setSubmitting(true);
-    await new Promise((res) => setTimeout(res, 500));
-
-    // No backend/API exists yet for this feature — append to the shared in-memory mock list
-    // so the new task shows up in the pending queue, same as every other mocked task.
-    MOCK_BULK_TASKS.unshift({
-      ID: `BLK-${3000 + Math.floor((MOCK_BULK_TASKS.length + 1) * 7)}`,
-      SUBMITTED_BY: 'admin@sbr.com',
-      SUBMITTED_AT: new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', ','),
-      TABLE_NAME: selectedTable,
-      RECORDS: validation.validRows,
-      CHANGES: validation.validRows,
-      STATUS: 'Pending',
-    });
-
-    setSubmitting(false);
-    toast.success(t('bulkChange.wizard.submitSuccess', { defaultValue: 'Bulk update submitted for approval.' }));
-    router.push('/tasks/bulk-change');
   };
 
   const tableOption = BULK_CHANGE_TABLES.find((o) => o.key === selectedTable);
@@ -101,10 +133,10 @@ export function NewBulkUpdatePage() {
 
       <BulkChangeStepper currentStep={step} />
 
-      {step === STEP_SETUP && <BulkChangeSetupStep selectedTable={selectedTable} onSelectTable={setSelectedTable} />}
-      {step === STEP_UPLOAD && <BulkChangeUploadStep selectedTable={selectedTable} file={file} onFileSelected={setFile} />}
+      {step === STEP_SETUP && <BulkChangeSetupStep selectedTable={selectedTable} onSelectTable={handleSelectTable} />}
+      {step === STEP_UPLOAD && <BulkChangeUploadStep selectedTable={selectedTable} file={file} onFileSelected={handleFileSelected} />}
       {step === STEP_VALIDATE && (
-        <BulkChangeValidateStep selectedTable={selectedTable} fileName={file?.name} onValidated={setValidation} />
+        <BulkChangeValidateStep selectedTable={selectedTable} file={file} onValidated={handleValidated} />
       )}
       {step === STEP_CONFIRM && validation && (
         <BulkChangeConfirmStep

@@ -102,6 +102,7 @@ export const ESTABLISHMENT_LOCKED_FIELDS: string[] = [
   'SOURCE_CODE',      // Main Regulator
   'MOCI_CR_NUM',      // Commercial Registration ID (CR)
   'MOCI_CP_NUM',      // Commercial Permit ID (CP)
+  'QFZ_SOURCE_ID',    // QFZ Source ID — regulator-issued, not user-maintained
   'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CR_CANCEL_DATE',
   'CP_ISSUE_DATE', 'CP_END_DATE', 'CP_CANCEL_DATE',
   'REG_DATE', 'REG_EXPIRY_DATE', 'REG_CANCEL_DATE',

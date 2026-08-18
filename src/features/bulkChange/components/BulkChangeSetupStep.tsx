@@ -1,7 +1,15 @@
+'use client';
+
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Building2, Users, MapPin, Download, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BULK_CHANGE_TABLES, BULK_CHANGE_DICTIONARIES, type BulkChangeTableKey } from '../constants';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePermission } from '@/hooks';
+import { toast } from '@/utils/toast';
+import { useGetBulkChangeTemplateQuery } from '../api/bulkChangeApi';
+import { buildTemplateWorkbook } from '../utils/parseWorkbook';
+import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
 
 const ICONS = { Building2, Users, MapPin } as const;
 
@@ -12,18 +20,67 @@ interface BulkChangeSetupStepProps {
 
 export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChangeSetupStepProps) {
   const { t } = useTranslation();
-  const dictionary = BULK_CHANGE_DICTIONARIES[selectedTable];
 
-  const handleDownloadTemplate = () => {
-    const headerRow = dictionary.map((row) => row.excelHeader).join(',');
-    const csv = `${headerRow}\n`;
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${selectedTable}_Bulk_Update_Template.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  // A bulk submit still requires the target table's own Edit permission — enforced by the API
+  // and again by SBR_PORTAL_PKG. Offering a table the user cannot edit would let them build a
+  // whole upload only to be refused at the final step, so only editable tables are shown.
+  const establishments = usePermission('establishments');
+  const contacts = usePermission('contacts');
+  const addresses = usePermission('addresses');
+  const canEditTable: Record<BulkChangeTableKey, boolean> = useMemo(() => ({
+    Establishments: establishments.canEdit,
+    Contacts: contacts.canEdit,
+    Addresses: addresses.canEdit,
+  }), [establishments.canEdit, contacts.canEdit, addresses.canEdit]);
+
+  const availableTables = BULK_CHANGE_TABLES.filter((o) => canEditTable[o.key]);
+
+  // The wizard opens on Establishments by default; move off it if that is not one the user can
+  // edit, so the Setup step never starts on a table they are not allowed to submit.
+  useEffect(() => {
+    if (availableTables.length === 0) return;
+    if (!canEditTable[selectedTable]) onSelectTable(availableTables[0].key);
+    // onSelectTable is a stable parent callback; re-running on it would fight the parent's state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTable, canEditTable]);
+
+  const entityType = ENTITY_TYPE_BY_TABLE[selectedTable];
+
+  // The column dictionary comes from the API, which builds it from the same editable-column
+  // specs the server validates against — so the template can never offer a column the submit
+  // would reject.
+  const { data, isLoading } = useGetBulkChangeTemplateQuery(entityType);
+  const template = data?.data;
+
+  const handleDownloadTemplate = async () => {
+    if (!template) return;
+    try {
+      const blob = await buildTemplateWorkbook(
+        selectedTable,
+        template.idColumn,
+        template.columns.map((c) => ({ key: c.key, type: c.type, allowed: c.allowed })),
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${selectedTable}_Bulk_Update_Template.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t('bulkChange.wizard.setup.templateFailed', { defaultValue: 'Could not build the template file.' }));
+    }
+  };
+
+  const describeAllowed = (column: NonNullable<typeof template>['columns'][number]): string => {
+    if (column.required) return t('bulkChange.wizard.setup.mustMatch', { defaultValue: 'Must match an existing record' });
+    if (column.allowed?.length) return column.allowed.join(' · ');
+    if (column.type === 'integer') {
+      return column.min !== null && column.min !== undefined
+        ? t('bulkChange.wizard.setup.minValue', { defaultValue: '{{min}} or greater', min: column.min })
+        : t('bulkChange.wizard.setup.wholeNumber', { defaultValue: 'Whole number' });
+    }
+    if (column.maxLength) return t('bulkChange.wizard.setup.maxChars', { defaultValue: 'Text up to {{max}} characters', max: column.maxLength });
+    return t('bulkChange.wizard.setup.anyText', { defaultValue: 'Any text' });
   };
 
   return (
@@ -37,7 +94,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {BULK_CHANGE_TABLES.map((option) => {
+          {availableTables.map((option) => {
             const Icon = ICONS[option.icon];
             const isActive = option.key === selectedTable;
             return (
@@ -75,61 +132,67 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
               {t('bulkChange.wizard.setup.columnDictionaryDesc', { defaultValue: 'Use these exact column headers in your file.' })}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate} disabled={!template}>
             <Download className="h-4 w-4" />
             {t('bulkChange.wizard.setup.downloadTemplate', { defaultValue: 'Download template' })}
           </Button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {t('bulkChange.wizard.setup.excelHeader', { defaultValue: 'Excel header' })}
-                </th>
-                <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {t('bulkChange.wizard.setup.attribute', { defaultValue: 'Attribute' })}
-                </th>
-                <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {t('bulkChange.wizard.setup.type', { defaultValue: 'Type' })}
-                </th>
-                <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {t('bulkChange.wizard.setup.required', { defaultValue: 'Required' })}
-                </th>
-                <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {t('bulkChange.wizard.setup.allowedValues', { defaultValue: 'Allowed values' })}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {dictionary.map((row) => (
-                <tr key={row.excelHeader} className="hover:bg-slate-50 transition-colors">
-                  <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-blue-700">{row.excelHeader}</td>
-                  <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-700">{row.attribute}</td>
-                  <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-700">{row.type}</td>
-                  <td className="whitespace-nowrap px-5 py-3">
-                    {row.required ? (
-                      <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
-                        {t('bulkChange.wizard.setup.mandatory', { defaultValue: 'Mandatory' })}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400">{t('bulkChange.wizard.setup.optional', { defaultValue: 'Optional' })}</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-sm text-slate-600">{row.allowedValues}</td>
+        {isLoading ? (
+          <div className="space-y-2 p-5">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {t('bulkChange.wizard.setup.excelHeader', { defaultValue: 'Excel header' })}
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {t('bulkChange.wizard.setup.type', { defaultValue: 'Type' })}
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {t('bulkChange.wizard.setup.required', { defaultValue: 'Required' })}
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {t('bulkChange.wizard.setup.allowedValues', { defaultValue: 'Allowed values' })}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {template?.columns.map((column) => (
+                  <tr key={column.key} className="hover:bg-slate-50 transition-colors">
+                    <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-blue-700">{column.key}</td>
+                    <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-700">{column.type}</td>
+                    <td className="whitespace-nowrap px-5 py-3">
+                      {column.required ? (
+                        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+                          {t('bulkChange.wizard.setup.mandatory', { defaultValue: 'Mandatory' })}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">{t('bulkChange.wizard.setup.optional', { defaultValue: 'Optional' })}</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-sm text-slate-600">{describeAllowed(column)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="flex items-start gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
           <Info className="h-4 w-4 shrink-0 text-slate-400" />
           <span>
-            {t('bulkChange.wizard.setup.note', {
+            {/* The identifier differs per table: an establishment has one current row per
+                SBR_ID, but many contacts and addresses — so those files are keyed by the
+                specific record ID being edited, not by SBR_ID. */}
+            {t('bulkChange.wizard.setup.noteIdColumn', {
               defaultValue:
-                'Only SBR_ID is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',
+                'Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',
+              idColumn: template?.idColumn ?? 'ID',
             })}
           </span>
         </div>

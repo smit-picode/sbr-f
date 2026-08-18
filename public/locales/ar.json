@@ -16,6 +16,7 @@
     "frozenFrames": "الإطارات المجمدة",
     "createSnapshot": "إنشاء لقطة",
     "browseSnapshots": "تصفح اللقطات",
+    "analysis": "التحليل",
     "dataQuality": "جودة البيانات",
     "qualityDashboard": "لوحة الجودة",
     "qualityFindings": "نتائج الجودة",
@@ -99,6 +100,12 @@
     "browseSnapshots": {
       "title": "تصفح اللقطات",
       "description": "تصفح لقطات الإطار المنشأة سابقًا",
+      "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
+      "noDataDesc": ""
+    },
+    "analysis": {
+      "title": "التحليل",
+      "description": "أنشئ تحليلات ورسومًا بيانية مخصّصة على أي جدول إطار.",
       "noData": "سيتم تنفيذ هذه الميزة في المرحلة القادمة",
       "noDataDesc": ""
     },
@@ -1092,16 +1099,12 @@
     "approve": "اعتماد",
     "decidedBy": "تم البت بواسطة",
     "changes": "التغييرات",
-    "statusPending": "قيد الانتظار",
-    "statusApproved": "معتمد",
-    "statusRejected": "مرفوض",
     "reviewColumns": {
       "SBR_ID": "رقم SBR",
       "NAME_ENU": "الاسم (بالإنجليزية)",
       "EST_STATUS": "الحالة",
       "SECTOR_ID": "القطاع",
-      "EMPLOYMENT_COUNT": "عدد الموظفين",
-      "CR_EXPIRY_DATE": "تاريخ انتهاء السجل التجاري"
+      "EMPLOYMENT_COUNT": "عدد الموظفين"
     },
     "wizard": {
       "steps": {
@@ -1126,13 +1129,18 @@
         "columnDictionaryDesc": "استخدم عناوين الأعمدة هذه بالضبط في ملفك.",
         "downloadTemplate": "تنزيل النموذج",
         "excelHeader": "عنوان العمود",
-        "attribute": "السمة",
         "type": "النوع",
         "required": "مطلوب",
         "allowedValues": "القيم المسموح بها",
         "mandatory": "إلزامي",
         "optional": "اختياري",
-        "note": "حقل SBR_ID وحده إلزامي — فهو يربط كل صف بسجل موجود. أدرج فقط الأعمدة التي تريد تغييرها؛ الأعمدة المحذوفة تبقى دون تغيير."
+        "templateFailed": "تعذر إنشاء ملف القالب.",
+        "mustMatch": "يجب أن يطابق سجلاً موجوداً",
+        "minValue": "{{min}} أو أكبر",
+        "wholeNumber": "رقم صحيح",
+        "maxChars": "نص حتى {{max}} حرف",
+        "anyText": "أي نص",
+        "noteIdColumn": "الحقل {{idColumn}} وحده إلزامي — فهو يربط كل صف بسجل. أدرج فقط الأعمدة التي تريد تغييرها؛ الأعمدة المحذوفة تبقى كما هي."
       },
       "upload": {
         "title": "رفع ملفك",
@@ -1154,14 +1162,25 @@
         "row": "الصف",
         "status": "الحالة",
         "errorLabel": "خطأ",
-        "messages": {
-          "sbrIdMandatory": "حقل SBR_ID إلزامي.",
-          "sbrIdNotFound": "SBR_ID لا يطابق أي سجل موجود.",
-          "estStatusInvalid": "يجب أن تكون القيمة إما Active أو Inactive.",
-          "sectorInvalid": "قطاع غير معروف.",
-          "employmentNegative": "يجب أن تكون القيمة 0 أو أكبر.",
-          "roleInvalid": "يجب أن تكون القيمة إما Owner أو Manager.",
-          "emailInvalid": "البريد الإلكتروني غير صالح."
+        "emptyFile": "لا يحتوي الملف على أي صفوف بيانات.",
+        "tooManyRows": "يحتوي الملف على {{count}} صف؛ الحد الأقصى {{max}}. يرجى تقسيمه.",
+        "missingIdColumn": "لا يحتوي الملف على عمود {{idColumn}}، لذا لا يمكن ربط أي صف بسجل.",
+        "unknownHeaders": "هذه الأعمدة ليست جزءاً من القالب وسيتم الإبلاغ عنها كأخطاء: {{headers}}",
+        "parseFailed": "تعذرت قراءة الملف. تأكد من أنه ملف ‎.xlsx أو ‎.xls أو ‎.csv صالح.",
+        "waiting": "في انتظار ملف للتحقق منه…",
+        "codes": {
+          "ID_MISSING": "معرّف السجل مطلوب.",
+          "ID_NOT_NUMERIC": "يجب أن يكون معرّف السجل رقماً صحيحاً موجباً.",
+          "RECORD_NOT_FOUND": "لا يوجد سجل نشط يطابق هذا المعرّف.",
+          "DUPLICATE_ID": "يظهر هذا السجل أكثر من مرة في الملف.",
+          "UNKNOWN_COLUMN": "هذا العمود ليس جزءاً من القالب.",
+          "NOT_EDITABLE": "لا يمكن تغيير هذا العمود.",
+          "INVALID_ENUM": "ليست من القيم المسموح بها.",
+          "INVALID_INTEGER": "يجب أن يكون رقماً صحيحاً.",
+          "BELOW_MIN": "القيمة أقل من الحد الأدنى المسموح به.",
+          "TOO_LONG": "القيمة طويلة جداً.",
+          "NO_CHANGES": "هذا الصف يطابق السجل المخزّن — لا يوجد ما يتغير.",
+          "ROW_TOO_LARGE": "يغيّر هذا الصف بيانات أكثر مما يمكن إرساله دفعة واحدة."
         }
       },
       "confirm": {
@@ -1172,9 +1191,21 @@
         "excludedErrors": "المستبعدة (أخطاء)",
         "reasonLabel": "سبب التغيير",
         "reasonPlaceholder": "صف باختصار سبب تحديث هذه السجلات…",
-        "recordsThatWillBeUpdated": "السجلات التي سيتم تحديثها"
-      }
-    }
+        "recordsThatWillBeUpdated": "السجلات التي سيتم تحديثها",
+        "reasonHint": "يُسجَّل هذا السبب على كل طلب تغيير ينشأ عن هذا الرفع."
+      },
+      "submitPartial": "تم إرسال {{submitted}} من {{total}} صف للموافقة؛ فشل {{failed}}."
+    },
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "تمت الموافقة",
+      "REJECTED": "مرفوض",
+      "PARTIALLY_APPROVED": "موافق عليه جزئياً",
+      "PARTIALLY_REJECTED": "مرفوض جزئياً",
+      "FAILED": "فشل"
+    },
+    "decidedPartial": "تمت معالجة {{succeeded}} من {{total}} تغييرات ({{decision}})؛ تعذر تطبيق {{failed}}.",
+    "failedItemsTitle": "تعذر إرسال {{count}} صف من الملف المرفوع."
   },
   "validation": {
     "errorCountOne": "تم العثور على خطأ تحقق واحد",

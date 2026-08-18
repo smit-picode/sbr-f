@@ -119,6 +119,19 @@ export const PERMISSION_TREE: PermissionNode[] = [
       { key: 'approvals.approve', label: 'Approve / Reject Change Requests' },
     ],
   },
+  {
+    // Module-level access to Bulk Change. These sit ON TOP of the per-entity permissions —
+    // granting them does not by itself allow editing any data. A bulk submit still requires
+    // the target table's Edit permission, and a bulk decision still requires
+    // "Approve / Reject Change Requests", both enforced by the API and the database.
+    key: 'bulk_change',
+    label: 'Bulk Change',
+    children: [
+      { key: 'bulk_change.view',    label: 'View Bulk Changes' },
+      { key: 'bulk_change.create',  label: 'Create Bulk Update' },
+      { key: 'bulk_change.approve', label: 'Approve / Reject Bulk Changes' },
+    ],
+  },
 ];
 
 // Flat set of all leaf permission keys

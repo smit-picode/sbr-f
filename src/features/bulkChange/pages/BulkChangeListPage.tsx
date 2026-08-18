@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +9,35 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
-import { MOCK_BULK_TASKS } from '../mocks/bulkChangeMocks';
+import { usePermission } from '@/hooks';
+import { formatDate } from '@/utils/format';
+import { cleanParams } from '@/utils/query';
+import { useGetBulkChangeListQuery } from '../api/bulkChangeApi';
+import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
+import { BULK_CHANGE_DEFAULT_FILTERS, TABLE_BY_ENTITY_TYPE } from '../constants';
 import type { BulkChangeTaskSummary } from '../types';
 
 export function BulkChangeListPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const [filters, setFilters] = useState({ ...BULK_CHANGE_DEFAULT_FILTERS });
+
+  // Submitting needs BOTH layers the API enforces: module access (bulk_change.create) AND an
+  // edit permission on at least one bulk-capable table. Hiding the button unless both hold
+  // keeps the UI from offering an action that would come back as a 403.
+  const establishments = usePermission('establishments');
+  const contacts = usePermission('contacts');
+  const addresses = usePermission('addresses');
+  const bulkChange = usePermission('bulk_change');
+  const canSubmit = bulkChange.canCreate
+    && (establishments.canEdit || contacts.canEdit || addresses.canEdit);
+
+  const { data, isLoading, isError, refetch } = useGetBulkChangeListQuery(cleanParams(filters));
+  const rows = data?.data ?? [];
+
+  const handleFilterChange = useCallback((next: Partial<typeof filters>) => {
+    setFilters((prev) => ({ ...prev, ...next }));
+  }, []);
 
   const columns: ColumnDef<BulkChangeTaskSummary>[] = [
     {
@@ -34,12 +58,15 @@ export function BulkChangeListPage() {
     {
       accessorKey: 'SUBMITTED_AT',
       header: t('bulkChange.cols.submitted', { defaultValue: 'Submitted' }),
-      cell: ({ getValue }) => <span className="text-sm text-slate-500">{String(getValue())}</span>,
+      cell: ({ getValue }) => <span className="text-sm text-slate-500">{formatDate(getValue<string | null>())}</span>,
     },
     {
-      accessorKey: 'TABLE_NAME',
+      accessorKey: 'ENTITY_TYPE',
       header: t('bulkChange.cols.table', { defaultValue: 'Table' }),
-      cell: ({ getValue }) => <span className="text-sm text-slate-700">{String(getValue())}</span>,
+      cell: ({ row }) => {
+        const tableKey = TABLE_BY_ENTITY_TYPE[row.original.ENTITY_TYPE];
+        return <span className="text-sm text-slate-700">{t(`nav.${tableKey.toLowerCase()}`, { defaultValue: tableKey })}</span>;
+      },
     },
     {
       accessorKey: 'RECORDS',
@@ -56,23 +83,13 @@ export function BulkChangeListPage() {
     {
       accessorKey: 'STATUS',
       header: t('bulkChange.cols.status', { defaultValue: 'Status' }),
-      cell: ({ getValue }) => {
-        const s = String(getValue());
-        const cls = s === 'Approved' ? 'bg-emerald-50 text-emerald-700' : s === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
-        const label =
-          s === 'Approved'
-            ? t('bulkChange.statusApproved', { defaultValue: 'Approved' })
-            : s === 'Rejected'
-              ? t('bulkChange.statusRejected', { defaultValue: 'Rejected' })
-              : t('bulkChange.statusPending', { defaultValue: 'Pending' });
-        return <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${cls}`}>{label}</span>;
-      },
+      cell: ({ row }) => <BulkChangeStatusBadge status={row.original.STATUS} />,
     },
     {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button variant="outline" size="sm" onClick={() => router.push(`/tasks/bulk-change/${row.original.ID}`)}>
+        <Button variant="outline" size="sm" onClick={() => router.push(`/tasks/bulk-change/${row.original.BATCH_ID}`)}>
           {t('bulkChange.review', { defaultValue: 'Review' })}
         </Button>
       ),
@@ -90,14 +107,16 @@ export function BulkChangeListPage() {
               <History className="h-4 w-4" />
               {t('bulkChange.history', { defaultValue: 'History' })}
             </Button>
-            <Button
-              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
-              className="text-white gap-1.5"
-              onClick={() => router.push('/tasks/bulk-change/new')}
-            >
-              <Plus className="h-4 w-4" />
-              {t('bulkChange.newBulkUpdate', { defaultValue: 'New bulk update' })}
-            </Button>
+            {canSubmit && (
+              <Button
+                style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+                className="text-white gap-1.5"
+                onClick={() => router.push('/tasks/bulk-change/new')}
+              >
+                <Plus className="h-4 w-4" />
+                {t('bulkChange.newBulkUpdate', { defaultValue: 'New bulk update' })}
+              </Button>
+            )}
           </div>
         }
       />
@@ -108,12 +127,15 @@ export function BulkChangeListPage() {
 
       <DataTable
         columns={columns}
-        data={MOCK_BULK_TASKS}
-        page={1}
-        limit={10}
-        total={MOCK_BULK_TASKS.length}
-        onPageChange={() => {}}
-        onLimitChange={() => {}}
+        data={rows}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+        page={filters.page}
+        limit={filters.limit}
+        total={data?.total ?? 0}
+        onPageChange={(page) => handleFilterChange({ page })}
+        onLimitChange={(limit) => handleFilterChange({ limit, page: 1 })}
       />
     </PageContainer>
   );
