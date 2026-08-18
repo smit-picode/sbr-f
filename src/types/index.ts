@@ -8,3 +8,4 @@ export * from './auditLog.types';
 export * from './admin.types';
 export * from './enterpriseGroup.types';
 export * from './legalUnit.types';
+export * from './lookup.types';

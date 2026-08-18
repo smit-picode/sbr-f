@@ -790,6 +790,8 @@
       "dates": "Dates",
       "metadata": "Metadata"
     },
+    "estStatusCategoryRequired": "Est. Status Category is required when Est. Status is Inactive",
+    "estStatusCategoryUnavailable": "Status categories could not be loaded. Please refresh and try again.",
     "fields": {
       "sbrId": "SBR ID",
       "recordId": "Record ID",
@@ -1211,5 +1213,13 @@
     "errorCountOne": "1 validation error found",
     "errorCountMany": "{{count}} validation errors found",
     "correctBeforeSaving": "Please correct the errors below before saving"
+  },
+  "isicSelect": {
+    "placeholder": "Select ISIC code",
+    "searchPlaceholder": "Search by code or activity…",
+    "loading": "Loading ISIC codes…",
+    "noMatch": "No matching ISIC codes.",
+    "unavailable": "ISIC codes could not be loaded. Please refresh and try again.",
+    "moreResults": "{{count}} more — keep typing to narrow the list."
   }
 }

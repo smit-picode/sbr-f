@@ -6,7 +6,9 @@ export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   // EditEstablishmentModal) — listed once in the error summary rather than per input.
   NAMES: 'Regulatory Name',
   EST_STATUS: 'Est. Status',
+  EST_STATUS_CATEGORY: 'Est. Status Category',
   SECTOR_ID: 'Sector',
+  ISIC_CODE: 'ISIC Code',
   MAIN_BRANCH_FLG: 'Main Branch Flag',
   EMPLOYMENT_COUNT: 'Employment Count',
   MAIN_BRANCH_SBR_ID: 'Main Branch SBR ID',
@@ -16,6 +18,14 @@ export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
 
 // Enum Options from backend
 export const EST_STATUS_OPTIONS: (string | null)[] = ['Active', 'Inactive', null];
+
+// The two values Est. Status may hold (NPC-223). Kept separate from EST_STATUS_OPTIONS above,
+// which deliberately still carries `null` so validate() accepts records the pipeline never
+// assigned a status to; these two are what the edit dropdown actually offers.
+export const EST_STATUS_VALUES = { ACTIVE: 'Active', INACTIVE: 'Inactive' } as const;
+
+// What the Est. Status dropdown renders, in order.
+export const EST_STATUS_SELECT_OPTIONS: string[] = [EST_STATUS_VALUES.ACTIVE, EST_STATUS_VALUES.INACTIVE];
 export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'Mixed-Government'];
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
 export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];

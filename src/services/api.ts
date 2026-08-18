@@ -88,7 +88,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange'],
+  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups'],
   // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
   // multi-user portal: another user's edit turns a record PENDING in the DB without this
   // session ever knowing, so cached list data goes stale the moment someone else saves.

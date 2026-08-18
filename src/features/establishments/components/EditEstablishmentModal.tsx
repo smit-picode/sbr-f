@@ -12,9 +12,12 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
+import { useGetEstStatusCategoriesQuery } from '@/features/lookups/api/lookupsApi';
 import {
   ESTABLISHMENTS_FIELD_LABELS,
   EST_STATUS_OPTIONS,
+  EST_STATUS_VALUES,
+  EST_STATUS_SELECT_OPTIONS,
   SECTOR_ID_OPTIONS,
   MAIN_BRANCH_FLG_OPTIONS,
   ESTABLISHMENTS_SOURCE_CODE_OPTIONS,
@@ -23,6 +26,7 @@ import {
   isEstablishmentFieldEditable,
 } from '../constants';
 import { SbrIdSearchInput } from '@/components/common/SbrIdSearchInput';
+import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
 
 interface Props {
   frame: SbrEstablishment | null;
@@ -70,6 +74,12 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [updateEstablishment, { isLoading }] = useUpdateEstablishmentMutation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Est. Status Category options (NPC-221). Fetched while the modal is open rather than only
+  // once the user picks Inactive, so the dropdown is already populated the moment it appears.
+  const { data: statusCategoryRes, isFetching: isLoadingStatusCategories } =
+    useGetEstStatusCategoriesQuery(undefined, { skip: !open });
+  const statusCategoryOptions = statusCategoryRes?.data ?? [];
 
   useEffect(() => {
     if (frame) {
@@ -153,6 +163,18 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   };
 
 
+  // Est. Status drives whether a category is required (NPC-223), so it gets its own handler
+  // instead of the generic set() every other field uses. Switching to Active clears any category
+  // the record carried: SBR_EST_STATUS_CATEGORY_LKP holds Inactive-meaning values only, so
+  // leaving e.g. 'Cancelled' on a now-Active establishment would be contradictory, and the
+  // Active-meaning categories are pipeline-derived rather than something a validator picks.
+  // The clear travels as an empty value, which SBR_ESTABLISHMENTS_API.SUBMIT_UPDATE normalises
+  // to an explicit null in CHANGE_DATA (and drops entirely if the category was already empty).
+  const setEstStatus = (value: string) => {
+    set('EST_STATUS', value);
+    if (value === EST_STATUS_VALUES.ACTIVE) set('EST_STATUS_CATEGORY', '');
+  };
+
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
@@ -182,6 +204,13 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     // Enum validations for select fields
     if (form.EST_STATUS !== null && form.EST_STATUS !== undefined && !EST_STATUS_OPTIONS.includes(String(form.EST_STATUS))) {
       e.EST_STATUS = `Must be one of [${EST_STATUS_OPTIONS.filter(v => v !== null).join(', ')}, or empty]`;
+    }
+    // NPC-223: an Inactive establishment must carry a status category. Mirrors the backend's
+    // conditional Joi rule so the editor sees it inline rather than as a 400 after confirming.
+    if (str(form.EST_STATUS) === EST_STATUS_VALUES.INACTIVE && !str(form.EST_STATUS_CATEGORY).trim()) {
+      e.EST_STATUS_CATEGORY = t('editEstablishment.estStatusCategoryRequired', {
+        defaultValue: 'Est. Status Category is required when Est. Status is Inactive',
+      });
     }
     if (form.SECTOR_ID !== null && form.SECTOR_ID !== undefined && !SECTOR_ID_OPTIONS.includes(String(form.SECTOR_ID))) {
       e.SECTOR_ID = `Must be one of [${SECTOR_ID_OPTIONS.join(', ')}, or empty]`;
@@ -364,14 +393,19 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           <SectionDivider title={t('editEstablishment.sections.statusClassification')} />
           <div className="space-y-1" data-field="EST_STATUS">
             <Label>{t('editEstablishment.fields.estStatus')}</Label>
-            <Select value={sel('EST_STATUS') || '__none__'} onValueChange={(v) => set('EST_STATUS', v === '__none__' ? '' : v)}>
+            <Select value={sel('EST_STATUS') || '__none__'} onValueChange={(v) => setEstStatus(v === '__none__' ? '' : v)}>
               <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS') ? 'border-red-400' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                {/* NPC-223: Est. Status offers exactly Active and Inactive. The empty option is
+                    rendered only while the record genuinely has no status (nothing in the
+                    pipeline guarantees one), so it stays a valid Select value for those rows but
+                    disappears — and can't be re-picked to blank the field — once one is chosen. */}
+                {!sel('EST_STATUS') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
+                {EST_STATUS_SELECT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FieldErr msg={err('EST_STATUS')} />
@@ -381,16 +415,60 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('EST_STATUS_SOURCE')} value={sel('EST_STATUS_SOURCE')} onChange={(e) => set('EST_STATUS_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_SOURCE')} />
           </div>
-          <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.estStatusCategory')}</Label>
-            <Input className={inp('EST_STATUS_CATEGORY')} value={sel('EST_STATUS_CATEGORY')} onChange={(e) => set('EST_STATUS_CATEGORY', e.target.value)} />
-            <FieldErr msg={err('EST_STATUS_CATEGORY')} />
-          </div>
-          <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.estStatusCategorySource')}</Label>
-            <Input className={inp('EST_STATUS_CATEGORY_SOURCE')} value={sel('EST_STATUS_CATEGORY_SOURCE')} onChange={(e) => set('EST_STATUS_CATEGORY_SOURCE', e.target.value)} />
-            <FieldErr msg={err('EST_STATUS_CATEGORY_SOURCE')} />
-          </div>
+          {/* NPC-223: only meaningful for an Inactive establishment, so the field appears only
+              then — and is mandatory when it does. Options come from SBR_EST_STATUS_CATEGORY_LKP
+              via SBR_LOOKUPS_API (NPC-221) rather than free text, so a validator can only pick a
+              configured value. The category and its provenance cell are hidden as a pair — a
+              whole row of the 2-column grid — so hiding them never shifts the fields below into
+              the wrong column. */}
+          {sel('EST_STATUS') === EST_STATUS_VALUES.INACTIVE && (
+            <>
+              <div className="space-y-1" data-field="EST_STATUS_CATEGORY">
+                <Label>
+                  {t('editEstablishment.fields.estStatusCategory')} <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={sel('EST_STATUS_CATEGORY') || '__none__'}
+                  onValueChange={(v) => set('EST_STATUS_CATEGORY', v === '__none__' ? '' : v)}
+                  disabled={isLoadingStatusCategories}
+                >
+                  <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS_CATEGORY') ? 'border-red-400' : ''}`}>
+                    <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* Same rule as Est. Status: the blank option exists only until a value is
+                        picked, so the field can't be emptied again once it is required. */}
+                    {!sel('EST_STATUS_CATEGORY') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
+                    {statusCategoryOptions.map((opt) => (
+                      <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
+                    ))}
+                    {/* The record's current category survives a lookup that no longer lists it
+                        (the non-MOCI values are flagged as provisional in NPC-221), so an edit to
+                        an unrelated field never silently drops it from the dropdown. */}
+                    {sel('EST_STATUS_CATEGORY') && !statusCategoryOptions.some((o) => o.CODE === sel('EST_STATUS_CATEGORY')) && (
+                      <SelectItem value={sel('EST_STATUS_CATEGORY')}>{sel('EST_STATUS_CATEGORY')}</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                {/* The list is required to save, so an empty one is a dead end the editor would
+                    otherwise have to guess at (the lookup is unreachable, or not yet deployed).
+                    Say so instead of leaving an empty dropdown next to a blocking error. */}
+                {!isLoadingStatusCategories && statusCategoryOptions.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    {t('editEstablishment.estStatusCategoryUnavailable', {
+                      defaultValue: 'Status categories could not be loaded. Please refresh and try again.',
+                    })}
+                  </p>
+                )}
+                <FieldErr msg={err('EST_STATUS_CATEGORY')} />
+              </div>
+              <div className="space-y-1">
+                <Label>{t('editEstablishment.fields.estStatusCategorySource')}</Label>
+                <Input className={inp('EST_STATUS_CATEGORY_SOURCE')} value={sel('EST_STATUS_CATEGORY_SOURCE')} onChange={(e) => set('EST_STATUS_CATEGORY_SOURCE', e.target.value)} />
+                <FieldErr msg={err('EST_STATUS_CATEGORY_SOURCE')} />
+              </div>
+            </>
+          )}
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.legalType')}</Label>
             {/* Suggestions, not a closed list: a datalist offers the known legal types while
@@ -434,9 +512,17 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('SECTOR_ID_SOURCE')} value={sel('SECTOR_ID_SOURCE')} onChange={(e) => set('SECTOR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('SECTOR_ID_SOURCE')} />
           </div>
-          <div className="space-y-1">
+          {/* NPC-218: searchable single-select over SBR_ISIC_LKP instead of free text, so an
+              invalid classification can no longer be typed in. `ed()` still decides editability,
+              exactly as the Input it replaces did. */}
+          <div className="space-y-1" data-field="ISIC_CODE">
             <Label>{t('editEstablishment.fields.isicCode')}</Label>
-            <Input className={inp('ISIC_CODE')} value={sel('ISIC_CODE')} onChange={(e) => set('ISIC_CODE', e.target.value)} />
+            <IsicCodeSelect
+              value={sel('ISIC_CODE')}
+              onChange={(code) => set('ISIC_CODE', code)}
+              disabled={!ed('ISIC_CODE')}
+              invalid={!!err('ISIC_CODE')}
+            />
             <FieldErr msg={err('ISIC_CODE')} />
           </div>
           <div className="space-y-1">
