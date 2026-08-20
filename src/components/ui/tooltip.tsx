@@ -8,6 +8,12 @@ const TooltipProvider = TooltipPrimitive.Provider;
 const Tooltip = TooltipPrimitive.Root;
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
+// Opt-in portal, mirroring DialogPortal / DropdownMenuPortal. TooltipContent renders inline by
+// default (unchanged for every existing caller); wrap it in TooltipPortal only when the trigger
+// sits inside an `overflow` container that would otherwise clip the tooltip — e.g. the collapsed
+// sidebar rail, whose scrollable <nav> cut off the menu-name tooltip.
+const TooltipPortal = TooltipPrimitive.Portal;
+
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
@@ -24,4 +30,4 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipPortal, TooltipProvider };

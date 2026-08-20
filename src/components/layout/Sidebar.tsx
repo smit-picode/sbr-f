@@ -40,7 +40,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NAV_GROUPS, type NavGroup, type NavItem } from '@/constants/navigation';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { formatRole } from '@/utils/format';
@@ -118,7 +118,14 @@ function NavLink({ item, collapsed, count }: NavLinkProps) {
             )}
           </Link>
         </TooltipTrigger>
-        <TooltipContent side="right">{label}{countLabel ? ` (${countLabel})` : ''}</TooltipContent>
+        {/* Portalled to <body>: the collapsed rail's <nav> is `overflow-y-auto overflow-x-hidden`,
+            so an inline side="right" tooltip was clipped at the sidebar edge. sideOffset clears
+            the 68px rail (trigger ends at 54px) so the label never sits on top of it. */}
+        <TooltipPortal>
+          <TooltipContent side="right" sideOffset={16} collisionPadding={8} className="shadow-lg">
+            {label}{countLabel ? ` (${countLabel})` : ''}
+          </TooltipContent>
+        </TooltipPortal>
       </Tooltip>
     );
   }
