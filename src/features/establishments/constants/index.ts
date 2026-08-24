@@ -80,7 +80,6 @@ export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   QSTP_PARENT_REG_NUM: 100,
   FARM_NO: 100,
   EID: 200,
-  EID_ORIG_SOURCE: 50,
 };
 
 export const ESTABLISHMENTS_DEFAULT_FILTERS = {

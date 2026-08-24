@@ -15,8 +15,6 @@ export interface SbrEstablishment {
   FARM_NO: string | null;
   EID: string | null;
   EID_SOURCE: string | null;
-  EID_ORIG: string | null;
-  EID_ORIG_SOURCE: string | null;
   // Names — English
   NAME_ENU: string | null;
   NAME_ENU_SOURCE: string | null;

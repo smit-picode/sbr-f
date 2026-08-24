@@ -129,7 +129,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         QSTP_PARENT_REG_NUM:        frame.QSTP_PARENT_REG_NUM ?? '',
         FARM_NO:                    frame.FARM_NO ?? '',
         EID:                        frame.EID ?? '',
-        EID_ORIG_SOURCE:            frame.EID_ORIG_SOURCE ?? '',
         // Dates
         CR_ISSUE_DATE:              frame.CR_ISSUE_DATE ?? '',
         CR_EXPIRY_DATE:             frame.CR_EXPIRY_DATE ?? '',
@@ -657,11 +656,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Label>{t('editEstablishment.fields.eid')}</Label>
             <Input className={inp('EID')} value={sel('EID')} onChange={(e) => set('EID', e.target.value)} />
             <FieldErr msg={err('EID')} />
-          </div>
-          <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.eidOrigSource')}</Label>
-            <Input className={inp('EID_ORIG_SOURCE')} value={sel('EID_ORIG_SOURCE')} onChange={(e) => set('EID_ORIG_SOURCE', e.target.value)} />
-            <FieldErr msg={err('EID_ORIG_SOURCE')} />
           </div>
 
           {/* Dates */}
