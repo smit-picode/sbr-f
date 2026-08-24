@@ -72,8 +72,5 @@ export const USER_STATUS_FILTER_OPTIONS: { value: string; i18nKey: string; label
 // ROLES is not sortable — roles come from a joined association, not a column on SBR_USER.
 export const USERS_SORTABLE_COLUMNS: string[] = ['NAME', 'IS_ACTIVE', 'CREATED_AT'];
 
-// Select sentinel for "No scope (all regulators)" — maps to the backend's GLOBAL scope
-export const NO_SCOPE_VALUE: string = '__none__';
-
 // Backend sentinel stored for unscoped role assignments
 export const GLOBAL_SCOPE_VALUE: string = 'GLOBAL';

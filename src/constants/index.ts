@@ -13,11 +13,15 @@ export const EST_STATUS_OPTIONS = [
   { label: 'Inactive', value: 'Inactive' },
 ];
 
+// NPC-69: 'Mixed-Government' was renamed to 'State Owned' in the DB (migration
+// 20260628-6) and in the pipeline procedures that derive SECTOR_ID. `value` must stay
+// exactly the stored literal — it is sent as the `sectorId` query param and matched by the
+// backend SECTOR enum, so the old spelling would now filter to zero rows.
 export const SECTOR_OPTIONS = [
   { label: 'All', value: '' },
   { label: 'Private', value: 'Private' },
   { label: 'Mixed-Private', value: 'Mixed-Private' },
-  { label: 'Mixed-Government', value: 'Mixed-Government' },
+  { label: 'State Owned', value: 'State Owned' },
 ];
 
 export const SOURCE_CODE_OPTIONS = [

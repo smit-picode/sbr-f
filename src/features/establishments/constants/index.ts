@@ -26,7 +26,10 @@ export const EST_STATUS_VALUES = { ACTIVE: 'Active', INACTIVE: 'Inactive' } as c
 
 // What the Est. Status dropdown renders, in order.
 export const EST_STATUS_SELECT_OPTIONS: string[] = [EST_STATUS_VALUES.ACTIVE, EST_STATUS_VALUES.INACTIVE];
-export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'Mixed-Government'];
+// Must match the backend SECTOR enum exactly. NPC-69 renamed 'Mixed-Government' to
+// 'State Owned'; the DB holds no row with the old literal, so submitting it would now be
+// rejected by the establishments validator.
+export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'State Owned'];
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
 export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
 

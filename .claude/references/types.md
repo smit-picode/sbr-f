@@ -33,7 +33,7 @@ interface SbrFrame {
   NPC_NAME_ENU: string | null;
   EST_STATUS: string | null;       // 'Active' | 'Inactive'
   LEGAL_TYPE: string | null;
-  SECTOR_ID: string | null;        // 'Private' | 'Mixed-Private' | 'Mixed-Government'
+  SECTOR_ID: string | null;        // 'Private' | 'Mixed-Private' | 'State Owned'
   ISIC_CODE: string | null;
   EMPLOYMENT_COUNT: number | null;
   MAIN_BRANCH_FLG: string | null;  // 'MAIN' | 'BRANCH'

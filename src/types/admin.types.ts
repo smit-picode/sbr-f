@@ -38,12 +38,6 @@ export interface UserRoleInput {
   EXPIRES_AT?: string | null;
 }
 
-export interface RegulatorScope {
-  ID: number;
-  CODE: string;
-  NAME: string;
-}
-
 export interface SbrUser {
   ID: number;
   NAME: string;

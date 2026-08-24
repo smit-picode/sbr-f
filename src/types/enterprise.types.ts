@@ -11,7 +11,7 @@ export interface SbrEnterprise {
   TRADE_NAME_ENU: string | null;
   TRADE_NAME_ENU_SOURCE: string | null;
   STATUS: string | null;            // 'Active' | 'Inactive'
-  SECTOR_ID: string | null;         // 'Private' | 'Mixed-Private' | 'Mixed-Government'
+  SECTOR_ID: string | null;         // 'Private' | 'Mixed-Private' | 'State Owned'
   SECTOR_ID_SOURCE: string | null;
   HOLDING_COMPANY_FLG: string | null;
   HOLDING_COMPANY_FLG_SOURCE: string | null;

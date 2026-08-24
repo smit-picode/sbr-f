@@ -3,9 +3,23 @@ import type { LegalUnit } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { ExternalLink } from 'lucide-react';
 
-const SOURCE_COLOR: Record<string, string> = {
-  MOCI: '#A71D3A', QFC: '#1a3a52', QFZ: '#2B7A9E', QSTP: '#B5742B', MOM_FARM: '#1F8A5B',
+// Per-source badge palette. Each source keeps its own hue for at-a-glance recognition, but as a
+// soft tint with dark text rather than a solid dark block. The text shades are deliberately a
+// step darker than the old solid-background colours (QFZ #2B7A9E -> #22637F, QSTP #B5742B ->
+// #8F5C22): at 12px on a tint the originals fall below the 4.5:1 contrast floor the design
+// system requires for small text. Kept as inline hex, as the solid version was, because these
+// regulator colours sit outside the slate/blue/emerald/red/amber Tailwind palette.
+const SOURCE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
+  MOCI:     { bg: '#FBEAEE', text: '#A71D3A', border: '#F3D3DB' },
+  QFC:      { bg: '#EEF2F6', text: '#1A3A52', border: '#D6DFE8' },
+  QFZ:      { bg: '#E9F4F8', text: '#22637F', border: '#CFE6EF' },
+  QSTP:     { bg: '#FDF3E7', text: '#8F5C22', border: '#F5E2C8' },
+  MOM_FARM: { bg: '#E8F5EE', text: '#196E49', border: '#C9E7D8' },
 };
+
+// Neutral slate for a source the palette above doesn't know, mirroring the previous
+// '#64748b' fallback so an unrecognised value still renders as a badge rather than bare text.
+const SOURCE_BADGE_FALLBACK = { bg: '#F1F5F9', text: '#475569', border: '#E2E8F0' };
 
 type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
 
@@ -51,11 +65,11 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
     header: t('columns.SOURCE_SYSTEM', { defaultValue: 'SOURCE SYSTEM' }),
     cell: ({ getValue }) => {
       const val = getValue<string>();
-      const color = SOURCE_COLOR[val] ?? '#64748b';
+      const badge = SOURCE_BADGE[val] ?? SOURCE_BADGE_FALLBACK;
       return (
         <span
-          className="inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-xs font-semibold text-white"
-          style={{ background: color }}
+          className="inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono text-xs font-semibold"
+          style={{ background: badge.bg, color: badge.text, borderColor: badge.border }}
         >
           {val}
         </span>

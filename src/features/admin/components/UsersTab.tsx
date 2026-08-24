@@ -14,11 +14,10 @@ import {
   useCreateUserMutation,
   useUpdateUserMutation,
   useGetRolesListQuery,
-  useGetRegulatorScopesQuery,
 } from '../api/adminApi';
 import { getUsersColumns, userRoleNames, getRoleBadgeClass, isSuperAdminUser } from './UsersColumns';
 import {
-  ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS, NO_SCOPE_VALUE,
+  ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS,
   ALL_ROLES_VALUE, ALL_STATUS_VALUE, USER_STATUS_FILTER_OPTIONS,
 } from '../constants';
 import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters } from '@/types';
@@ -50,7 +49,7 @@ const PASSWORD_RULES = [
 
 type RoleSelection = number | null;
 
-const EMPTY_FORM = { NAME: '', EMAIL: '', PASSWORD: '', IS_ACTIVE: 'Y', SCOPE: NO_SCOPE_VALUE };
+const EMPTY_FORM = { NAME: '', EMAIL: '', PASSWORD: '', IS_ACTIVE: 'Y' };
 
 export function UsersTab({
   canEdit = false,
@@ -112,12 +111,10 @@ export function UsersTab({
     { page: 1, limit: 100 },
     { refetchOnMountOrArgChange: true, skip: !canEdit && !canSearch }
   );
-  const { data: scopesData } = useGetRegulatorScopesQuery(undefined, { skip: !canEdit });
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
   const roles = rolesData?.data ?? [];
-  const scopes = scopesData?.data ?? [];
   // SUPER_ADMIN can never be assigned through the UI — only shown, never selectable
   const assignableRoles = roles.filter((role) => role.ROLE_NAME !== 'SUPER_ADMIN');
 
@@ -201,7 +198,6 @@ export function UsersTab({
       EMAIL: user.EMAIL,
       PASSWORD: '',
       IS_ACTIVE: user.IS_ACTIVE ? 'Y' : 'N',
-      SCOPE: NO_SCOPE_VALUE,
     });
   };
 
@@ -295,43 +291,20 @@ export function UsersTab({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1">
-            <Label htmlFor="user-scope">{t('admin.users.regulatorScopeLabel')}</Label>
-            <InfoTooltip content="This feature will be implemented in the next phase" />
-          </div>
-          <Select value={form.SCOPE} onValueChange={(v) => setForm(p => ({ ...p, SCOPE: v }))} disabled>
-            <SelectTrigger id="user-scope" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NO_SCOPE_VALUE} className="focus:bg-[#A71D3A] focus:text-white">
-                {t('admin.users.noScope')}
-              </SelectItem>
-              {scopes.map((scope) => (
-                <SelectItem key={scope.ID} value={scope.CODE} className="focus:bg-[#A71D3A] focus:text-white">
-                  {scope.CODE}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <Label htmlFor="user-status">{t('admin.users.statusLabel')}</Label>
+          <InfoTooltip content="This feature will be implemented in the next phase" />
         </div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-1">
-            <Label htmlFor="user-status">{t('admin.users.statusLabel')}</Label>
-            <InfoTooltip content="This feature will be implemented in the next phase" />
-          </div>
-          <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
-            <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Y" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
-              <SelectItem value="N" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
+          <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Y" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
+            <SelectItem value="N" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1">

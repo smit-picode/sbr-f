@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrPermission, SbrRole, SbrRoleWithPermissions, SbrUser, UserRoleInput, RegulatorScope, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
+import type { ApiResponse, SbrPermission, SbrRole, SbrRoleWithPermissions, SbrUser, UserRoleInput, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -80,12 +80,6 @@ export const adminApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/admin/users/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
-
-    // Regulator scopes — reference data for the user onboarding dialog
-    getRegulatorScopes: builder.query<ApiResponse<RegulatorScope[]>, void>({
-      query: () => ({ url: '/admin/regulator-scopes' }),
-      providesTags: ['Admin'],
-    }),
   }),
   overrideExisting: false,
 });
@@ -107,5 +101,4 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
-  useGetRegulatorScopesQuery,
 } = adminApi;

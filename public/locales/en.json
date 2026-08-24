@@ -1053,8 +1053,6 @@
       "colCreatedAt": "CREATED",
       "statusActive": "Active",
       "statusInactive": "Inactive",
-      "regulatorScopeLabel": "Regulator scope",
-      "noScope": "No scope (all regulators)",
       "statusLabel": "Status",
       "assignedRolesLabel": "Assigned roles",
       "assignedRolesHint": "A user can hold multiple roles; effective permissions follow the active role. Set an optional per-role expiry date.",

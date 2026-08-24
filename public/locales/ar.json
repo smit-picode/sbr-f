@@ -1053,8 +1053,6 @@
       "colCreatedAt": "تاريخ الإنشاء",
       "statusActive": "نشط",
       "statusInactive": "غير نشط",
-      "regulatorScopeLabel": "نطاق الجهة التنظيمية",
-      "noScope": "بدون نطاق (جميع الجهات)",
       "statusLabel": "الحالة",
       "assignedRolesLabel": "الأدوار المسندة",
       "assignedRolesHint": "يمكن للمستخدم حمل عدة أدوار؛ تتبع الصلاحيات الدور النشط. يمكن تحديد تاريخ انتهاء اختياري لكل دور.",

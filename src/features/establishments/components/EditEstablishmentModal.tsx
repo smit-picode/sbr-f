@@ -500,9 +500,12 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
-                <SelectItem value="Private">Private</SelectItem>
-                <SelectItem value="Mixed-Private">Mixed-Private</SelectItem>
-                <SelectItem value="Mixed-Government">Mixed-Government</SelectItem>
+                {/* Rendered from SECTOR_ID_OPTIONS — the same constant validate() checks against,
+                    so the dropdown and the validation rule can never disagree (they did before
+                    the NPC-69 'Mixed-Government' -> 'State Owned' rename). */}
+                {SECTOR_ID_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FieldErr msg={err('SECTOR_ID')} />
