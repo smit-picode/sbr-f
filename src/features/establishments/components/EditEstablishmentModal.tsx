@@ -12,7 +12,7 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
-import { useGetEstStatusCategoriesQuery } from '@/features/lookups/api/lookupsApi';
+import { useGetEstStatusCategoriesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
 import {
   ESTABLISHMENTS_FIELD_LABELS,
   EST_STATUS_OPTIONS,
@@ -25,8 +25,8 @@ import {
   LEGAL_TYPE_SUGGESTIONS,
   isEstablishmentFieldEditable,
 } from '../constants';
-import { SbrIdSearchInput } from '@/components/common/SbrIdSearchInput';
 import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
+import { MainBranchSelect } from '@/components/common/MainBranchSelect';
 
 interface Props {
   frame: SbrEstablishment | null;
@@ -80,6 +80,14 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const { data: statusCategoryRes, isFetching: isLoadingStatusCategories } =
     useGetEstStatusCategoriesQuery(undefined, { skip: !open });
   const statusCategoryOptions = statusCategoryRes?.data ?? [];
+
+  // Main branch establishment list (NPC-222). Same RTK Query cache MainBranchSelect reads —
+  // calling the hook again here does not re-fetch, it just lets validate() below check
+  // membership too, as a pre-submit safety net for a stored value the picker itself can no
+  // longer produce (e.g. set before this fix, or via a direct API call that bypassed the UI).
+  const { data: mainBranchRes, isFetching: isLoadingMainBranches } =
+    useGetMainBranchValuesQuery(undefined, { skip: !open });
+  const mainBranchOptions = mainBranchRes?.data ?? [];
 
   useEffect(() => {
     if (frame) {
@@ -198,6 +206,20 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     }
     if (form.MAIN_BRANCH_SBR_ID != null && !Number.isInteger(Number(form.MAIN_BRANCH_SBR_ID))) {
       e.MAIN_BRANCH_SBR_ID = 'Must be an integer';
+    }
+    // NPC-222: MainBranchSelect only ever offers active, main-branch SBR IDs, so this only
+    // fires for a value the picker itself could not have produced — set before this fix, or
+    // written by a direct API call that bypassed the UI. Skipped while the list is still
+    // loading so a slow network can't flag a value that simply hasn't been checked yet.
+    if (
+      form.MAIN_BRANCH_SBR_ID != null &&
+      !isLoadingMainBranches &&
+      mainBranchOptions.length > 0 &&
+      !mainBranchOptions.some((o) => o.SBR_ID === Number(form.MAIN_BRANCH_SBR_ID))
+    ) {
+      e.MAIN_BRANCH_SBR_ID = t('editEstablishment.mainBranchSbrIdInvalid', {
+        defaultValue: 'This SBR ID is not an active main-branch establishment. Please select one from the list.',
+      });
     }
 
     // Enum validations for select fields
@@ -558,14 +580,15 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
             <Label>{t('editEstablishment.fields.mainBranchSbrId')}</Label>
-            {/* Search-and-select rather than free-text entry, so the ID always belongs to a
-                real establishment. Same guarantee the enterprise search gives on the group
-                modals. */}
-            <SbrIdSearchInput
+            {/* Picker over the active main-branch establishment list (NPC-222), rather than a
+                free-text ID or a general "any establishment" search — the value can only ever
+                be a real, active, main-branch SBR ID, so a branch or non-existent ID can never
+                be entered in the first place. */}
+            <MainBranchSelect
               value={form.MAIN_BRANCH_SBR_ID ?? null}
               onChange={(sbrId) => set('MAIN_BRANCH_SBR_ID', sbrId)}
               disabled={!ed('MAIN_BRANCH_SBR_ID')}
-              className={err('MAIN_BRANCH_SBR_ID') ? 'border-red-400' : ''}
+              invalid={!!err('MAIN_BRANCH_SBR_ID')}
             />
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID')} />
           </div>

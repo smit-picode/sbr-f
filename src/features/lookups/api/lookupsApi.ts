@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, LookupValue } from '@/types';
+import type { ApiResponse, LookupValue, MainBranchEstablishment } from '@/types';
 
 // Static reference lookups (SBR_LOOKUPS_API). Its own feature slice rather than part of
 // establishments: the backing package is shared infrastructure for lookup lists that belong to
@@ -27,8 +27,16 @@ export const lookupsApi = baseApi.injectEndpoints({
       providesTags: ['Lookups'],
       keepUnusedDataFor: 3600,
     }),
+    // Every active main-branch establishment (NPC-222). Same load-once, filter-client-side
+    // design as ISIC — the procedure exposes no search or paging parameter, and the list is
+    // small (dozens of rows, same order of magnitude as the other two lookups).
+    getMainBranchValues: builder.query<ApiResponse<MainBranchEstablishment[]>, void>({
+      query: () => '/lookups/main-branches',
+      providesTags: ['Lookups'],
+      keepUnusedDataFor: 3600,
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetEstStatusCategoriesQuery, useGetIsicValuesQuery } = lookupsApi;
+export const { useGetEstStatusCategoriesQuery, useGetIsicValuesQuery, useGetMainBranchValuesQuery } = lookupsApi;

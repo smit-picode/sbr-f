@@ -8,3 +8,14 @@ export interface LookupValue {
   // the label can diverge from the stored value later without a frontend change.
   DESCRIPTION: string | null;
 }
+
+// One row of GET /lookups/main-branches (NPC-222) — every active main-branch establishment,
+// for the Edit Establishment "Main Branch SBR ID" picker. A different shape from LookupValue's
+// CODE/DESCRIPTION pair, so it gets its own type.
+export interface MainBranchEstablishment {
+  SBR_ID: number;
+  NAME_ENU: string | null;
+  NAME_ARA: string | null;
+  EST_STATUS: string | null;
+  MAIN_BRANCH_FLG: string | null;
+}
