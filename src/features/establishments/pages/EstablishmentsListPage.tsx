@@ -8,7 +8,7 @@ import { DataTable } from '@/components/table/DataTable';
 import { getEstablishmentsColumns } from '../components/EstablishmentsColumns';
 import { EstablishmentsFiltersBar } from '../components/EstablishmentsFilters';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
 import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISHMENTS_SORTABLE_COLUMNS } from '../constants';
@@ -49,7 +49,7 @@ export function EstablishmentsListPage() {
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
+  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,

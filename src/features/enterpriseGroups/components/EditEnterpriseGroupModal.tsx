@@ -352,7 +352,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
               <Select value={form.HOLDING_COMPANY_FLG} onValueChange={(v) => set('HOLDING_COMPANY_FLG', v)}>
                 <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.yesNoPlaceholder', { defaultValue: 'Yes / No' })} /></SelectTrigger>
                 <SelectContent>
-                  {ENTERPRISE_GROUP_HOLDING_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                  {ENTERPRISE_GROUP_HOLDING_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

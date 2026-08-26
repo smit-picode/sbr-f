@@ -249,7 +249,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.yesNoPlaceholder', { defaultValue: 'Yes / No' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_HOLDING_OPTIONS.map((o) => (
-                    <SelectItem key={o} value={o}>{o}</SelectItem>
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

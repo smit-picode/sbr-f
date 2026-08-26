@@ -506,7 +506,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
                   </Badge>
                 )}
                 {!!group.HAS_PENDING_REQUEST && <PendingBadge />}
-                {group.HOLDING_COMPANY_FLG === 'Yes' && (
+                {group.HOLDING_COMPANY_FLG === 'Y' && (
                   <Badge className="rounded-md bg-white/15 text-white border border-white/30 text-[10px] font-semibold">
                     {t('enterpriseGroupDetail.holdingCompanyBadge', { defaultValue: 'Holding company' })}
                   </Badge>

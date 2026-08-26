@@ -5,7 +5,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
 import { getEnterpriseColumns } from '../components/EnterpriseColumns';
 import { EnterprisesFiltersBar } from '../components/EnterprisesFilters';
 import { useGetEnterprisesListQuery } from '../api/enterprisesApi';
@@ -39,7 +39,7 @@ export function EnterprisesListPage() {
 
   const { canSearch, canViewDetail } = usePermission('enterprises');
 
-  const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
+  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,

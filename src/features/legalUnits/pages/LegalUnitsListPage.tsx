@@ -10,7 +10,7 @@ import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
 import { getLegalUnitColumns } from '../components/LegalUnitColumns';
 import { useGetLegalUnitsListQuery } from '../api/legalUnitsApi';
 import { LEGAL_UNITS_DEFAULT_FILTERS, LEGAL_UNIT_RECORD_FILTER_OPTIONS, LEGAL_UNIT_FILTER_COLUMNS } from '../constants';
@@ -42,7 +42,7 @@ export function LegalUnitsListPage() {
 
   const { canSearch } = usePermission('legal_units');
 
-  const activeColumnFilters = columnFilters.filter((r) => r.column && r.value.trim());
+  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,

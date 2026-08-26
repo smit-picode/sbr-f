@@ -18,13 +18,32 @@ export interface ColumnFilterOption {
   label: string;
 }
 
-const OPERATORS = ['contains', 'equals', 'starts_with', 'is_not'] as const;
+// Full 8-operator set SBR_QUERY_PKG accepts (NPC-216 / NPC-76) — snake_case values must match
+// the procedure's whitelist exactly, or it now raises ORA-20410 instead of silently ignoring it.
+const OPERATORS = [
+  'contains', 'not_contains', 'starts_with', 'ends_with',
+  'equals', 'is_not', 'is_empty', 'is_not_empty',
+] as const;
 const OP_FALLBACK: Record<string, string> = {
   contains: 'contains',
-  equals: 'equals',
+  not_contains: 'does not contain',
   starts_with: 'starts with',
+  ends_with: 'ends with',
+  equals: 'equals',
   is_not: 'is not',
+  is_empty: 'is empty',
+  is_not_empty: 'is not empty',
 };
+// These two operators test for null/blank and take no value — SBR_QUERY_PKG ignores whatever
+// is sent for them, so the value box is hidden rather than left as a dead, misleading input.
+export const NO_VALUE_OPERATORS = new Set(['is_empty', 'is_not_empty']);
+
+// A filter row is ready to send once its column is picked and either it has a typed value or its
+// operator doesn't need one. Every *ListPage that renders <ColumnFilters> derives its
+// `columnFilters` query param with this — without it, is_empty/is_not_empty rows (whose value is
+// always blank) get silently dropped by a `r.value.trim()` check before ever reaching the API.
+export const isActiveColumnFilterRow = (r: ColumnFilterRow): boolean =>
+  !!r.column && (NO_VALUE_OPERATORS.has(r.operator) || !!r.value.trim());
 
 interface ColumnFiltersProps {
   columns: ColumnFilterOption[];
@@ -82,12 +101,14 @@ export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) 
                       ))}
                     </SelectContent>
                   </Select>
-                  <Input
-                    className="h-8 w-56 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
-                    placeholder={t('columnFilters.valuePlaceholder', { defaultValue: 'Value…' })}
-                    value={row.value}
-                    onChange={(e) => updateRow(row.id, { value: e.target.value })}
-                  />
+                  {!NO_VALUE_OPERATORS.has(row.operator) && (
+                    <Input
+                      className="h-8 w-56 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                      placeholder={t('columnFilters.valuePlaceholder', { defaultValue: 'Value…' })}
+                      value={row.value}
+                      onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() => removeRow(row.id)}
