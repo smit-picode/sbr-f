@@ -57,6 +57,11 @@ const EMPTY_FORM: FormState = {
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
+// A group cannot start in the future — confirmed with the team lead (NPC-239). Recomputed per
+// render rather than module-load time, so the cap stays correct across a session left open
+// past midnight.
+const todayISO = (): string => new Date().toISOString().slice(0, 10);
+
 export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGroupModalProps) {
   const { t } = useTranslation();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -116,6 +121,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     }
     if (headId == null || !members.some((m) => m.ENTERPRISE_ID === headId)) {
       e.GROUP_HEAD = t('editEnterpriseGroup.headRequired', { defaultValue: 'Mark one member enterprise as the group head.' });
+    }
+    if (form.GROUP_START_DATE && form.GROUP_START_DATE > todayISO()) {
+      e.GROUP_START_DATE = t('editEnterpriseGroup.startDateFuture', { defaultValue: 'Group start date cannot be in the future.' });
     }
     setErrors(e);
     if (Object.keys(e).length > 0) return;
@@ -270,6 +278,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               <Input
                 type="date"
                 value={form.GROUP_START_DATE}
+                max={todayISO()}
                 onChange={(e) => set('GROUP_START_DATE', e.target.value)}
                 className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
               />

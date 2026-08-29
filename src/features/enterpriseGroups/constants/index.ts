@@ -7,6 +7,7 @@ export const ENTERPRISE_GROUP_FIELD_LABELS: Record<string, string> = {
   UCI_NAME: 'UCI Name',
   MEMBERS: 'Member Enterprises',
   GROUP_HEAD: 'Group Head',
+  GROUP_START_DATE: 'Group Start Date',
 };
 
 export const ENTERPRISE_GROUP_DEFAULT_FILTERS = {
