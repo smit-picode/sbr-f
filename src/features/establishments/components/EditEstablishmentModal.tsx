@@ -12,13 +12,12 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
-import { useGetEstStatusCategoriesQuery, useGetLegalTypeValuesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
+import { useGetEstStatusCategoriesQuery, useGetLegalTypeValuesQuery, useGetSectorTypeValuesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
 import {
   ESTABLISHMENTS_FIELD_LABELS,
   EST_STATUS_OPTIONS,
   EST_STATUS_VALUES,
   EST_STATUS_SELECT_OPTIONS,
-  SECTOR_ID_OPTIONS,
   MAIN_BRANCH_FLG_OPTIONS,
   ESTABLISHMENTS_SOURCE_CODE_OPTIONS,
   ESTABLISHMENTS_MAX_LENGTHS,
@@ -86,6 +85,14 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const { data: legalTypeRes, isFetching: isLoadingLegalTypes } =
     useGetLegalTypeValuesQuery(undefined, { skip: !open });
   const legalTypeOptions = legalTypeRes?.data ?? [];
+
+  // Sector list (NPC-225), replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of
+  // drift that caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded
+  // copy silently fell out of sync with the real values). validate() below checks against this
+  // same loaded list, so the dropdown and the validation rule can never disagree again.
+  const { data: sectorTypeRes, isFetching: isLoadingSectorTypes } =
+    useGetSectorTypeValuesQuery(undefined, { skip: !open });
+  const sectorTypeOptions = sectorTypeRes?.data ?? [];
 
   // Main branch establishment list (NPC-222). Same RTK Query cache MainBranchSelect reads —
   // calling the hook again here does not re-fetch, it just lets validate() below check
@@ -243,8 +250,11 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     // before the enum check so a blank Sector reports "required", not "must be one of [...]".
     if (!str(form.SECTOR_ID).trim()) {
       e.SECTOR_ID = t('editEstablishment.sectorRequired', { defaultValue: 'Sector is required' });
-    } else if (!SECTOR_ID_OPTIONS.includes(String(form.SECTOR_ID))) {
-      e.SECTOR_ID = `Must be one of [${SECTOR_ID_OPTIONS.join(', ')}]`;
+    } else if (
+      !isLoadingSectorTypes && sectorTypeOptions.length > 0
+      && !sectorTypeOptions.some((o) => o.CODE === String(form.SECTOR_ID))
+    ) {
+      e.SECTOR_ID = `Must be one of [${sectorTypeOptions.map((o) => o.CODE).join(', ')}]`;
     }
     if (form.MAIN_BRANCH_FLG !== null && form.MAIN_BRANCH_FLG !== undefined && form.MAIN_BRANCH_FLG !== '' && !MAIN_BRANCH_FLG_OPTIONS.includes(String(form.MAIN_BRANCH_FLG))) {
       e.MAIN_BRANCH_FLG = `Must be one of [${MAIN_BRANCH_FLG_OPTIONS.join(', ')}, or empty]`;
@@ -543,18 +553,29 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="SECTOR_ID">
             <Label>{t('editEstablishment.fields.sector')}</Label>
-            <Select value={sel('SECTOR_ID') || '__none__'} onValueChange={(v) => set('SECTOR_ID', v === '__none__' ? '' : v)}>
+            {/* NPC-225: a closed dropdown backed by SBR_SECTOR_TYPE_LKP via SBR_LOOKUPS_API,
+                replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of drift that
+                caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded copy
+                silently fell out of sync with the real values). validate() above checks against
+                this same loaded list, so the dropdown and the validation rule can never disagree. */}
+            <Select
+              value={sel('SECTOR_ID') || '__none__'}
+              onValueChange={(v) => set('SECTOR_ID', v === '__none__' ? '' : v)}
+              disabled={isLoadingSectorTypes}
+            >
               <SelectTrigger className={`w-full shadow-none ${err('SECTOR_ID') ? 'border-red-400' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
-                {/* Rendered from SECTOR_ID_OPTIONS — the same constant validate() checks against,
-                    so the dropdown and the validation rule can never disagree (they did before
-                    the NPC-69 'Mixed-Government' -> 'State Owned' rename). */}
-                {SECTOR_ID_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                {!sel('SECTOR_ID') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
+                {sectorTypeOptions.map((opt) => (
+                  <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
                 ))}
+                {/* The record's current value survives a lookup that does not (yet) list it,
+                    same reasoning as Legal Type above. */}
+                {sel('SECTOR_ID') && !sectorTypeOptions.some((o) => o.CODE === sel('SECTOR_ID')) && (
+                  <SelectItem value={sel('SECTOR_ID')}>{sel('SECTOR_ID')}</SelectItem>
+                )}
               </SelectContent>
             </Select>
             <FieldErr msg={err('SECTOR_ID')} />

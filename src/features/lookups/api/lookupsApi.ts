@@ -44,6 +44,14 @@ export const lookupsApi = baseApi.injectEndpoints({
       providesTags: ['Lookups'],
       keepUnusedDataFor: 3600,
     }),
+    // The full SBR_SECTOR_TYPE_LKP list (NPC-225), for the Establishments tab's Sector dropdown.
+    // Replaces a hardcoded frontend list — the same class of drift that caused the earlier
+    // 'Mixed-Government' vs 'State Owned' rename bug. Small list, plain <Select>, same as Legal Type.
+    getSectorTypeValues: builder.query<ApiResponse<LookupValue[]>, void>({
+      query: () => '/lookups/sector-types',
+      providesTags: ['Lookups'],
+      keepUnusedDataFor: 3600,
+    }),
     // Every active main-branch establishment (NPC-222). Same load-once, filter-client-side
     // design as ISIC — the procedure exposes no search or paging parameter, and the list is
     // small (dozens of rows, same order of magnitude as the other two lookups).
@@ -61,5 +69,6 @@ export const {
   useGetIsicValuesQuery,
   useGetIsic2DigitValuesQuery,
   useGetLegalTypeValuesQuery,
+  useGetSectorTypeValuesQuery,
   useGetMainBranchValuesQuery,
 } = lookupsApi;
