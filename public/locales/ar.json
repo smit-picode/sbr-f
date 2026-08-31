@@ -792,6 +792,7 @@
     },
     "estStatusCategoryRequired": "فئة حالة المنشأة مطلوبة عندما تكون حالة المنشأة \"غير نشطة\"",
     "estStatusCategoryUnavailable": "تعذر تحميل فئات الحالة. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+    "legalTypeUnavailable": "تعذر تحميل أنواع الشكل القانوني. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
     "sectorRequired": "القطاع مطلوب",
     "fields": {
       "sbrId": "رقم SBR",

@@ -792,6 +792,7 @@
     },
     "estStatusCategoryRequired": "Est. Status Category is required when Est. Status is Inactive",
     "estStatusCategoryUnavailable": "Status categories could not be loaded. Please refresh and try again.",
+    "legalTypeUnavailable": "Legal types could not be loaded. Please refresh and try again.",
     "sectorRequired": "Sector is required",
     "fields": {
       "sbrId": "SBR ID",

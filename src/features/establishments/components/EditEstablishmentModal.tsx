@@ -12,7 +12,7 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
-import { useGetEstStatusCategoriesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
+import { useGetEstStatusCategoriesQuery, useGetLegalTypeValuesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
 import {
   ESTABLISHMENTS_FIELD_LABELS,
   EST_STATUS_OPTIONS,
@@ -22,7 +22,6 @@ import {
   MAIN_BRANCH_FLG_OPTIONS,
   ESTABLISHMENTS_SOURCE_CODE_OPTIONS,
   ESTABLISHMENTS_MAX_LENGTHS,
-  LEGAL_TYPE_SUGGESTIONS,
   isEstablishmentFieldEditable,
 } from '../constants';
 import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
@@ -80,6 +79,13 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const { data: statusCategoryRes, isFetching: isLoadingStatusCategories } =
     useGetEstStatusCategoriesQuery(undefined, { skip: !open });
   const statusCategoryOptions = statusCategoryRes?.data ?? [];
+
+  // Legal Type list (NPC-224), replacing the old free-text-with-suggestions field. Deliberately
+  // not enum-validated server-side (SBR_LEGAL_TYPE_LKP is a growing register snapshot, not a
+  // closed set — see the backend controller's own comment) — this dropdown is the enforcement.
+  const { data: legalTypeRes, isFetching: isLoadingLegalTypes } =
+    useGetLegalTypeValuesQuery(undefined, { skip: !open });
+  const legalTypeOptions = legalTypeRes?.data ?? [];
 
   // Main branch establishment list (NPC-222). Same RTK Query cache MainBranchSelect reads —
   // calling the hook again here does not re-fetch, it just lets validate() below check
@@ -494,22 +500,40 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
               </div>
             </>
           )}
-          <div className="space-y-1">
+          <div className="space-y-1" data-field="LEGAL_TYPE">
             <Label>{t('editEstablishment.fields.legalType')}</Label>
-            {/* Suggestions, not a closed list: a datalist offers the known legal types while
-                still accepting anything typed, per the "dropdown but allow manual entry"
-                requirement. A Select would reject unknown values, which is the one thing this
-                field must not do. */}
-            <Input
-              className={inp('LEGAL_TYPE')}
-              value={sel('LEGAL_TYPE')}
-              onChange={(e) => set('LEGAL_TYPE', e.target.value)}
-              list="establishment-legal-type-options"
-              autoComplete="off"
-            />
-            <datalist id="establishment-legal-type-options">
-              {LEGAL_TYPE_SUGGESTIONS.map((v) => <option key={v} value={v} />)}
-            </datalist>
+            {/* NPC-224: a closed dropdown backed by SBR_LEGAL_TYPE_LKP via SBR_LOOKUPS_API,
+                replacing the old free-text-with-suggestions field so a value can only ever come
+                from the lookup. Same pattern as Est. Status Category above. */}
+            <Select
+              value={sel('LEGAL_TYPE') || '__none__'}
+              onValueChange={(v) => set('LEGAL_TYPE', v === '__none__' ? '' : v)}
+              disabled={!ed('LEGAL_TYPE') || isLoadingLegalTypes}
+            >
+              <SelectTrigger className={`w-full shadow-none ${err('LEGAL_TYPE') ? 'border-red-400' : ''}`}>
+                <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {!sel('LEGAL_TYPE') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
+                {legalTypeOptions.map((opt) => (
+                  <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
+                ))}
+                {/* The record's current value survives a lookup that does not (yet) list it —
+                    the register is a growing snapshot, not a fixed set — so an edit to an
+                    unrelated field never silently blanks a legal type the lookup hasn't caught
+                    up to. */}
+                {sel('LEGAL_TYPE') && !legalTypeOptions.some((o) => o.CODE === sel('LEGAL_TYPE')) && (
+                  <SelectItem value={sel('LEGAL_TYPE')}>{sel('LEGAL_TYPE')}</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            {!isLoadingLegalTypes && legalTypeOptions.length === 0 && (
+              <p className="text-xs text-amber-600 mt-0.5">
+                {t('editEstablishment.legalTypeUnavailable', {
+                  defaultValue: 'Legal types could not be loaded. Please refresh and try again.',
+                })}
+              </p>
+            )}
             <FieldErr msg={err('LEGAL_TYPE')} />
           </div>
           <div className="space-y-1">

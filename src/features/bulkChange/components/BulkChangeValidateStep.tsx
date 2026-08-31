@@ -265,7 +265,11 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                           {fieldIssue && (
                             <p className="mt-0.5 text-xs text-red-600">
                               {t(`bulkChange.wizard.validate.codes.${fieldIssue.code}`, {
-                                defaultValue: BULK_CHANGE_VALIDATION_DEFAULTS[fieldIssue.code] ?? fieldIssue.message,
+                                // The server's own message is specific to this row (e.g. names the
+                                // actual value and the real allowed list) — prefer it over the
+                                // generic per-code default, which is only a fallback for the rare
+                                // case the server didn't supply one.
+                                defaultValue: fieldIssue.message ?? BULK_CHANGE_VALIDATION_DEFAULTS[fieldIssue.code],
                               })}
                             </p>
                           )}
@@ -281,7 +285,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                           {generalIssues.map((issue) => (
                             <p key={issue.code} className="mt-0.5 text-xs text-red-600">
                               {t(`bulkChange.wizard.validate.codes.${issue.code}`, {
-                                defaultValue: BULK_CHANGE_VALIDATION_DEFAULTS[issue.code] ?? issue.message,
+                                defaultValue: issue.message ?? BULK_CHANGE_VALIDATION_DEFAULTS[issue.code],
                               })}
                             </p>
                           ))}

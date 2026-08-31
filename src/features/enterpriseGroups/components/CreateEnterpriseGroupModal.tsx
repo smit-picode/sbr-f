@@ -21,6 +21,7 @@ import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
 import { Search, Building2, X, Star } from 'lucide-react';
 import type { SbrEnterprise } from '@/types';
 
@@ -244,11 +245,10 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
-              <Input
+              <IsicCodeSelect
                 value={form.PRINCIPAL_ISIC_2DIGIT}
-                onChange={(e) => set('PRINCIPAL_ISIC_2DIGIT', e.target.value)}
-                maxLength={2}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                onChange={(code) => set('PRINCIPAL_ISIC_2DIGIT', code)}
+                digitMode="lvl2"
               />
             </div>
             <div className="space-y-1.5">

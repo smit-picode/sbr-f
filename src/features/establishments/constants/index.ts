@@ -33,16 +33,6 @@ export const SECTOR_ID_OPTIONS: string[] = ['Private', 'Mixed-Private', 'State O
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
 export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
 
-// Legal Type SUGGESTIONS, deliberately not a closed enum. The 2026-08-11 requirements call
-// asked for a dropdown of the known values while still allowing a value that is not in the
-// list, because no verified exhaustive list of Qatari legal types exists. So this drives a
-// datalist (type-ahead suggestions on a normal text input), NOT a Select, and LEGAL_TYPE is
-// deliberately absent from the validate() checks — anything the user types is accepted.
-// Values are the distinct LEGAL_TYPE values currently present on active establishments.
-export const LEGAL_TYPE_SUGGESTIONS: string[] = [
-  'Sole Proprietorship', 'Partnership', 'Branch', 'WLL', 'LLC', 'Single Person Company',
-];
-
 // Max length validations from backend validator
 export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   NAME_ENU: 500,

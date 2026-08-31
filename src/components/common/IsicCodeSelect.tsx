@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useGetIsicValuesQuery } from '@/features/lookups/api/lookupsApi';
+import { useGetIsicValuesQuery, useGetIsic2DigitValuesQuery } from '@/features/lookups/api/lookupsApi';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -11,10 +11,11 @@ import { useTranslation } from 'react-i18next';
  *
  * Replaces free-text ISIC entry so an invalid code cannot be typed — the value can only ever
  * come from the lookup. Mirrors the SbrIdSearchInput idiom (trigger → search panel → click to
- * select), with one deliberate difference: the ~437-row list is loaded ONCE from
- * SBR_LOOKUPS_API.GET_ISIC_VALUES and filtered in memory, because the procedure exposes no
- * search or paging parameters. That is also why there is no useDebounce here — no keystroke
- * reaches the network, so debouncing would only add lag to a local array filter.
+ * select), with one deliberate difference: the list is loaded ONCE (from
+ * SBR_LOOKUPS_API.GET_ISIC_VALUES, or GET_ISIC_2DIGIT_VALUES in `digitMode="lvl2"`) and filtered
+ * in memory, because neither procedure exposes a search or paging parameter. That is also why
+ * there is no useDebounce here — no keystroke reaches the network, so debouncing would only add
+ * lag to a local array filter.
  *
  * A value already on the record is always displayed even when the lookup does not contain it.
  * Historic rows can carry codes the current lookup has dropped, and silently blanking one on
@@ -28,20 +29,31 @@ interface IsicCodeSelectProps {
   disabled?: boolean;
   /** Marks the trigger invalid, matching the modal's error styling. */
   invalid?: boolean;
+  /**
+   * 'lvl4' (default): the ~437-row full classification (Establishments/Enterprises ISIC_CODE).
+   * 'lvl2': the ~87-row division-level list (Enterprise Groups' PRINCIPAL_ISIC_2DIGIT, NPC-218).
+   * Defaults to 'lvl4' so every existing caller keeps its current behaviour unchanged.
+   */
+  digitMode?: 'lvl4' | 'lvl2';
 }
 
-// Rendering all ~437 options at once is wasted DOM for a list nobody scrolls end to end.
-// Anything beyond this is reachable by typing, and the panel says so.
+// Rendering all ~437 (lvl4) / ~87 (lvl2) options at once is wasted DOM for a list nobody scrolls
+// end to end. Anything beyond this is reachable by typing, and the panel says so.
 const MAX_VISIBLE = 50;
 
-export function IsicCodeSelect({ value, onChange, disabled, invalid }: IsicCodeSelectProps) {
+export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode = 'lvl4' }: IsicCodeSelectProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const { data, isFetching } = useGetIsicValuesQuery();
+  // Both hooks are always called (React hook rules — no conditional calls), but only one of the
+  // two ever has an active subscriber per rendered instance since digitMode is fixed per usage,
+  // so this never doubles up the actual network/cache traffic for either list.
+  const lvl4 = useGetIsicValuesQuery(undefined, { skip: digitMode !== 'lvl4' });
+  const lvl2 = useGetIsic2DigitValuesQuery(undefined, { skip: digitMode !== 'lvl2' });
+  const { data, isFetching } = digitMode === 'lvl2' ? lvl2 : lvl4;
   const options = useMemo(() => data?.data ?? [], [data]);
 
   const matches = useMemo(() => {

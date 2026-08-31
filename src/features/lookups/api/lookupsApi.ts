@@ -27,6 +27,23 @@ export const lookupsApi = baseApi.injectEndpoints({
       providesTags: ['Lookups'],
       keepUnusedDataFor: 3600,
     }),
+    // The distinct 2-digit ISIC division list (NPC-218), for the Enterprise Groups tab's
+    // PRINCIPAL_ISIC_2DIGIT dropdown. Same load-once, filter-client-side design as ISIC above —
+    // just the coarser ~87-row division level instead of the 4-digit classification.
+    getIsic2DigitValues: builder.query<ApiResponse<LookupValue[]>, void>({
+      query: () => '/lookups/isic-2digit',
+      providesTags: ['Lookups'],
+      keepUnusedDataFor: 3600,
+    }),
+    // The full SBR_LEGAL_TYPE_LKP list (NPC-224), for the Establishments tab's Legal Type
+    // dropdown. Same load-once design as the other lookups here — ~8-23 rows, small enough that
+    // this doesn't need the search panel the ISIC list uses, matching EST_STATUS_CATEGORY's plain
+    // <Select> precedent for a similarly-sized list.
+    getLegalTypeValues: builder.query<ApiResponse<LookupValue[]>, void>({
+      query: () => '/lookups/legal-types',
+      providesTags: ['Lookups'],
+      keepUnusedDataFor: 3600,
+    }),
     // Every active main-branch establishment (NPC-222). Same load-once, filter-client-side
     // design as ISIC — the procedure exposes no search or paging parameter, and the list is
     // small (dozens of rows, same order of magnitude as the other two lookups).
@@ -39,4 +56,10 @@ export const lookupsApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetEstStatusCategoriesQuery, useGetIsicValuesQuery, useGetMainBranchValuesQuery } = lookupsApi;
+export const {
+  useGetEstStatusCategoriesQuery,
+  useGetIsicValuesQuery,
+  useGetIsic2DigitValuesQuery,
+  useGetLegalTypeValuesQuery,
+  useGetMainBranchValuesQuery,
+} = lookupsApi;
