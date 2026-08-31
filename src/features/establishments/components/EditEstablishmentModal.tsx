@@ -233,8 +233,12 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         defaultValue: 'Est. Status Category is required when Est. Status is Inactive',
       });
     }
-    if (form.SECTOR_ID !== null && form.SECTOR_ID !== undefined && !SECTOR_ID_OPTIONS.includes(String(form.SECTOR_ID))) {
-      e.SECTOR_ID = `Must be one of [${SECTOR_ID_OPTIONS.join(', ')}, or empty]`;
+    // Sector must always carry a value (confirmed with the team lead, 2026-08-31) — checked
+    // before the enum check so a blank Sector reports "required", not "must be one of [...]".
+    if (!str(form.SECTOR_ID).trim()) {
+      e.SECTOR_ID = t('editEstablishment.sectorRequired', { defaultValue: 'Sector is required' });
+    } else if (!SECTOR_ID_OPTIONS.includes(String(form.SECTOR_ID))) {
+      e.SECTOR_ID = `Must be one of [${SECTOR_ID_OPTIONS.join(', ')}]`;
     }
     if (form.MAIN_BRANCH_FLG !== null && form.MAIN_BRANCH_FLG !== undefined && form.MAIN_BRANCH_FLG !== '' && !MAIN_BRANCH_FLG_OPTIONS.includes(String(form.MAIN_BRANCH_FLG))) {
       e.MAIN_BRANCH_FLG = `Must be one of [${MAIN_BRANCH_FLG_OPTIONS.join(', ')}, or empty]`;
