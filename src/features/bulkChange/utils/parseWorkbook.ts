@@ -165,10 +165,18 @@ export const parseWorkbook = async (
 
 // Builds the downloadable starter template for an entity: one header row of the identifier
 // plus every editable column, with a comment row describing allowed values.
+//
+// `records`, when given (NPC-260 follow-up), fills the sheet with the operator's actual current
+// rows instead of leaving it blank — the row's own ID rides along pre-filled, so an operator
+// building an upload for Contacts/Addresses never has to discover or type it themselves. Column
+// SHAPE is identical either way: still exactly idColumn + the template's editable columns, in the
+// same order — no extra column (e.g. SBR_ID for context) is added to the sheet, since anything
+// beyond that shape would round-trip back through parseWorkbook as an UNKNOWN_COLUMN on re-upload.
 export const buildTemplateWorkbook = async (
   entityLabel: string,
   idColumn: string,
   columns: { key: string; type: string; allowed: string[] | null }[],
+  records?: Record<string, string | number | null>[],
 ): Promise<Blob> => {
   const ExcelJsLib = await loadExcelJs();
   const workbook = new ExcelJsLib.Workbook();
@@ -188,6 +196,10 @@ export const buildTemplateWorkbook = async (
   });
   sheet.addRow(hints);
   sheet.getRow(2).font = { italic: true, color: { argb: 'FF888888' } };
+
+  records?.forEach((record) => {
+    sheet.addRow(headers.map((header) => record[header] ?? null));
+  });
 
   sheet.columns.forEach((column) => { column.width = 22; });
 

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermission } from '@/hooks';
 import { toast } from '@/utils/toast';
-import { useGetBulkChangeTemplateQuery } from '../api/bulkChangeApi';
+import { useGetBulkChangeTemplateQuery, useLazyGetBulkChangeExportQuery } from '../api/bulkChangeApi';
 import { buildTemplateWorkbook } from '../utils/parseWorkbook';
 import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
 
@@ -52,13 +52,29 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
   const { data, isLoading } = useGetBulkChangeTemplateQuery(entityType);
   const template = data?.data;
 
+  // NPC-260 follow-up: fetched only on click (lazy), never on mount — the export is a snapshot
+  // for this one download, not something the page needs to keep current in the background.
+  const [fetchExport, { isFetching: isExporting }] = useLazyGetBulkChangeExportQuery();
+
   const handleDownloadTemplate = async () => {
     if (!template) return;
     try {
+      // Pre-fill with the operator's actual current records so nobody has to discover or type a
+      // row ID themselves (see buildTemplateWorkbook's own note). If the export call fails for
+      // any reason, fall back to the plain blank template rather than blocking the download
+      // entirely — pre-filling is a convenience on top of the template, not a requirement of it.
+      let records: Record<string, string | number | null>[] | undefined;
+      try {
+        records = (await fetchExport(entityType).unwrap()).data?.records;
+      } catch {
+        records = undefined;
+      }
+
       const blob = await buildTemplateWorkbook(
         selectedTable,
         template.idColumn,
         template.columns.map((c) => ({ key: c.key, type: c.type, allowed: c.allowed })),
+        records,
       );
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -140,7 +156,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
               {t('bulkChange.wizard.setup.columnDictionaryDesc', { defaultValue: 'Use these exact column headers in your file.' })}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate} disabled={!template}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate} disabled={!template || isExporting}>
             <Download className="h-4 w-4" />
             {t('bulkChange.wizard.setup.downloadTemplate', { defaultValue: 'Download template' })}
           </Button>
@@ -194,9 +210,8 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
         <div className="flex items-start gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
           <Info className="h-4 w-4 shrink-0 text-slate-400" />
           <span>
-            {/* The identifier differs per table: an establishment has one current row per
-                SBR_ID, but many contacts and addresses — so those files are keyed by the
-                specific record ID being edited, not by SBR_ID. */}
+            {/* SBR_ID is the identifier for every table. For Contacts/Addresses it only resolves
+                when exactly one active record shares that SBR_ID — see each column's note. */}
             {t('bulkChange.wizard.setup.noteIdColumn', {
               defaultValue:
                 'Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',

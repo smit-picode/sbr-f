@@ -12,6 +12,11 @@ import type {
   BulkChangeValidationResult,
 } from '../types';
 
+// One current record for the export-and-prefill flow (NPC-260 follow-up) — the row's own ID plus
+// SBR_ID plus every column the template offers, keyed generically since the field set differs
+// per entity. Same value shapes parseWorkbook.ts already works with.
+export type BulkChangeExportRecord = Record<string, string | number | null>;
+
 export interface BulkChangeListFilters {
   page?: number;
   limit?: number;
@@ -42,6 +47,18 @@ export const bulkChangeApi = baseApi.injectEndpoints({
     getBulkChangeTemplate: builder.query<ApiResponse<BulkChangeTemplate>, BulkChangeEntityType>({
       query: (entityType) => ({ url: `/bulk-change/template/${entityType}` }),
       providesTags: ['BulkChange'],
+    }),
+
+    // NPC-260: the operator's actual current records, for "Download template" to pre-fill
+    // instead of handing back an empty sheet. Contacts/Addresses are grouped by SBR_ID server-side;
+    // an SBR_ID with more than one active record is excluded (excludedCount) rather than guessed
+    // at, since it can't be resolved to a single row later. A lazy query: fetched only on demand
+    // (the button click), never on mount.
+    getBulkChangeExport: builder.query<
+      ApiResponse<{ records: BulkChangeExportRecord[]; excludedCount: number }>,
+      BulkChangeEntityType
+    >({
+      query: (entityType) => ({ url: `/bulk-change/export/${entityType}` }),
     }),
 
     // Dry run: checks the parsed rows against live data and returns the real old/new diff.
@@ -85,6 +102,7 @@ export const {
   useGetBulkChangeHistoryQuery,
   useGetBulkChangeByIdQuery,
   useGetBulkChangeTemplateQuery,
+  useLazyGetBulkChangeExportQuery,
   useValidateBulkChangeMutation,
   useSubmitBulkChangeMutation,
   useDecideBulkChangeMutation,
