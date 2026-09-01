@@ -83,6 +83,14 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     return t('bulkChange.wizard.setup.anyText', { defaultValue: 'Any text' });
   };
 
+  // NPC-258: a conditionally-required column (e.g. EST_STATUS_CATEGORY, only mandatory when
+  // EST_STATUS is Inactive) isn't flagged `mandatory`, since it isn't always required — the
+  // condition is surfaced here instead, appended to whatever describeAllowed() already shows.
+  const describeAllowedWithNote = (column: NonNullable<typeof template>['columns'][number]): string => {
+    const base = describeAllowed(column);
+    return column.note ? `${base} — ${column.note}` : base;
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -167,7 +175,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                     <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-blue-700">{column.key}</td>
                     <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-700">{column.type}</td>
                     <td className="whitespace-nowrap px-5 py-3">
-                      {column.required ? (
+                      {column.mandatory ? (
                         <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
                           {t('bulkChange.wizard.setup.mandatory', { defaultValue: 'Mandatory' })}
                         </span>
@@ -175,7 +183,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                         <span className="text-xs text-slate-400">{t('bulkChange.wizard.setup.optional', { defaultValue: 'Optional' })}</span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-sm text-slate-600">{describeAllowed(column)}</td>
+                    <td className="px-5 py-3 text-sm text-slate-600">{describeAllowedWithNote(column)}</td>
                   </tr>
                 ))}
               </tbody>

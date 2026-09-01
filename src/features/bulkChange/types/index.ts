@@ -150,7 +150,18 @@ export interface BulkChangeDecideResponse {
 export interface BulkChangeTemplateColumn {
   key: string;
   type: 'string' | 'integer' | 'enum';
+  // "This is the row identifier column" — drives the Setup step's "must match an existing
+  // record" text and the Validate step's allowedColumns filter. NOT the same thing as
+  // "must have a non-blank value"; see `mandatory` below for that (NPC-258).
   required: boolean;
+  // Whether this column must carry a non-blank value for the upload to succeed (NPC-250/251's
+  // app-layer required-field rules — Name, Sector, Contact Name, Municipality ID). Independent
+  // of `required` above: the ID column is both required and mandatory, but a mandatory business
+  // field like NAME_ENU is never the identifier column.
+  mandatory: boolean;
+  // Explains a conditional requirement (e.g. "Required when EST_STATUS = Inactive") that doesn't
+  // fit a flat mandatory/optional badge. Null when there's no such condition.
+  note: string | null;
   allowed: string[] | null;
   maxLength?: number | null;
   min?: number | null;
