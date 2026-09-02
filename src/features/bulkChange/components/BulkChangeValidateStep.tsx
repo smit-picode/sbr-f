@@ -221,7 +221,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
           {t('bulkChange.wizard.validate.rowDetails', { defaultValue: 'Row details' })}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse">
+          <table className="w-full min-w-[900px] border-collapse">
             <thead>
               <tr className="border-b border-slate-200">
                 <th className="w-16 px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -232,7 +232,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                     {col.label}
                   </th>
                 ))}
-                <th className="px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                <th className="w-64 min-w-[220px] px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
                   {t('bulkChange.wizard.validate.status', { defaultValue: 'Status' })}
                 </th>
               </tr>
@@ -276,7 +276,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                         </td>
                       );
                     })}
-                    <td className="px-3 py-3">
+                    <td className="w-64 min-w-[220px] px-3 py-3">
                       {hasError ? (
                         <div>
                           <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">

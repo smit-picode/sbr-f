@@ -22,6 +22,12 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     enableSorting: true,
   },
   {
+    accessorKey: 'ID',
+    header: t('columns.ID'),
+    cell: ({ getValue }) => <span className="font-mono text-xs text-slate-500">{String(getValue())}</span>,
+    enableSorting: true,
+  },
+  {
     accessorKey: 'CONTACT_NAME',
     header: t('columns.CONTACT_NAME'),
     cell: ({ getValue }) => (

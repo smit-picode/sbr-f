@@ -210,8 +210,10 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
         <div className="flex items-start gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
           <Info className="h-4 w-4 shrink-0 text-slate-400" />
           <span>
-            {/* SBR_ID is the identifier for every table. For Contacts/Addresses it only resolves
-                when exactly one active record shares that SBR_ID — see each column's note. */}
+            {/* The identifier is ID for every table — the real, always-unique row key (SBR_ID
+                is not unique on Contacts/Addresses: one establishment can have several active
+                contacts or addresses). SBR_ID still appears as its own reference column so the
+                operator can see which establishment a row belongs to. */}
             {t('bulkChange.wizard.setup.noteIdColumn', {
               defaultValue:
                 'Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',

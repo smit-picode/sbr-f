@@ -21,6 +21,12 @@ export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc, c
     enableSorting: true,
   },
   {
+    accessorKey: 'ID',
+    header: t('columns.ID'),
+    cell: ({ getValue }) => <span className="font-mono text-xs text-slate-500">{String(getValue())}</span>,
+    enableSorting: true,
+  },
+  {
     accessorKey: 'MUNICIPALITY_ID',
     header: t('columns.MUNICIPALITY_ID'),
     cell: ({ getValue }) => <span className="text-sm text-slate-700">{nullableText(getValue<string | null>())}</span>,

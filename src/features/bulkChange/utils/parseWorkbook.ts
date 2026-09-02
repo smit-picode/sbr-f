@@ -169,9 +169,12 @@ export const parseWorkbook = async (
 // `records`, when given (NPC-260 follow-up), fills the sheet with the operator's actual current
 // rows instead of leaving it blank — the row's own ID rides along pre-filled, so an operator
 // building an upload for Contacts/Addresses never has to discover or type it themselves. Column
-// SHAPE is identical either way: still exactly idColumn + the template's editable columns, in the
-// same order — no extra column (e.g. SBR_ID for context) is added to the sheet, since anything
-// beyond that shape would round-trip back through parseWorkbook as an UNKNOWN_COLUMN on re-upload.
+// SHAPE is exactly idColumn + `columns`, in the order the caller passes them — `columns` already
+// includes SBR_ID as an ordinary (non-required) reference column for Contacts/Addresses (see
+// BulkChangeSetupStep's template.columns), so it rides along in the file too; parseWorkbook
+// accepts it back the same way as any other non-identifier column (present in allowedColumns,
+// its value carried through in changeData, silently dropped server-side — see
+// stripSbrIdReference in bulkChange.controller.ts) rather than being flagged UNKNOWN_COLUMN.
 export const buildTemplateWorkbook = async (
   entityLabel: string,
   idColumn: string,
