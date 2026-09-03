@@ -1096,6 +1096,8 @@
     "approved": "Bulk change approved.",
     "rejected": "Bulk change rejected.",
     "reasonForChange": "Reason for Change",
+    "reasonRequired": "Please enter a reason.",
+    "approvalNote": "Reason for approval / rejection (required)…",
     "confirmTitle": "Confirm Bulk Change",
     "noChange": "No change",
     "reject": "Reject",

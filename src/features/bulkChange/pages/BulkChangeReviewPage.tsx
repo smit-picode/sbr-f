@@ -9,6 +9,7 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { PageLoader } from '@/components/common/Loader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/i18n';
 import { usePermission } from '@/hooks';
 import { formatDate } from '@/utils/format';
@@ -28,6 +29,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   const router = useRouter();
   const { isArabic } = useLanguage();
   const [pendingAction, setPendingAction] = useState<BulkChangeDecision | null>(null);
+  const [note, setNote] = useState('');
 
   const batchId = Number(id);
   const { data, isLoading, isError, refetch } = useGetBulkChangeByIdQuery(batchId, { skip: !Number.isInteger(batchId) });
@@ -60,9 +62,13 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   const tableKey = TABLE_BY_ENTITY_TYPE[task.ENTITY_TYPE];
 
   const doAction = async (decision: BulkChangeDecision) => {
+    if (!note.trim()) {
+      toast.error(t('bulkChange.reasonRequired', { defaultValue: 'Please enter a reason.' }));
+      return;
+    }
     setPendingAction(decision);
     try {
-      const response = await decideBulkChange({ id: task.BATCH_ID, decision }).unwrap();
+      const response = await decideBulkChange({ id: task.BATCH_ID, decision, reason: note.trim() }).unwrap();
       const result = response.data;
 
       // DECIDE_BULK is best-effort: individual rows can fail on a row lock (ORA-20009) or a
@@ -241,22 +247,30 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       </div>
 
       {isPending && canApprove && (
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => doAction('REJECTED')}
-            disabled={pendingAction !== null}
-            className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
-          >
-            <X className="h-4 w-4" /> {t('bulkChange.reject', { defaultValue: 'Reject' })}
-          </Button>
-          <Button
-            onClick={() => doAction('APPROVED')}
-            disabled={pendingAction !== null}
-            className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
-          >
-            <Check className="h-4 w-4" /> {t('bulkChange.approve', { defaultValue: 'Approve' })}
-          </Button>
+        <div className="rounded-lg border border-[#A71D3A]/15 bg-[#FCF4F6] p-4">
+          <Input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('bulkChange.approvalNote', { defaultValue: 'Reason for approval / rejection (required)…' })}
+            className="mb-3 bg-white focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+          />
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => doAction('REJECTED')}
+              disabled={pendingAction !== null || !note.trim()}
+              className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
+            >
+              <X className="h-4 w-4" /> {t('bulkChange.reject', { defaultValue: 'Reject' })}
+            </Button>
+            <Button
+              onClick={() => doAction('APPROVED')}
+              disabled={pendingAction !== null || !note.trim()}
+              className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <Check className="h-4 w-4" /> {t('bulkChange.approve', { defaultValue: 'Approve' })}
+            </Button>
+          </div>
         </div>
       )}
     </PageContainer>

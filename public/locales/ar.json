@@ -1096,6 +1096,8 @@
     "approved": "تم اعتماد التغيير الجماعي.",
     "rejected": "تم رفض التغيير الجماعي.",
     "reasonForChange": "سبب التغيير",
+    "reasonRequired": "يرجى إدخال سبب.",
+    "approvalNote": "سبب الاعتماد / الرفض (مطلوب)…",
     "confirmTitle": "تأكيد التغيير الجماعي",
     "noChange": "لا تغيير",
     "reject": "رفض",
