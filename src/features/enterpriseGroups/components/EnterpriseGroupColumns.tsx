@@ -85,8 +85,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ENTERPRISE_COUNT',
     header: t('columns.ENTERPRISES', { defaultValue: 'ENTERPRISES' }),
-    // Derived, but the list procedure now orders by the same roll-up subquery it projects
-    // (NPC-187), so server-side sort is exact over the full dataset.
+    // Derived, but the list procedure now orders by the same roll-up subquery it projects,
+    // so server-side sort is exact over the full dataset.
     enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
@@ -101,8 +101,8 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
     header: t('columns.ESTABLISHMENTS', { defaultValue: 'ESTABLISHMENTS' }),
-    // Derived, but the list procedure now orders by the same roll-up subquery it projects
-    // (NPC-187), so server-side sort is exact over the full dataset.
+    // Derived, but the list procedure now orders by the same roll-up subquery it projects,
+    // so server-side sort is exact over the full dataset.
     enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
@@ -118,7 +118,7 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     header: t('columns.EMPLOYEES', { defaultValue: 'EMPLOYEES' }),
     // EMPLOYEE_COUNT is the LIVE sum over current members, deliberately NOT the stored
     // TOTAL_EMPLOYEES column — the two can disagree when the stored value is stale. The list
-    // procedure accepts EMPLOYEE_COUNT as its own sort key (NPC-187), so the header sorts by
+    // procedure accepts EMPLOYEE_COUNT as its own sort key, so the header sorts by
     // exactly the number the cell displays.
     enableSorting: true,
     cell: ({ getValue }) => {

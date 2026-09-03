@@ -19,7 +19,7 @@ export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
 // Enum Options from backend
 export const EST_STATUS_OPTIONS: (string | null)[] = ['Active', 'Inactive', null];
 
-// The two values Est. Status may hold (NPC-223). Kept separate from EST_STATUS_OPTIONS above,
+// The two values Est. Status may hold. Kept separate from EST_STATUS_OPTIONS above,
 // which deliberately still carries `null` so validate() accepts records the pipeline never
 // assigned a status to; these two are what the edit dropdown actually offers.
 export const EST_STATUS_VALUES = { ACTIVE: 'Active', INACTIVE: 'Inactive' } as const;

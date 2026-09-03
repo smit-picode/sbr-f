@@ -1,5 +1,5 @@
 // Bulk Change feature types — the wire contract of /api/v1/bulk-change, which fronts the
-// DBA's SBR_PORTAL_PKG.SUBMIT_BULK / DECIDE_BULK procedures (NPC-170).
+// DBA's SBR_PORTAL_PKG.SUBMIT_BULK / DECIDE_BULK procedures.
 //
 // Those procedures are BEST-EFFORT, not atomic: every row commits independently, so a batch
 // can be partly submitted or partly decided. That is why STATUS has PARTIALLY_* members and
@@ -152,10 +152,10 @@ export interface BulkChangeTemplateColumn {
   type: 'string' | 'integer' | 'enum';
   // "This is the row identifier column" — drives the Setup step's "must match an existing
   // record" text and the Validate step's allowedColumns filter. NOT the same thing as
-  // "must have a non-blank value"; see `mandatory` below for that (NPC-258).
+  // "must have a non-blank value"; see `mandatory` below for that.
   required: boolean;
-  // Whether this column must carry a non-blank value for the upload to succeed (NPC-250/251's
-  // app-layer required-field rules — Name, Sector, Contact Name, Municipality ID). Independent
+  // Whether this column must carry a non-blank value for the upload to succeed (app-layer
+  // required-field rules — Name, Sector, Contact Name, Municipality ID). Independent
   // of `required` above: the ID column is both required and mandatory, but a mandatory business
   // field like NAME_ENU is never the identifier column.
   mandatory: boolean;

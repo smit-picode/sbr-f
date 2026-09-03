@@ -9,7 +9,7 @@ export interface LookupValue {
   DESCRIPTION: string | null;
 }
 
-// One row of GET /lookups/main-branches (NPC-222) — every active main-branch establishment,
+// One row of GET /lookups/main-branches — every active main-branch establishment,
 // for the Edit Establishment "Main Branch SBR ID" picker. A different shape from LookupValue's
 // CODE/DESCRIPTION pair, so it gets its own type.
 export interface MainBranchEstablishment {

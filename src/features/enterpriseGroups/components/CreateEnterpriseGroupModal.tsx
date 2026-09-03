@@ -58,7 +58,7 @@ const EMPTY_FORM: FormState = {
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
-// A group cannot start in the future — confirmed with the team lead (NPC-239). Recomputed per
+// A group cannot start in the future — confirmed with the team lead. Recomputed per
 // render rather than module-load time, so the cap stays correct across a session left open
 // past midnight.
 const todayISO = (): string => new Date().toISOString().slice(0, 10);

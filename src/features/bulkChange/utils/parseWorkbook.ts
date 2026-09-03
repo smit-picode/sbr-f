@@ -166,7 +166,7 @@ export const parseWorkbook = async (
 // Builds the downloadable starter template for an entity: one header row of the identifier
 // plus every editable column, with a comment row describing allowed values.
 //
-// `records`, when given (NPC-260 follow-up), fills the sheet with the operator's actual current
+// `records`, when given, fills the sheet with the operator's actual current
 // rows instead of leaving it blank — the row's own ID rides along pre-filled, so an operator
 // building an upload for Contacts/Addresses never has to discover or type it themselves. Column
 // SHAPE is exactly idColumn + `columns`, in the order the caller passes them — `columns` already

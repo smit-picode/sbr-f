@@ -18,7 +18,7 @@ export interface ColumnFilterOption {
   label: string;
 }
 
-// Full 8-operator set SBR_QUERY_PKG accepts (NPC-216 / NPC-76) — snake_case values must match
+// Full 8-operator set SBR_QUERY_PKG accepts — snake_case values must match
 // the procedure's whitelist exactly, or it now raises ORA-20410 instead of silently ignoring it.
 const OPERATORS = [
   'contains', 'not_contains', 'starts_with', 'ends_with',

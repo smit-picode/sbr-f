@@ -56,7 +56,7 @@ interface MemberRow {
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
-// A group cannot start in the future — confirmed with the team lead (NPC-239). Recomputed per
+// A group cannot start in the future — confirmed with the team lead. Recomputed per
 // render rather than module-load time, so the cap stays correct across a session left open
 // past midnight.
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
@@ -100,7 +100,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   // The `ungrouped: true` search only returns enterprises with no group at all — an enterprise
   // removed from THIS group a moment ago is still grouped in the database until Save Changes is
   // clicked, so the API correctly (from its point of view) excludes it too, and it becomes
-  // unsearchable until the edit is saved (NPC-215). Since the modal already has this group's full
+  // unsearchable until the edit is saved. Since the modal already has this group's full
   // original membership via `currentMembers`, prepend any removed member whose name matches the
   // query — no extra request, and no backend change needed.
   const removedMemberSearchMatches: MemberRow[] = useMemo(() => {
@@ -198,7 +198,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   // SUBMIT_UPDATE diffs whatever keys are PRESENT in the payload against the current stored row
   // and reports any string mismatch as a change; sending every field unconditionally (the
   // previous behaviour) made an untouched field appear as "changed" the moment its resubmitted
-  // value didn't byte-for-byte match the stored value — the fixed bug (NPC-213): Holding Co. was
+  // value didn't byte-for-byte match the stored value — the fixed bug: Holding Co. was
   // the only edit, but Group Start still showed up in the change request because the date value
   // round-tripped through the API and back with a different string representation than what is
   // stored. Now the field is simply never sent when unchanged, so no round-trip mismatch — of any

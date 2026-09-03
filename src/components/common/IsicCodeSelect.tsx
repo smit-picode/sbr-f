@@ -7,7 +7,7 @@ import { useGetIsicValuesQuery, useGetIsic2DigitValuesQuery } from '@/features/l
 import { useTranslation } from 'react-i18next';
 
 /**
- * Pick an ISIC code from the SBR_ISIC_LKP classification list (NPC-218).
+ * Pick an ISIC code from the SBR_ISIC_LKP classification list.
  *
  * Replaces free-text ISIC entry so an invalid code cannot be typed — the value can only ever
  * come from the lookup. Mirrors the SbrIdSearchInput idiom (trigger → search panel → click to
@@ -31,7 +31,7 @@ interface IsicCodeSelectProps {
   invalid?: boolean;
   /**
    * 'lvl4' (default): the ~437-row full classification (Establishments/Enterprises ISIC_CODE).
-   * 'lvl2': the ~87-row division-level list (Enterprise Groups' PRINCIPAL_ISIC_2DIGIT, NPC-218).
+   * 'lvl2': the ~87-row division-level list (Enterprise Groups' PRINCIPAL_ISIC_2DIGIT).
    * Defaults to 'lvl4' so every existing caller keeps its current behaviour unchanged.
    */
   digitMode?: 'lvl4' | 'lvl2';

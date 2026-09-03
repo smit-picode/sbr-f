@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 /**
  * Pick an establishment's Main Branch SBR ID from the active main-branch establishment list
- * (NPC-222, SBR_LOOKUPS_API.GET_MAIN_BRANCH_VALUES).
+ * (SBR_LOOKUPS_API.GET_MAIN_BRANCH_VALUES).
  *
  * Replaces the general "search any establishment by name" picker so a non-existent, retired, or
  * branch-only SBR ID can never be selected — the value can only ever come from a candidate the

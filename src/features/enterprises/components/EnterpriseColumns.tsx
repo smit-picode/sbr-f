@@ -59,7 +59,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
       );
     },
     // Derived, not a real column, but the list procedure now orders by the same member-count
-    // subquery it projects (NPC-184), so server-side sort is exact over the full dataset.
+    // subquery it projects, so server-side sort is exact over the full dataset.
     enableSorting: true,
   },
   {

@@ -73,20 +73,20 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const [updateEstablishment, { isLoading }] = useUpdateEstablishmentMutation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Est. Status Category options (NPC-221). Fetched while the modal is open rather than only
+  // Est. Status Category options. Fetched while the modal is open rather than only
   // once the user picks Inactive, so the dropdown is already populated the moment it appears.
   const { data: statusCategoryRes, isFetching: isLoadingStatusCategories } =
     useGetEstStatusCategoriesQuery(undefined, { skip: !open });
   const statusCategoryOptions = statusCategoryRes?.data ?? [];
 
-  // Legal Type list (NPC-224), replacing the old free-text-with-suggestions field. Deliberately
+  // Legal Type list, replacing the old free-text-with-suggestions field. Deliberately
   // not enum-validated server-side (SBR_LEGAL_TYPE_LKP is a growing register snapshot, not a
   // closed set — see the backend controller's own comment) — this dropdown is the enforcement.
   const { data: legalTypeRes, isFetching: isLoadingLegalTypes } =
     useGetLegalTypeValuesQuery(undefined, { skip: !open });
   const legalTypeOptions = legalTypeRes?.data ?? [];
 
-  // Sector list (NPC-225), replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of
+  // Sector list, replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of
   // drift that caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded
   // copy silently fell out of sync with the real values). validate() below checks against this
   // same loaded list, so the dropdown and the validation rule can never disagree again.
@@ -94,7 +94,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     useGetSectorTypeValuesQuery(undefined, { skip: !open });
   const sectorTypeOptions = sectorTypeRes?.data ?? [];
 
-  // Main branch establishment list (NPC-222). Same RTK Query cache MainBranchSelect reads —
+  // Main branch establishment list. Same RTK Query cache MainBranchSelect reads —
   // calling the hook again here does not re-fetch, it just lets validate() below check
   // membership too, as a pre-submit safety net for a stored value the picker itself can no
   // longer produce (e.g. set before this fix, or via a direct API call that bypassed the UI).
@@ -183,7 +183,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   };
 
 
-  // Est. Status drives whether a category is required (NPC-223), so it gets its own handler
+  // Est. Status drives whether a category is required, so it gets its own handler
   // instead of the generic set() every other field uses. Switching to Active clears any category
   // the record carried: SBR_EST_STATUS_CATEGORY_LKP holds Inactive-meaning values only, so
   // leaving e.g. 'Cancelled' on a now-Active establishment would be contradictory, and the
@@ -220,7 +220,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     if (form.MAIN_BRANCH_SBR_ID != null && !Number.isInteger(Number(form.MAIN_BRANCH_SBR_ID))) {
       e.MAIN_BRANCH_SBR_ID = 'Must be an integer';
     }
-    // NPC-222: MainBranchSelect only ever offers active, main-branch SBR IDs, so this only
+    // MainBranchSelect only ever offers active, main-branch SBR IDs, so this only
     // fires for a value the picker itself could not have produced — set before this fix, or
     // written by a direct API call that bypassed the UI. Skipped while the list is still
     // loading so a slow network can't flag a value that simply hasn't been checked yet.
@@ -239,7 +239,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     if (form.EST_STATUS !== null && form.EST_STATUS !== undefined && !EST_STATUS_OPTIONS.includes(String(form.EST_STATUS))) {
       e.EST_STATUS = `Must be one of [${EST_STATUS_OPTIONS.filter(v => v !== null).join(', ')}, or empty]`;
     }
-    // NPC-223: an Inactive establishment must carry a status category. Mirrors the backend's
+    // An Inactive establishment must carry a status category. Mirrors the backend's
     // conditional Joi rule so the editor sees it inline rather than as a 400 after confirming.
     if (str(form.EST_STATUS) === EST_STATUS_VALUES.INACTIVE && !str(form.EST_STATUS_CATEGORY).trim()) {
       e.EST_STATUS_CATEGORY = t('editEstablishment.estStatusCategoryRequired', {
@@ -439,7 +439,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                {/* NPC-223: Est. Status offers exactly Active and Inactive. The empty option is
+                {/* Est. Status offers exactly Active and Inactive. The empty option is
                     rendered only while the record genuinely has no status (nothing in the
                     pipeline guarantees one), so it stays a valid Select value for those rows but
                     disappears — and can't be re-picked to blank the field — once one is chosen. */}
@@ -456,9 +456,9 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('EST_STATUS_SOURCE')} value={sel('EST_STATUS_SOURCE')} onChange={(e) => set('EST_STATUS_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_SOURCE')} />
           </div>
-          {/* NPC-223: only meaningful for an Inactive establishment, so the field appears only
+          {/* Only meaningful for an Inactive establishment, so the field appears only
               then — and is mandatory when it does. Options come from SBR_EST_STATUS_CATEGORY_LKP
-              via SBR_LOOKUPS_API (NPC-221) rather than free text, so a validator can only pick a
+              via SBR_LOOKUPS_API rather than free text, so a validator can only pick a
               configured value. The category and its provenance cell are hidden as a pair — a
               whole row of the 2-column grid — so hiding them never shifts the fields below into
               the wrong column. */}
@@ -484,7 +484,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                       <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
                     ))}
                     {/* The record's current category survives a lookup that no longer lists it
-                        (the non-MOCI values are flagged as provisional in NPC-221), so an edit to
+                        (the non-MOCI values are flagged as provisional), so an edit to
                         an unrelated field never silently drops it from the dropdown. */}
                     {sel('EST_STATUS_CATEGORY') && !statusCategoryOptions.some((o) => o.CODE === sel('EST_STATUS_CATEGORY')) && (
                       <SelectItem value={sel('EST_STATUS_CATEGORY')}>{sel('EST_STATUS_CATEGORY')}</SelectItem>
@@ -512,7 +512,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           )}
           <div className="space-y-1" data-field="LEGAL_TYPE">
             <Label>{t('editEstablishment.fields.legalType')}</Label>
-            {/* NPC-224: a closed dropdown backed by SBR_LEGAL_TYPE_LKP via SBR_LOOKUPS_API,
+            {/* A closed dropdown backed by SBR_LEGAL_TYPE_LKP via SBR_LOOKUPS_API,
                 replacing the old free-text-with-suggestions field so a value can only ever come
                 from the lookup. Same pattern as Est. Status Category above. */}
             <Select
@@ -553,7 +553,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="SECTOR_ID">
             <Label>{t('editEstablishment.fields.sector')}</Label>
-            {/* NPC-225: a closed dropdown backed by SBR_SECTOR_TYPE_LKP via SBR_LOOKUPS_API,
+            {/* A closed dropdown backed by SBR_SECTOR_TYPE_LKP via SBR_LOOKUPS_API,
                 replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of drift that
                 caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded copy
                 silently fell out of sync with the real values). validate() above checks against
@@ -585,7 +585,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('SECTOR_ID_SOURCE')} value={sel('SECTOR_ID_SOURCE')} onChange={(e) => set('SECTOR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('SECTOR_ID_SOURCE')} />
           </div>
-          {/* NPC-218: searchable single-select over SBR_ISIC_LKP instead of free text, so an
+          {/* Searchable single-select over SBR_ISIC_LKP instead of free text, so an
               invalid classification can no longer be typed in. `ed()` still decides editability,
               exactly as the Input it replaces did. */}
           <div className="space-y-1" data-field="ISIC_CODE">
@@ -629,7 +629,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
             <Label>{t('editEstablishment.fields.mainBranchSbrId')}</Label>
-            {/* Picker over the active main-branch establishment list (NPC-222), rather than a
+            {/* Picker over the active main-branch establishment list, rather than a
                 free-text ID or a general "any establishment" search — the value can only ever
                 be a real, active, main-branch SBR ID, so a branch or non-existent ID can never
                 be entered in the first place. */}

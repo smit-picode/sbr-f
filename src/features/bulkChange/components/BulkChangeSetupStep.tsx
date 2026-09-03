@@ -52,8 +52,8 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
   const { data, isLoading } = useGetBulkChangeTemplateQuery(entityType);
   const template = data?.data;
 
-  // NPC-260 follow-up: fetched only on click (lazy), never on mount — the export is a snapshot
-  // for this one download, not something the page needs to keep current in the background.
+  // Fetched only on click (lazy), never on mount — the export is a snapshot for this one
+  // download, not something the page needs to keep current in the background.
   const [fetchExport, { isFetching: isExporting }] = useLazyGetBulkChangeExportQuery();
 
   const handleDownloadTemplate = async () => {
@@ -99,7 +99,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     return t('bulkChange.wizard.setup.anyText', { defaultValue: 'Any text' });
   };
 
-  // NPC-258: a conditionally-required column (e.g. EST_STATUS_CATEGORY, only mandatory when
+  // A conditionally-required column (e.g. EST_STATUS_CATEGORY, only mandatory when
   // EST_STATUS is Inactive) isn't flagged `mandatory`, since it isn't always required — the
   // condition is surfaced here instead, appended to whatever describeAllowed() already shows.
   const describeAllowedWithNote = (column: NonNullable<typeof template>['columns'][number]): string => {
