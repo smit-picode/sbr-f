@@ -78,7 +78,12 @@ export function NewBulkUpdatePage() {
           t('bulkChange.wizard.submitPartial', {
             defaultValue: '{{submitted}} of {{total}} rows submitted for approval; {{failed}} failed.',
             submitted: result.submitted,
-            total: result.submitted + result.failed,
+            // Reuse the total the operator already confirmed on the Validate step rather than
+            // result.submitted + result.failed, which reflects only this submit call's own
+            // outcome and can drift from that earlier total (e.g. rows the app-layer rules held
+            // out of the procedure call entirely) — showing a different total here than what was
+            // already shown would contradict the counts the operator just reviewed.
+            total: validation.totalRows,
             failed: result.failed,
           })
         );
