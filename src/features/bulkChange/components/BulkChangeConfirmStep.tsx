@@ -20,7 +20,8 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
   const tableOption = BULK_CHANGE_TABLES.find((o) => o.key === selectedTable);
   const tableLabel = tableOption ? t(tableOption.navKey, { defaultValue: tableOption.label }) : selectedTable;
 
-  // Only rows the server accepted are submitted, so only those are previewed here.
+  // Only rows the server accepted go to /bulk-change on submit (see NewBulkUpdatePage's
+  // handleSubmit) — this preview must show exactly that set, not the full upload.
   const validRows = validation.rows.filter((row) => row.status === 'VALID');
   const columns = validation.columns;
 

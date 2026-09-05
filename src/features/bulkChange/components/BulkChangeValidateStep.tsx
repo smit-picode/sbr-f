@@ -264,13 +264,17 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                           )}
                           {fieldIssue && (
                             <p className="mt-0.5 text-xs text-red-600">
-                              {t(`bulkChange.wizard.validate.codes.${fieldIssue.code}`, {
-                                // The server's own message is specific to this row (e.g. names the
-                                // actual value and the real allowed list) — prefer it over the
-                                // generic per-code default, which is only a fallback for the rare
-                                // case the server didn't supply one.
-                                defaultValue: fieldIssue.message ?? BULK_CHANGE_VALIDATION_DEFAULTS[fieldIssue.code],
-                              })}
+                              {/* The server's own message is specific to this row (e.g. names the
+                                  actual value and the real allowed list) — rendered directly rather
+                                  than as an i18n defaultValue, since en.json/ar.json define a static
+                                  string for every code, and a loaded translation always wins over
+                                  defaultValue regardless of what it's set to. Falls back to the
+                                  generic, translated per-code text only when the server sent none. */}
+                              {fieldIssue.message?.trim()
+                                ? fieldIssue.message
+                                : t(`bulkChange.wizard.validate.codes.${fieldIssue.code}`, {
+                                    defaultValue: BULK_CHANGE_VALIDATION_DEFAULTS[fieldIssue.code],
+                                  })}
                             </p>
                           )}
                         </td>
@@ -284,9 +288,12 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
                           </span>
                           {generalIssues.map((issue) => (
                             <p key={issue.code} className="mt-0.5 text-xs text-red-600">
-                              {t(`bulkChange.wizard.validate.codes.${issue.code}`, {
-                                defaultValue: issue.message ?? BULK_CHANGE_VALIDATION_DEFAULTS[issue.code],
-                              })}
+                              {/* Same server-message-first rule as the field-level issue above. */}
+                              {issue.message?.trim()
+                                ? issue.message
+                                : t(`bulkChange.wizard.validate.codes.${issue.code}`, {
+                                    defaultValue: BULK_CHANGE_VALIDATION_DEFAULTS[issue.code],
+                                  })}
                             </p>
                           ))}
                         </div>

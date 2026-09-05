@@ -60,31 +60,42 @@ export function NewBulkUpdatePage() {
 
   const handleSubmit = async () => {
     if (!validation || items.length === 0) return;
+    // Only the rows the operator actually reviewed on the Confirm step (validation.rows is
+    // positionally aligned with items — both come from the same /validate call, see
+    // BulkChangeValidateStep's onValidated). Posting the full, unfiltered items here let the
+    // API's own re-validation pass admit a row the Confirm screen had shown as an error — the
+    // operator confirms 8 records, gets a batch created with 9 (NPC-269). The API still
+    // re-validates every row it receives (data can change between /validate and submit), so
+    // this is a ceiling on what gets submitted, never a guarantee — but it can only shrink the
+    // confirmed set from here on, not grow it.
+    const validItems = items.filter((_, index) => validation.rows[index]?.status === 'VALID');
+    if (validItems.length === 0) return;
     try {
       const response = await submitBulkChange({
         entityType: ENTITY_TYPE_BY_TABLE[selectedTable],
-        // Every parsed row is posted; the API re-validates and submits only the rows that
-        // still pass, so the client's verdict is never trusted as the gate.
-        items,
+        items: validItems,
         reason: reason.trim(),
         fileName: file?.name,
       }).unwrap();
 
       const result = response.data;
-      // SUBMIT_BULK is best-effort: some rows can fail inside the procedure while the rest
-      // commit. Say so rather than reporting a clean success.
-      if (result && result.failed > 0) {
+      const total = validation.totalRows;
+      const submitted = result?.submitted ?? 0;
+      // Everything that didn't end up on the approval task, for whatever reason: rows the
+      // Validate step already excluded as errors (never even sent — see validItems above) AND
+      // any row that failed inside SUBMIT_BATCH itself despite passing validation (a genuine
+      // best-effort partial failure). result.failed alone only ever covers the second case — now
+      // that only pre-validated rows are submitted, it is almost always 0, which would otherwise
+      // hide the first case entirely and show a bare "submitted" toast for a 12-row upload that
+      // only actually created 10 records. total - submitted covers both in one number.
+      const failed = total - submitted;
+      if (failed > 0) {
         toast.warning(
           t('bulkChange.wizard.submitPartial', {
             defaultValue: '{{submitted}} of {{total}} rows submitted for approval; {{failed}} failed.',
-            submitted: result.submitted,
-            // Reuse the total the operator already confirmed on the Validate step rather than
-            // result.submitted + result.failed, which reflects only this submit call's own
-            // outcome and can drift from that earlier total (e.g. rows the app-layer rules held
-            // out of the procedure call entirely) — showing a different total here than what was
-            // already shown would contradict the counts the operator just reviewed.
-            total: validation.totalRows,
-            failed: result.failed,
+            submitted,
+            total,
+            failed,
           })
         );
       } else {
