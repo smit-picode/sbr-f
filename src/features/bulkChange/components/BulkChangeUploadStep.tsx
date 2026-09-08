@@ -4,9 +4,10 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadCloud, FileSpreadsheet, X } from 'lucide-react';
 import { toast } from '@/utils/toast';
-import { BULK_CHANGE_TABLES, type BulkChangeTableKey } from '../constants';
+import { BULK_CHANGE_TABLES, BULK_CHANGE_MAX_FILE_SIZE_BYTES, type BulkChangeTableKey } from '../constants';
 
 const ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
+const MAX_FILE_SIZE_LABEL = '500 MB';
 
 interface BulkChangeUploadStepProps {
   selectedTable: BulkChangeTableKey;
@@ -39,6 +40,15 @@ export function BulkChangeUploadStep({ selectedTable, file, onFileSelected }: Bu
       toast.error(
         t('bulkChange.wizard.upload.unsupportedFile', {
           defaultValue: 'Unsupported file type. Please upload an .xlsx, .xls or .csv file.',
+        })
+      );
+      return;
+    }
+    if (picked.size > BULK_CHANGE_MAX_FILE_SIZE_BYTES) {
+      toast.error(
+        t('bulkChange.wizard.upload.fileTooLarge', {
+          defaultValue: 'File is too large. The maximum upload size is {{max}}.',
+          max: MAX_FILE_SIZE_LABEL,
         })
       );
       return;

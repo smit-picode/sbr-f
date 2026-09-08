@@ -1145,7 +1145,8 @@
         "wholeNumber": "Whole number",
         "maxChars": "Text up to {{max}} characters",
         "anyText": "Any text",
-        "noteIdColumn": "Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched."
+        "noteIdColumnOnly": "Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.",
+        "noteIdColumnAndOthers": "Mandatory columns: {{mandatoryColumns}}. {{idColumn}} is the row key — it matches each row to a record. Every other column is optional; include only the ones you want to change, omitted columns are left untouched."
       },
       "upload": {
         "title": "Upload your file",
@@ -1153,6 +1154,7 @@
         "dragDrop": "Drag and drop your file here, or click to browse",
         "acceptedFormats": "Accepted formats: .xlsx, .xls, .csv",
         "unsupportedFile": "Unsupported file type. Please upload an .xlsx, .xls or .csv file.",
+        "fileTooLarge": "File is too large. The maximum upload size is {{max}}.",
         "removeFile": "Remove file"
       },
       "validate": {

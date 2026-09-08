@@ -53,7 +53,10 @@ export const BULK_CHANGE_ID_COLUMN: Record<BulkChangeEntityType, string> = {
 
 // Batch ceiling enforced by the API (BULK_MAX_ITEMS). Checked client-side too so an oversized
 // workbook is rejected before it is parsed and posted.
-export const BULK_CHANGE_MAX_ROWS = 1000;
+export const BULK_CHANGE_MAX_ROWS = 200000;
+
+// Portal's documented bulk-upload file-size ceiling — checked before the file is read.
+export const BULK_CHANGE_MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
 
 export const BULK_CHANGE_ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 

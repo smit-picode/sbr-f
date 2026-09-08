@@ -64,7 +64,7 @@ export function NewBulkUpdatePage() {
     // positionally aligned with items — both come from the same /validate call, see
     // BulkChangeValidateStep's onValidated). Posting the full, unfiltered items here let the
     // API's own re-validation pass admit a row the Confirm screen had shown as an error — the
-    // operator confirms 8 records, gets a batch created with 9 (NPC-269). The API still
+    // operator confirms 8 records but gets a batch created with 9. The API still
     // re-validates every row it receives (data can change between /validate and submit), so
     // this is a ceiling on what gets submitted, never a guarantee — but it can only shrink the
     // confirmed set from here on, not grow it.

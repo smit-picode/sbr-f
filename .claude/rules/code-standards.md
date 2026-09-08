@@ -70,6 +70,7 @@ These rules apply to ALL code written in this repo. Claude must follow these wit
 - Write NO comments unless WHY is non-obvious
 - No TODO in committed code
 - No commented-out code blocks
+- **NEVER reference a ticket number (NPC-xxx or any other tracker ID) in code or comments** — not in variable/function names, comments, or docstrings. Explain the WHY in plain language instead (what the constraint is, what breaks without it) — a ticket ID rots the moment the tracker changes and means nothing to someone reading the code later. Applies to every completed task, no exceptions.
 
 ## Import Rules
 - Use `@/` path alias — never relative `../../` beyond one level

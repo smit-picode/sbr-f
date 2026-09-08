@@ -107,6 +107,14 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     return column.note ? `${base} — ${column.note}` : base;
   };
 
+  // Mandatory business fields beyond the row key itself (e.g. Contacts requires CONTACT_NAME
+  // and PRIORITY) — the footer note below must call these out, not just claim the id column
+  // alone is required, or an operator following it hits a validation error on their first try.
+  const otherMandatoryColumns = useMemo(
+    () => (template?.columns ?? []).filter((c) => c.mandatory && c.key !== template?.idColumn).map((c) => c.key),
+    [template],
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -214,11 +222,18 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                 is not unique on Contacts/Addresses: one establishment can have several active
                 contacts or addresses). SBR_ID still appears as its own reference column so the
                 operator can see which establishment a row belongs to. */}
-            {t('bulkChange.wizard.setup.noteIdColumn', {
-              defaultValue:
-                'Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',
-              idColumn: template?.idColumn ?? 'ID',
-            })}
+            {otherMandatoryColumns.length === 0
+              ? t('bulkChange.wizard.setup.noteIdColumnOnly', {
+                  defaultValue:
+                    'Only {{idColumn}} is mandatory — it matches each row to a record. Include only the columns you want to change; omitted columns are left untouched.',
+                  idColumn: template?.idColumn ?? 'ID',
+                })
+              : t('bulkChange.wizard.setup.noteIdColumnAndOthers', {
+                  defaultValue:
+                    'Mandatory columns: {{mandatoryColumns}}. {{idColumn}} is the row key — it matches each row to a record. Every other column is optional; include only the ones you want to change, omitted columns are left untouched.',
+                  idColumn: template?.idColumn ?? 'ID',
+                  mandatoryColumns: [template?.idColumn ?? 'ID', ...otherMandatoryColumns].join(', '),
+                })}
           </span>
         </div>
       </div>
