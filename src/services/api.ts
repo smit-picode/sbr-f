@@ -31,6 +31,12 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 ) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
+  // A superseded request (e.g. clicking a column sort repeatedly before the previous request
+  // for that same query finishes) is aborted by RTK Query itself, not a real failure — every
+  // caller of this shared base query would otherwise show "Something went wrong" for a request
+  // whose result nobody even needed, once per abort.
+  if (api.signal.aborted) return result;
+
   if (result.error) {
     const status = result.error.status;
     const url = typeof args === 'string' ? args : args.url;

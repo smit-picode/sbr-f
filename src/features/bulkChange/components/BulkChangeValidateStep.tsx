@@ -16,6 +16,27 @@ import {
 } from '../constants';
 import type { BulkChangeItemInput, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
+// Best-effort text for a caught value that isn't an Error instance — exceljs's browser-bundled
+// zip/stream parsing can reject with a raw stream 'error' event or a plain object instead of a
+// real Error for some malformed or unusually large files, which used to fall straight through
+// to a generic "file could not be read" message with the actual cause visible nowhere.
+function describeThrownValue(error: unknown): string | null {
+  if (error === null || error === undefined) return null;
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object') {
+    const obj = error as Record<string, unknown>;
+    if (typeof obj.message === 'string' && obj.message) return obj.message;
+    if (typeof obj.type === 'string' && obj.type) return `${obj.type} error while reading the file`;
+    try {
+      const json = JSON.stringify(obj);
+      if (json && json !== '{}') return json;
+    } catch {
+      // Circular or non-serialisable object (e.g. a DOM Event) — nothing more to extract.
+    }
+  }
+  return null;
+}
+
 interface BulkChangeValidateStepProps {
   selectedTable: BulkChangeTableKey;
   file: File | null;
@@ -102,9 +123,18 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
         onValidated(validation, parsed.items);
       } catch (error) {
         if (cancelled) return;
-        const msg = error instanceof Error
-          ? error.message
-          : t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' });
+        // Logged in full because the message shown below is intentionally short — this is the
+        // only place the real cause (a raw exceljs parse failure, or the server's own error
+        // shape from RTK Query's unwrap(), which is a plain {status, data} object, not an
+        // Error) survives for diagnosis. console.warn, not .error — this failure is already
+        // handled and shown in the wizard's own UI below, but Next.js's dev overlay treats any
+        // console.error as an unhandled crash and pops a blocking full-screen dialog over it.
+        console.warn('Bulk change validate step failed:', error);
+        const msg =
+          error instanceof Error
+            ? error.message
+            : describeThrownValue(error) ??
+              t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' });
         setParseError(msg);
         setResult(null);
         onValidated(null, []);

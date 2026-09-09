@@ -93,7 +93,25 @@ const readWorkbook = async (file: File): Promise<ExcelJS.Worksheet> => {
     return sheet;
   }
 
-  await workbook.xlsx.load(buffer);
+  try {
+    await workbook.xlsx.load(buffer);
+  } catch (cause) {
+    // exceljs's browser-bundled zip/XML parsing can reject with something other than a real
+    // Error for a large or unusual file (a raw stream event, a plain object) — wrap it in a
+    // WorkbookParseError so the real cause always reaches the UI as text instead of falling
+    // back to a generic "invalid file" message that hides what actually happened.
+    const detail =
+      cause instanceof Error
+        ? cause.message
+        : (() => {
+            try {
+              return JSON.stringify(cause);
+            } catch {
+              return String(cause);
+            }
+          })();
+    throw new WorkbookParseError(`The workbook could not be parsed (${detail}).`);
+  }
   const sheet = workbook.worksheets[0];
   if (!sheet) throw new WorkbookParseError('The workbook has no sheets.');
   return sheet;

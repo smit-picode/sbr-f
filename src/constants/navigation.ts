@@ -61,7 +61,6 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.frozenFrames',
     items: [
       { title: 'Create Snapshot',  href: '/snapshots/create',   icon: 'Camera',      permKey: '', i18nKey: 'nav.createSnapshot'  },
-      // Temporarily hidden from the sidebar. Uncomment to restore.
       // { title: 'Browse Snapshots', href: '/snapshots/browse',   icon: 'Database',    permKey: '', i18nKey: 'nav.browseSnapshots' },
       { title: 'Analysis',         href: '/snapshots/analysis', icon: 'ChartColumn', permKey: '', i18nKey: 'nav.analysis'         },
     ],
