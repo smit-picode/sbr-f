@@ -92,14 +92,14 @@
       "noDataDesc": ""
     },
     "createSnapshot": {
-      "title": "Create Snapshot",
-      "description": "Create a frozen snapshot of the live frame",
+      "title": "Create Frozen Frame",
+      "description": "Freeze the current SBR core tables into a point-in-time snapshot",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     },
     "browseSnapshots": {
-      "title": "Browse Snapshots",
-      "description": "Browse previously created frame snapshots",
+      "title": "Frozen Frames",
+      "description": "Point-in-time snapshots of the register that define a population to sample from",
       "noData": "This feature will be implemented in the next phase",
       "noDataDesc": ""
     },
@@ -1226,5 +1226,36 @@
     "noMatch": "No matching ISIC codes.",
     "unavailable": "ISIC codes could not be loaded. Please refresh and try again.",
     "moreResults": "{{count}} more — keep typing to narrow the list."
+  },
+  "snapshots": {
+    "createTitle": "Create Frozen Frame",
+    "createDescription": "Freeze the current SBR core tables into a point-in-time snapshot",
+    "nameLabel": "Snapshot name",
+    "namePlaceholder": "e.g. Q2 2026 Sampling Frame",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Purpose of this frozen frame…",
+    "captureCaption": "Freezing will capture the current state of the SBR core tables:",
+    "freezeButton": "Freeze Snapshot",
+    "nameRequired": "Snapshot name is required.",
+    "confirmTitle": "Freeze this snapshot?",
+    "confirmDescription": "This captures the current SBR core tables as a point-in-time Frozen Frame. A frozen frame is read-only and cannot be edited afterwards.",
+    "confirmSummary": "{{establishments}} Establishments · {{enterprises}} Enterprises · {{contacts}} Contacts · {{addresses}} Addresses",
+    "confirmButton": "Freeze Now",
+    "createSuccess": "Snapshot \"{{name}}\" frozen successfully.",
+    "browseTitle": "Frozen Frames",
+    "browseDescription": "Point-in-time snapshots of the register that define a population to sample from",
+    "searchPlaceholder": "Search by name or user…",
+    "frameLabelOne": "frozen frame",
+    "frameLabelMany": "frozen frames",
+    "statusFrozen": "Frozen",
+    "frozenOn": "Frozen On",
+    "frozenBy": "Frozen By",
+    "browseAction": "Browse",
+    "backToAll": "All Frozen Frames",
+    "readOnlyBadge": "Read-only — frozen point-in-time population.",
+    "frozenOnAt": "Frozen on {{date}}",
+    "frozenByUser": "Frozen by",
+    "noData": "No frozen frames yet",
+    "noDataDesc": "Freeze a snapshot from Create Snapshot to see it listed here."
   }
 }

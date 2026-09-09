@@ -9,3 +9,4 @@ export * from './admin.types';
 export * from './enterpriseGroup.types';
 export * from './legalUnit.types';
 export * from './lookup.types';
+export * from './snapshot.types';

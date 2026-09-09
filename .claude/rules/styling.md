@@ -124,13 +124,15 @@ These keep every new dropdown/input on the maroon theme (`#A71D3A`). Match these
 </Select>
 ```
 
-### Inputs — soft maroon focus ring (filter/search style)
-- The base `Input` ships a hard `focus:ring-2 focus:ring-[#A71D3A]`. For filter/search inputs use the **soft** ring (matches `SearchInput`):
+### Inputs — soft maroon focus ring (ALWAYS, every text input/textarea)
+- The base `Input` ships a hard `focus:ring-2 focus:ring-[#A71D3A] focus:border-[#A71D3A]` — a solid, dark ring. Never leave this as-is on a new input: every text `Input` and `<textarea>` you add, in a filter bar, a modal, or a plain form (not just search/filter fields), must override to the **soft** ring:
   ```
   focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20
   ```
+  (already the convention `SearchInput` and the snapshots feature's description `<textarea>` use — apply it the same way to any plain `Input` you write, e.g. a name field, not only filter/search inputs.)
 - Do NOT change the base `Input` / `Select` components to achieve this — they are shared; override per-instance via `className` (tailwind-merge keeps the later class).
-- Compact filter controls: `h-8 text-xs shadow-none`. Standard form controls: leave defaults (`h-9 text-sm`).
+- Compact filter controls: `h-8 text-xs shadow-none`. Standard form controls: leave sizing defaults (`h-9 text-sm`) — only the focus-ring color changes.
+- Existing inputs written before this rule (e.g. the modals' plain `Input` fields) still carry the old hard ring — fix them only when you're already touching that file for another reason, not as a drive-by change.
 
 ## Lucide Icons
 Import from `lucide-react`. Common ones used in this project:
