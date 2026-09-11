@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+@theme {
+  --color-adaam: #8A1538;
+  --color-adaam-deep: #6D0D2A;
+  --color-adaam-tint: #F6E7EC;
+
+  --color-dune: #A29374;
+  --color-dune-light: #C0AC86;
+  --color-dune-deep: #87795D;
+  --color-dune-dark: #776848;
+  --color-dune-tint: #F4F0E8;
+
+  --color-pos: #3FB185;
+  --color-pos-text: #047857;
+  --color-pos-tint: #ECFDF5;
+
+  --color-neg: #DF7878;
+  --color-neg-text: #B23B3B;
+  --color-neg-tint: #FDECEC;
+
+  --color-warn: #BF9F5F;
+  --color-warn-text: #A67C1B;
+  --color-warn-tint: #FBF3D6;
+
+  --color-info: #2A6B8A;
+  --color-info-text: #1D4ED8;
+  --color-info-tint: #EFF6FF;
+
+  --color-ink: #111827;
+  --color-ink-2: #1F2937;
+  --color-panel: #FAFAFA;
+  --color-panel-2: #F5F5F5;
+  --color-line: #E5E7EB;
+  --color-line-soft: #F3F4F6;
+
+  --shadow-card: 0 0 60px rgba(0,0,0,0.08);
+  --shadow-float: 0 4px 24px rgba(0,0,0,0.15);
+  --shadow-soft: 0 4px 14px rgba(0,0,0,0.12);
+  --shadow-input: 0 4px 24px rgba(0,0,0,0.05);
+}
+
 :root {
   --brand-crimson: #A71D3A;
   --brand-crimson-dark: #6B1428;
@@ -99,4 +139,40 @@ select option:active {
   /* Force the highlight colour in WebKit/Blink, which otherwise paints the OS accent */
   background: #f1f5f9 linear-gradient(#f1f5f9, #f1f5f9);
   color: #0f172a;
+}
+
+/* Controls passed into PageHeader's `actions` prop, when rendered inside the banner,
+   need to read against a dark photo background instead of the app's usual white surface. */
+.banner-actions button[class*="border-slate-300"] {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+}
+.banner-actions button[class*="border-slate-300"]:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.banner-actions .text-slate-500,
+.banner-actions .text-slate-600,
+.banner-actions .text-slate-700 {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Login "Sign In" button — a diagonal shine sweeps across on hover, skipped entirely while
+   disabled/loading so a repeated click during submission never re-triggers it. */
+.btn-sign-in:hover:not(:disabled) {
+  box-shadow: 0 14px 30px -6px rgba(119, 104, 72, 0.55) !important;
+}
+.btn-sign-in-shine {
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 48%, transparent 66%);
+  transform: translateX(-120%);
+}
+.btn-sign-in:hover:not(:disabled) .btn-sign-in-shine {
+  animation: sbr-btn-shine 0.9s ease-out;
+}
+@keyframes sbr-btn-shine {
+  to { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-sign-in-shine { animation: none !important; }
 }

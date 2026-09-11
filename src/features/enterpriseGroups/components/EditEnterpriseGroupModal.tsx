@@ -505,7 +505,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+            style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
             className="text-white"
           >
             {t('actions.saveChanges', { defaultValue: 'Save Changes' })}

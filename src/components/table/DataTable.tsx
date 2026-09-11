@@ -112,11 +112,11 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-end">
         <ColumnToggle table={table} />
       </div>
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-line bg-white shadow-sm overflow-hidden">
       <Table wrapperRef={scrollRef}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-slate-50">
+              <TableRow key={headerGroup.id} className="hover:bg-panel">
                 {headerGroup.headers.map((header, colIndex) => {
                   const sorted = header.column.getIsSorted();
                   const canSort = sortableColumns
@@ -129,7 +129,7 @@ export function DataTable<TData, TValue>({
                       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                       className={cn(
                         canSort && 'cursor-pointer select-none group',
-                        isSticky && 'sticky start-0 z-20 bg-slate-50'
+                        isSticky && 'sticky start-0 z-20 bg-panel'
                       )}
                     >
                       {header.isPlaceholder ? null : (
@@ -169,7 +169,7 @@ export function DataTable<TData, TValue>({
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && 'sticky start-0 z-10 bg-white group-hover:bg-slate-50')}
+                      className={cn(isSticky && 'sticky start-0 z-10 bg-white group-hover:bg-panel')}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

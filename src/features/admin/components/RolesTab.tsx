@@ -584,7 +584,7 @@ export function RolesTab({
                     size="sm"
                     onClick={handleSavePermissions}
                     disabled={isAssigning}
-                    style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+                    style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
                     className="text-white hover:opacity-90 text-xs h-8 px-3"
                   >
                     {isAssigning ? t('admin.roles.saving') : t('admin.roles.savePermissions')}
@@ -691,7 +691,7 @@ export function RolesTab({
             <Button
               onClick={handleCreate}
               disabled={isCreating}
-              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
               className="text-white"
             >
               {isCreating ? t('admin.roles.creating') : t('actions.confirmSave')}
@@ -726,7 +726,7 @@ export function RolesTab({
             <Button
               onClick={handleUpdate}
               disabled={isUpdating}
-              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
               className="text-white"
             >
               {isUpdating ? t('admin.roles.saving') : t('actions.confirmSave')}

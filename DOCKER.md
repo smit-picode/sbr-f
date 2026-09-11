@@ -15,8 +15,8 @@ docker compose up
 ```
 
 - Frontend → http://localhost:7000 (hot reload)
-- API calls go to `BACKEND_URL`
+- API calls go to `NEXT_PUBLIC_API_URL`
 - Stop with `Ctrl+C`. Rebuild after dependency changes: `docker compose up --build`.
 
-If you ever run your own backend locally instead, just omit `BACKEND_URL`
-(it defaults to `http://localhost:3000`).
+If you ever run your own backend locally instead, just omit `NEXT_PUBLIC_API_URL`
+(it defaults to `http://localhost:4000`).
