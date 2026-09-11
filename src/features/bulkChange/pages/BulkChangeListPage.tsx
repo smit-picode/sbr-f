@@ -109,7 +109,7 @@ export function BulkChangeListPage() {
             </Button>
             {canSubmit && (
               <Button
-                style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+                style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
                 className="text-white gap-1.5"
                 onClick={() => router.push('/tasks/bulk-change/new')}
               >

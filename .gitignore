@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (exclude actual env, but allow .env.example template)
 .env
+.env.local
+.env.*.local
 !.env.example
 
 # vercel

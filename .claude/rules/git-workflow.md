@@ -20,7 +20,7 @@ This applies even if the user says "deploy", "publish", "send to GitHub", or sim
 - Always show `git status` and `git diff --stat` before staging
 - Commit message format: `type: short description`
 - Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `style`
-- Never commit `.env` or any file with secrets
+- Never commit `.env.local` or any file with secrets
 - Never use `git add .` without reviewing what's being added
 
 ## Branch Rules

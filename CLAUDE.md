@@ -67,12 +67,12 @@ Every page shows a **shimmer skeleton** (the `Skeleton` primitive / shared `Page
 ---
 
 ## Security — CRITICAL ⚠️
-**Never commit secrets** (API keys, tokens, credentials, real user data) — not in code, `docs/`, `.claude/`, `CLAUDE.md`, commit messages, or `.env.example`. Real values go only in `.env` (gitignored). If one leaks: rotate, scrub history, report.
+**Never commit secrets** (API keys, tokens, credentials, real user data) — not in code, `docs/`, `.claude/`, `CLAUDE.md`, commit messages, or `.env.example`. Real values go only in `.env.local` (gitignored). If one leaks: rotate, scrub history, report.
 
 ## Local dev
 ```bash
 npm install
-cp .env.example .env   # set NEXT_PUBLIC_API_URL to the running backend
+# .env.local: NEXT_PUBLIC_API_URL → the running backend, NEXT_PUBLIC_ENV=development
 npm run dev   # http://localhost:3000
 ```
 Type-check: `npx tsc --noEmit`.

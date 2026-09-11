@@ -77,7 +77,7 @@ Auth: JWT token sent via `x-auth-token` header, stored in `localStorage`.
 npm install
 
 # Configure environment
-cp .env.example .env
+cp .env.example .env.local
 # Set NEXT_PUBLIC_API_URL=http://localhost:3000
 
 # Run dev server

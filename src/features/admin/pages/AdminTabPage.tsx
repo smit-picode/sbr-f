@@ -91,7 +91,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           <button
             onClick={() => router.push('/establishments')}
             className="mt-6 flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
-            style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)' }}
+            style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)' }}
           >
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t('admin.panel.backToMain')}
           </button>
@@ -113,7 +113,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           tab === 'users' && canEditUsers ? (
             <Button
               onClick={() => usersOpenCreate.current?.()}
-              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
               className="text-white hover:opacity-90"
             >
               <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
@@ -121,7 +121,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           ) : tab === 'roles' && canCreateRoles ? (
             <Button
               onClick={() => rolesOpenCreate.current?.()}
-              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
               className="text-white hover:opacity-90"
             >
               <Plus className="h-4 w-4 mr-2" /> {t('admin.roles.addRole')}

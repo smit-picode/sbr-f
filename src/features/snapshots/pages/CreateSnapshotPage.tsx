@@ -106,7 +106,7 @@ export function CreateSnapshotPage() {
         <div className="flex justify-end">
           <Button
             onClick={handleFreezeClick}
-            style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+            style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
             className="text-white"
           >
             <Camera className="h-4 w-4 mr-1.5" />
@@ -136,7 +136,7 @@ export function CreateSnapshotPage() {
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t('actions.cancel')}</Button>
             <Button
               onClick={handleConfirmFreeze}
-              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
               className="text-white"
             >
               <Camera className="h-4 w-4 mr-1.5" />
