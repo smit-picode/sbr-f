@@ -5,7 +5,7 @@
 #
 #   1. Get the backend dev-tunnel URL from a backend developer
 #   2. Put it in a .env file next to this one:
-#        NEXT_PUBLIC_API_URL=https://xxxx-3000.devtunnels.ms
+#        BACKEND_URL=https://xxxx-3000.devtunnels.ms
 #   3. docker compose up
 #
 # Frontend -> http://localhost:7000
@@ -20,10 +20,9 @@ services:
       - "7000:7000"
     environment:
       # The backend dev-tunnel URL (falls back to localhost if running a
-      # backend yourself). The browser calls this URL directly. Same
-      # variable name as plain `npm run dev` — no Docker-only alias.
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
-      - NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV:-development}
+      # backend yourself). The browser calls this URL directly.
+      - NEXT_PUBLIC_API_URL=${BACKEND_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_ENV=development
     volumes:
       - .:/app
       - /app/node_modules        # keep container's node_modules

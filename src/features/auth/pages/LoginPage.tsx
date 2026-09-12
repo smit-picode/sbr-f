@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,10 +58,6 @@ export function LoginPage() {
   const [switchingRoleId, setSwitchingRoleId] = useState<number | null>(null);
   const [loginMutation, { isLoading }] = useLoginMutation();
   const [switchRoleMutation] = useSwitchRoleMutation();
-  // Synchronous guard against a second submit landing before React re-renders the button as
-  // disabled (isLoading only flips after the mutation actually starts) — a fast double-click
-  // or double-tap can otherwise fire onSubmit twice in the same tick.
-  const isSubmittingRef = useRef(false);
 
   const {
     register,
@@ -70,8 +66,6 @@ export function LoginPage() {
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
   async function onSubmit(values: LoginForm) {
-    if (isSubmittingRef.current) return;
-    isSubmittingRef.current = true;
     setLoginError(null);
     try {
       const result = await loginMutation(values).unwrap();
@@ -85,8 +79,6 @@ export function LoginPage() {
     } catch (err) {
       const apiMsg = (err as { data?: { message?: string } })?.data?.message;
       setLoginError(apiMsg || t('login.invalidCredentials', { defaultValue: 'Invalid email or password. Please try again.' }));
-    } finally {
-      isSubmittingRef.current = false;
     }
   }
 
@@ -115,31 +107,23 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white p-4 gap-4">
-      {/* Left Side: skyline photo card (QInsights style) */}
-      <div className="hidden md:flex md:w-1/2 lg:w-1/2 relative overflow-hidden rounded-3xl">
+    <div className="min-h-screen flex bg-white">
+      {/* Left Side: Gradient Background with Logo */}
+      <div className="hidden md:flex md:w-1/2 lg:w-1/2 relative overflow-hidden">
         <div
           className="absolute inset-0"
-          style={{ background: "#0E1A2B url('/assets/login-skyline.jpg') center / cover no-repeat" }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(10,20,40,.15) 0%, rgba(10,20,40,.35) 60%, rgba(10,20,40,.85) 100%)' }}
+          style={{
+            background: 'linear-gradient(135deg, #A71D3A 0%, #6B1428 30%, #1a3a52 100%)',
+          }}
         />
 
-        {/* Brand chip — self-start so it isn't stretched to mid-height by the parent flex row */}
-        <div className="relative self-start flex items-center gap-3 p-8">
-          <span className="h-11 w-11 rounded-full bg-dune flex items-center justify-center shrink-0" style={{ boxShadow: '0 0 0 2px rgba(255,255,255,.55)' }}>
-            <Logo size="sm" src="/sbr-logo-white.png" />
-          </span>
-          <span className="text-white font-extrabold text-[15px]">SBR Portal</span>
-        </div>
+        {/* Logo / Branding */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8">
+          <Logo size="lg" src="/sbr-logo-white.png" />
 
-        {/* Title block, anchored bottom-left with breathing room above the rounded corner */}
-        <div className="absolute bottom-10 start-0 px-8 max-w-md">
-          <h2 className="text-white text-3xl font-extrabold leading-tight">{t('login.branding')}</h2>
-          <p className="text-white/85 text-sm mt-2">{t('login.brandingSub')} · {t('login.brandingCountry')}</p>
-          <p className="text-white/60 text-xs mt-6">© {new Date().getFullYear()} {t('login.copyright')}</p>
+          <div className="text-center">
+            <h2 className="text-white text-xl font-bold tracking-wide">{t('login.branding')}</h2>
+          </div>
         </div>
       </div>
 
@@ -166,7 +150,7 @@ export function LoginPage() {
           {!pendingRoles && (
             <>
           <div className="mb-8">
-            <h2 className="text-3xl font-extrabold text-dune-deep">{t('login.title')}</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{t('login.title')}</h2>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -185,7 +169,6 @@ export function LoginPage() {
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
-                disabled={isLoading}
                 {...register('email')}
               />
               {errors.email && (
@@ -204,14 +187,12 @@ export function LoginPage() {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   className="pr-10"
-                  disabled={isLoading}
                   {...register('password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -224,19 +205,15 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              aria-busy={isLoading}
-              className={`btn-sign-in group relative w-full h-12 mt-2 rounded-full font-bold text-white tracking-wide overflow-hidden transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:translate-y-0 ${isLoading ? 'pointer-events-none opacity-80' : ''}`}
+              className="w-full h-11 rounded-full font-semibold text-white transition-all disabled:opacity-50"
               style={{
-                background: 'linear-gradient(135deg, #C0AC86 0%, #A29374 55%, #776848 100%)',
-                boxShadow: '0 10px 24px -6px rgba(119,104,72,0.45)',
+                background: isLoading
+                  ? '#A71D3A'
+                  : 'linear-gradient(90deg, #A71D3A 0%, #1a3a52 100%)',
               }}
             >
-              {/* One-shot diagonal shine sweep on hover — purely decorative, disabled state skips it via CSS */}
-              <span className="btn-sign-in-shine pointer-events-none absolute inset-0" />
-              <span className="relative inline-flex items-center justify-center gap-2">
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? t('login.signingIn') : t('login.signIn')}
-              </span>
+              {isLoading && <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? t('login.signingIn') : t('login.signIn')}
             </button>
           </form>
             </>

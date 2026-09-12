@@ -75,7 +75,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ChartColumn,
 };
 
-const RAIL_GRADIENT = '#FFFFFF';
+const RAIL_GRADIENT = 'linear-gradient(180deg, #6B1428 0%, #6B1428 42%, #7E1830 68%, #A71D3A 100%)';
 
 const SIDEBAR_COLLAPSED_KEY = 'sbr_sidebar_collapsed';
 const SIDEBAR_GROUPS_KEY = 'sbr_sidebar_groups';
@@ -105,14 +105,14 @@ function NavLink({ item, collapsed, count }: NavLinkProps) {
           <Link
             href={item.href}
             className={cn(
-              'relative flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-colors',
-              isActive ? 'bg-adaam-tint text-adaam' : 'text-gray-500 hover:bg-gray-50'
+              'relative flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-colors',
+              isActive ? 'bg-white text-[#A71D3A]' : 'text-[#f0cdd5] hover:bg-white/10'
             )}
           >
             {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
             <span className="sr-only">{label}</span>
             {countLabel && (
-              <span className="absolute -top-1 -end-1 min-w-[16px] h-4 rounded-full bg-adaam text-white text-[9px] font-bold flex items-center justify-center px-0.5 leading-none shadow-sm">
+              <span className="absolute -top-1 -end-1 min-w-[16px] h-4 rounded-full bg-white text-[#A71D3A] text-[9px] font-bold flex items-center justify-center px-0.5 leading-none shadow-sm">
                 {countLabel}
               </span>
             )}
@@ -134,8 +134,8 @@ function NavLink({ item, collapsed, count }: NavLinkProps) {
     <Link
       href={item.href}
       className={cn(
-        'flex w-full items-center gap-2.5 ps-3 pe-2.5 py-1.5 rounded-full text-[13px] transition-colors',
-        isActive ? 'bg-adaam-tint font-semibold text-adaam' : 'font-medium text-gray-600 hover:bg-gray-50'
+        'flex w-full items-center gap-2.5 ps-3 pe-2 py-2 rounded-lg text-[13px] transition-colors',
+        isActive ? 'bg-white font-bold text-[#A71D3A] shadow-sm' : 'font-medium text-[#f0cdd5] hover:bg-white/10'
       )}
     >
       {Icon && <Icon className="h-4 w-4 shrink-0" />}
@@ -143,7 +143,7 @@ function NavLink({ item, collapsed, count }: NavLinkProps) {
       {countLabel && (
         <span className={cn(
           'ms-auto min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none',
-          isActive ? 'bg-adaam text-white' : 'bg-adaam/80 text-white'
+          isActive ? 'bg-[#A71D3A] text-white' : 'bg-white/25 text-white'
         )}>
           {countLabel}
         </span>
@@ -257,14 +257,13 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          // Floating white rail (QInsights style) instead of a full-bleed maroon panel.
-          // sticky + own height (not h-screen) keeps it pinned with margin on all sides.
-          'flex flex-col shrink-0 sticky top-4 my-4 ms-4 rounded-3xl shadow-float transition-[width] duration-200 ease-out',
+          // h-screen + sticky keeps the maroon rail full-height and pinned so no gap shows
+          // below it when collapsed content is short and the page scrolls
+          'flex flex-col shrink-0 h-screen sticky top-0 transition-[width] duration-200 ease-out',
           collapsed ? 'w-[68px]' : 'w-[236px]'
         )}
         style={{
           background: RAIL_GRADIENT,
-          height: 'calc(100vh - 32px)',
           // Arabic mode: Noto Sans Arabic primary so nav text matches client; English: Jakarta primary
           fontFamily: i18n.language === 'ar'
             ? 'var(--font-cairo), var(--font-jakarta), sans-serif'
@@ -273,20 +272,18 @@ export function Sidebar() {
       >
         {/* Brand */}
         <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0', collapsed ? 'justify-center px-2' : 'px-4')}>
-          <div className="h-9 w-9 rounded-full bg-dune flex items-center justify-center shrink-0">
-            <Image
-              src="/sbr-logo-white.png"
-              alt="NPC emblem"
-              width={20}
-              height={20}
-              priority
-              className="object-contain"
-            />
-          </div>
+          <Image
+            src="/sbr-logo-white.png"
+            alt="NPC emblem"
+            width={34}
+            height={34}
+            priority
+            className="object-contain shrink-0"
+          />
           {!collapsed && (
             <div className="leading-tight min-w-0">
-              <p className="font-extrabold text-[13.5px] text-ink truncate">SBR Portal</p>
-              <p className="text-[10px] mt-0.5 truncate text-slate-500">{t('login.brandingSub')}</p>
+              <p className="font-extrabold text-[13.5px] text-white truncate">SBR Portal</p>
+              <p className="text-[10px] mt-0.5 truncate text-[#e7b9c4]">{t('login.brandingSub')}</p>
             </div>
           )}
         </div>
@@ -305,11 +302,11 @@ export function Sidebar() {
 
             if (collapsed) {
               return (
-                <div key={group.id} className="py-1.5 border-t first:border-t-0 border-gray-100">
+                <div key={group.id} className="py-1.5 border-t first:border-t-0 border-white/10">
                   <div className="flex flex-col gap-1">
                     {visibleItems.map((item, idx) => (
                       <div key={item.href} className="contents">
-                        {item.divider && idx > 0 && <div className="mx-2 my-1.5 h-px bg-gray-200" />}
+                        {item.divider && idx > 0 && <div className="mx-2 my-1.5 h-px bg-white/15" />}
                         <NavLink item={item} collapsed count={item.showCount ? pendingCount : undefined} />
                       </div>
                     ))}
@@ -323,13 +320,13 @@ export function Sidebar() {
                 <button
                   onClick={() => toggleGroup(group.id)}
                   className={cn(
-                    'flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-gray-50',
-                    groupActive ? 'text-dune-deep' : 'text-gray-400'
+                    'flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-white/5',
+                    groupActive ? 'text-white' : 'text-[#dca7b4]'
                   )}
                 >
                   <span className="truncate">{t(group.i18nKey, { defaultValue: group.title })}</span>
                   {groupPendingCount > 0 && (
-                    <span className="min-w-[16px] h-4 rounded-full bg-adaam text-white text-[9px] font-bold flex items-center justify-center px-1 leading-none">
+                    <span className="min-w-[16px] h-4 rounded-full bg-white/20 text-white text-[9px] font-bold flex items-center justify-center px-1 leading-none">
                       {groupPendingCount > 99 ? '99+' : groupPendingCount}
                     </span>
                   )}
@@ -341,7 +338,7 @@ export function Sidebar() {
                   <div className="mt-1 flex flex-col gap-0.5">
                     {visibleItems.map((item, idx) => (
                       <div key={item.href} className="contents">
-                        {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-gray-200" />}
+                        {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-white/15" />}
                         <NavLink item={item} collapsed={false} count={item.showCount ? pendingCount : undefined} />
                       </div>
                     ))}
@@ -356,7 +353,7 @@ export function Sidebar() {
         <button
           onClick={toggleCollapsed}
           className={cn(
-            'flex items-center gap-2 h-10 shrink-0 text-[12px] font-semibold text-gray-500 transition-colors hover:bg-gray-50',
+            'flex items-center gap-2 h-10 shrink-0 text-[12px] font-semibold text-[#f0cdd5] transition-colors hover:bg-white/10',
             collapsed ? 'justify-center' : 'px-4'
           )}
           title={collapsed ? t('sidebar.expand', { defaultValue: 'Expand' }) : t('sidebar.collapse', { defaultValue: 'Collapse' })}
@@ -372,24 +369,25 @@ export function Sidebar() {
         </button>
 
         {/* User */}
-        <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0 border-t border-gray-100', collapsed ? 'justify-center px-2' : 'px-4')}>
+        <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0 border-t border-white/10', collapsed ? 'justify-center px-2' : 'px-4')}>
           <div
-            className="h-8 w-8 rounded-full bg-dune flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+            className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+            style={{ background: 'rgba(255,255,255,.18)' }}
           >
             {initials}
           </div>
           {!collapsed && (
             <>
               <div className="leading-tight min-w-0 flex-1">
-                <p className="text-[12px] font-semibold text-ink truncate">
+                <p className="text-[12px] font-semibold text-white truncate">
                   {effectiveUser?.email ?? 'User'}
                 </p>
-                <p className="text-[10px] truncate text-gray-500">{formatRole(effectiveUser?.role)}</p>
+                <p className="text-[10px] truncate text-[#e7b9c4]">{formatRole(effectiveUser?.role)}</p>
               </div>
               <button
                 onClick={handleLogout}
                 title={t('actions.signOut')}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-adaam hover:bg-adaam-tint transition-colors"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <LogOut className="h-[15px] w-[15px] rtl:rotate-180" />
               </button>

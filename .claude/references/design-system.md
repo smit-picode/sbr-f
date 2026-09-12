@@ -25,24 +25,6 @@ Design language: Professional, data-dense, authoritative. Clean and minimal.
 | Warning | `amber-600` | #d97706 | Warnings |
 | Info | `blue-600` | #2563eb | Info toasts |
 
-### QInsights tokens (new, additive — added 2026-09-09)
-
-| Token | Hex | Usage |
-|---|---|---|
-| `adaam` / `adaam-deep` / `adaam-tint` | `#8A1538` / `#6D0D2A` / `#F6E7EC` | New primary (replaces `#A71D3A` in re-themed components) |
-| `dune` / `dune-light` / `dune-deep` / `dune-dark` / `dune-tint` | `#A29374` family | Secondary accent — avatar circles, logo badge |
-| `pos` / `pos-text` / `pos-tint` | `#3FB185` / `#047857` / `#ECFDF5` | Active/success |
-| `neg` / `neg-text` / `neg-tint` | `#DF7878` / `#B23B3B` / `#FDECEC` | Inactive/error |
-| `warn` / `warn-text` / `warn-tint` | `#BF9F5F` / `#A67C1B` / `#FBF3D6` | Warning/pending |
-| `info` / `info-text` / `info-tint` | `#2A6B8A` / `#1D4ED8` / `#EFF6FF` | Info |
-| `ink` / `ink-2` | `#111827` / `#1F2937` | New-component text |
-| `panel` / `panel-2` | `#FAFAFA` / `#F5F5F5` | New-component surfaces |
-| `line` | `#E5E7EB` | New-component borders |
-
-Shadows: `shadow-card`, `shadow-float`, `shadow-soft`, `shadow-input` (see `globals.css` for values).
-
-These are used by components re-themed as part of the QInsights shell redesign (Sidebar, banner header, `StatusBadge`, `DataTable` chrome, buttons, inputs). Components not yet migrated keep using the old palette until touched.
-
 ### NEVER use these colors (out of system):
 - `indigo-*`, `violet-*`, `purple-*`, `teal-*`, `cyan-*`, `pink-*`, `rose-*`
 - Arbitrary hex values inline
