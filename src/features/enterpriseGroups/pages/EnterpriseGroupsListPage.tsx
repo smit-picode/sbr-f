@@ -112,7 +112,7 @@ export function EnterpriseGroupsListPage() {
               <Button
                 size="sm"
                 onClick={() => setShowCreate(true)}
-                style={{ background: 'linear-gradient(135deg, #A71D3A, #6B1428)', border: 'none' }}
+                style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
                 className="text-white gap-1.5"
               >
                 <Plus className="h-4 w-4" />

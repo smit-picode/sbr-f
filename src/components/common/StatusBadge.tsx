@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
   status: string | null | undefined;
@@ -15,5 +16,12 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         ? 'destructive'
         : 'secondary';
 
-  return <Badge variant={variant} className={className}>{status}</Badge>;
+  const dotColor = status === 'Active' ? 'bg-pos' : status === 'Inactive' ? 'bg-neg' : 'bg-slate-400';
+
+  return (
+    <Badge variant={variant} className={cn('inline-flex items-center gap-1.5', className)}>
+      <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', dotColor)} />
+      {status}
+    </Badge>
+  );
 }
