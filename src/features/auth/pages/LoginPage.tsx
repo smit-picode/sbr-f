@@ -116,8 +116,10 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-white p-4 gap-4">
-      {/* Left Side: skyline photo card (QInsights style) */}
-      <div className="hidden md:flex md:w-1/2 lg:w-1/2 relative overflow-hidden rounded-3xl">
+      {/* Left Side: skyline photo card (QInsights style) — one unified p-9 container with
+          justify-between (matching the reference exactly) so the brand chip and the bottom
+          text block share the same left inset instead of drifting apart (p-8 vs px-8/bottom-10). */}
+      <div className="hidden md:flex md:w-[46%] relative overflow-hidden rounded-3xl text-white">
         <div
           className="absolute inset-0"
           style={{ background: "#0E1A2B url('/assets/login-skyline.jpg') center / cover no-repeat" }}
@@ -127,31 +129,32 @@ export function LoginPage() {
           style={{ background: 'linear-gradient(180deg, rgba(10,20,40,.15) 0%, rgba(10,20,40,.35) 60%, rgba(10,20,40,.85) 100%)' }}
         />
 
-        {/* Brand chip — self-start so it isn't stretched to mid-height by the parent flex row */}
-        <div className="relative self-start flex items-center gap-3 p-8">
-          <span className="h-11 w-11 rounded-full bg-dune flex items-center justify-center shrink-0" style={{ boxShadow: '0 0 0 2px rgba(255,255,255,.55)' }}>
-            <Logo size="sm" src="/sbr-logo-white.png" />
-          </span>
-          <span className="text-white font-extrabold text-[15px]">SBR Portal</span>
-        </div>
+        <div className="relative flex flex-col justify-between w-full p-9">
+          <div className="flex items-center gap-3">
+            <span className="h-11 w-11 rounded-full bg-dune flex items-center justify-center shrink-0" style={{ boxShadow: '0 0 0 2px rgba(255,255,255,.6)' }}>
+              <Logo size="sm" src="/sbr-logo-white.png" />
+            </span>
+            <span className="text-[15px] font-bold">SBR Portal</span>
+          </div>
 
-        {/* Title block, anchored bottom-left with breathing room above the rounded corner */}
-        <div className="absolute bottom-10 start-0 px-8 max-w-md">
-          <h2 className="text-white text-3xl font-extrabold leading-tight">{t('login.branding')}</h2>
-          <p className="text-white/85 text-sm mt-2">{t('login.brandingSub')} · {t('login.brandingCountry')}</p>
-          <p className="text-white/60 text-xs mt-6">© {new Date().getFullYear()} {t('login.copyright')}</p>
+          <div>
+            <h2 className="text-[40px] font-extrabold leading-[1.1] max-w-md">{t('login.branding')}</h2>
+            <p className="text-[15px] text-white/85 mt-4 max-w-md leading-relaxed">{t('login.brandingSub')} · {t('login.brandingCountry')}</p>
+            <p className="text-[12px] text-white/60 mt-6">© {new Date().getFullYear()} {t('login.copyright')}</p>
+          </div>
         </div>
       </div>
 
       {/* Right Side */}
-      <div className="w-full md:w-1/2 lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
-        {/* Language Toggle */}
+      <div className="w-full md:w-[54%] flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
+        {/* Language Toggle — single word for the OTHER language, matching the reference
+            (not a bilingual "Arabic  عربي" pairing). */}
         <button
           type="button"
           onClick={toggleLanguage}
-          className="absolute top-6 end-6 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          className="absolute top-4 end-4 md:top-6 md:end-8 inline-flex items-center h-9 px-4 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-input"
         >
-          {isArabic ? <><span>إنجليزي</span> English</> : <><span>Arabic</span> عربي</>}
+          {isArabic ? 'English' : 'عربي'}
         </button>
 
         <div className={pendingRoles ? 'w-full max-w-md' : 'w-full max-w-sm'}>
@@ -165,7 +168,7 @@ export function LoginPage() {
           {/* Step 1 — Credentials */}
           {!pendingRoles && (
             <>
-          <div className="mb-8">
+          <div className="mt-20 mb-3">
             <h2 className="text-3xl font-extrabold text-dune-deep">{t('login.title')}</h2>
           </div>
 
