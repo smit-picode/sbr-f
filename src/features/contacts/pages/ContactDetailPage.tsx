@@ -59,6 +59,7 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}

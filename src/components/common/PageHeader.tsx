@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { NAV_GROUPS } from '@/constants/navigation';
 import { useLanguage } from '@/i18n';
 import { useAppSelector } from '@/hooks';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PageHeaderProps {
   // ReactNode (not just string) so a detail page can pass a name with its own click-to-history
@@ -102,9 +102,15 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
                 <span className="absolute top-2 end-2.5 w-1.5 h-1.5 rounded-full bg-dune-light" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-[220px] text-center text-xs">
-              This feature will be implemented in the next phase
-            </TooltipContent>
+            {/* Portalled to <body>: the banner is `overflow-hidden` (for its rounded corners),
+                and this trigger sits right at its top-right edge, so an inline tooltip was
+                clipped against that boundary — same class of bug the sidebar rail already
+                hit. collisionPadding keeps it off the viewport edge too. */}
+            <TooltipPortal>
+              <TooltipContent side="bottom" collisionPadding={8} className="max-w-[220px] text-center text-xs">
+                This feature will be implemented in the next phase
+              </TooltipContent>
+            </TooltipPortal>
           </Tooltip>
         </TooltipProvider>
         <div

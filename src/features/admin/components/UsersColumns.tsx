@@ -3,6 +3,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { formatDate } from '@/utils/format';
 import type { SbrUser } from '@/types';
 
@@ -14,23 +15,35 @@ export function userRoleNames(user: SbrUser): string[] {
 
 export const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes('SUPER_ADMIN');
 
-// Soft tint badges (light fill, dark text) instead of the previous solid saturated fills —
-// reads calmer in a dense table and stays inside the design-system palette (slate, blue,
-// emerald, amber) plus the maroon theme accent, dropping the off-palette purple/orange/rose.
-const ROLE_BADGE_PALETTE = [
-  'bg-[#8A1538]/10 text-[#8A1538]', // maroon (theme accent)
-  'bg-slate-100 text-slate-700',    // slate
-  'bg-emerald-50 text-emerald-700', // emerald
-  'bg-blue-50 text-blue-700',       // blue
-  'bg-amber-50 text-amber-700',     // amber
+// Soft tint pills (light fill, dark text, dot) matching the reference's role-chip pattern —
+// stays inside the design-system palette (slate, blue, emerald, amber) plus the maroon theme
+// accent, dropping the off-palette purple/orange/rose.
+const ROLE_BADGE_PALETTE: { badge: string; dot: string }[] = [
+  { badge: 'bg-[#8A1538]/10 text-[#8A1538]', dot: 'bg-[#8A1538]' }, // maroon (theme accent)
+  { badge: 'bg-slate-100 text-slate-700', dot: 'bg-slate-500' },    // slate
+  { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' }, // emerald
+  { badge: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },        // blue
+  { badge: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },     // amber
 ];
 
-export function getRoleBadgeClass(roleName: string): string {
+function getRoleBadgeColors(roleName: string): { badge: string; dot: string } {
   // Same light-red tint as the Status column's INACTIVE badge, so SUPER_ADMIN reads as the
   // one role that stands out from every other role's soft tint.
-  if (roleName === 'SUPER_ADMIN') return 'bg-red-100 text-red-700';
+  if (roleName === 'SUPER_ADMIN') return { badge: 'bg-red-100 text-red-700', dot: 'bg-red-500' };
   const hash = roleName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return ROLE_BADGE_PALETTE[hash % ROLE_BADGE_PALETTE.length];
+}
+
+// Reference-matching role chip: rounded-full pill with a small color-matched dot, rather than a
+// plain rectangular badge — used both in the table's Roles column and the view-user dialog.
+export function RoleBadge({ name, label }: { name: string; label: string }) {
+  const { badge, dot } = getRoleBadgeColors(name);
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold whitespace-nowrap ${badge}`}>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+      {label}
+    </span>
+  );
 }
 
 interface UsersColumnsOptions {
@@ -74,12 +87,7 @@ export const getUsersColumns = ({
         return (
           <div className="flex flex-wrap gap-1">
             {names.map((name) => (
-              <span
-                key={name}
-                className={`rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${getRoleBadgeClass(name)}`}
-              >
-                {name}
-              </span>
+              <RoleBadge key={name} name={name} label={name} />
             ))}
           </div>
         );
@@ -89,15 +97,9 @@ export const getUsersColumns = ({
       id: 'IS_ACTIVE',
       accessorKey: 'IS_ACTIVE',
       header: t('admin.users.colStatus'),
-      cell: ({ row }) => (
-        <span
-          className={`rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap uppercase ${
-            row.original.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-          }`}
-        >
-          {row.original.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')}
-        </span>
-      ),
+      // StatusBadge matches the design system's other status columns (EST_STATUS, etc.), which
+      // key their color off the raw English enum value and never localize it — same here.
+      cell: ({ row }) => <StatusBadge status={row.original.IS_ACTIVE ? 'Active' : 'Inactive'} />,
     },
     {
       id: 'CREATED_AT',

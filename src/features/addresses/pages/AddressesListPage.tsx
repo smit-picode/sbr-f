@@ -101,6 +101,7 @@ export function AddressesListPage() {
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
         stickyFirstColumn
         onRowClick={canOpenDetail ? (row) => router.push(`/addresses/${row.ID}`) : undefined}
+        getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'bg-warn-tint/60 hover:bg-warn-tint' : undefined)}
       />
 
       <EditAddressModal

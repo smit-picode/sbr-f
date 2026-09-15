@@ -3,8 +3,8 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/utils/toast';
 import { BulkChangeStepper } from '../components/BulkChangeStepper';
@@ -128,24 +128,14 @@ export function NewBulkUpdatePage() {
 
   return (
     <PageContainer>
-      <button
-        onClick={() => router.push('/tasks/bulk-change')}
-        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#8A1538]"
-      >
-        <X className="h-4 w-4" /> {t('bulkChange.wizard.backToBulkChanges', { defaultValue: 'Back to bulk changes' })}
-      </button>
-
-      <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-slate-900">
-          {t('bulkChange.wizard.title', { defaultValue: 'New bulk update' })}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {t('bulkChange.wizard.description', {
-            defaultValue: 'Update many {{table}} at once from an Excel file — submitted as one approval task.',
-            table: tableLabel,
-          })}
-        </p>
-      </div>
+      <PageHeader
+        title={t('bulkChange.wizard.title', { defaultValue: 'New bulk update' })}
+        description={t('bulkChange.wizard.description', {
+          defaultValue: 'Update many {{table}} at once from an Excel file — submitted as one approval task.',
+          table: tableLabel,
+        })}
+        back={{ label: t('bulkChange.wizard.backToBulkChanges', { defaultValue: 'Back to bulk changes' }), onClick: () => router.push('/tasks/bulk-change') }}
+      />
 
       <BulkChangeStepper currentStep={step} />
 

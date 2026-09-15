@@ -40,8 +40,11 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
   const panelRef = useRef<HTMLDivElement>(null);
   // The panel is portaled to <body> (see below) so a modal's `overflow-y-auto` body can't clip
   // it — position it in fixed/viewport coordinates from the input's own rect instead of relying
-  // on CSS `absolute` positioning off a `relative` ancestor.
-  const [panelRect, setPanelRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  // on CSS `absolute` positioning off a `relative` ancestor. `maxHeight` is capped to whatever
+  // room is actually left in the viewport (flipping above the input when there's more room
+  // there) so the list scrolls within the panel instead of running past the screen edge with
+  // nothing able to scroll it back into view.
+  const [panelRect, setPanelRect] = useState<{ left: number; width: number; maxHeight: number; top?: number; bottom?: number } | null>(null);
 
   const debouncedQuery = useDebounce(query, 400);
 
@@ -71,7 +74,17 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
     if (!open) return;
     const update = () => {
       const rect = inputRef.current?.getBoundingClientRect();
-      if (rect) setPanelRect({ top: rect.bottom, left: rect.left, width: rect.width });
+      if (!rect) return;
+      const margin = 8;
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceAbove = rect.top - margin;
+      const openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
+      const maxHeight = Math.max(160, Math.min(320, openUp ? spaceAbove : spaceBelow));
+      setPanelRect(
+        openUp
+          ? { left: rect.left, width: rect.width, maxHeight, bottom: window.innerHeight - rect.top + 4 }
+          : { left: rect.left, width: rect.width, maxHeight, top: rect.bottom + 4 }
+      );
     };
     update();
     window.addEventListener('resize', update);
@@ -134,15 +147,20 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
       {open && debouncedQuery && panelRect && createPortal(
         <div
           ref={panelRef}
-          className="fixed z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float"
-          style={{ top: panelRect.top + 4, left: panelRect.left, width: panelRect.width }}
+          className="fixed z-50 overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white shadow-float"
+          style={{
+            left: panelRect.left,
+            width: panelRect.width,
+            maxHeight: panelRect.maxHeight,
+            ...(panelRect.top !== undefined ? { top: panelRect.top } : { bottom: panelRect.bottom }),
+          }}
         >
           {isFetching ? (
             <p className="px-3 py-2 text-xs text-slate-400">{t('common.searching', { defaultValue: 'Searching…' })}</p>
           ) : results.length === 0 ? (
             <p className="px-3 py-2 text-xs text-slate-400">{t('common.noMatchingEstablishments', { defaultValue: 'No matching establishments.' })}</p>
           ) : (
-            <ul className="max-h-44 overflow-y-auto">
+            <ul>
               {results.map((e) => (
                 <li key={e.ID}>
                   <button

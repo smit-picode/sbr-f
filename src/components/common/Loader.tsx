@@ -27,7 +27,9 @@ export function PageLoader() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-4 w-32" />
-      <Skeleton className="h-28 w-full rounded-lg" />
+      {/* Stands in for PageHeader's dark hero banner, not a plain white card — shimmer-dark
+          matches its navy tone, and the exact size/radius avoid any layout shift on load. */}
+      <Skeleton className="shimmer-dark min-h-[172px] w-full rounded-3xl" />
 
       {/* Highlight strip */}
       <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-lg bg-white px-5 py-4 shadow-card">

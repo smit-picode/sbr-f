@@ -65,6 +65,7 @@ function DetailField({ recordId, fieldKey, label, value, canViewHistory, pending
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -111,6 +112,7 @@ function StatField({ recordId, fieldKey, label, value, canViewHistory, pendingCo
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -128,7 +130,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
   recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
 }) {
   const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLSpanElement>(null);
   const { data, isLoading, isError } = useGetEnterpriseGroupHistoryQuery(recordId, { skip: !open });
 
   useEffect(() => {
@@ -141,7 +143,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
   }, [open]);
 
   return (
-    <div className="relative" ref={wrapRef}>
+    <span className="relative inline-flex" ref={wrapRef}>
       <button
         type="button"
         onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
@@ -154,6 +156,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -162,7 +165,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
           onClose={() => setOpen(false)}
         />
       )}
-    </div>
+    </span>
   );
 }
 
@@ -422,7 +425,8 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
     return (
       <PageContainer>
         <div className="space-y-4">
-          <Skeleton className="h-32 w-full rounded-xl" />
+          {/* Stands in for PageHeader's dark hero banner below, not a plain white card. */}
+          <Skeleton className="shimmer-dark min-h-[172px] w-full rounded-3xl" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 space-y-4">
               <Skeleton className="h-64 w-full rounded-lg" />

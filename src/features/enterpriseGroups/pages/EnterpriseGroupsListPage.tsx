@@ -195,6 +195,7 @@ export function EnterpriseGroupsListPage() {
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
         onRowClick={canViewDetail || canEdit ? (row) => router.push(`/enterprise-groups/${row.ID}`) : undefined}
         stickyFirstColumn
+        getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'bg-warn-tint/60 hover:bg-warn-tint' : undefined)}
       />
 
       <CreateEnterpriseGroupModal open={showCreate} onClose={() => setShowCreate(false)} />

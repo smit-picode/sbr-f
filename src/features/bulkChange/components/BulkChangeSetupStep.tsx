@@ -10,6 +10,36 @@ import { toast } from '@/utils/toast';
 import { useGetBulkChangeTemplateQuery, useLazyGetBulkChangeExportQuery } from '../api/bulkChangeApi';
 import { buildTemplateWorkbook } from '../utils/parseWorkbook';
 import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
+import { ESTABLISHMENTS_FIELD_LABELS } from '@/features/establishments/constants';
+import { CONTACT_FIELD_LABELS } from '@/features/contacts/constants';
+import { ADDRESS_FIELD_LABELS } from '@/features/addresses/constants';
+
+// The id-column labels aren't in any feature's FIELD_LABELS map (that map is for editable
+// business fields, not the row key) — named here to match the reference's "Establishment ID".
+const ID_COLUMN_LABELS: Record<BulkChangeTableKey, Record<string, string>> = {
+  Establishments: { SBR_ID: 'Establishment ID' },
+  Contacts: { ID: 'Contact ID' },
+  Addresses: { ID: 'Address ID' },
+};
+
+const FIELD_LABELS_BY_TABLE: Record<BulkChangeTableKey, Record<string, string>> = {
+  Establishments: ESTABLISHMENTS_FIELD_LABELS,
+  Contacts: CONTACT_FIELD_LABELS,
+  Addresses: ADDRESS_FIELD_LABELS,
+};
+
+// Falls back to a humanized version of the raw column key (TRADE_NAME_ARA -> "Trade Name
+// (Arabic)") for any bulk-editable column that predates or otherwise isn't in a feature's
+// FIELD_LABELS map, so the Attribute column is never blank for a column the API does support.
+function humanizeColumnKey(key: string): string {
+  const words = key.split('_').filter(Boolean);
+  const suffix = words[words.length - 1];
+  const languageSuffix = suffix === 'ENU' ? 'English' : suffix === 'ARA' ? 'Arabic' : null;
+  const base = (languageSuffix ? words.slice(0, -1) : words)
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(' ');
+  return languageSuffix ? `${base} (${languageSuffix})` : base;
+}
 
 const ICONS = { Building2, Users, MapPin } as const;
 
@@ -107,6 +137,11 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     return column.note ? `${base} — ${column.note}` : base;
   };
 
+  const describeAttribute = (column: NonNullable<typeof template>['columns'][number]): string =>
+    ID_COLUMN_LABELS[selectedTable][column.key]
+    ?? FIELD_LABELS_BY_TABLE[selectedTable][column.key]
+    ?? humanizeColumnKey(column.key);
+
   // Mandatory business fields beyond the row key itself (e.g. Contacts requires CONTACT_NAME
   // and PRIORITY) — the footer note below must call these out, not just claim the id column
   // alone is required, or an operator following it hits a validation error on their first try.
@@ -125,7 +160,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
           {t('bulkChange.wizard.setup.chooseDataDesc', { defaultValue: 'Pick which table your Excel file targets.' })}
         </p>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-3 grid max-w-lg grid-cols-3 gap-2">
           {availableTables.map((option) => {
             const Icon = ICONS[option.icon];
             const isActive = option.key === selectedTable;
@@ -134,18 +169,18 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                 key={option.key}
                 type="button"
                 onClick={() => onSelectTable(option.key)}
-                className={`flex flex-col items-start gap-3 rounded-lg border p-4 text-start transition-colors ${
-                  isActive ? 'border-[#8A1538] bg-[#8A1538]/5' : 'border-slate-200 bg-white hover:bg-slate-50'
+                className={`flex flex-col items-start gap-2 rounded-xl border p-3 text-start transition-all ${
+                  isActive ? 'border-[#8A1538] bg-adaam-tint' : 'border-slate-200 hover:bg-slate-50'
                 }`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-md ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                     isActive ? 'bg-[#8A1538] text-white' : 'bg-slate-100 text-slate-500'
                   }`}
                 >
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-4 w-4" />
                 </span>
-                <span className={`text-sm font-medium ${isActive ? 'text-[#8A1538]' : 'text-slate-700'}`}>
+                <span className="text-[12.5px] font-semibold text-slate-700">
                   {t(option.navKey, { defaultValue: option.label })}
                 </span>
               </button>
@@ -183,6 +218,9 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                     {t('bulkChange.wizard.setup.excelHeader', { defaultValue: 'Excel header' })}
                   </th>
                   <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {t('bulkChange.wizard.setup.attribute', { defaultValue: 'Attribute' })}
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
                     {t('bulkChange.wizard.setup.type', { defaultValue: 'Type' })}
                   </th>
                   <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -196,11 +234,12 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
               <tbody className="divide-y divide-slate-100">
                 {template?.columns.map((column) => (
                   <tr key={column.key} className="hover:bg-slate-50 transition-colors">
-                    <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-blue-700">{column.key}</td>
-                    <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-700">{column.type}</td>
+                    <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-slate-700">{column.key}</td>
+                    <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-600">{describeAttribute(column)}</td>
+                    <td className="whitespace-nowrap px-5 py-3 text-sm text-slate-500">{column.type}</td>
                     <td className="whitespace-nowrap px-5 py-3">
                       {column.mandatory ? (
-                        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+                        <span className="inline-flex items-center rounded-full bg-adaam-tint px-2 py-0.5 text-xs font-semibold text-adaam">
                           {t('bulkChange.wizard.setup.mandatory', { defaultValue: 'Mandatory' })}
                         </span>
                       ) : (

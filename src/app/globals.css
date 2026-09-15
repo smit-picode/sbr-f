@@ -106,7 +106,9 @@ html[dir='rtl'] body {
 }
 
 /* Skeleton shimmer — subtle on-theme sweep used for all loading placeholders.
-   A slate base with a faint maroon-tinted highlight sliding across. */
+   A slate base with a faint dune-tinted highlight sliding across (the maroon `adaam` tint read
+   as a jarring red streak against the dark navy banner skeleton — dune is the neutral secondary
+   accent, so the sweep now reads as a soft warm-gray pulse instead). */
 @keyframes sbr-shimmer {
   100% { transform: translateX(100%); }
 }
@@ -123,9 +125,9 @@ html[dir='rtl'] body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(138, 21, 56, 0.06) 40%,
+    rgba(162, 147, 116, 0.10) 40%,
     rgba(255, 255, 255, 0.65) 50%,
-    rgba(138, 21, 56, 0.06) 60%,
+    rgba(162, 147, 116, 0.10) 60%,
     transparent 100%
   );
   animation: sbr-shimmer 1.6s infinite;
@@ -136,6 +138,24 @@ html[dir='rtl'] .shimmer::after {
 }
 @media (prefers-reduced-motion: reduce) {
   .shimmer::after { animation: none; }
+}
+
+/* Dark variant — for a skeleton standing in for the PageHeader banner (dark navy + hero image),
+   not a plain white card. The default .shimmer's light slate-200 base flashed as a jarring
+   mismatch against the dark banner that appears once data loads. Combine with .shimmer:
+   `className="shimmer shimmer-dark"` — same markup/animation, only the two colors below change. */
+.shimmer-dark {
+  background-color: #16243a; /* one step lighter than the banner's #0E1A2B base, so the pulse reads against it */
+}
+.shimmer-dark::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(162, 147, 116, 0.16) 40%,
+    rgba(220, 210, 190, 0.32) 50%,
+    rgba(162, 147, 116, 0.16) 60%,
+    transparent 100%
+  );
 }
 
 /* Native <select> option highlight — use theme gray instead of the OS blue */

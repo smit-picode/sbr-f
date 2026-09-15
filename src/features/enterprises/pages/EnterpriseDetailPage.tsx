@@ -101,6 +101,7 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
       <div className="mt-0.5 truncate text-sm font-medium text-slate-800">{value}</div>
       {open && canViewHistory && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -157,6 +158,7 @@ function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHi
       )}
       {open && canViewHistory && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey="NAME_ENU"
           fieldLabel={label}

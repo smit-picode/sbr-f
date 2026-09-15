@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_Arabic, Plus_Jakarta_Sans } from 'next/font/google';
+import { Cairo, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { ReduxProvider } from '@/providers/ReduxProvider';
 import { Toaster } from '@/components/common/Toaster';
 import { LanguageProvider } from '@/i18n';
 
-const notoSansArabic = Noto_Sans_Arabic({
+// The reference vendors Cairo for Arabic (theme.js's `fontArabic` stack) — Noto Sans Arabic is a
+// visually different typeface, so Arabic text wasn't actually matching the client font even
+// though the CSS variable was (confusingly) still named --font-cairo.
+const cairo = Cairo({
   subsets: ['arabic'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-cairo',
 });
@@ -31,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${notoSansArabic.variable} ${jakarta.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${cairo.variable} ${jakarta.variable}`}>
       <body suppressHydrationWarning>
         <ReduxProvider>
           <LanguageProvider>

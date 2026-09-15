@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { History, User, Landmark, X } from 'lucide-react';
 import { formatDate } from '@/utils/format';
+import { useLanguage } from '@/i18n';
 import type { HistoryVersion } from './FieldHistoryModal';
 
 interface FieldHistoryPopoverProps {
@@ -13,14 +15,22 @@ interface FieldHistoryPopoverProps {
   isLoading?: boolean;
   isError?: boolean;
   onClose: () => void;
+  /** The clickable field wrapper the popover anchors to — used to compute its portaled position. */
+  anchorRef: React.RefObject<HTMLElement | null>;
 }
 
-// Anchored attribute-history popover (tooltip-style). Rendered inside a `relative` field
-// wrapper, it opens just below the clicked clock icon — replaces the full-screen drawer.
-export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, onClose }: FieldHistoryPopoverProps) {
+const PANEL_WIDTH = 320;
+
+// Anchored attribute-history popover (tooltip-style) — replaces the full-screen drawer. Portaled
+// to <body> with fixed/viewport positioning computed from `anchorRef` (rather than `absolute`
+// inside the field's own `relative` wrapper), because several callers sit inside an
+// `overflow-hidden` ancestor (e.g. the banner behind a detail page's title) that would otherwise
+// clip most of the panel.
+export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, onClose, anchorRef }: FieldHistoryPopoverProps) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLDivElement>(null);
-  const [openUp, setOpenUp] = useState(false);
+  const { isArabic } = useLanguage();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<{ left: number; maxHeight: number; top?: number; bottom?: number } | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -28,15 +38,46 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // If the downward-opening popover spills past the viewport bottom and there's room above
-  // the anchor, flip it to open upward instead. Run BEFORE paint (useLayoutEffect) so the
-  // popover appears directly in its final position — no visible jump from down to up.
+  // Close on outside click — the panel lives in a portal, outside the anchor's own DOM subtree.
+  useEffect(() => {
+    const onPointerDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (anchorRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      onClose();
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [anchorRef, onClose]);
+
+  // Track the anchor's viewport position, flipping above it when there's more room there, and
+  // capping height to whatever space is actually available so the timeline scrolls inside the
+  // panel instead of running past the screen edge. Runs before paint so there's no visible jump.
   useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setOpenUp(rect.bottom > window.innerHeight - 8 && rect.top - rect.height > 8);
-  }, [versions, isLoading, isError]);
+    const update = () => {
+      const anchorRect = anchorRef.current?.getBoundingClientRect();
+      if (!anchorRect) return;
+      const margin = 8;
+      const spaceBelow = window.innerHeight - anchorRect.bottom - margin;
+      const spaceAbove = anchorRect.top - margin;
+      const openUp = spaceBelow < 220 && spaceAbove > spaceBelow;
+      const maxHeight = Math.max(160, Math.min(420, openUp ? spaceAbove : spaceBelow));
+      const rawLeft = isArabic ? anchorRect.right - PANEL_WIDTH : anchorRect.left;
+      const left = Math.max(margin, Math.min(rawLeft, window.innerWidth - PANEL_WIDTH - margin));
+      setRect(
+        openUp
+          ? { left, maxHeight, bottom: window.innerHeight - anchorRect.top + 6 }
+          : { left, maxHeight, top: anchorRect.bottom + 6 }
+      );
+    };
+    update();
+    window.addEventListener('resize', update);
+    document.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      document.removeEventListener('scroll', update, true);
+    };
+  }, [anchorRef, isArabic, versions, isLoading, isError]);
 
   const valueOf = (v: HistoryVersion | undefined) => {
     if (!v) return '—';
@@ -77,12 +118,20 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     ...changes.map((v, i): TimelineItem => ({ kind: 'version', date: timeOf(v.VALID_FROM), data: v, prev: changes[i + 1] })),
   ].sort((a, b) => b.date - a.date);
 
-  return (
+  if (!rect) return null;
+
+  return createPortal(
     <div
-      ref={ref}
-      className={`absolute start-0 z-50 w-80 max-w-[90vw] rounded-lg border border-slate-200 bg-white shadow-xl ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
+      ref={panelRef}
+      className="fixed z-50 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl"
+      style={{
+        left: rect.left,
+        width: PANEL_WIDTH,
+        maxHeight: rect.maxHeight,
+        ...(rect.top !== undefined ? { top: rect.top } : { bottom: rect.bottom }),
+      }}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-800">
           <History className="h-4 w-4 shrink-0 text-[#8A1538]" />
           {t('fieldHistory.title', { defaultValue: 'Attribute history' })}
@@ -98,7 +147,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
         </button>
       </div>
 
-      <div className="max-h-80 overflow-y-auto px-4 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3">
         {isLoading ? (
           <p className="py-1 text-sm text-slate-500">{t('fieldHistory.loading', { defaultValue: 'Loading history…' })}</p>
         ) : isError ? (
@@ -184,6 +233,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
           </ul>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

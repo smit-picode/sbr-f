@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { DataTable } from '@/components/table/DataTable';
 import { Eye, EyeOff, RefreshCw, Search, Shield, Calendar, IdCard } from 'lucide-react';
 import {
@@ -15,7 +16,7 @@ import {
   useUpdateUserMutation,
   useGetRolesListQuery,
 } from '../api/adminApi';
-import { getUsersColumns, userRoleNames, getRoleBadgeClass, isSuperAdminUser } from './UsersColumns';
+import { getUsersColumns, userRoleNames, RoleBadge, isSuperAdminUser } from './UsersColumns';
 import {
   ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS,
   ALL_ROLES_VALUE, ALL_STATUS_VALUE, USER_STATUS_FILTER_OPTIONS,
@@ -480,15 +481,9 @@ export function UsersTab({
 
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
                     {roleNames.map((name) => (
-                      <span key={name} className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${getRoleBadgeClass(name)}`}>
-                        {toTitleCaseRole(name)}
-                      </span>
+                      <RoleBadge key={name} name={name} label={toTitleCaseRole(name)} />
                     ))}
-                    <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
-                      viewTarget.IS_ACTIVE ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {viewTarget.IS_ACTIVE ? t('admin.users.statusActive') : t('admin.users.statusInactive')}
-                    </span>
+                    <StatusBadge status={viewTarget.IS_ACTIVE ? 'Active' : 'Inactive'} />
                   </div>
                 </div>
 

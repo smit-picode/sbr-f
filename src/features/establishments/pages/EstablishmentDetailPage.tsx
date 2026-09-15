@@ -88,6 +88,7 @@ function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHi
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -148,6 +149,7 @@ function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pe
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}
@@ -214,6 +216,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
       </button>
       {open && (
         <FieldHistoryPopover
+          anchorRef={wrapRef}
           versions={data?.data ?? []}
           fieldKey={fieldKey}
           fieldLabel={label}

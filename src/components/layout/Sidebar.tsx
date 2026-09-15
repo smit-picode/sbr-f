@@ -265,7 +265,7 @@ export function Sidebar() {
         style={{
           background: RAIL_GRADIENT,
           height: 'calc(100vh - 32px)',
-          // Arabic mode: Noto Sans Arabic primary so nav text matches client; English: Jakarta primary
+          // Arabic mode: Cairo primary so nav text matches the client reference; English: Jakarta primary
           fontFamily: i18n.language === 'ar'
             ? 'var(--font-cairo), var(--font-jakarta), sans-serif'
             : 'var(--font-jakarta), var(--font-cairo), sans-serif',

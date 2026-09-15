@@ -47,8 +47,11 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
   const searchRef = useRef<HTMLInputElement>(null);
   // The panel is portaled to <body> (see below) so a modal's `overflow-y-auto` body can't clip
   // it — position it in fixed/viewport coordinates from the trigger's own rect instead of
-  // relying on CSS `absolute` positioning off a `relative` ancestor.
-  const [panelRect, setPanelRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  // relying on CSS `absolute` positioning off a `relative` ancestor. `maxHeight` is capped to
+  // whatever room is actually left in the viewport (flipping above the trigger when there's more
+  // room there) so the list scrolls within the panel instead of running past the screen edge
+  // with nothing able to scroll it back into view.
+  const [panelRect, setPanelRect] = useState<{ left: number; width: number; maxHeight: number; top?: number; bottom?: number } | null>(null);
 
   const { data, isFetching } = useGetMainBranchValuesQuery();
   const options = useMemo(() => data?.data ?? [], [data]);
@@ -86,7 +89,17 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
     if (!open) return;
     const update = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
-      if (rect) setPanelRect({ top: rect.bottom, left: rect.left, width: rect.width });
+      if (!rect) return;
+      const margin = 8;
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceAbove = rect.top - margin;
+      const openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
+      const maxHeight = Math.max(160, Math.min(360, openUp ? spaceAbove : spaceBelow));
+      setPanelRect(
+        openUp
+          ? { left: rect.left, width: rect.width, maxHeight, bottom: window.innerHeight - rect.top + 4 }
+          : { left: rect.left, width: rect.width, maxHeight, top: rect.bottom + 4 }
+      );
     };
     update();
     window.addEventListener('resize', update);
@@ -160,10 +173,15 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
       {open && panelRect && createPortal(
         <div
           ref={panelRef}
-          className="fixed z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float"
-          style={{ top: panelRect.top + 4, left: panelRect.left, width: panelRect.width }}
+          className="fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float"
+          style={{
+            left: panelRect.left,
+            width: panelRect.width,
+            maxHeight: panelRect.maxHeight,
+            ...(panelRect.top !== undefined ? { top: panelRect.top } : { bottom: panelRect.bottom }),
+          }}
         >
-          <div className="relative border-b border-slate-100 p-2">
+          <div className="relative shrink-0 border-b border-slate-100 p-2">
             <Search className="pointer-events-none absolute start-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <Input
               ref={searchRef}
@@ -176,49 +194,51 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
             />
           </div>
 
-          {isFetching ? (
-            <p className="px-3 py-2 text-xs text-slate-400">
-              {t('mainBranchSelect.loading', { defaultValue: 'Loading main branch establishments…' })}
-            </p>
-          ) : options.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-amber-600">
-              {t('mainBranchSelect.unavailable', { defaultValue: 'Main branch list could not be loaded. Please refresh and try again.' })}
-            </p>
-          ) : matches.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-slate-400">
-              {t('mainBranchSelect.noMatch', { defaultValue: 'No matching establishments.' })}
-            </p>
-          ) : (
-            <>
-              <ul className="max-h-56 overflow-y-auto" role="listbox">
-                {matches.slice(0, MAX_VISIBLE).map((o) => (
-                  <li key={o.SBR_ID}>
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={o.SBR_ID === value}
-                      onClick={() => select(o.SBR_ID)}
-                      className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
-                    >
-                      <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.SBR_ID === value ? 'text-[#8A1538]' : 'text-transparent'}`} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-mono text-xs font-medium text-slate-700">{o.SBR_ID}</span>
-                        {o.NAME_ENU && <span className="block text-xs text-slate-500">{o.NAME_ENU}</span>}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {matches.length > MAX_VISIBLE && (
-                <p className="border-t border-slate-100 px-3 py-1.5 text-xs text-slate-400">
-                  {t('mainBranchSelect.moreResults', {
-                    count: matches.length - MAX_VISIBLE,
-                    defaultValue: '{{count}} more — keep typing to narrow the list.',
-                  })}
-                </p>
-              )}
-            </>
-          )}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            {isFetching ? (
+              <p className="px-3 py-2 text-xs text-slate-400">
+                {t('mainBranchSelect.loading', { defaultValue: 'Loading main branch establishments…' })}
+              </p>
+            ) : options.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-amber-600">
+                {t('mainBranchSelect.unavailable', { defaultValue: 'Main branch list could not be loaded. Please refresh and try again.' })}
+              </p>
+            ) : matches.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-slate-400">
+                {t('mainBranchSelect.noMatch', { defaultValue: 'No matching establishments.' })}
+              </p>
+            ) : (
+              <>
+                <ul role="listbox">
+                  {matches.slice(0, MAX_VISIBLE).map((o) => (
+                    <li key={o.SBR_ID}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={o.SBR_ID === value}
+                        onClick={() => select(o.SBR_ID)}
+                        className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
+                      >
+                        <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.SBR_ID === value ? 'text-[#8A1538]' : 'text-transparent'}`} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-mono text-xs font-medium text-slate-700">{o.SBR_ID}</span>
+                          {o.NAME_ENU && <span className="block text-xs text-slate-500">{o.NAME_ENU}</span>}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {matches.length > MAX_VISIBLE && (
+                  <p className="border-t border-slate-100 px-3 py-1.5 text-xs text-slate-400">
+                    {t('mainBranchSelect.moreResults', {
+                      count: matches.length - MAX_VISIBLE,
+                      defaultValue: '{{count}} more — keep typing to narrow the list.',
+                    })}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>,
         document.body
       )}

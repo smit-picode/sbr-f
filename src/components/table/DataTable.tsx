@@ -47,6 +47,11 @@ interface DataTableProps<TData, TValue> {
   sortableColumns?: string[];
   stickyFirstColumn?: boolean;
   onRowClick?: (row: TData) => void;
+  // Extra classes for a specific row (e.g. a subtle amber tint for a row with a pending change
+  // request, matching the reference). Applied to the row and, when stickyFirstColumn is on, to
+  // its sticky first cell too — that cell needs its own opaque background to stay solid while
+  // the table scrolls horizontally underneath it, so it can't just inherit the row's.
+  getRowClassName?: (row: TData) => string | undefined;
 }
 
 export function DataTable<TData, TValue>({
@@ -64,6 +69,7 @@ export function DataTable<TData, TValue>({
   sortableColumns,
   stickyFirstColumn,
   onRowClick,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -158,25 +164,32 @@ export function DataTable<TData, TValue>({
             {isLoading ? (
               <TableLoader rows={limit} cols={colCount} />
             ) : (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row) => {
+                const rowClassName = getRowClassName?.(row.original);
+                // The sticky cell is a descendant of the row (which carries `group`), not the
+                // hovered element itself, so its own hover tint needs `group-hover:` — plain
+                // `hover:` on a sibling cell never fires just because another cell was hovered.
+                const stickyClassName = rowClassName?.replace(/(^|\s)hover:/g, '$1group-hover:');
+                return (
                 <TableRow
                   key={row.id}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                  className={cn('group', onRowClick && 'cursor-pointer')}
+                  className={cn('group', onRowClick && 'cursor-pointer', rowClassName)}
                 >
                   {row.getVisibleCells().map((cell, colIndex) => {
                     const isSticky = stickyFirstColumn && colIndex === 0;
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && 'sticky start-0 z-10 bg-white group-hover:bg-panel')}
+                      className={cn(isSticky && cn('sticky start-0 z-10', stickyClassName || 'bg-white group-hover:bg-panel'))}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                     );
                   })}
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
       </Table>

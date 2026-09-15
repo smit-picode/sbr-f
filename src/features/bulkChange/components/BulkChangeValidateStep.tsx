@@ -16,23 +16,22 @@ import {
 } from '../constants';
 import type { BulkChangeItemInput, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
-// Best-effort text for a caught value that isn't an Error instance — exceljs's browser-bundled
-// zip/stream parsing can reject with a raw stream 'error' event or a plain object instead of a
-// real Error for some malformed or unusually large files, which used to fall straight through
-// to a generic "file could not be read" message with the actual cause visible nowhere.
+// Best-effort text for a caught value that isn't an Error instance. Covers two distinct shapes:
+// - RTK Query's own rejection from .unwrap() on a failed request — `{ status, data: { message } }`
+//   (the same shape services/api.ts's baseQueryWithErrorToast already reads to toast the server's
+//   message) — surfaced here too so the Validate step's own error panel shows that same plain
+//   sentence instead of falling through to a raw JSON dump of the whole error object.
+// - exceljs's browser-bundled zip/stream parsing, which can reject with a raw stream 'error'
+//   event or a plain object instead of a real Error for some malformed or unusually large files.
 function describeThrownValue(error: unknown): string | null {
   if (error === null || error === undefined) return null;
   if (typeof error === 'string') return error;
   if (typeof error === 'object') {
     const obj = error as Record<string, unknown>;
+    const data = obj.data as Record<string, unknown> | undefined;
+    if (typeof data?.message === 'string' && data.message) return data.message;
     if (typeof obj.message === 'string' && obj.message) return obj.message;
     if (typeof obj.type === 'string' && obj.type) return `${obj.type} error while reading the file`;
-    try {
-      const json = JSON.stringify(obj);
-      if (json && json !== '{}') return json;
-    } catch {
-      // Circular or non-serialisable object (e.g. a DOM Event) — nothing more to extract.
-    }
   }
   return null;
 }
