@@ -53,7 +53,7 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
           onClick={(e) => { e.stopPropagation(); onOpenEstablishment(sbrId); }}
           className="group inline-flex items-center gap-1.5 text-left"
         >
-          <span className="font-mono text-xs font-medium text-red-600">SBR #{sbrId}</span>
+          <span className="font-mono text-xs font-medium text-adaam">SBR #{sbrId}</span>
           <span className="text-sm text-slate-700 group-hover:text-[#8A1538] group-hover:underline group-hover:decoration-[#8A1538]">{nullableText(name)}</span>
           <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-[#8A1538]" />
         </button>

@@ -91,7 +91,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
-        <span className="font-mono text-xs font-medium text-red-600">#{val}</span>
+        <span className="font-mono text-xs font-medium text-adaam">#{val}</span>
       ) : (
         <span className="text-slate-400">—</span>
       );

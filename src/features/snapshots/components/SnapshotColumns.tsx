@@ -25,7 +25,7 @@ function DateCell({ value }: { value: string | null | undefined }) {
 // (a snapshot can't have in-flight change requests), same cell styling as the live tables.
 
 export const getSnapshotEstablishmentColumns = (t: TFunc): ColumnDef<SbrEstablishment>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span> },
+  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
   { accessorKey: 'SOURCE_CODE', header: t('columns.SOURCE_CODE'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
   { accessorKey: 'NAME_ENU', header: t('columns.NAME_ENU'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'TRADE_NAME_ENU', header: t('columns.TRADE_NAME_ENU'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
@@ -51,12 +51,12 @@ export const getSnapshotEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>
   { accessorKey: 'LEGAL_TYPE', header: t('columns.LEGAL_TYPE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'SECTOR_ID', header: t('columns.SECTOR'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'STATUS', header: t('columns.STATUS'), cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" /> },
-  { accessorKey: 'MAIN_ESTABLISHMENT_SBR_ID', header: t('columns.MAIN_UNIT'), cell: ({ getValue }) => { const val = getValue<number | null>(); return val != null ? <span className="font-mono text-xs font-medium text-red-600">#{val}</span> : <span className="text-slate-400">—</span>; } },
+  { accessorKey: 'MAIN_ESTABLISHMENT_SBR_ID', header: t('columns.MAIN_UNIT'), cell: ({ getValue }) => { const val = getValue<number | null>(); return val != null ? <span className="font-mono text-xs font-medium text-adaam">#{val}</span> : <span className="text-slate-400">—</span>; } },
   { accessorKey: 'VALID_FROM', header: t('columns.VALID_FROM'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
 ];
 
 export const getSnapshotContactColumns = (t: TFunc): ColumnDef<SbrContact>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span> },
+  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
   { accessorKey: 'CONTACT_NAME', header: t('columns.CONTACT_NAME'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'ROLE', header: t('columns.ROLE'), cell: ({ getValue }) => { const val = getValue<string | null>(); return val ? <span className="text-xs font-medium bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">{val}</span> : <span className="text-slate-400">—</span>; } },
   { accessorKey: 'PHONE', header: t('columns.PHONE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
@@ -71,7 +71,7 @@ export const getSnapshotContactColumns = (t: TFunc): ColumnDef<SbrContact>[] => 
 ];
 
 export const getSnapshotAddressColumns = (t: TFunc): ColumnDef<SbrAddress>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span> },
+  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
   { accessorKey: 'MUNICIPALITY_ID', header: t('columns.MUNICIPALITY_ID'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'ZONE', header: t('columns.ZONE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
   { accessorKey: 'STREET', header: t('columns.STREET'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },

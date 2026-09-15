@@ -37,7 +37,7 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     header: t('columns.SBR_ID'),
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
-        <span className="font-mono text-xs font-medium text-red-600">{String(getValue())}</span>
+        <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span>
         {row.original.HAS_PENDING_REQUEST && <PendingBadge />}
       </span>
     ),
@@ -209,7 +209,7 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => {
       const val = getValue<number | null>();
       return val != null ? (
-        <span className="font-mono text-xs font-medium text-blue-700">{val}</span>
+        <span className="font-mono text-xs font-medium text-adaam">{val}</span>
       ) : (
         <span className="text-slate-400">—</span>
       );
