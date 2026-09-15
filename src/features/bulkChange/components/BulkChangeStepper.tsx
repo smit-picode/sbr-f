@@ -12,7 +12,7 @@ export function BulkChangeStepper({ currentStep }: BulkChangeStepperProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="flex items-center rounded-lg bg-white p-4 shadow-card">
       {STEP_KEYS.map((stepKey, index) => {
         const label = t(`bulkChange.wizard.steps.${stepKey}`, { defaultValue: STEP_DEFAULTS[index] });
         const isDone = index < currentStep;
@@ -23,9 +23,9 @@ export function BulkChangeStepper({ currentStep }: BulkChangeStepperProps) {
               <span
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   isDone
-                    ? 'bg-[#A71D3A] text-white'
+                    ? 'bg-[#8A1538] text-white'
                     : isActive
-                      ? 'bg-[#A71D3A] text-white'
+                      ? 'bg-[#8A1538] text-white'
                       : 'bg-slate-100 text-slate-400'
                 }`}
               >
@@ -36,7 +36,7 @@ export function BulkChangeStepper({ currentStep }: BulkChangeStepperProps) {
               </span>
             </div>
             {index < STEP_KEYS.length - 1 && (
-              <div className={`mx-3 h-px flex-1 ${isDone ? 'bg-[#A71D3A]/40' : 'bg-slate-200'}`} />
+              <div className={`mx-3 h-px flex-1 ${isDone ? 'bg-[#8A1538]/40' : 'bg-slate-200'}`} />
             )}
           </div>
         );

@@ -103,7 +103,7 @@ export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) 
                   </Select>
                   {!NO_VALUE_OPERATORS.has(row.operator) && (
                     <Input
-                      className="h-8 w-56 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                      className="h-8 w-56 text-xs shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
                       placeholder={t('columnFilters.valuePlaceholder', { defaultValue: 'Value…' })}
                       value={row.value}
                       onChange={(e) => updateRow(row.id, { value: e.target.value })}
@@ -125,7 +125,7 @@ export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) 
         <button
           type="button"
           onClick={addRow}
-          className="-mr-1 -mt-1 flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#A71D3A] transition-colors hover:bg-[#FCF4F6]"
+          className="-mr-1 -mt-1 flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#8A1538] transition-colors hover:bg-[#FCF4F6]"
         >
           <Plus className="h-3 w-3" />
           {t('columnFilters.add', { defaultValue: 'Add filter' })}

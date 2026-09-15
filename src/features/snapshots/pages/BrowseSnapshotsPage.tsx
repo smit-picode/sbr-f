@@ -50,7 +50,7 @@ export function BrowseSnapshotsPage() {
     {
       id: 'STATUS',
       header: t('columns.STATUS'),
-      cell: () => <Badge variant="default" className="bg-blue-50 text-blue-700 rounded-md">{t('snapshots.statusFrozen')}</Badge>,
+      cell: () => <Badge variant="info" className="rounded-full">{t('snapshots.statusFrozen')}</Badge>,
     },
     {
       accessorKey: 'FROZEN_AT',
@@ -112,7 +112,7 @@ export function BrowseSnapshotsPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+      <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
         <SearchInput
           className="shadow-none"
           value={search}

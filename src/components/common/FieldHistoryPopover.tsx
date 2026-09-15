@@ -84,7 +84,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     >
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-800">
-          <History className="h-4 w-4 shrink-0 text-[#A71D3A]" />
+          <History className="h-4 w-4 shrink-0 text-[#8A1538]" />
           {t('fieldHistory.title', { defaultValue: 'Attribute history' })}
           <span className="truncate font-normal text-slate-400">{fieldLabel}</span>
         </div>
@@ -140,7 +140,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
 
               const v = item.data;
               const userEdit = isUserEdit(v);
-              const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A71D3A';
+              const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#8A1538';
               return (
                 <li key={v.ID ?? i} className="relative ps-5">
                   <span className="absolute start-0 top-1.5 h-2 w-2 rounded-full border-2 border-white" style={{ background: dotColor }} />
@@ -159,7 +159,7 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                             {t('fieldHistory.approved', { defaultValue: 'Approved' })}
                           </span>
                         ))
-                      : (v.SOURCE_CODE && <span className="text-[10px] font-bold tracking-wide text-[#A71D3A]">{v.SOURCE_CODE}</span>)}
+                      : (v.SOURCE_CODE && <span className="text-[10px] font-bold tracking-wide text-[#8A1538]">{v.SOURCE_CODE}</span>)}
                   </div>
                   {userEdit ? (
                     <p className="mt-1 text-sm font-medium text-slate-700">

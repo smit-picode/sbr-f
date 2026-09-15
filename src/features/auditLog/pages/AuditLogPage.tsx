@@ -136,7 +136,7 @@ export function AuditLogPage() {
       />
 
       {canSearch && (
-        <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
           <Select
             value={filters.tableName ?? '__all__'}
             onValueChange={(v) => handleFilterChange({ tableName: v === '__all__' ? undefined : v, page: 1 })}
@@ -156,7 +156,7 @@ export function AuditLogPage() {
           <Input
             type="number"
             placeholder={t('filters.filterByRecordId')}
-            className="w-48 h-8 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+            className="w-48 h-8 text-xs shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
             min="1"
             value={recordIdInput}
             onKeyDown={(e) => {

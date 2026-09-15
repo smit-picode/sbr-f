@@ -19,7 +19,7 @@ export function EnterprisesFiltersBar({ filters, onFilterChange, onReset, isDefa
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+    <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
       <SearchInput
         className="shadow-none"
         value={filters.search ?? ''}

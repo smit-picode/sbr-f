@@ -24,19 +24,30 @@ If "all" — run the full audit below then apply fixes in order.
 
 ### Established Design System (DO NOT change these foundations)
 
+**Updated 2026-09 — QInsights redesign.** The palette below replaced the earlier blue-700/dark-sidebar/Inter theme project-wide (tokens defined in `src/app/globals.css`'s `@theme` block).
+
 ```
-Primary:   blue-700  (#1d4ed8)   — buttons, links, active states, accents
-Sidebar:   slate-900 (#0f172a)   — dark sidebar background
-Body bg:   slate-50  (#f8fafc)   — page background
-Surface:   white                  — cards, tables, modals
-Border:    slate-200 (#e2e8f0)   — all borders
-Text:      slate-900 (#0f172a)   — headings
-Text muted:slate-500 (#64748b)   — descriptions, secondary
-Text dim:  slate-400 (#94a3b8)   — null values, placeholders
-Success:   emerald-600           — Active status
-Danger:    red-600               — Inactive status / errors
-Warning:   amber-500             — warnings
+Primary:   adaam        (#8A1538)   — buttons, links, active states, accents
+Primary deep: adaam-deep(#6D0D2A)   — gradient end, hover-deepen
+Primary tint: adaam-tint(#F6E7EC)   — active nav pill bg, soft badges
+Secondary: dune         (#A29374)   — logo badge, avatar circles, warm accents
+Sidebar:   white                     — floating rounded rail (NOT dark anymore)
+Body bg:   #F7F8FA                  — page background
+Surface:   white                     — cards, tables, modals
+Border:    slate-200 (#e2e8f0), or `line` (#E5E7EB) in QInsights-token components
+Text:      slate-900 (#0f172a)      — headings
+Text muted:slate-500 (#64748b)      — descriptions, secondary
+Text dim:  slate-400 (#94a3b8)      — null values, placeholders
+Success:   pos / pos-text / pos-tint (#3FB185 / #047857 / #ECFDF5) — Active status
+Danger:    neg / neg-text / neg-tint (#DF7878 / #B23B3B / #FDECEC) — Inactive status / errors
+Warning:   warn / warn-text / warn-tint (#BF9F5F / #A67C1B / #FBF3D6)
+Info:      info / info-text / info-tint (#2A6B8A / #1D4ED8 / #EFF6FF)
+Radius:    sm 6px · DEFAULT 8px · md 10px · lg 14px · xl 20px · 2xl 24px · 3xl 36px
+Shadows:   shadow-card, shadow-float, shadow-soft, shadow-input (see globals.css)
+Font:      Plus Jakarta Sans (Latin) + Cairo (Arabic) — NOT Inter
 ```
+
+Reference prototype for the target visual language: `D:\Artefact\OCI\SBR-design` (static HTML/JS, run via `npx serve`). Design reference doc: `.claude/references/design-system.md`'s "QInsights tokens" section.
 
 ### Typography Scale (enforce across all pages)
 
@@ -121,36 +132,9 @@ Read every file listed. Check each item. Log violations.
 
 ## Phase 4 — Apply Improvements
 
-### Step 4a — Install Inter Font (if not already set up)
+### Step 4a — Font (already set up — do not change)
 
-Inter is the standard corporate data portal font. Add to `src/app/layout.tsx`:
-
-```tsx
-import { Inter } from 'next/font/google';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans">
-        ...
-      </body>
-    </html>
-  );
-}
-```
-
-Add to `globals.css`:
-```css
-body {
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-```
+The project already uses **Plus Jakarta Sans** (Latin) + **Cairo** (Arabic), loaded via `next/font/google` in `src/app/layout.tsx` and applied in `globals.css`'s `body { font-family: var(--font-jakarta), var(--font-cairo), ... }`. This matches the QInsights reference design — do not install or switch to Inter.
 
 ### Step 4b — Add Design Tokens to globals.css
 

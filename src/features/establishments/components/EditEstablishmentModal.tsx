@@ -306,7 +306,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     if (!ed(f)) return 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none';
     return err(f)
       ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-      : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
+      : 'focus-visible:border-2 focus-visible:border-[#8A1538]/40 focus-visible:ring-0';
   };
 
   const handleSubmit = () => {

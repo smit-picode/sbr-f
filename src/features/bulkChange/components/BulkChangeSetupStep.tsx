@@ -117,7 +117,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-white p-5 shadow-card">
         <h2 className="text-base font-semibold text-slate-800">
           {t('bulkChange.wizard.setup.chooseData', { defaultValue: 'Choose the data to update' })}
         </h2>
@@ -135,17 +135,17 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                 type="button"
                 onClick={() => onSelectTable(option.key)}
                 className={`flex flex-col items-start gap-3 rounded-lg border p-4 text-start transition-colors ${
-                  isActive ? 'border-[#A71D3A] bg-[#A71D3A]/5' : 'border-slate-200 bg-white hover:bg-slate-50'
+                  isActive ? 'border-[#8A1538] bg-[#8A1538]/5' : 'border-slate-200 bg-white hover:bg-slate-50'
                 }`}
               >
                 <span
                   className={`flex h-9 w-9 items-center justify-center rounded-md ${
-                    isActive ? 'bg-[#A71D3A] text-white' : 'bg-slate-100 text-slate-500'
+                    isActive ? 'bg-[#8A1538] text-white' : 'bg-slate-100 text-slate-500'
                   }`}
                 >
                   <Icon className="h-4.5 w-4.5" />
                 </span>
-                <span className={`text-sm font-medium ${isActive ? 'text-[#A71D3A]' : 'text-slate-700'}`}>
+                <span className={`text-sm font-medium ${isActive ? 'text-[#8A1538]' : 'text-slate-700'}`}>
                   {t(option.navKey, { defaultValue: option.label })}
                 </span>
               </button>
@@ -154,7 +154,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg bg-white shadow-card">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
           <div>
             <h2 className="text-base font-semibold text-slate-800">

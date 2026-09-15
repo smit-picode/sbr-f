@@ -91,7 +91,7 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#A71D3A]/10 px-2 py-0.5 text-xs font-medium text-[#A71D3A]">
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#8A1538]/10 px-2 py-0.5 text-xs font-medium text-[#8A1538]">
           <Orbit className="h-3.5 w-3.5" />
           {count}
         </span>

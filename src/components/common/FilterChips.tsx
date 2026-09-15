@@ -41,7 +41,7 @@ export function FilterChips({ chips, onClearAll }: FilterChipsProps) {
             type="button"
             onClick={chip.onRemove}
             aria-label={t('filters.removeFilter', { defaultValue: 'Remove filter' })}
-            className="text-slate-400 hover:text-[#A71D3A] transition-colors"
+            className="text-slate-400 hover:text-[#8A1538] transition-colors"
           >
             <X className="h-3 w-3" />
           </button>
@@ -51,7 +51,7 @@ export function FilterChips({ chips, onClearAll }: FilterChipsProps) {
       <button
         type="button"
         onClick={onClearAll}
-        className="text-xs font-semibold text-[#A71D3A] hover:underline ms-1"
+        className="text-xs font-semibold text-[#8A1538] hover:underline ms-1"
       >
         {t('filters.clearAll', { defaultValue: 'Clear all' })}
       </button>

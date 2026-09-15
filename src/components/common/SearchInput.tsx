@@ -19,18 +19,18 @@ export function SearchInput({
 }: SearchInputProps) {
   return (
     <div className="relative flex items-center">
-      <Search className="absolute left-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute start-4 h-4 w-4 text-slate-400 pointer-events-none" />
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`pl-8 pr-8 w-80 focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${className ?? ''}`}
+        className={`ps-10 pe-9 w-80 focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${className ?? ''}`}
       />
       {value && (
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-0 h-9 w-9"
+          className="absolute end-0 h-10 w-10 rounded-full"
           onClick={() => onChange('')}
         >
           <X className="h-4 w-4 text-slate-400" />

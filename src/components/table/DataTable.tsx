@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-end">
         <ColumnToggle table={table} />
       </div>
-      <div className="rounded-lg border border-line bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg bg-white shadow-card overflow-hidden">
       <Table wrapperRef={scrollRef}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

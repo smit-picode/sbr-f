@@ -180,7 +180,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
   const err = (f: string) => errors[f];
   const inp = (f: string) => err(f)
     ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-    : 'focus-visible:border-2 focus-visible:border-[#A71D3A]/40 focus-visible:ring-0';
+    : 'focus-visible:border-2 focus-visible:border-[#8A1538]/40 focus-visible:ring-0';
 
   return (
     <>

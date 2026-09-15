@@ -229,7 +229,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                 if (errors.NAME_ENU) setErrors((prev) => { const n = { ...prev }; delete n.NAME_ENU; return n; });
               }}
               maxLength={500}
-              className={`focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
+              className={`focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
             />
             {errors.NAME_ENU && <p className="text-xs text-red-500 mt-0.5">{errors.NAME_ENU}</p>}
           </div>
@@ -281,7 +281,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                     </div>
                     <StatusBadge status={r.EST_STATUS} className="shrink-0 text-[10px]" />
                     {isMain
-                      ? <Badge className="rounded-md bg-[#A71D3A] text-white text-[10px] font-bold">MAIN</Badge>
+                      ? <Badge className="rounded-md bg-[#8A1538] text-white text-[10px] font-bold">MAIN</Badge>
                       : <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>}
                     <button
                       type="button"
@@ -309,7 +309,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('enterpriseEdit.searchPlaceholder', { defaultValue: 'Search by SBR ID, name, or CR...' })}
-                  className="pl-8 bg-white focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                  className="pl-8 bg-white focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
                 />
               </div>
               {debouncedSearch && (

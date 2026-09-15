@@ -57,7 +57,7 @@ export function BulkChangeUploadStep({ selectedTable, file, onFileSelected }: Bu
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-lg bg-white p-5 shadow-card">
       <h2 className="text-base font-semibold text-slate-800">{t('bulkChange.wizard.upload.title', { defaultValue: 'Upload your file' })}</h2>
       <p className="mt-0.5 text-sm text-slate-500">
         {t('bulkChange.wizard.upload.description', { defaultValue: 'Upload the Excel file with your updates for {{table}}.', table: tableLabel })}
@@ -77,7 +77,7 @@ export function BulkChangeUploadStep({ selectedTable, file, onFileSelected }: Bu
           }}
           onClick={() => inputRef.current?.click()}
           className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-10 text-center transition-colors ${
-            isDragOver ? 'border-[#A71D3A] bg-[#A71D3A]/5' : 'border-slate-200 hover:bg-slate-50'
+            isDragOver ? 'border-[#8A1538] bg-[#8A1538]/5' : 'border-slate-200 hover:bg-slate-50'
           }`}
         >
           <UploadCloud className="h-8 w-8 text-slate-400" />

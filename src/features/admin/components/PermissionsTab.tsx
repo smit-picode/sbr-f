@@ -120,7 +120,7 @@ export function PermissionsTab() {
           );
 
           return (
-            <div key={node.key} className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div key={node.key} className="rounded-xl overflow-hidden shadow-card">
               {/* Parent row */}
               <div
                 className={`flex items-center gap-4 px-5 py-3.5 bg-white ${hasChildren ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}`}

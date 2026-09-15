@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { Bell, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NAV_GROUPS } from '@/constants/navigation';
 import { useLanguage } from '@/i18n';
@@ -9,9 +9,17 @@ import { useAppSelector } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PageHeaderProps {
-  title: string;
-  description?: string;
+  // ReactNode (not just string) so a detail page can pass a name with its own click-to-history
+  // affordance baked in, same as every other prop here — purely additive, every existing caller
+  // already passes a plain translated string, which is itself a valid ReactNode.
+  title: React.ReactNode;
+  description?: React.ReactNode;
   actions?: React.ReactNode;
+  // Small pills next to the breadcrumb (e.g. record ID, StatusBadge) — used by detail pages.
+  chips?: React.ReactNode;
+  // Overlay back-link rendered top-left of the banner, above the toolbar row — used by detail
+  // pages to return to their list. Omit for list pages, which have no "back".
+  back?: { label: string; onClick: () => void };
 }
 
 // route -> breadcrumb data for the current path — moved from the old Header.tsx unchanged.
@@ -38,7 +46,7 @@ function initialsOf(user: { email: string } | null): string {
   return user.email.slice(0, 2).toUpperCase();
 }
 
-export function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({ title, description, actions, chips, back }: PageHeaderProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { toggleLanguage, isArabic } = useLanguage();
@@ -55,11 +63,28 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
         style={{ background: 'linear-gradient(90deg, rgba(0,0,0,.58), rgba(0,0,0,.30) 55%, rgba(0,0,0,.42))' }}
       />
 
-      {/* Toolbar: language toggle + notification bell + avatar — moved from the old Header.tsx,
-          same handlers, now an overlay pill instead of a separate flat bar. */}
+      {back && (
+        <button
+          onClick={back.onClick}
+          className="absolute top-4 start-4 z-10 inline-flex items-center gap-1.5 h-8 ps-2.5 pe-3.5 rounded-full text-[12px] font-semibold text-white/90 hover:bg-white/25 transition-colors"
+          style={{ background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)' }}
+        >
+          <ChevronLeft className="h-3.5 w-3.5 rtl:rotate-180" />
+          {back.label}
+        </button>
+      )}
+
+      {/* Toolbar: language toggle + notification bell + avatar — one shared frosted-glass pill
+          container (matching the reference), with thin dividers so each item still reads as
+          its own control instead of blending into one blob. */}
       <div
-        className="absolute top-4 end-4 z-10 flex items-center gap-1.5 rounded-full p-1.5"
-        style={{ background: 'rgba(255,255,255,.12)', boxShadow: '0 4px 24px rgba(0,0,0,.22)', backdropFilter: 'blur(8px)' }}
+        className="absolute top-4 end-4 z-10 flex items-center gap-1.5 divide-x divide-white/20 rounded-full p-1.5"
+        style={{
+          background: 'rgba(255,255,255,.22)',
+          boxShadow: '0 4px 20px rgba(0,0,0,.15)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
       >
         <button
           onClick={toggleLanguage}
@@ -98,6 +123,7 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
               {t(crumb.groupKey, { defaultValue: crumb.groupTitle })}
               {'  ·  '}
               {isArabic ? t(crumb.itemKey, { defaultValue: crumb.itemTitle }) : (crumb.itemBreadcrumb ?? t(crumb.itemKey, { defaultValue: crumb.itemTitle }))}
+              {chips}
             </div>
             <h1 className="font-extrabold leading-tight mt-1 text-white text-[26px]">{title}</h1>
             {description && <p className="text-[13px] text-white/80 mt-1 max-w-2xl">{description}</p>}

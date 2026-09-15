@@ -94,7 +94,7 @@ function PermissionGrid({
             key={perm.ID}
             className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 transition-colors ${
               granted
-                ? 'border-[#A71D3A]/40 bg-[#FCF4F6]'
+                ? 'border-[#8A1538]/40 bg-[#FCF4F6]'
                 : 'border-slate-200 hover:bg-slate-50'
             }`}
           >
@@ -108,7 +108,7 @@ function PermissionGrid({
             >
               <span
                 className={`flex h-4 w-4 items-center justify-center rounded border shrink-0 ${
-                  granted ? 'border-[#A71D3A] bg-[#A71D3A] text-white' : 'border-slate-300'
+                  granted ? 'border-[#8A1538] bg-[#8A1538] text-white' : 'border-slate-300'
                 }`}
               >
                 {granted && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -118,7 +118,7 @@ function PermissionGrid({
               </span>
             </button>
             <span className="relative group shrink-0">
-              <Info className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#A71D3A] cursor-help" />
+              <Info className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#8A1538] cursor-help" />
               <span className="pointer-events-none absolute z-50 end-0 top-6 w-56 rounded-lg bg-slate-900 text-white text-[11px] leading-snug px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
                 <span className="block font-semibold mb-0.5">{pLabel(nodeKey, label, t)}</span>
                 <span className="block font-mono text-[10px] text-slate-300">{perm.PERMISSION_NAME}</span>
@@ -470,7 +470,7 @@ export function RolesTab({
             </span>
             <Select value={roleSort} onValueChange={setRoleSort}>
               <SelectTrigger
-                className="h-7 w-[124px] text-[11px] shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="h-7 w-[124px] text-[11px] shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
                 aria-label={t('admin.roles.sortLabel', { defaultValue: 'Sort roles' })}
               >
                 <SelectValue />
@@ -502,10 +502,10 @@ export function RolesTab({
                 >
                   <button
                     onClick={() => setSelectedRole(role)}
-                    className="min-w-0 flex-1 rounded-lg py-2 pe-1 ps-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
+                    className="min-w-0 flex-1 rounded-lg py-2 pe-1 ps-3 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A1538]/30"
                   >
                     <span className={`block truncate text-[12.5px] ${
-                      isSelected ? 'font-semibold text-[#A71D3A]' : 'font-medium text-slate-700'
+                      isSelected ? 'font-semibold text-[#8A1538]' : 'font-medium text-slate-700'
                     }`}>
                       {role.ROLE_NAME}
                     </span>
@@ -537,7 +537,7 @@ export function RolesTab({
                         setForm({ ROLE_NAME: role.ROLE_NAME });
                         setEditTarget(role);
                       }}
-                      className="me-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-black/5 hover:text-[#A71D3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
+                      className="me-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-black/5 hover:text-[#8A1538] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A1538]/30"
                       title={t('admin.roles.editRoleTitle')}
                       aria-label={t('admin.roles.editRoleTitle')}
                     >
@@ -556,7 +556,7 @@ export function RolesTab({
 
             {/* ── Role header — separate box ── */}
             <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-4 py-3">
-              <span className="h-7 w-7 rounded-lg flex items-center justify-center text-white shrink-0 bg-[#A71D3A]">
+              <span className="h-7 w-7 rounded-lg flex items-center justify-center text-white shrink-0 bg-[#8A1538]">
                 <ShieldCheck className="h-[15px] w-[15px]" />
               </span>
               <div className="min-w-0">
@@ -663,7 +663,7 @@ export function RolesTab({
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
                 placeholder={t('admin.roles.roleNamePlaceholder')}
-                className="focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
               />
             </div>
             <div className="space-y-1">
@@ -715,7 +715,7 @@ export function RolesTab({
                 id="edit-role-name"
                 value={form.ROLE_NAME}
                 onChange={(e) => setForm(p => ({ ...p, ROLE_NAME: e.target.value }))}
-                className="focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
               />
             </div>
           </div>

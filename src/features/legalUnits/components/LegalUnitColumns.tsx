@@ -10,7 +10,7 @@ import { ExternalLink } from 'lucide-react';
 // system requires for small text. Kept as inline hex, as the solid version was, because these
 // regulator colours sit outside the slate/blue/emerald/red/amber Tailwind palette.
 const SOURCE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
-  MOCI:     { bg: '#FBEAEE', text: '#A71D3A', border: '#F3D3DB' },
+  MOCI:     { bg: '#FBEAEE', text: '#8A1538', border: '#F3D3DB' },
   QFC:      { bg: '#EEF2F6', text: '#1A3A52', border: '#D6DFE8' },
   QFZ:      { bg: '#E9F4F8', text: '#22637F', border: '#CFE6EF' },
   QSTP:     { bg: '#FDF3E7', text: '#8F5C22', border: '#F5E2C8' },
@@ -54,8 +54,8 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
           className="group inline-flex items-center gap-1.5 text-left"
         >
           <span className="font-mono text-xs font-medium text-red-600">SBR #{sbrId}</span>
-          <span className="text-sm text-slate-700 group-hover:text-[#A71D3A] group-hover:underline group-hover:decoration-[#A71D3A]">{nullableText(name)}</span>
-          <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-[#A71D3A]" />
+          <span className="text-sm text-slate-700 group-hover:text-[#8A1538] group-hover:underline group-hover:decoration-[#8A1538]">{nullableText(name)}</span>
+          <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-[#8A1538]" />
         </button>
       );
     },

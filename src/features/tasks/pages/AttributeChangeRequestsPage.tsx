@@ -26,7 +26,7 @@ const TABLE_OPTIONS = [
 ];
 
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
+  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
@@ -108,7 +108,7 @@ export function AttributeChangeRequestsPage() {
       cell: ({ getValue }) => (
         <span className="flex items-center gap-1.5 text-sm">
           <User className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-[#A71D3A]">{(getValue() as string) ?? '—'}</span>
+          <span className="text-[#8A1538]">{(getValue() as string) ?? '—'}</span>
         </span>
       ),
     },
@@ -136,7 +136,7 @@ export function AttributeChangeRequestsPage() {
     return (
       <PageContainer>
         <PageHeader title={t('pages.attributeChangeRequests.title')} description={t('pages.attributeChangeRequests.description')} />
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-card">
           <NoData message={t('common.noAccess', { defaultValue: 'You do not have access to this section.' })} />
         </div>
       </PageContainer>

@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden" style={{ background: '#F7F8FA' }}>
       <div
         className="w-[236px] shrink-0"
-        style={{ background: 'linear-gradient(180deg, #6B1428 0%, #6B1428 42%, #7E1830 68%, #A71D3A 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #6D0D2A 0%, #6D0D2A 42%, #7E1830 68%, #8A1538 100%)' }}
       />
       <div className="flex-1 flex flex-col min-w-0">
         <div className="h-[58px] bg-white border-b border-slate-200 shrink-0" />

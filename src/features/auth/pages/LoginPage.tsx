@@ -276,7 +276,7 @@ export function LoginPage() {
                       type="button"
                       disabled={switchingRoleId !== null}
                       onClick={() => handleRolePick(role)}
-                      className="w-full flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 text-start shadow-sm hover:border-[#A71D3A]/40 hover:shadow transition-all group disabled:opacity-60"
+                      className="w-full flex items-center gap-4 rounded-xl bg-white p-4 text-start shadow-card hover:border-[#A71D3A]/40 hover:shadow transition-all group disabled:opacity-60"
                     >
                       <span className={`h-11 w-11 rounded-lg flex items-center justify-center shrink-0 ${tint.bg}`}>
                         {switching

@@ -51,7 +51,7 @@ export function BulkChangeListPage() {
       cell: ({ getValue }) => (
         <span className="flex items-center gap-1.5 text-sm">
           <User className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-[#A71D3A]">{String(getValue())}</span>
+          <span className="text-[#8A1538]">{String(getValue())}</span>
         </span>
       ),
     },

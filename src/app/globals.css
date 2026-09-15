@@ -38,14 +38,26 @@
   --shadow-float: 0 4px 24px rgba(0,0,0,0.15);
   --shadow-soft: 0 4px 14px rgba(0,0,0,0.12);
   --shadow-input: 0 4px 24px rgba(0,0,0,0.05);
+
+  /* QInsights radius scale — overrides Tailwind's stock rounded-* values so the Sidebar/banner
+     curves match the reference exactly. Was specified in the original theme design but never
+     actually added here, so rounded-3xl had been silently falling back to Tailwind's default
+     24px instead of the intended 36px. */
+  --radius-sm: 6px;
+  --radius-DEFAULT: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 36px;
 }
 
 :root {
-  --brand-crimson: #A71D3A;
-  --brand-crimson-dark: #6B1428;
+  --brand-crimson: #8A1538;
+  --brand-crimson-dark: #6D0D2A;
   --brand-navy: #1a3a52;
-  --brand-gradient: linear-gradient(to right, #A71D3A 0%, #6B1428 40%, #1a3a52 100%);
-  --brand-button-gradient: linear-gradient(90deg, #A71D3A 0%, #1a3a52 100%);
+  --brand-gradient: linear-gradient(to right, #8A1538 0%, #6D0D2A 40%, #1a3a52 100%);
+  --brand-button-gradient: linear-gradient(90deg, #8A1538 0%, #1a3a52 100%);
   --interactive: #2B7A9E;
   --interactive-hover: #1f6080;
 }
@@ -111,9 +123,9 @@ html[dir='rtl'] body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(167, 29, 58, 0.06) 40%,
+    rgba(138, 21, 56, 0.06) 40%,
     rgba(255, 255, 255, 0.65) 50%,
-    rgba(167, 29, 58, 0.06) 60%,
+    rgba(138, 21, 56, 0.06) 60%,
     transparent 100%
   );
   animation: sbr-shimmer 1.6s infinite;

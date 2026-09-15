@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
@@ -31,11 +32,11 @@ import {
   GitBranch, ClipboardList, ArrowUpRight, History, Pencil,
 } from 'lucide-react';
 
-const MAROON = '#A71D3A';
+const MAROON = '#8A1538';
 
 // Table-name pill colours (same palette as the Attribute Change Requests list)
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
+  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
@@ -90,7 +91,7 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="shrink-0 cursor-pointer text-slate-200 transition-colors hover:text-[#A71D3A]"
+            className="shrink-0 cursor-pointer text-slate-200 transition-colors hover:text-[#8A1538]"
             title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
           >
             <History className="h-3 w-3" />
@@ -112,8 +113,10 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
   );
 }
 
-// Maroon-header name field — same lazy-load + toggle logic as EnterpriseFieldWithHistory, with a
-// white-tinted icon so it stays legible on the dark gradient band.
+// Banner-header name field — same lazy-load + toggle logic as EnterpriseFieldWithHistory, with a
+// white-tinted icon so it stays legible over the photo. Renders as a plain span (not its own
+// heading element) because this is passed as PageHeader's `title`, which supplies the actual
+// <h1> — nesting a second <h1> inside it would be invalid HTML.
 function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHistory }: {
   enterpriseId: number;
   label: string;
@@ -122,7 +125,7 @@ function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHi
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLSpanElement>(null);
   const { data, isLoading, isError } = useGetEnterpriseHistoryQuery(enterpriseId, { skip: !open });
 
   useEffect(() => {
@@ -140,20 +143,18 @@ function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHi
   }, [open]);
 
   return (
-    <div className="relative" ref={wrapRef}>
-      <div className="mt-2 flex items-center gap-2">
-        <h1 className="text-2xl font-bold">{value}</h1>
-        {canViewHistory && (
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            className="cursor-pointer text-white/50 transition-colors hover:text-white"
-            title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
-          >
-            <History className="h-4 w-4" />
-          </button>
-        )}
-      </div>
+    <span className="relative inline-flex items-center gap-2" ref={wrapRef}>
+      {value}
+      {canViewHistory && (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="cursor-pointer text-white/50 transition-colors hover:text-white"
+          title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
+        >
+          <History className="h-4 w-4" />
+        </button>
+      )}
       {open && canViewHistory && (
         <FieldHistoryPopover
           versions={data?.data ?? []}
@@ -164,13 +165,13 @@ function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHi
           onClose={() => setOpen(false)}
         />
       )}
-    </div>
+    </span>
   );
 }
 
 function SectionCard({ title, count, icon, children }: { title: string; count?: number; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-lg bg-white shadow-card">
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
         <span style={{ color: MAROON }}>{icon}</span>
         <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
@@ -188,13 +189,13 @@ function IsicChip({ code, fromText, primary }: { code: string; fromText?: string
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
-        primary ? 'border-[#A71D3A]/15 bg-[#A71D3A]/5' : 'border-slate-200 bg-slate-50'
+        primary ? 'border-[#8A1538]/15 bg-[#8A1538]/5' : 'border-slate-200 bg-slate-50'
       }`}
     >
       <span className="font-mono font-semibold text-slate-800">{code}</span>
       {desc && <span className="text-slate-500">{desc}</span>}
       {fromText && <span className="text-slate-400">{fromText}</span>}
-      {primary && <span className="font-semibold text-[#A71D3A]">· PRIMARY</span>}
+      {primary && <span className="font-semibold text-[#8A1538]">· PRIMARY</span>}
     </span>
   );
 }
@@ -236,7 +237,7 @@ function FieldWithHistory({ label, value, sbrId, field, fieldLabel, pendingCount
       <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
         <span className="truncate">{value}</span>
         {canViewHistory && (
-          <button type="button" onClick={() => setOpen((o) => !o)} className={`cursor-pointer transition-colors hover:text-[#A71D3A] ${pendingCount ? 'text-[#A71D3A]' : 'text-slate-300'}`} title="View history">
+          <button type="button" onClick={() => setOpen((o) => !o)} className={`cursor-pointer transition-colors hover:text-[#8A1538] ${pendingCount ? 'text-[#8A1538]' : 'text-slate-300'}`} title="View history">
             <History className="h-3.5 w-3.5" />
           </button>
         )}
@@ -254,16 +255,16 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
   return (
     <div className="rounded-lg border border-slate-200">
       {/* header */}
-      <div className={`rounded-t-lg px-4 py-3 ${isMain ? 'bg-[#A71D3A]/5' : 'bg-slate-50'}`}>
+      <div className={`rounded-t-lg px-4 py-3 ${isMain ? 'bg-[#8A1538]/5' : 'bg-slate-50'}`}>
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-600">#{est.SBR_ID}</span>
           {isMain ? (
-            <Badge className="rounded bg-[#A71D3A] text-white text-[10px] font-bold">{t('enterpriseDetail.mainUnit')}</Badge>
+            <Badge className="rounded bg-[#8A1538] text-white text-[10px] font-bold">{t('enterpriseDetail.mainUnit')}</Badge>
           ) : (
             <Badge variant="secondary" className="text-[10px]">{t('enterpriseDetail.branch')}</Badge>
           )}
           <StatusBadge status={est.EST_STATUS} />
-          <button type="button" onClick={() => onOpen(est)} className="ml-auto text-slate-400 transition-colors hover:text-[#A71D3A]" title={t('enterpriseDetail.openEstablishment')}>
+          <button type="button" onClick={() => onOpen(est)} className="ml-auto text-slate-400 transition-colors hover:text-[#8A1538]" title={t('enterpriseDetail.openEstablishment')}>
             <ArrowUpRight className="h-4 w-4" />
           </button>
         </div>
@@ -431,7 +432,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         <button onClick={() => router.push('/enterprises')} className="mb-3 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
           {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('enterpriseDetail.allEnterprises')}
         </button>
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-8 text-center">
+        <div className="rounded-lg bg-white shadow-card p-8 text-center">
           <p className="text-sm text-slate-500">{t('admin.panel.accessDeniedDesc')}</p>
         </div>
       </PageContainer>
@@ -452,7 +453,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         <button onClick={() => router.push('/enterprises')} className="mb-3 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
           {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('enterpriseDetail.allEnterprises')}
         </button>
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-card">
           <ErrorState onRetry={refetch} />
         </div>
       </PageContainer>
@@ -464,68 +465,61 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
 
   return (
     <PageContainer>
-      {/* Back link */}
-      <button onClick={() => router.push('/enterprises')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
-        {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('enterpriseDetail.allEnterprises')}
-      </button>
+      <PageHeader
+        title={
+          <EnterpriseHeaderNameWithHistory
+            enterpriseId={enterprise.ENTERPRISE_ID}
+            label={t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}
+            value={nullableText(enterprise.NAME_ENU)}
+            canViewHistory={canViewEnterpriseHistory}
+          />
+        }
+        description={enterprise.MAIN_CR ? `CR ${enterprise.MAIN_CR}` : undefined}
+        back={{ label: t('enterpriseDetail.allEnterprises'), onClick: () => router.push('/enterprises') }}
+        chips={
+          <>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 font-mono text-xs text-white">
+              <Target className="h-3.5 w-3.5" /> ENT-{enterprise.ENTERPRISE_ID}
+            </span>
+            <StatusBadge status={enterprise.STATUS} className="rounded-full" />
+            {!!enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
+          </>
+        }
+        actions={canEdit && (
+          <Button onClick={() => setEditOpen(true)} className="shrink-0 rounded-full bg-dune text-white hover:bg-dune-deep">
+            <Pencil className="mr-1.5 h-4 w-4" /> {t('actions.edit')}
+          </Button>
+        )}
+      />
 
-      {/* Header card */}
-      {/* Rounding lives on the two children instead of an `overflow-hidden` wrapper — the wrapper
-          would clip the attribute-history popovers opened from the name and the summary strip. */}
-      <div className="rounded-lg shadow-sm">
-        <div className="rounded-t-lg bg-gradient-to-br from-[#7c1228] to-[#A71D3A] px-6 py-5 text-white">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded bg-white/15 px-2 py-0.5 font-mono text-xs">
-                  <Target className="h-3.5 w-3.5" /> ENT-{enterprise.ENTERPRISE_ID}
-                </span>
-                <StatusBadge status={enterprise.STATUS} className="rounded-md" />
-                {!!enterprise.HAS_PENDING_REQUEST && <PendingBadge />}
-              </div>
-              <EnterpriseHeaderNameWithHistory
-                enterpriseId={enterprise.ENTERPRISE_ID}
-                label={t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}
-                value={nullableText(enterprise.NAME_ENU)}
-                canViewHistory={canViewEnterpriseHistory}
-              />
-              {enterprise.MAIN_CR && <p className="text-sm text-white/80">CR {enterprise.MAIN_CR}</p>}
-            </div>
-            {canEdit && (
-              <Button onClick={() => setEditOpen(true)} className="shrink-0 bg-white text-[#A71D3A] hover:bg-white/90">
-                <Pencil className="mr-1.5 h-4 w-4" /> {t('actions.edit')}
-              </Button>
-            )}
-          </div>
-        </div>
-        {/* Summary strip */}
-        <div className="grid grid-cols-2 gap-4 rounded-b-lg border border-t-0 border-slate-200 bg-white px-6 py-4 md:grid-cols-3 lg:grid-cols-6">
-          <EnterpriseFieldWithHistory
-            enterpriseId={enterprise.ENTERPRISE_ID}
-            fieldKey="SECTOR_ID"
-            label={t('enterpriseDetail.sector')}
-            value={nullableText(enterprise.SECTOR_ID)}
-            canViewHistory={canViewEnterpriseHistory}
-          />
-          <EnterpriseFieldWithHistory
-            enterpriseId={enterprise.ENTERPRISE_ID}
-            fieldKey="STATUS"
-            label={t('enterpriseDetail.status')}
-            value={nullableText(enterprise.STATUS)}
-            canViewHistory={canViewEnterpriseHistory}
-          />
-          <SummaryCell label={t('enterpriseDetail.legalType')} value={nullableText(enterprise.LEGAL_TYPE)} />
-          <SummaryCell label={t('enterpriseDetail.mainUnit')} value={enterprise.MAIN_ESTABLISHMENT_SBR_ID != null ? <span className="font-mono">#{enterprise.MAIN_ESTABLISHMENT_SBR_ID}</span> : '—'} />
-          <SummaryCell label={t('enterpriseDetail.linkedEstablishments')} value={enterprise.ESTABLISHMENT_COUNT} />
-          <SummaryCell label={t('enterpriseDetail.validFrom')} value={formatDate(enterprise.VALID_FROM)} />
-        </div>
+      {/* Attribute strip — its own card, separate from the banner (matches the reference's
+          two-card layout instead of welding the grid to the header). */}
+      <div className="grid grid-cols-2 gap-4 rounded-lg bg-white px-6 py-4 shadow-card md:grid-cols-3 lg:grid-cols-6">
+        <EnterpriseFieldWithHistory
+          enterpriseId={enterprise.ENTERPRISE_ID}
+          fieldKey="SECTOR_ID"
+          label={t('enterpriseDetail.sector')}
+          value={nullableText(enterprise.SECTOR_ID)}
+          canViewHistory={canViewEnterpriseHistory}
+        />
+        <EnterpriseFieldWithHistory
+          enterpriseId={enterprise.ENTERPRISE_ID}
+          fieldKey="STATUS"
+          label={t('enterpriseDetail.status')}
+          value={nullableText(enterprise.STATUS)}
+          canViewHistory={canViewEnterpriseHistory}
+        />
+        <SummaryCell label={t('enterpriseDetail.legalType')} value={nullableText(enterprise.LEGAL_TYPE)} />
+        <SummaryCell label={t('enterpriseDetail.mainUnit')} value={enterprise.MAIN_ESTABLISHMENT_SBR_ID != null ? <span className="font-mono">#{enterprise.MAIN_ESTABLISHMENT_SBR_ID}</span> : '—'} />
+        <SummaryCell label={t('enterpriseDetail.linkedEstablishments')} value={enterprise.ESTABLISHMENT_COUNT} />
+        <SummaryCell label={t('enterpriseDetail.validFrom')} value={formatDate(enterprise.VALID_FROM)} />
       </div>
 
       {!!enterprise.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {(canViewEstablishmentHistory || canViewEnterpriseHistory) && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
-          <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
+          <History className="h-3.5 w-3.5 text-[#8A1538]" /> {t('fieldHistory.clickHint')}
         </p>
       )}
 
@@ -535,10 +529,10 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
               <div className="w-full md:max-w-md">
                 <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseDetail.mainActivity')}</p>
                 {enterprise.ISIC_CODE ? (
-                  <div className="rounded-md bg-[#A71D3A]/5 p-4">
+                  <div className="rounded-md bg-[#8A1538]/5 p-4">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-base font-semibold text-slate-800">{enterprise.ISIC_CODE}</span>
-                      <span className="rounded bg-[#A71D3A]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#A71D3A]">PRIMARY</span>
+                      <span className="rounded bg-[#8A1538]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#8A1538]">PRIMARY</span>
                     </div>
                     {getIsicLabel(enterprise.ISIC_CODE) && (
                       <p className="mt-1.5 text-sm text-slate-600">{getIsicLabel(enterprise.ISIC_CODE)}</p>

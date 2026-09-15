@@ -45,10 +45,10 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
   return (
     <DropdownMenu onOpenChange={(open) => { if (!open) setQuery(''); }}>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 px-3 h-9 rounded-md border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
+        <button className="flex items-center gap-2 px-3 h-9 rounded-md bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-card">
           <Columns3 className="h-3.5 w-3.5" />
           {t('columnsToggle.columns')}
-          <span className="text-[10px] font-bold rounded px-1.5 py-0.5 bg-[#A71D3A]/10 text-[#A71D3A]">
+          <span className="text-[10px] font-bold rounded px-1.5 py-0.5 bg-[#8A1538]/10 text-[#8A1538]">
             {visible}/{total}
           </span>
         </button>
@@ -66,14 +66,14 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
               placeholder={t('columnsToggle.findColumn')}
-              className="h-8 w-full rounded-md border border-slate-200 ps-8 pe-2.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A71D3A]/30"
+              className="h-8 w-full rounded-md border border-slate-200 ps-8 pe-2.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8A1538]/30"
             />
           </div>
         </div>
 
         {/* Show all / Hide all */}
         <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-slate-100 text-[11px]">
-          <button onClick={showAll} className="font-semibold text-[#A71D3A] hover:underline">
+          <button onClick={showAll} className="font-semibold text-[#8A1538] hover:underline">
             {t('columnsToggle.showAll')}
           </button>
           <button onClick={hideAll} className="font-semibold text-slate-500 hover:underline">

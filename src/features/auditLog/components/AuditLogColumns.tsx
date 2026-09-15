@@ -3,7 +3,7 @@ import type { AuditLog, AuditUserRef } from '@/types';
 import { formatDate } from '@/utils/format';
 
 const TABLE_COLORS: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#F3DEE4] text-[#A71D3A]',
+  SBR_ESTABLISHMENTS: 'bg-[#F3DEE4] text-[#8A1538]',
   SBR_ENTERPRISES: 'bg-amber-100 text-amber-700',
   SBR_CONTACTS:    'bg-green-100 text-green-700',
   SBR_ADDRESSES:   'bg-purple-100 text-purple-700',
@@ -23,7 +23,7 @@ export function prettyTableName(raw: string): string {
 
 const OPERATION_COLORS: Record<string, string> = {
   INSERT: 'bg-emerald-100 text-emerald-700',
-  UPDATE: 'bg-[#F3DEE4] text-[#A71D3A]',
+  UPDATE: 'bg-[#F3DEE4] text-[#8A1538]',
   DELETE: 'bg-red-100 text-red-700',
   REVERT: 'bg-amber-100 text-amber-700',
 };
@@ -39,14 +39,14 @@ function UserCell({ user }: { user: AuditUserRef | null | undefined }) {
   return (
     <div className="flex flex-col gap-0.5 min-w-[120px]">
       <span className="text-xs font-semibold text-slate-900">{user.NAME}</span>
-      <span className="text-xs text-[#A71D3A]">{user.EMAIL}</span>
+      <span className="text-xs text-[#8A1538]">{user.EMAIL}</span>
     </div>
   );
 }
 
 function RecordIdCell({ value }: { value: number | null }) {
   if (value === null || value === undefined) return <span className="text-slate-400 text-xs">—</span>;
-  return <span className="font-mono text-xs font-medium text-[#A71D3A]">{String(value)}</span>;
+  return <span className="font-mono text-xs font-medium text-[#8A1538]">{String(value)}</span>;
 }
 
 interface MemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }

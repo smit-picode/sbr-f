@@ -18,7 +18,7 @@ export const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes(
 // reads calmer in a dense table and stays inside the design-system palette (slate, blue,
 // emerald, amber) plus the maroon theme accent, dropping the off-palette purple/orange/rose.
 const ROLE_BADGE_PALETTE = [
-  'bg-[#A71D3A]/10 text-[#A71D3A]', // maroon (theme accent)
+  'bg-[#8A1538]/10 text-[#8A1538]', // maroon (theme accent)
   'bg-slate-100 text-slate-700',    // slate
   'bg-emerald-50 text-emerald-700', // emerald
   'bg-blue-50 text-blue-700',       // blue

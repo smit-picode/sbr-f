@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import { PendingApprovalBanner } from '@/components/common/PendingApprovalBanner';
@@ -20,11 +21,11 @@ import { formatGroupCode } from '../constants';
 import { usePermission } from '@/hooks';
 import type { EnterpriseGroupMember } from '@/types';
 import {
-  ChevronLeft, Pencil, ArrowUpRight, Orbit,
+  Pencil, ArrowUpRight, Orbit,
   GitFork, ShieldCheck, Activity, Info, Network, History,
 } from 'lucide-react';
 
-const MAROON = '#A71D3A';
+const MAROON = '#8A1538';
 
 // Overview-panel row with the per-attribute history popover (same pattern as ContactDetailPage)
 function DetailField({ recordId, fieldKey, label, value, canViewHistory, pendingCount }: {
@@ -59,7 +60,7 @@ function DetailField({ recordId, fieldKey, label, value, canViewHistory, pending
         </span>
         <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 text-right">
           {value}
-          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#8A1538]" />}
         </span>
       </button>
       {open && (
@@ -104,7 +105,7 @@ function StatField({ recordId, fieldKey, label, value, canViewHistory, pendingCo
         <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
           {label}
           <PendingFieldBadge count={pendingCount} />
-          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A71D3A]" />}
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#8A1538]" />}
         </p>
         <p className="text-sm font-semibold text-slate-800">{value}</p>
       </button>
@@ -172,7 +173,7 @@ function SectionCard({ title, icon, children, badge }: {
   badge?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-lg bg-white shadow-card">
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
         <span style={{ color: MAROON }}>{icon}</span>
         <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
@@ -292,12 +293,12 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
 
         {/* ── UCI node ─────────────────────────────────────────── */}
         <div
-          className="absolute rounded-2xl border border-[#A71D3A]/30 bg-[#FFF5F7] px-5 py-3 text-center"
+          className="absolute rounded-2xl border border-[#8A1538]/30 bg-[#FFF5F7] px-5 py-3 text-center"
           style={{ width: NODE_W, left: cx - NODE_W / 2, top: UCI_Y }}
           onMouseEnter={() => setTooltip(uciTooltip)}
           onMouseLeave={() => setTooltip(null)}
         >
-          <p className="text-[10px] font-semibold text-[#A71D3A]/70 mb-0.5">
+          <p className="text-[10px] font-semibold text-[#8A1538]/70 mb-0.5">
             UCI{uci.type ? ` · ${uci.type.toUpperCase()}` : ''}
           </p>
           <p className="text-sm font-bold text-slate-800 leading-snug">{nullableText(uci.name)}</p>
@@ -311,7 +312,7 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
             width: NODE_W,
             left: cx - NODE_W / 2,
             top: GROUP_Y,
-            background: 'linear-gradient(135deg, #A71D3A 0%, #6B1428 100%)',
+            background: 'linear-gradient(135deg, #8A1538 0%, #6D0D2A 100%)',
           }}
           onMouseEnter={() => setTooltip(groupTooltip)}
           onMouseLeave={() => setTooltip(null)}
@@ -328,10 +329,10 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
             onMouseEnter={() => setTooltip(memberTooltip(m))}
             onMouseLeave={() => setTooltip(null)}
             className={`absolute rounded-xl border border-slate-200 px-3 py-2.5 text-center bg-white transition-all ${
-              onMemberClick ? 'cursor-pointer hover:shadow-md hover:border-[#A71D3A]/50' : ''}`}
+              onMemberClick ? 'cursor-pointer hover:shadow-md hover:border-[#8A1538]/50' : ''}`}
             style={{ width: MEMBER_W, left: membersStartX + i * (MEMBER_W + H_GAP), top: MEMBER_Y }}
           >
-            <p className={`text-[10px] font-mono font-semibold ${m.isHead ? 'text-[#A71D3A]' : 'text-slate-400'}`}>
+            <p className={`text-[10px] font-mono font-semibold ${m.isHead ? 'text-[#8A1538]' : 'text-slate-400'}`}>
               ENT-{m.enterpriseId}{m.isHead ? ' ★' : ''}
             </p>
             <p className="text-xs font-semibold text-slate-700 leading-snug mt-0.5 line-clamp-2">
@@ -373,12 +374,12 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
     <div
       className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
         onClick ? 'cursor-pointer hover:bg-slate-50' : ''
-      } ${member.IS_GROUP_HEAD ? 'border-[#A71D3A]/30 bg-[#A71D3A]/5' : 'border-slate-200 bg-white'}`}
+      } ${member.IS_GROUP_HEAD ? 'border-[#8A1538]/30 bg-[#8A1538]/5' : 'border-slate-200 bg-white'}`}
       onClick={onClick}
     >
       {/* Orbit icon — maroon bg for head enterprise, gray for others */}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-        member.IS_GROUP_HEAD ? 'bg-[#A71D3A]' : 'bg-slate-100'
+        member.IS_GROUP_HEAD ? 'bg-[#8A1538]' : 'bg-slate-100'
       }`}>
         <Orbit className={`h-5 w-5 ${member.IS_GROUP_HEAD ? 'text-white' : 'text-slate-400'}`} />
       </div>
@@ -390,7 +391,7 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
             {nullableText(member.NAME_ENU)}
           </p>
           {!!member.IS_GROUP_HEAD && (
-            <span className="inline-flex items-center rounded-md bg-[#A71D3A] px-2 py-0.5 text-[10px] font-bold text-white">
+            <span className="inline-flex items-center rounded-md bg-[#8A1538] px-2 py-0.5 text-[10px] font-bold text-white">
               {groupHeadLabel}
             </span>
           )}
@@ -471,137 +472,114 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
 
   return (
     <PageContainer>
-      {/* Back link + hero header card — wrapped together so PageContainer gap-4 doesn't push them apart */}
-      <div>
-        <button
-          onClick={() => router.push('/enterprise-groups')}
-          className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 mb-4"
-        >
-          <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
-          {t('enterpriseGroupDetail.backLink', { defaultValue: 'Enterprise Groups' })}
-        </button>
-
-        {/* Hero header card: maroon top + white stats bar. Rounding is applied per-band (not
-            via a parent overflow-hidden) so attribute-history popovers can render outside the
-            card bounds instead of being clipped. */}
-        <div className="rounded-xl border border-slate-200 shadow-sm mb-4">
-        {/* Maroon band — badges + name only */}
-        <div
-          className="rounded-t-xl px-6 py-5 text-white"
-          style={{ background: 'linear-gradient(135deg, #A71D3A 0%, #6B1428 100%)' }}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              {/* Badges row: GROUP_ID pill + status + type badges */}
-              <div className="flex items-center gap-2 flex-wrap mb-3">
-                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#C73050' }}>
-                  <GitFork className="h-3 w-3" />
-                  {formatGroupCode(group.ENTERPRISE_GROUP_ID)}
-                </span>
-                <StatusBadge status={group.STATUS} className="rounded-md" />
-                {group.TYPE && (
-                  <Badge className="rounded-md bg-white/15 text-white border border-white/30 text-[10px] font-semibold gap-1">
-                    <Network className="h-3 w-3" />
-                    {group.TYPE}
-                  </Badge>
-                )}
-                {!!group.HAS_PENDING_REQUEST && <PendingBadge />}
-                {group.HOLDING_COMPANY_FLG === 'Y' && (
-                  <Badge className="rounded-md bg-white/15 text-white border border-white/30 text-[10px] font-semibold">
-                    {t('enterpriseGroupDetail.holdingCompanyBadge', { defaultValue: 'Holding company' })}
-                  </Badge>
-                )}
-              </div>
-              {/* Names */}
-              {group.NAME_ENU && (
-                <HeaderNameField
-                  recordId={group.ID}
-                  fieldKey="NAME_ENU"
-                  label={t('enterpriseGroupDetail.nameEnu', { defaultValue: 'Name (English)' })}
-                  canViewHistory={canViewHistory}
-                  pendingCount={group.PENDING_FIELDS?.NAME_ENU}
-                >
-                  <p className="text-2xl font-bold text-white leading-tight">{group.NAME_ENU}</p>
-                </HeaderNameField>
-              )}
-              {group.NAME_ARA && (
-                <HeaderNameField
-                  recordId={group.ID}
-                  fieldKey="NAME_ARA"
-                  label={t('enterpriseGroupDetail.nameAra', { defaultValue: 'Name (Arabic)' })}
-                  canViewHistory={canViewHistory}
-                  pendingCount={group.PENDING_FIELDS?.NAME_ARA}
-                >
-                  <p className="text-sm mt-0.5" style={{ color: 'rgba(255,190,200,0.80)' }}>
-                    {group.NAME_ARA}
-                  </p>
-                </HeaderNameField>
-              )}
-            </div>
-
-            {canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEdit(true)}
-                className="shrink-0 bg-white border-white/60 text-[#A71D3A] hover:bg-white/90 gap-1.5"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                {t('actions.edit', { defaultValue: 'Edit' })}
-              </Button>
+      <PageHeader
+        title={
+          group.NAME_ENU ? (
+            <HeaderNameField
+              recordId={group.ID}
+              fieldKey="NAME_ENU"
+              label={t('enterpriseGroupDetail.nameEnu', { defaultValue: 'Name (English)' })}
+              canViewHistory={canViewHistory}
+              pendingCount={group.PENDING_FIELDS?.NAME_ENU}
+            >
+              <span>{group.NAME_ENU}</span>
+            </HeaderNameField>
+          ) : formatGroupCode(group.ENTERPRISE_GROUP_ID)
+        }
+        description={
+          group.NAME_ARA ? (
+            <HeaderNameField
+              recordId={group.ID}
+              fieldKey="NAME_ARA"
+              label={t('enterpriseGroupDetail.nameAra', { defaultValue: 'Name (Arabic)' })}
+              canViewHistory={canViewHistory}
+              pendingCount={group.PENDING_FIELDS?.NAME_ARA}
+            >
+              <span>{group.NAME_ARA}</span>
+            </HeaderNameField>
+          ) : undefined
+        }
+        back={{ label: t('enterpriseGroupDetail.backLink', { defaultValue: 'Enterprise Groups' }), onClick: () => router.push('/enterprise-groups') }}
+        chips={
+          <>
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#C73050' }}>
+              <GitFork className="h-3 w-3" />
+              {formatGroupCode(group.ENTERPRISE_GROUP_ID)}
+            </span>
+            <StatusBadge status={group.STATUS} className="rounded-full" />
+            {group.TYPE && (
+              <Badge className="rounded-full bg-white/15 text-white border border-white/30 text-[10px] font-semibold gap-1">
+                <Network className="h-3 w-3" />
+                {group.TYPE}
+              </Badge>
             )}
-          </div>
-        </div>
+            {!!group.HAS_PENDING_REQUEST && <PendingBadge />}
+            {group.HOLDING_COMPANY_FLG === 'Y' && (
+              <Badge className="rounded-full bg-white/15 text-white border border-white/30 text-[10px] font-semibold">
+                {t('enterpriseGroupDetail.holdingCompanyBadge', { defaultValue: 'Holding company' })}
+              </Badge>
+            )}
+          </>
+        }
+        actions={canEdit && (
+          <Button
+            size="sm"
+            onClick={() => setShowEdit(true)}
+            className="shrink-0 rounded-full bg-dune text-white hover:bg-dune-deep gap-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            {t('actions.edit', { defaultValue: 'Edit' })}
+          </Button>
+        )}
+      />
 
-        {/* White stats bar — outside the maroon band */}
-        <div className="rounded-b-xl bg-white px-6 py-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3 border-t border-slate-100">
-          <StatField
-            recordId={group.ID}
-            fieldKey="UCI_NAME"
-            label={t('enterpriseGroupDetail.controllingInstitution', { defaultValue: 'Controlling institution (UCI)' })}
-            value={nullableText(group.UCI_NAME)}
-            canViewHistory={canViewHistory}
-            pendingCount={group.PENDING_FIELDS?.UCI_NAME}
-          />
-          <StatField
-            recordId={group.ID}
-            fieldKey="UCI_TYPE"
-            label={t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' })}
-            value={nullableText(group.UCI_TYPE)}
-            canViewHistory={canViewHistory}
-            pendingCount={group.PENDING_FIELDS?.UCI_TYPE}
-          />
-          <StatField
-            recordId={group.ID}
-            fieldKey="UCI_COUNTRY"
-            label={t('enterpriseGroupDetail.uciCountry', { defaultValue: 'UCI country' })}
-            value={nullableText(group.UCI_COUNTRY)}
-            canViewHistory={canViewHistory}
-            pendingCount={group.PENDING_FIELDS?.UCI_COUNTRY}
-          />
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.principalActivity', { defaultValue: 'Principal activity' })}</p>
-            <p className="text-sm font-semibold text-slate-800">
-              {group.PRINCIPAL_ISIC_2DIGIT || '—'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.enterprises', { defaultValue: 'Enterprises' })}</p>
-            <p className="text-sm font-semibold text-slate-800">{group.ENTERPRISE_COUNT}</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.employees', { defaultValue: 'Employees' })}</p>
-            <p className="text-sm font-semibold text-slate-800">{group.EMPLOYEE_COUNT.toLocaleString()}</p>
-          </div>
+      {/* Attribute strip — its own card, separate from the banner. */}
+      <div className="rounded-lg bg-white shadow-card px-6 py-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3">
+        <StatField
+          recordId={group.ID}
+          fieldKey="UCI_NAME"
+          label={t('enterpriseGroupDetail.controllingInstitution', { defaultValue: 'Controlling institution (UCI)' })}
+          value={nullableText(group.UCI_NAME)}
+          canViewHistory={canViewHistory}
+          pendingCount={group.PENDING_FIELDS?.UCI_NAME}
+        />
+        <StatField
+          recordId={group.ID}
+          fieldKey="UCI_TYPE"
+          label={t('enterpriseGroupDetail.uciType', { defaultValue: 'UCI type' })}
+          value={nullableText(group.UCI_TYPE)}
+          canViewHistory={canViewHistory}
+          pendingCount={group.PENDING_FIELDS?.UCI_TYPE}
+        />
+        <StatField
+          recordId={group.ID}
+          fieldKey="UCI_COUNTRY"
+          label={t('enterpriseGroupDetail.uciCountry', { defaultValue: 'UCI country' })}
+          value={nullableText(group.UCI_COUNTRY)}
+          canViewHistory={canViewHistory}
+          pendingCount={group.PENDING_FIELDS?.UCI_COUNTRY}
+        />
+        <div>
+          <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.principalActivity', { defaultValue: 'Principal activity' })}</p>
+          <p className="text-sm font-semibold text-slate-800">
+            {group.PRINCIPAL_ISIC_2DIGIT || '—'}
+          </p>
         </div>
-        </div>{/* end hero header card */}
-      </div>{/* end back link + header wrapper */}
+        <div>
+          <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.enterprises', { defaultValue: 'Enterprises' })}</p>
+          <p className="text-sm font-semibold text-slate-800">{group.ENTERPRISE_COUNT}</p>
+        </div>
+        <div>
+          <p className="text-xs text-slate-400 mb-0.5">{t('enterpriseGroupDetail.employees', { defaultValue: 'Employees' })}</p>
+          <p className="text-sm font-semibold text-slate-800">{group.EMPLOYEE_COUNT.toLocaleString()}</p>
+        </div>
+      </div>
 
       {!!group.HAS_PENDING_REQUEST && <PendingApprovalBanner />}
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
-          <History className="h-3.5 w-3.5 text-[#A71D3A]" /> {t('fieldHistory.clickHint')}
+          <History className="h-3.5 w-3.5 text-[#8A1538]" /> {t('fieldHistory.clickHint')}
         </p>
       )}
 
@@ -651,7 +629,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
               <div className="space-y-2">
                 {memberEnterprises.map((m) => (
                   <MemberCard
-                    key={m.ID}
+                    key={m.ENTERPRISE_ID}
                     member={m}
                     onClick={() => router.push(`/enterprises/${m.ENTERPRISE_ID}`)}
                     establishmentsLabel={t('enterpriseGroupDetail.establishments', { defaultValue: 'establishments' })}
@@ -708,7 +686,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         {/* Right sidebar */}
         <div className="space-y-4">
           {/* Overview panel */}
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="rounded-lg bg-white shadow-card">
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
               <Info className="h-4 w-4 shrink-0" style={{ color: MAROON }} />
               <h2 className="text-sm font-semibold text-slate-800">
@@ -769,7 +747,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
           </div>
 
           {/* Lifecycle events */}
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="rounded-lg bg-white shadow-card">
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
               <Activity className="h-4 w-4 shrink-0" style={{ color: MAROON }} />
               <h2 className="text-sm font-semibold text-slate-800">

@@ -103,13 +103,13 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
     <PageContainer>
       <button
         onClick={() => router.push(backHref)}
-        className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#A71D3A]"
+        className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#8A1538]"
       >
         {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('bulkChange.back', { defaultValue: 'Back to bulk changes' })}
       </button>
 
       {/* Header */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-white p-5 shadow-card">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-500">{task.ID}</span>
           <span className="inline-flex items-center gap-1">
@@ -121,7 +121,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.submittedBy', { defaultValue: 'Submitted by' })}</p>
-            <p className="mt-0.5 flex items-start gap-1.5 text-sm font-medium text-[#A71D3A]">
+            <p className="mt-0.5 flex items-start gap-1.5 text-sm font-medium text-[#8A1538]">
               <User className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" /> <span className="min-w-0 break-words">{task.SUBMITTED_BY}</span>
             </p>
           </div>
@@ -167,7 +167,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       )}
 
       {/* Reason */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.reasonForChange', { defaultValue: 'Reason for Change' })}
         </div>
@@ -175,7 +175,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       </div>
 
       {/* Per-record diff */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.confirmTitle', { defaultValue: 'Confirm Bulk Change' })}
         </div>
@@ -247,12 +247,12 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       </div>
 
       {isPending && canApprove && (
-        <div className="rounded-lg border border-[#A71D3A]/15 bg-[#FCF4F6] p-4">
+        <div className="rounded-lg border border-[#8A1538]/15 bg-[#FCF4F6] p-4">
           <Input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder={t('bulkChange.approvalNote', { defaultValue: 'Reason for approval / rejection (required)…' })}
-            className="mb-3 bg-white focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+            className="mb-3 bg-white focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
           />
           <div className="flex items-center justify-end gap-2">
             <Button

@@ -27,7 +27,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-white p-5 shadow-card">
         <h2 className="text-base font-semibold text-slate-800">
           {t('bulkChange.wizard.confirm.title', { defaultValue: 'Confirm bulk update' })}
         </h2>
@@ -69,7 +69,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
             rows={3}
             maxLength={500}
             placeholder={t('bulkChange.wizard.confirm.reasonPlaceholder', { defaultValue: 'Briefly describe why these records are being updated…' })}
-            className="w-full rounded-md border border-slate-200 p-2.5 text-sm text-slate-800 focus:border-[#A71D3A]/40 focus:outline-none focus:ring-2 focus:ring-[#A71D3A]/20"
+            className="w-full rounded-md border border-slate-200 p-2.5 text-sm text-slate-800 focus:border-[#8A1538]/40 focus:outline-none focus:ring-2 focus:ring-[#8A1538]/20"
           />
           <p className="text-xs text-slate-400">
             {/* SUBMIT_BULK takes a reason per item; the wizard collects one and the API applies
@@ -81,7 +81,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.wizard.confirm.recordsThatWillBeUpdated', { defaultValue: 'Records that will be updated' })}
         </div>

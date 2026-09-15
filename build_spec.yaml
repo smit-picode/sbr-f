@@ -1,0 +1,29 @@
+version: 0.1
+component: build
+timeoutInSeconds: 6000
+runAs: root
+shell: bash    
+env:
+  vaultVariables:
+    AUTH_TOKEN: ${AUTH_TOKEN}
+  exportedVariables:
+    - REPO_URL
+    - BUILDRUN_HASH
+
+steps:
+  - type: Command
+    timeoutInSeconds: 1500
+    name: "Build container image"
+    command: |
+      set -e
+      echo "${AUTH_TOKEN}" | docker login ${DOCKER_REGISTRY} -u "${DOCKER_USER}" --password-stdin
+
+      export BUILDRUN_HASH="${OCI_BUILD_RUN_ID}"
+      export REPO_URL="${REPO_URL_EXPORT}"
+
+      cd ${OCI_WORKSPACE_DIR}/sbr-frontend
+      DOCKER_BUILDKIT=1 docker build \
+      --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" \
+      -t ${REPO_URL}:${BUILDRUN_HASH} .
+
+      docker push ${REPO_URL}:${BUILDRUN_HASH}     

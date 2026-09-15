@@ -130,7 +130,7 @@ export function NewBulkUpdatePage() {
     <PageContainer>
       <button
         onClick={() => router.push('/tasks/bulk-change')}
-        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#A71D3A]"
+        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#8A1538]"
       >
         <X className="h-4 w-4" /> {t('bulkChange.wizard.backToBulkChanges', { defaultValue: 'Back to bulk changes' })}
       </button>

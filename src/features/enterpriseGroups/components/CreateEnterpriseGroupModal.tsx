@@ -180,7 +180,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 onChange={(e) => set('NAME_ENU', e.target.value)}
                 maxLength={500}
                 placeholder={t('createEnterpriseGroup.englishNamePlaceholder', { defaultValue: 'English name' })}
-                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+                className={`shadow-none focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
               />
             </div>
             <div className="space-y-1.5">
@@ -191,7 +191,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 maxLength={500}
                 dir="rtl"
                 placeholder="الاسم بالعربية"
-                className={`shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+                className={`shadow-none focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
               />
             </div>
             {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
@@ -205,7 +205,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 value={form.UCI_NAME}
                 onChange={(e) => set('UCI_NAME', e.target.value)}
                 maxLength={200}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                className="shadow-none focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
               />
             </div>
             <div className="space-y-1.5">
@@ -236,7 +236,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 value={form.UCI_IDENTIFIER}
                 onChange={(e) => set('UCI_IDENTIFIER', e.target.value)}
                 maxLength={100}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                className="shadow-none focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
               />
             </div>
           </div>
@@ -280,7 +280,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 value={form.GROUP_START_DATE}
                 max={todayISO()}
                 onChange={(e) => set('GROUP_START_DATE', e.target.value)}
-                className="shadow-none focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                className="shadow-none focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
               />
             </div>
           </div>
@@ -299,7 +299,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             {members.length > 0 && (
               <>
               <p className="flex items-center gap-1.5 text-xs text-slate-400">
-                <Star className="h-3.5 w-3.5 text-[#A71D3A]" />
+                <Star className="h-3.5 w-3.5 text-[#8A1538]" />
                 {t('editEnterpriseGroup.markHeadHint', { defaultValue: 'Click the star to mark the group head.' })}
               </p>
               <div className="space-y-1.5">
@@ -309,7 +309,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                   <div
                     key={m.ENTERPRISE_ID}
                     className={`flex items-center gap-2 rounded-md border px-3 py-2 transition-colors ${
-                      isHead ? 'border-[#A71D3A]/40 bg-[#A71D3A]/5' : 'border-slate-200 bg-slate-50'
+                      isHead ? 'border-[#8A1538]/40 bg-[#8A1538]/5' : 'border-slate-200 bg-slate-50'
                     }`}
                   >
                     <button
@@ -319,13 +319,13 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                       aria-label={t('editEnterpriseGroup.markAsHead', { defaultValue: 'Mark as group head' })}
                       className="shrink-0"
                     >
-                      <Star className={`h-4 w-4 transition-colors ${isHead ? 'fill-[#A71D3A] text-[#A71D3A]' : 'text-slate-300 hover:text-[#A71D3A]'}`} />
+                      <Star className={`h-4 w-4 transition-colors ${isHead ? 'fill-[#8A1538] text-[#8A1538]' : 'text-slate-300 hover:text-[#8A1538]'}`} />
                     </button>
                     <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
                     <div className="min-w-0 flex-1">
                       <span className="font-mono text-xs text-slate-500 mr-2">ENT-{m.ENTERPRISE_ID}</span>
                       {isHead && (
-                        <span className="text-[10px] font-bold bg-[#A71D3A] text-white rounded-md px-1 mr-1">
+                        <span className="text-[10px] font-bold bg-[#8A1538] text-white rounded-md px-1 mr-1">
                           {t('editEnterpriseGroup.headBadge', { defaultValue: 'HEAD' })}
                         </span>
                       )}
@@ -350,7 +350,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   placeholder={t('editEnterpriseGroup.searchPlaceholder', { defaultValue: 'Search enterprises by name or ENT ID...' })}
-                  className="pl-8 shadow-none bg-white focus:ring-1 focus:ring-[#A71D3A]/30 focus:border-[#A71D3A]/40"
+                  className="pl-8 shadow-none bg-white focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
                 />
               </div>
               {debouncedMemberSearch && (

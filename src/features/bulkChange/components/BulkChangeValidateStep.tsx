@@ -166,14 +166,14 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
   if (isRunning) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-lg bg-white p-5 shadow-card">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="mt-2 h-4 w-72" />
           <div className="mt-4 grid grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
           </div>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-lg bg-white p-5 shadow-card">
           {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="mb-2 h-8 w-full" />)}
         </div>
       </div>
@@ -186,7 +186,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
 
   if (!result) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-white p-5 shadow-card">
         <p className="text-sm text-slate-500">
           {t('bulkChange.wizard.validate.waiting', { defaultValue: 'Waiting for a file to validate…' })}
         </p>
@@ -199,7 +199,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg bg-white p-5 shadow-card">
         <h2 className="text-base font-semibold text-slate-800">
           {t('bulkChange.wizard.validate.title', { defaultValue: 'Validation results' })}
         </h2>
@@ -246,7 +246,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           {t('bulkChange.wizard.validate.rowDetails', { defaultValue: 'Row details' })}
         </div>

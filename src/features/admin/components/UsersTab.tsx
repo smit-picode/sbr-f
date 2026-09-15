@@ -219,7 +219,7 @@ export function UsersTab({
       <label
         key={role.ID}
         className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 cursor-pointer transition-colors ${
-          checked ? 'border-[#A71D3A]/40 bg-[#F3DEE4]/40' : 'border-slate-200 bg-white hover:bg-slate-50'
+          checked ? 'border-[#8A1538]/40 bg-[#F3DEE4]/40' : 'border-slate-200 bg-white hover:bg-slate-50'
         }`}
       >
         <input
@@ -227,7 +227,7 @@ export function UsersTab({
           name="assigned-role"
           checked={checked}
           onChange={() => toggleRole(role.ID)}
-          className="h-4 w-4 shrink-0 accent-[#A71D3A]"
+          className="h-4 w-4 shrink-0 accent-[#8A1538]"
         />
         <span className="flex-1 text-sm text-slate-800">{toTitleCaseRole(role.ROLE_NAME)}</span>
       </label>
@@ -240,12 +240,12 @@ export function UsersTab({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label htmlFor="user-name">{t('admin.users.nameLabel')}</Label>
-          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20" />
+          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="user-email">{t('admin.users.emailLabel')}</Label>
           <Input id="user-email" type="email" value={form.EMAIL} disabled={mode === 'edit'}
-            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20" />
+            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20" />
         </div>
       </div>
 
@@ -259,7 +259,7 @@ export function UsersTab({
                 type={showPassword ? 'text' : 'password'}
                 value={form.PASSWORD}
                 onChange={(e) => setForm(p => ({ ...p, PASSWORD: e.target.value }))}
-                className="pr-9 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="pr-9 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
                 autoComplete="new-password"
               />
               <button
@@ -297,12 +297,12 @@ export function UsersTab({
           <InfoTooltip content="This feature will be implemented in the next phase" />
         </div>
         <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
-          <SelectTrigger id="user-status" className="focus:ring-[#A71D3A] opacity-60 cursor-not-allowed shadow-none">
+          <SelectTrigger id="user-status" className="focus:ring-[#8A1538] opacity-60 cursor-not-allowed shadow-none">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Y" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
-            <SelectItem value="N" className="focus:bg-[#A71D3A] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
+            <SelectItem value="Y" className="focus:bg-[#8A1538] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
+            <SelectItem value="N" className="focus:bg-[#8A1538] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -329,14 +329,14 @@ export function UsersTab({
       {/* Card 1 — Search bar (gated by admin_panel.users.search) */}
       {canSearch && (
         <>
-          <div className="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
+          <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
               <Input
                 placeholder={t('admin.users.searchPlaceholder')}
                 value={filters.search}
                 onChange={(e) => handleFilterChange({ search: e.target.value, page: 1 })}
-                className="pl-9 w-80 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="pl-9 w-80 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
                 autoComplete="off"
               />
             </div>
@@ -350,7 +350,7 @@ export function UsersTab({
               <SelectTrigger
                 // Sentinel-valued selects never hit Radix's data-[placeholder] state, so the
                 // unfiltered label is muted explicitly to read as a placeholder.
-                className={`w-52 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${
+                className={`w-52 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${
                   filters.roleId ? '' : 'text-slate-400'
                 }`}
                 aria-label={t('admin.users.filterByRole', { defaultValue: 'Filter by role' })}
@@ -374,7 +374,7 @@ export function UsersTab({
               }
             >
               <SelectTrigger
-                className={`w-44 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${
+                className={`w-44 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${
                   filters.status ? '' : 'text-slate-400'
                 }`}
                 aria-label={t('admin.users.filterByStatus', { defaultValue: 'Filter by status' })}
@@ -468,7 +468,7 @@ export function UsersTab({
                 <div className="p-5 pb-4 pe-12">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-start">
-                      <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F3DEE4] text-lg font-bold text-[#A71D3A]">
+                      <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F3DEE4] text-lg font-bold text-[#8A1538]">
                         {viewTarget.NAME?.charAt(0)?.toUpperCase()}
                       </span>
                       <span className="min-w-0">

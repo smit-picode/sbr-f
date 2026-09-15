@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Snowflake, Building2, Orbit, Users, MapPin, Calendar, User } from 'lucide-react';
+import { Building2, Orbit, Users, MapPin, Calendar, User } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DataTable } from '@/components/table/DataTable';
@@ -22,14 +23,14 @@ const PAGE_SIZE = 20;
 // design rather than the shadcn default's gray pill/segmented-control styling.
 const TAB_TRIGGER_CLASS =
   'group gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-2.5 pt-0 text-sm font-medium text-slate-500 shadow-none ' +
-  'data-[state=active]:border-[#A71D3A] data-[state=active]:bg-transparent data-[state=active]:text-[#A71D3A] data-[state=active]:font-semibold data-[state=active]:shadow-none';
+  'data-[state=active]:border-[#8A1538] data-[state=active]:bg-transparent data-[state=active]:text-[#8A1538] data-[state=active]:font-semibold data-[state=active]:shadow-none';
 
 // Count next to each tab's label — a plain muted number while inactive, a light pink pill
 // (matching the reference) once its tab is selected. Uses Radix's data-state on the parent
 // TabsTrigger via the `group` class above, so no extra "which tab is active" state is needed.
 const TAB_COUNT_CLASS =
   'rounded-full px-1.5 text-xs font-normal text-slate-400 ' +
-  'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#A71D3A] group-data-[state=active]:font-semibold';
+  'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#8A1538] group-data-[state=active]:font-semibold';
 
 function usePagedSlice<T>(rows: T[]) {
   const [page, setPage] = useState(1);
@@ -55,7 +56,7 @@ export function SnapshotDetailPage({ id }: { id: number }) {
   if (!snapshot) {
     return (
       <PageContainer>
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
           <NoData message={t('snapshots.noData')} description={t('snapshots.noDataDesc')} />
         </div>
       </PageContainer>
@@ -64,42 +65,31 @@ export function SnapshotDetailPage({ id }: { id: number }) {
 
   return (
     <PageContainer>
-      <button
-        type="button"
-        onClick={() => router.push('/snapshots/browse')}
-        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#A71D3A] w-fit"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        {t('snapshots.backToAll')}
-      </button>
-
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-blue-600 shrink-0">
-              <Snowflake className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-slate-900">{snapshot.NAME}</h1>
-              {snapshot.DESCRIPTION && <p className="text-sm text-slate-500 mt-0.5">{snapshot.DESCRIPTION}</p>}
-              <p className="flex flex-wrap items-center gap-1.5 text-xs text-slate-400 mt-1.5">
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {t('snapshots.frozenOnAt', { date: formatDateTime(snapshot.FROZEN_AT) })}
-                </span>
-                <span>·</span>
-                <span className="inline-flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" />
-                  {t('snapshots.frozenByUser')} <span className="text-red-500">{snapshot.FROZEN_BY}</span>
-                </span>
-              </p>
-            </div>
-          </div>
-          <Badge variant="warning" className="rounded-md whitespace-nowrap">
+      <PageHeader
+        title={snapshot.NAME}
+        description={
+          <>
+            {snapshot.DESCRIPTION && <span className="block">{snapshot.DESCRIPTION}</span>}
+            <span className="flex flex-wrap items-center gap-1.5 mt-1">
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5" />
+                {t('snapshots.frozenOnAt', { date: formatDateTime(snapshot.FROZEN_AT) })}
+              </span>
+              <span>·</span>
+              <span className="inline-flex items-center gap-1">
+                <User className="h-3.5 w-3.5" />
+                {t('snapshots.frozenByUser')} {snapshot.FROZEN_BY}
+              </span>
+            </span>
+          </>
+        }
+        back={{ label: t('snapshots.backToAll'), onClick: () => router.push('/snapshots/browse') }}
+        actions={
+          <Badge variant="warning" className="rounded-full whitespace-nowrap">
             {t('snapshots.readOnlyBadge')}
           </Badge>
-        </div>
-      </div>
+        }
+      />
 
       <Tabs defaultValue="establishments">
         {/* Underline tabs (not the shadcn pill default) to match the reference design — overridden

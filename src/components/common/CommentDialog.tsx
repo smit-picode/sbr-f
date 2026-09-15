@@ -62,7 +62,7 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel, warning }:
               {t('comment.label')} <span className="text-red-500">*</span>
             </Label>
             <textarea
-              className={`w-full border rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#A71D3A]/40 focus:border-[#A71D3A]/40 ${
+              className={`w-full border rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#8A1538]/40 focus:border-[#8A1538]/40 ${
                 error ? 'border-red-400' : 'border-slate-200'
               }`}
               rows={4}

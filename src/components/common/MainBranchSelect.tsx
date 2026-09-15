@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
@@ -41,7 +42,13 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  // The panel is portaled to <body> (see below) so a modal's `overflow-y-auto` body can't clip
+  // it — position it in fixed/viewport coordinates from the trigger's own rect instead of
+  // relying on CSS `absolute` positioning off a `relative` ancestor.
+  const [panelRect, setPanelRect] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const { data, isFetching } = useGetMainBranchValuesQuery();
   const options = useMemo(() => data?.data ?? [], [data]);
@@ -59,14 +66,35 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
 
   const selected = useMemo(() => options.find((o) => o.SBR_ID === value), [options, value]);
 
-  // Close on outside click so the panel never sits over the rest of the form.
+  // Close on outside click so the panel never sits over the rest of the form. The panel itself
+  // lives in a portal (outside containerRef in the DOM), so it needs its own ref checked too.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onPointerDown);
     return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open]);
+
+  // Track the trigger's viewport position while open, so the portaled panel stays anchored
+  // under it even when an ancestor (e.g. a modal's scrollable body) scrolls or the window resizes.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (rect) setPanelRect({ top: rect.bottom, left: rect.left, width: rect.width });
+    };
+    update();
+    window.addEventListener('resize', update);
+    document.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      document.removeEventListener('scroll', update, true);
+    };
   }, [open]);
 
   // Focus the search box on open so the user can type straight away.
@@ -90,21 +118,22 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
     ? 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none border-slate-200'
     : invalid
       ? 'border-red-400'
-      : 'border-slate-200 hover:bg-slate-50';
+      : 'border-slate-200 hover:bg-slate-50 shadow-input';
 
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex h-9 w-full items-center justify-between gap-2 rounded-md border bg-white px-3 py-2 text-start text-sm transition-colors ${triggerClasses}`}
+        className={`flex h-10 w-full items-center justify-between gap-2 rounded-full border bg-white px-4 py-2 text-start text-sm transition-colors ${triggerClasses}`}
       >
         {value != null ? (
           <span className="min-w-0 flex-1 truncate">
-            <span className="font-mono text-xs font-medium text-[#A71D3A]">{value}</span>
+            <span className="font-mono text-xs font-medium text-[#8A1538]">{value}</span>
             {selected?.NAME_ENU && <span className="ms-2 text-slate-600">{selected.NAME_ENU}</span>}
           </span>
         ) : (
@@ -128,8 +157,12 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
         </button>
       )}
 
-      {open && (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-md">
+      {open && panelRect && createPortal(
+        <div
+          ref={panelRef}
+          className="fixed z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float"
+          style={{ top: panelRect.top + 4, left: panelRect.left, width: panelRect.width }}
+        >
           <div className="relative border-b border-slate-100 p-2">
             <Search className="pointer-events-none absolute start-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <Input
@@ -138,7 +171,7 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
               placeholder={t('mainBranchSelect.searchPlaceholder', { defaultValue: 'Search by SBR ID or name…' })}
-              className="h-8 ps-7 text-xs shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+              className="h-8 ps-7 text-xs shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
               autoComplete="off"
             />
           </div>
@@ -167,7 +200,7 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
                       onClick={() => select(o.SBR_ID)}
                       className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
                     >
-                      <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.SBR_ID === value ? 'text-[#A71D3A]' : 'text-transparent'}`} />
+                      <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.SBR_ID === value ? 'text-[#8A1538]' : 'text-transparent'}`} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-mono text-xs font-medium text-slate-700">{o.SBR_ID}</span>
                         {o.NAME_ENU && <span className="block text-xs text-slate-500">{o.NAME_ENU}</span>}
@@ -186,7 +219,8 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
               )}
             </>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

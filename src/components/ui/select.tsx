@@ -22,7 +22,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-9 w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm data-[placeholder]:text-slate-400 focus:outline-none focus:ring-2 focus:ring-adaam/40 focus:border-adaam/40 disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-10 w-full items-center justify-between rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 shadow-input data-[placeholder]:text-slate-400 focus:outline-none focus:ring-2 focus:ring-adaam/40 focus:border-adaam/40 disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
     {...props}
@@ -46,7 +46,7 @@ const SelectContent = React.forwardRef<
       className={cn(
         // Same viewport-fit rule as DropdownMenuContent: cap at the space Radix measured and
         // scroll rather than running off-screen when the trigger sits near a window edge.
-        'relative z-50 min-w-[8rem] max-h-[var(--radix-select-content-available-height)] overflow-y-auto overflow-x-hidden rounded-md border border-slate-200 bg-white text-slate-900 shadow-md',
+        'relative z-50 min-w-[8rem] max-h-[var(--radix-select-content-available-height)] overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-float',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         position === 'popper' && 'translate-y-1',
         className
@@ -83,7 +83,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:text-adaam data-[state=checked]:font-medium data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex w-full cursor-pointer select-none items-center rounded-xl py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-adaam-tint data-[state=checked]:text-adaam data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}
     {...props}

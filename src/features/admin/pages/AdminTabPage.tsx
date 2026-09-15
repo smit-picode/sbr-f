@@ -82,7 +82,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
   if (!hasAdminAccess) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 max-w-md w-full text-center">
+        <div className="bg-white rounded-xl shadow-card p-8 max-w-md w-full text-center">
           <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-6 w-6 text-red-600" />
           </div>
@@ -131,7 +131,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
       />
 
       {visibleTabs.length === 0 ? (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+        <div className="bg-white rounded-lg shadow-card p-6">
           <p className="text-sm text-slate-500">{t('admin.panel.noTabsAvailable')}</p>
         </div>
       ) : canSeeCurrent ? (
@@ -155,7 +155,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
           )}
           {/* Permissions stays inside a single card */}
           {tab === 'permissions' && (
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div className="bg-white rounded-lg shadow-card">
               <div className="p-6">
                 <PermissionsTab />
               </div>

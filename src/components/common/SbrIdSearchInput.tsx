@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Building2, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -35,6 +36,12 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // The panel is portaled to <body> (see below) so a modal's `overflow-y-auto` body can't clip
+  // it — position it in fixed/viewport coordinates from the input's own rect instead of relying
+  // on CSS `absolute` positioning off a `relative` ancestor.
+  const [panelRect, setPanelRect] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const debouncedQuery = useDebounce(query, 400);
 
@@ -44,14 +51,35 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
   );
   const results = data?.data ?? [];
 
-  // Close on outside click so the panel never sits over the rest of the form.
+  // Close on outside click so the panel never sits over the rest of the form. The panel itself
+  // lives in a portal (outside containerRef in the DOM), so it needs its own ref checked too.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onPointerDown);
     return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open]);
+
+  // Track the input's viewport position while open, so the portaled panel stays anchored under
+  // it even when an ancestor (e.g. a modal's scrollable body) scrolls or the window resizes.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const rect = inputRef.current?.getBoundingClientRect();
+      if (rect) setPanelRect({ top: rect.bottom, left: rect.left, width: rect.width });
+    };
+    update();
+    window.addEventListener('resize', update);
+    document.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      document.removeEventListener('scroll', update, true);
+    };
   }, [open]);
 
   const select = (sbrId: number) => {
@@ -73,7 +101,7 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
       <div className="flex items-center gap-2">
         <span className="inline-flex flex-1 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
           <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
-          <span className="font-mono text-xs font-medium text-[#A71D3A]">{value}</span>
+          <span className="font-mono text-xs font-medium text-[#8A1538]">{value}</span>
         </span>
         {!disabled && (
           <button
@@ -93,17 +121,22 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
     <div ref={containerRef} className="relative">
       <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
       <Input
+        ref={inputRef}
         value={query}
         disabled={disabled}
         onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder ?? t('common.searchEstablishmentPlaceholder', { defaultValue: 'Search establishments by name...' })}
-        className={`ps-8 shadow-none focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20 ${className ?? ''}`}
+        className={`ps-8 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${className ?? ''}`}
         autoComplete="off"
       />
 
-      {open && debouncedQuery && (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-md">
+      {open && debouncedQuery && panelRect && createPortal(
+        <div
+          ref={panelRef}
+          className="fixed z-50 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-float"
+          style={{ top: panelRect.top + 4, left: panelRect.left, width: panelRect.width }}
+        >
           {isFetching ? (
             <p className="px-3 py-2 text-xs text-slate-400">{t('common.searching', { defaultValue: 'Searching…' })}</p>
           ) : results.length === 0 ? (
@@ -127,7 +160,8 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
               ))}
             </ul>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

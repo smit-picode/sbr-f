@@ -21,7 +21,7 @@ export function QualityDashboardPage() {
           </div>
         }
       />
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg bg-white shadow-card overflow-hidden">
         <NoData message={t('pages.qualityDashboard.noData')} description={t('pages.qualityDashboard.noDataDesc')} />
       </div>
     </PageContainer>

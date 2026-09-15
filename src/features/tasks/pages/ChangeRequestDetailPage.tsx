@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, X, User, Clock, Database, ArrowRight, Building2, Layers } from 'lucide-react';
+import { ChevronRight, Check, X, User, Clock, Database, ArrowRight, Building2, Layers } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -23,7 +24,7 @@ import { ROUTES } from '@/constants/routes';
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#A71D3A]/10 text-[#A71D3A]',
+  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
@@ -363,41 +364,43 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
   return (
     <PageContainer>
-      <button onClick={() => router.push('/tasks/attribute-change-requests')} className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#A71D3A]">
-        <ChevronLeft className="h-4 w-4" /> {t('changeRequests.back', { defaultValue: 'Back to requests' })}
-      </button>
-
-      {/* Header */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs font-medium text-slate-500">{r.REQUEST_CODE}</span>
-          <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
-          {isCreate && (
-            <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700">
-              {t('changeRequests.newRecordBadge', { defaultValue: 'New Record' })}
+      <PageHeader
+        title={<span className={r.ENTITY || newRecordName ? '' : 'italic text-white/70'}>{title}</span>}
+        description={
+          <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="inline-flex items-center gap-1">
+              <User className="h-3.5 w-3.5" /> {t('changeRequests.submittedBy', { defaultValue: 'Submitted by' })} <span className="font-medium">{r.REQUESTED_BY ?? '—'}</span>
             </span>
-          )}
-          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${statusCls}`}>
-            <Clock className="h-3 w-3" /> {r.STATUS.charAt(0) + r.STATUS.slice(1).toLowerCase()}
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDateTime(r.CREATED_AT)}</span>
+            <span className="inline-flex items-center gap-1">
+              <Database className="h-3.5 w-3.5" />
+              {isCreate
+                ? t('changeRequests.newRecord', { defaultValue: 'New record' })
+                : `${t('changeRequests.row', { defaultValue: 'Row' })} #${r.ROW_ID}`}
+            </span>
           </span>
-        </div>
-        <h1 className={`mt-2 text-2xl font-bold ${r.ENTITY || newRecordName ? 'text-slate-900' : 'italic text-slate-400'}`}>{title}</h1>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
-          <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {t('changeRequests.submittedBy', { defaultValue: 'Submitted by' })} <span className="font-medium text-[#A71D3A]">{r.REQUESTED_BY ?? '—'}</span></span>
-          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {formatDateTime(r.CREATED_AT)}</span>
-          <span className="flex items-center gap-1">
-            <Database className="h-3.5 w-3.5" />
-            {isCreate
-              ? t('changeRequests.newRecord', { defaultValue: 'New record' })
-              : `${t('changeRequests.row', { defaultValue: 'Row' })} #${r.ROW_ID}`}
-          </span>
-        </div>
-      </div>
+        }
+        back={{ label: t('changeRequests.back', { defaultValue: 'Back to requests' }), onClick: () => router.push('/tasks/attribute-change-requests') }}
+        chips={
+          <>
+            <span className="font-mono text-xs font-medium text-white/80">{r.REQUEST_CODE}</span>
+            <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
+            {isCreate && (
+              <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                {t('changeRequests.newRecordBadge', { defaultValue: 'New Record' })}
+              </span>
+            )}
+            <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${statusCls}`}>
+              <Clock className="h-3 w-3" /> {r.STATUS.charAt(0) + r.STATUS.slice(1).toLowerCase()}
+            </span>
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Left: changes + reason + actions */}
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="rounded-lg bg-white shadow-card">
             <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
               {isCreate
                 ? t('changeRequests.newRecordDetails', { defaultValue: 'New Record Details' })
@@ -440,19 +443,19 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           </div>
 
           {r.CHANGE_REASON && (
-            <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="rounded-lg bg-white shadow-card">
               <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.reasonForChange', { defaultValue: 'Reason for Change' })}</div>
               <p className="px-5 py-3 text-sm text-slate-700">{r.CHANGE_REASON}</p>
             </div>
           )}
 
           {pending && canApprove && (
-            <div className="rounded-lg border border-[#A71D3A]/15 bg-[#FCF4F6] p-4">
+            <div className="rounded-lg border border-[#8A1538]/15 bg-[#FCF4F6] p-4">
               <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={t('changeRequests.approvalNote', { defaultValue: 'Reason for approval / rejection (required)…' })}
-                className="mb-3 bg-white focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20"
+                className="mb-3 bg-white focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
               />
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-slate-600">
@@ -473,7 +476,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           )}
 
           {!pending && r.APPROVAL_REASON && (
-            <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="rounded-lg bg-white shadow-card">
               <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.approvalReason', { defaultValue: 'Approval Reason' })}</div>
               <p className="px-5 py-3 text-sm text-slate-700">{r.APPROVAL_REASON}</p>
             </div>
@@ -482,7 +485,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
         {/* Right: record context */}
         <div className="space-y-4">
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg bg-white shadow-card overflow-hidden">
             <div className="border-b border-slate-200 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 {isCreate
@@ -532,30 +535,30 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           </div>
 
           {parentSbrId != null && (
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg bg-white p-5 shadow-card">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.parentEstablishment', { defaultValue: 'Parent Establishment' })}</p>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(parentSbrId))}
-                className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+                className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
               >
-                <Building2 className="h-4 w-4 shrink-0 text-[#A71D3A]" />
-                <span className="font-mono text-sm font-medium text-[#A71D3A]">SBR #{parentSbrId}</span>
+                <Building2 className="h-4 w-4 shrink-0 text-[#8A1538]" />
+                <span className="font-mono text-sm font-medium text-[#8A1538]">SBR #{parentSbrId}</span>
               </button>
             </div>
           )}
 
           {/* Establishment request → related records (parent enterprise + child counts) */}
           {showRelatedRecords && (
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg bg-white p-5 shadow-card">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.relatedRecords', { defaultValue: 'Related Records' })}</p>
               {relEnterprise && (
                 <button
                   type="button"
                   onClick={() => router.push(`/enterprises/${relEnterprise.ENTERPRISE_ID}`)}
-                  className="mb-3 flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+                  className="mb-3 flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
                 >
-                  <Layers className="h-4 w-4 shrink-0 text-[#A71D3A]" />
+                  <Layers className="h-4 w-4 shrink-0 text-[#8A1538]" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-slate-800">{relEnterprise.NAME_ENU ?? `#${relEnterprise.ENTERPRISE_ID}`}</span>
                     <span className="block text-xs text-slate-500">
@@ -580,7 +583,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
           {/* Enterprise request → member establishments */}
           {r.TABLE_NAME === 'SBR_ENTERPRISES' && (
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg bg-white p-5 shadow-card">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 {t('changeRequests.memberEstablishments', { defaultValue: 'Member Establishments' })} ({members.length})
               </p>
@@ -593,7 +596,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                       key={m.SBR_ID}
                       type="button"
                       onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(m.SBR_ID))}
-                      className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A71D3A]/40 hover:bg-[#FCF4F6]"
+                      className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
                     >
                       <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
                       <span className="min-w-0 flex-1">
@@ -601,7 +604,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                         <span className="block text-xs text-slate-500">{m.MOCI_CR_NUM ? `CR ${m.MOCI_CR_NUM} · ` : ''}#{m.SBR_ID}</span>
                       </span>
                       {m.MAIN_BRANCH_FLG === 'MAIN' ? (
-                        <span className="shrink-0 rounded bg-[#A71D3A] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
+                        <span className="shrink-0 rounded bg-[#8A1538] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
                       ) : m.MAIN_BRANCH_FLG === 'BRANCH' ? (
                         <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{t('changeRequests.branch', { defaultValue: 'BRANCH' })}</span>
                       ) : null}
