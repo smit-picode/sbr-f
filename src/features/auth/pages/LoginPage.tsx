@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +27,6 @@ import { LOGIN_SELECTED_ROLE_KEY } from '../constants';
 import { useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
-import { Logo } from '@/components/common/Logo';
 import type { AuthRole } from '@/types';
 
 // Visual rotation for role cards — purely decorative
@@ -130,11 +130,13 @@ export function LoginPage() {
         />
 
         <div className="relative flex flex-col justify-between w-full p-9">
-          <div className="flex items-center gap-3">
-            <span className="h-11 w-11 rounded-full bg-dune flex items-center justify-center shrink-0" style={{ boxShadow: '0 0 0 2px rgba(255,255,255,.6)' }}>
-              <Logo size="sm" src="/sbr-logo-white.png" />
-            </span>
-            <span className="text-[15px] font-bold">SBR Portal</span>
+          {/* Matches SBR-design's own login page exactly: the white-on-transparent primary
+              logo (its own PNG carries "National Planning Council" / "State of Qatar") sitting
+              directly on the photo, no card behind it — not the secondary/regular-color mark
+              used elsewhere, which needs a light background to read. */}
+          <div className="flex flex-col items-start gap-3">
+            <Image src="/assets/npc-logo-primary-white.png" alt="National Planning Council" width={257} height={90} className="h-16 w-auto object-contain -ms-2" priority />
+            <span className="text-[15px] font-bold ps-0.5">SBR Portal</span>
           </div>
 
           <div>
