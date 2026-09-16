@@ -32,11 +32,11 @@ import {
   GitBranch, ClipboardList, ArrowUpRight, History, Pencil,
 } from 'lucide-react';
 
-const MAROON = '#8A1538';
+const MAROON = '#A29374';
 
 // Table-name pill colours (same palette as the Attribute Change Requests list)
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
+  SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
@@ -45,8 +45,8 @@ const TABLE_BADGE: Record<string, string> = {
 function SummaryCell({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <p className="text-xs text-slate-500">{label}</p>
-      <div className="mt-0.5 text-sm font-medium text-slate-800 truncate">{value}</div>
+      <p className="text-[11px] text-slate-400">{label}</p>
+      <div className="mt-0.5 text-[13px] font-semibold text-slate-800 truncate">{value}</div>
     </div>
   );
 }
@@ -86,19 +86,19 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
     <div className="relative min-w-0" ref={wrapRef}>
       {/* Icon sits on the label line, matching the Establishments detail strip */}
       <div className="flex items-center gap-1.5">
-        <p className="text-xs text-slate-500">{label}</p>
+        <p className="text-[11px] text-slate-400">{label}</p>
         {canViewHistory && (
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="shrink-0 cursor-pointer text-slate-200 transition-colors hover:text-[#8A1538]"
+            className="shrink-0 cursor-pointer text-slate-200 transition-colors hover:text-[#A29374]"
             title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
           >
             <History className="h-3 w-3" />
           </button>
         )}
       </div>
-      <div className="mt-0.5 truncate text-sm font-medium text-slate-800">{value}</div>
+      <div className="mt-0.5 truncate text-[13px] font-semibold text-slate-800">{value}</div>
       {open && canViewHistory && (
         <FieldHistoryPopover
           anchorRef={wrapRef}
@@ -176,9 +176,9 @@ function SectionCard({ title, count, icon, children }: { title: string; count?: 
     <div className="rounded-lg bg-white shadow-card">
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
         <span style={{ color: MAROON }}>{icon}</span>
-        <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
+        <h2 className="text-[14px] font-bold text-slate-800">{title}</h2>
         {count != null && (
-          <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{count}</span>
+          <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{count}</span>
         )}
       </div>
       <div className="p-4">{children}</div>
@@ -187,17 +187,18 @@ function SectionCard({ title, count, icon, children }: { title: string; count?: 
 }
 
 function IsicChip({ code, fromText, primary }: { code: string; fromText?: string; primary?: boolean }) {
+  const { t } = useTranslation();
   const desc = getIsicLabel(code);
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
-        primary ? 'border-[#8A1538]/15 bg-[#8A1538]/5' : 'border-slate-200 bg-slate-50'
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] ${
+        primary ? 'bg-[#A29374]/5' : 'bg-slate-100'
       }`}
     >
       <span className="font-mono font-semibold text-slate-800">{code}</span>
       {desc && <span className="text-slate-500">{desc}</span>}
       {fromText && <span className="text-slate-400">{fromText}</span>}
-      {primary && <span className="font-semibold text-[#8A1538]">· PRIMARY</span>}
+      {primary && <span className="font-semibold text-[#A29374]">· {t('enterpriseDetail.primary', { defaultValue: 'Primary' })}</span>}
     </span>
   );
 }
@@ -233,13 +234,13 @@ function FieldWithHistory({ label, value, sbrId, field, fieldLabel, pendingCount
   return (
     <div className="relative min-w-0" ref={wrapRef}>
       <div className="flex items-center gap-1.5">
-        <p className="text-xs text-slate-500">{label}</p>
+        <p className="text-[11px] text-slate-400">{label}</p>
         <PendingFieldBadge count={pendingCount} />
       </div>
-      <div className="mt-0.5 flex items-center gap-1 text-sm font-medium text-slate-800">
+      <div className="mt-0.5 flex items-center gap-1 text-[13px] font-semibold text-slate-800">
         <span className="truncate">{value}</span>
         {canViewHistory && (
-          <button type="button" onClick={() => setOpen((o) => !o)} className={`cursor-pointer transition-colors hover:text-[#8A1538] ${pendingCount ? 'text-[#8A1538]' : 'text-slate-300'}`} title="View history">
+          <button type="button" onClick={() => setOpen((o) => !o)} className={`cursor-pointer transition-colors hover:text-[#A29374] ${pendingCount ? 'text-[#A29374]' : 'text-slate-300'}`} title="View history">
             <History className="h-3.5 w-3.5" />
           </button>
         )}
@@ -257,25 +258,25 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
   return (
     <div className="rounded-lg border border-slate-200">
       {/* header */}
-      <div className={`rounded-t-lg px-4 py-3 ${isMain ? 'bg-[#8A1538]/5' : 'bg-slate-50'}`}>
+      <div className={`rounded-t-lg px-4 py-3 ${isMain ? 'bg-[#A29374]/5' : 'bg-slate-50'}`}>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-medium text-slate-600">#{est.SBR_ID}</span>
+          <span className="font-mono text-[11px] font-bold text-[#A29374]">#{est.SBR_ID}</span>
           {isMain ? (
-            <Badge className="rounded bg-[#8A1538] text-white text-[10px] font-bold">{t('enterpriseDetail.mainUnit')}</Badge>
+            <Badge className="rounded bg-[#A29374] text-[10px] font-semibold text-white">{t('enterpriseDetail.mainUnit')}</Badge>
           ) : (
-            <Badge variant="secondary" className="text-[10px]">{t('enterpriseDetail.branch')}</Badge>
+            <Badge variant="secondary" className="text-[10px] font-semibold">{t('enterpriseDetail.branch')}</Badge>
           )}
           <StatusBadge status={est.EST_STATUS} />
-          <button type="button" onClick={() => onOpen(est)} className="ml-auto text-slate-400 transition-colors hover:text-[#8A1538]" title={t('enterpriseDetail.openEstablishment')}>
+          <button type="button" onClick={() => onOpen(est)} className="ml-auto text-slate-400 transition-colors hover:text-[#A29374]" title={t('enterpriseDetail.openEstablishment')}>
             <ArrowUpRight className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1.5 font-semibold text-slate-800">{nullableText(est.NAME_ENU)}</p>
-        {est.MOCI_CR_NUM && <p className="text-xs text-slate-500">CR {est.MOCI_CR_NUM}</p>}
+        <p className="mt-1 truncate text-[13.5px] font-bold text-slate-900">{nullableText(est.NAME_ENU)}</p>
+        {est.MOCI_CR_NUM && <p className="font-mono text-[11.5px] text-slate-400">CR {est.MOCI_CR_NUM}</p>}
       </div>
       {/* body */}
       <div className="space-y-3 p-4">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 text-[12.5px] md:grid-cols-4">
           <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} sbrId={est.SBR_ID} field="SECTOR_ID" fieldLabel={t('enterpriseDetail.sector')} pendingCount={est.PENDING_FIELDS?.SECTOR_ID} />
           <FieldWithHistory label={t('enterpriseDetail.legalType')} value={nullableText(est.LEGAL_TYPE)} sbrId={est.SBR_ID} field="LEGAL_TYPE" fieldLabel={t('enterpriseDetail.legalType')} pendingCount={est.PENDING_FIELDS?.LEGAL_TYPE} />
           <FieldWithHistory label={t('enterpriseDetail.employees')} value={est.EMPLOYMENT_COUNT != null ? est.EMPLOYMENT_COUNT.toLocaleString() : '—'} sbrId={est.SBR_ID} field="EMPLOYMENT_COUNT" fieldLabel={t('enterpriseDetail.employees')} pendingCount={est.PENDING_FIELDS?.EMPLOYMENT_COUNT} />
@@ -284,7 +285,7 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
 
         {est.ISIC_CODE && (
           <div>
-            <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseDetail.registeredActivities')}</p>
+            <p className="mb-1.5 text-[11px] font-semibold text-slate-400">{t('enterpriseDetail.registeredActivities')}</p>
             <IsicChip code={est.ISIC_CODE} primary />
           </div>
         )}
@@ -292,42 +293,42 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
         <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-3 md:grid-cols-2">
           {/* contacts */}
           <div>
-            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <Users className="h-3.5 w-3.5" /> {t('enterpriseDetail.contacts')} <span className="text-slate-400">({est.contacts?.length ?? 0})</span>
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+              <Users className="h-3 w-3" /> {t('enterpriseDetail.contacts')} <span className="text-slate-300">({est.contacts?.length ?? 0})</span>
             </p>
             {est.contacts?.length ? (
               <ul className="space-y-1.5">
                 {est.contacts.map((c) => (
-                  <li key={c.ID} className="text-sm">
-                    <span className="text-slate-700">{nullableText(c.CONTACT_NAME ?? c.EMAIL)}</span>
-                    <span className="block text-xs text-slate-400">
+                  <li key={c.ID} className="text-[12px]">
+                    <span className="block truncate font-medium text-slate-700">{nullableText(c.CONTACT_NAME ?? c.EMAIL)}</span>
+                    <span className="block truncate text-[11px] text-slate-400">
                       {[c.ROLE, c.PHONE ?? c.MOBILE, c.EMAIL].filter(Boolean).join(' · ') || '—'}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-400">—</p>
+              <p className="text-[12px] text-slate-400">—</p>
             )}
           </div>
           {/* addresses */}
           <div>
-            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <MapPin className="h-3.5 w-3.5" /> {t('enterpriseDetail.addresses')} <span className="text-slate-400">({est.addresses?.length ?? 0})</span>
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+              <MapPin className="h-3 w-3" /> {t('enterpriseDetail.addresses')} <span className="text-slate-300">({est.addresses?.length ?? 0})</span>
             </p>
             {est.addresses?.length ? (
               <ul className="space-y-1.5">
                 {est.addresses.map((a) => (
-                  <li key={a.ID} className="text-sm">
-                    <span className="text-slate-700">
+                  <li key={a.ID} className="text-[12px]">
+                    <span className="block truncate font-medium text-slate-700">
                       {[a.MUNICIPALITY_ID, a.ZONE ? `Zone ${a.ZONE}` : null, a.STREET ? `St ${a.STREET}` : null].filter(Boolean).join(' · ') || '—'}
                     </span>
-                    {a.QARS && <span className="block text-xs text-slate-400">QARS {a.QARS}</span>}
+                    {a.QARS && <span className="block truncate font-mono text-[11px] text-slate-400">QARS {a.QARS}</span>}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-400">—</p>
+              <p className="text-[12px] text-slate-400">—</p>
             )}
           </div>
         </div>
@@ -338,7 +339,7 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
 
 function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[] }) {
   const { t } = useTranslation();
-  if (!entries.length) return <p className="text-sm text-slate-400">{t('enterpriseDetail.noChangeHistory')}</p>;
+  if (!entries.length) return <p className="text-[12.5px] text-slate-400">{t('enterpriseDetail.noChangeHistory')}</p>;
   return (
     <ul className="space-y-3">
       {entries.map((e) => {
@@ -353,11 +354,11 @@ function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[
           <li key={e.ID} className="rounded-md border border-slate-100 p-2.5">
             <div className="flex items-center gap-2">
               <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[e.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{e.TABLE_NAME}</span>
-              {recordId != null && <span className="font-mono text-xs font-medium text-red-600">#{recordId}</span>}
-              <span className={`ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium ${statusCfg.cls}`}>{statusCfg.label}</span>
+              {recordId != null && <span className="font-mono text-[10.5px] text-[#A29374]">#{recordId}</span>}
+              <span className={`ml-auto rounded px-1.5 py-0.5 text-[11px] font-semibold ${statusCfg.cls}`}>{statusCfg.label}</span>
             </div>
-            <p className="mt-1 text-sm text-slate-700">{nullableText(e.REASON)}</p>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-1 text-[12.5px] text-slate-700">{nullableText(e.REASON)}</p>
+            <p className="mt-0.5 text-[10.5px] text-slate-400">
               {formatDate(e.CREATED_AT)}
               {e.CHANGED_BY_EMAIL && ` · ${e.CHANGED_BY_EMAIL}`}
               {e.APPROVED_BY_EMAIL && ` → ${e.APPROVED_BY_EMAIL}`}
@@ -393,16 +394,16 @@ function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${added ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${added ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
                   {added ? '+ Added' : '− Removed'}
                 </span>
-                <span className="text-sm font-medium text-slate-800">
-                  {e.SBR_ID != null && <span className="font-mono text-red-600">#{e.SBR_ID}</span>}
+                <span className="text-[12.5px] font-semibold text-slate-700">
+                  {e.SBR_ID != null && <span className="font-mono text-[#A29374]">#{e.SBR_ID}</span>}
                   {e.NAME ? ` — ${e.NAME}` : ''}{e.CR ? ` (${e.CR})` : ''}
                 </span>
               </div>
-              {e.REASON && <p className="mt-0.5 text-xs italic text-slate-500">“{e.REASON}”</p>}
-              <p className="mt-0.5 text-xs text-slate-400">
+              {e.REASON && <p className="mt-0.5 text-[11px] italic text-slate-500">“{e.REASON}”</p>}
+              <p className="mt-0.5 text-[11px] text-slate-400">
                 {formatDate(e.CREATED_AT)}
                 {e.CHANGED_BY_EMAIL && ` · ${e.CHANGED_BY_EMAIL}`}
                 {e.APPROVED_BY_EMAIL && ` → ${e.APPROVED_BY_EMAIL}`}
@@ -480,7 +481,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         back={{ label: t('enterpriseDetail.allEnterprises'), onClick: () => router.push('/enterprises') }}
         chips={
           <>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 font-mono text-xs text-white">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-bold text-white">
               <Target className="h-3.5 w-3.5" /> ENT-{enterprise.ENTERPRISE_ID}
             </span>
             <StatusBadge status={enterprise.STATUS} className="rounded-full" />
@@ -521,7 +522,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
 
       {(canViewEstablishmentHistory || canViewEnterpriseHistory) && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
-          <History className="h-3.5 w-3.5 text-[#8A1538]" /> {t('fieldHistory.clickHint')}
+          <History className="h-3.5 w-3.5 text-[#A29374]" /> {t('fieldHistory.clickHint')}
         </p>
       )}
 
@@ -529,23 +530,23 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
       <SectionCard title={t('enterpriseDetail.economicActivity')} icon={<Briefcase className="h-4 w-4" />}>
             <div className="flex flex-col gap-6 md:flex-row md:gap-10">
               <div className="w-full md:max-w-md">
-                <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseDetail.mainActivity')}</p>
+                <p className="mb-2 text-[11px] font-bold text-slate-400">{t('enterpriseDetail.mainActivity')}</p>
                 {enterprise.ISIC_CODE ? (
-                  <div className="rounded-md bg-[#8A1538]/5 p-4">
+                  <div className="rounded-md bg-[#A29374]/5 p-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-base font-semibold text-slate-800">{enterprise.ISIC_CODE}</span>
-                      <span className="rounded bg-[#8A1538]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#8A1538]">PRIMARY</span>
+                      <span className="font-mono text-[15px] font-extrabold text-[#A29374]">{enterprise.ISIC_CODE}</span>
+                      <span className="rounded-full bg-[#A29374] px-1.5 py-0.5 text-[11px] font-semibold text-white">{t('enterpriseDetail.primary', { defaultValue: 'Primary' })}</span>
                     </div>
                     {getIsicLabel(enterprise.ISIC_CODE) && (
-                      <p className="mt-1.5 text-sm text-slate-600">{getIsicLabel(enterprise.ISIC_CODE)}</p>
+                      <p className="mt-1 text-[13px] text-slate-700">{getIsicLabel(enterprise.ISIC_CODE)}</p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">—</p>
+                  <p className="text-[12.5px] text-slate-400">—</p>
                 )}
               </div>
               <div className="flex-1">
-                <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseDetail.secondaryActivities')}</p>
+                <p className="mb-2 text-[11px] font-bold text-slate-400">{t('enterpriseDetail.secondaryActivities')}</p>
                 {secondaryActivities.length ? (
                   <div className="flex flex-wrap gap-2">
                     {secondaryActivities.map((s, i) => (
@@ -553,7 +554,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">—</p>
+                  <p className="text-[12.5px] text-slate-400">—</p>
                 )}
               </div>
             </div>
@@ -582,10 +583,10 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         {/* Right rail */}
         <div className="space-y-4">
           <SectionCard title={t('enterpriseDetail.profilingChanges')} count={profilingChanges.length} icon={<GitBranch className="h-4 w-4" />}>
-            <p className="text-xs text-slate-500">{t('enterpriseDetail.profilingDesc')}</p>
+            <p className="-mt-1 mb-1 text-[11px] text-slate-400">{t('enterpriseDetail.profilingDesc')}</p>
             {profilingChanges.length > 0
               ? <ProfilingChangesList entries={profilingChanges} />
-              : <p className="mt-2 text-sm text-slate-400">{t('enterpriseDetail.noProfilingChanges')}</p>}
+              : <p className="mt-2 text-[12.5px] text-slate-400">{t('enterpriseDetail.noProfilingChanges')}</p>}
           </SectionCard>
 
           <SectionCard title={t('enterpriseDetail.changeHistory')} count={changeHistory.length} icon={<ClipboardList className="h-4 w-4" />}>

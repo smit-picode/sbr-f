@@ -107,12 +107,12 @@ Used internally by DataTable — do not use standalone unless custom layout need
 
 ## Dropdowns & Inputs — Theme Rules (ALWAYS follow)
 
-These keep every new dropdown/input on the maroon theme (`#A71D3A`). Match these exactly.
+These keep every new dropdown/input on the dune theme (`#A29374`). Match these exactly.
 
 ### Dropdowns — ALWAYS the themed `Select`, NEVER native `<select>`
 - Use `Select / SelectTrigger / SelectValue / SelectContent / SelectItem` from `@/components/ui/select`.
 - A native `<select>` renders the OS-default (blue) option list, which is off-theme — never use it for a styled dropdown.
-- The themed `SelectItem` already gives the maroon check + slate hover for the selected/active option; do not re-style those.
+- The themed `SelectItem` already gives the dune check + slate hover for the selected/active option; do not re-style those.
 ```tsx
 <Select value={val} onValueChange={setVal}>
   <SelectTrigger className="h-8 w-44 text-xs shadow-none">  {/* size only; keep theme classes */}
@@ -124,10 +124,10 @@ These keep every new dropdown/input on the maroon theme (`#A71D3A`). Match these
 </Select>
 ```
 
-### Inputs — soft maroon focus ring (ALWAYS, every text input/textarea)
-- The base `Input` ships a hard `focus:ring-2 focus:ring-[#A71D3A] focus:border-[#A71D3A]` — a solid, dark ring. Never leave this as-is on a new input: every text `Input` and `<textarea>` you add, in a filter bar, a modal, or a plain form (not just search/filter fields), must override to the **soft** ring:
+### Inputs — soft dune focus ring (ALWAYS, every text input/textarea)
+- The base `Input` ships a hard `focus:ring-2 focus:ring-adaam focus:border-adaam` (dune, `#A29374`) — a solid ring. Never leave this as-is on a new input: every text `Input` and `<textarea>` you add, in a filter bar, a modal, or a plain form (not just search/filter fields), must override to the **soft** ring:
   ```
-  focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20
+  focus:border-[#A29374]/40 focus:ring-[#A29374]/20
   ```
   (already the convention `SearchInput` and the snapshots feature's description `<textarea>` use — apply it the same way to any plain `Input` you write, e.g. a name field, not only filter/search inputs.)
 - Do NOT change the base `Input` / `Select` components to achieve this — they are shared; override per-instance via `className` (tailwind-merge keeps the later class).

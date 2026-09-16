@@ -220,7 +220,7 @@ export function UsersTab({
       <label
         key={role.ID}
         className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 cursor-pointer transition-colors ${
-          checked ? 'border-[#8A1538]/40 bg-[#F3DEE4]/40' : 'border-slate-200 bg-white hover:bg-slate-50'
+          checked ? 'border-[#A29374]/40 bg-[#F4F0E8]/40' : 'border-slate-200 bg-white hover:bg-slate-50'
         }`}
       >
         <input
@@ -228,7 +228,7 @@ export function UsersTab({
           name="assigned-role"
           checked={checked}
           onChange={() => toggleRole(role.ID)}
-          className="h-4 w-4 shrink-0 accent-[#8A1538]"
+          className="h-4 w-4 shrink-0 accent-[#A29374]"
         />
         <span className="flex-1 text-sm text-slate-800">{toTitleCaseRole(role.ROLE_NAME)}</span>
       </label>
@@ -241,12 +241,12 @@ export function UsersTab({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label htmlFor="user-name">{t('admin.users.nameLabel')}</Label>
-          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20" />
+          <Input id="user-name" value={form.NAME} onChange={(e) => setForm(p => ({ ...p, NAME: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="user-email">{t('admin.users.emailLabel')}</Label>
           <Input id="user-email" type="email" value={form.EMAIL} disabled={mode === 'edit'}
-            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20" />
+            onChange={(e) => setForm(p => ({ ...p, EMAIL: e.target.value }))} autoComplete="off" className="shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20" />
         </div>
       </div>
 
@@ -260,7 +260,7 @@ export function UsersTab({
                 type={showPassword ? 'text' : 'password'}
                 value={form.PASSWORD}
                 onChange={(e) => setForm(p => ({ ...p, PASSWORD: e.target.value }))}
-                className="pr-9 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+                className="pr-9 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
                 autoComplete="new-password"
               />
               <button
@@ -298,12 +298,12 @@ export function UsersTab({
           <InfoTooltip content="This feature will be implemented in the next phase" />
         </div>
         <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
-          <SelectTrigger id="user-status" className="focus:ring-[#8A1538] opacity-60 cursor-not-allowed shadow-none">
+          <SelectTrigger id="user-status" className="focus:ring-[#A29374] opacity-60 cursor-not-allowed shadow-none">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Y" className="focus:bg-[#8A1538] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
-            <SelectItem value="N" className="focus:bg-[#8A1538] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
+            <SelectItem value="Y" className="focus:bg-[#A29374] focus:text-white">{t('admin.users.statusActive')}</SelectItem>
+            <SelectItem value="N" className="focus:bg-[#A29374] focus:text-white">{t('admin.users.statusInactive')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -337,7 +337,7 @@ export function UsersTab({
                 placeholder={t('admin.users.searchPlaceholder')}
                 value={filters.search}
                 onChange={(e) => handleFilterChange({ search: e.target.value, page: 1 })}
-                className="pl-9 w-80 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+                className="pl-9 w-80 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
                 autoComplete="off"
               />
             </div>
@@ -351,7 +351,7 @@ export function UsersTab({
               <SelectTrigger
                 // Sentinel-valued selects never hit Radix's data-[placeholder] state, so the
                 // unfiltered label is muted explicitly to read as a placeholder.
-                className={`w-52 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${
+                className={`w-52 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${
                   filters.roleId ? '' : 'text-slate-400'
                 }`}
                 aria-label={t('admin.users.filterByRole', { defaultValue: 'Filter by role' })}
@@ -375,7 +375,7 @@ export function UsersTab({
               }
             >
               <SelectTrigger
-                className={`w-44 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${
+                className={`w-44 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${
                   filters.status ? '' : 'text-slate-400'
                 }`}
                 aria-label={t('admin.users.filterByStatus', { defaultValue: 'Filter by status' })}
@@ -446,7 +446,7 @@ export function UsersTab({
           {dialogBody('create')}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsCreateOpen(false); resetDialogState(); }} disabled={isCreating}>{t('actions.cancel')}</Button>
-            <Button onClick={handleCreate} disabled={isCreating} style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }} className="text-white">{isCreating ? t('admin.users.creating') : t('actions.confirmSave')}</Button>
+            <Button onClick={handleCreate} disabled={isCreating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isCreating ? t('admin.users.creating') : t('actions.confirmSave')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -469,7 +469,7 @@ export function UsersTab({
                 <div className="p-5 pb-4 pe-12">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-start">
-                      <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F3DEE4] text-lg font-bold text-[#8A1538]">
+                      <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F4F0E8] text-lg font-bold text-[#A29374]">
                         {viewTarget.NAME?.charAt(0)?.toUpperCase()}
                       </span>
                       <span className="min-w-0">
@@ -492,11 +492,11 @@ export function UsersTab({
                 <div className="border-y border-slate-200">
                   {rows.map(({ key, icon: Icon, label, value }) => (
                     <div key={key} className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 last:border-b-0">
-                      <span className="flex shrink-0 items-center gap-2 text-sm text-slate-500">
+                      <span className="flex shrink-0 items-center gap-2 text-[11px] text-slate-400">
                         <Icon className="h-4 w-4 text-slate-400" />
                         {label}
                       </span>
-                      <span className="truncate text-sm font-semibold text-slate-900">
+                      <span className="truncate text-[12px] font-medium text-slate-700">
                         {value}
                       </span>
                     </div>
@@ -514,7 +514,7 @@ export function UsersTab({
                   )}
                   <Button
                     onClick={() => setViewTarget(null)}
-                    style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+                    style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
                     className="text-white"
                   >
                     {t('admin.users.close')}
@@ -533,7 +533,7 @@ export function UsersTab({
           {dialogBody('edit')}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditTarget(null); resetDialogState(); }} disabled={isUpdating}>{t('actions.cancel')}</Button>
-            <Button onClick={handleUpdate} disabled={isUpdating} style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }} className="text-white">{isUpdating ? t('admin.users.saving') : t('actions.saveChanges')}</Button>
+            <Button onClick={handleUpdate} disabled={isUpdating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isUpdating ? t('admin.users.saving') : t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

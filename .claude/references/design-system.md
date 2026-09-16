@@ -29,8 +29,8 @@ Design language: Professional, data-dense, authoritative. Clean and minimal.
 
 | Token | Hex | Usage |
 |---|---|---|
-| `adaam` / `adaam-deep` / `adaam-tint` | `#8A1538` / `#6D0D2A` / `#F6E7EC` | New primary (replaces `#A71D3A` in re-themed components) |
-| `dune` / `dune-light` / `dune-deep` / `dune-dark` / `dune-tint` | `#A29374` family | Secondary accent — avatar circles, logo badge |
+| `adaam` / `adaam-deep` / `adaam-tint` | `#A29374` / `#87795D` / `#F4F0E8` | Primary — aliased to the `dune` palette (was maroon `#8A1538`/`#6D0D2A`/`#F6E7EC`, replaced app-wide 2026-09-15; kept as its own token name only because every component already references `bg-adaam`/`text-adaam`, not because it's a distinct color anymore) |
+| `dune` / `dune-light` / `dune-deep` / `dune-dark` / `dune-tint` | `#A29374` family | Secondary accent — avatar circles, logo badge; same color family as `adaam` above |
 | `pos` / `pos-text` / `pos-tint` | `#3FB185` / `#047857` / `#ECFDF5` | Active/success |
 | `neg` / `neg-text` / `neg-tint` | `#DF7878` / `#B23B3B` / `#FDECEC` | Inactive/error |
 | `warn` / `warn-text` / `warn-tint` | `#BF9F5F` / `#A67C1B` / `#FBF3D6` | Warning/pending |

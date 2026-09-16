@@ -21,7 +21,7 @@ export function BulkChangeStepper({ currentStep }: BulkChangeStepperProps) {
           <div key={stepKey} className="flex items-center gap-2">
             <span
               className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                isActive ? 'bg-[#8A1538] text-white' : isDone ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'
+                isActive ? 'bg-[#A29374] text-white' : isDone ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'
               }`}
             >
               {isDone ? <Check className="h-3.5 w-3.5" /> : index + 1}

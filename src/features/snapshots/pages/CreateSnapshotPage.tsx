@@ -69,7 +69,7 @@ export function CreateSnapshotPage() {
             value={name}
             onChange={(e) => { setName(e.target.value); if (nameError) setNameError(''); }}
             placeholder={t('snapshots.namePlaceholder')}
-            className={`shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${nameError ? 'border-red-400' : ''}`}
+            className={`shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${nameError ? 'border-red-400' : ''}`}
           />
           {nameError && <p className="text-xs text-red-500">{nameError}</p>}
         </div>
@@ -78,7 +78,7 @@ export function CreateSnapshotPage() {
           <Label htmlFor="snapshot-description">{t('snapshots.descriptionLabel')}</Label>
           <textarea
             id="snapshot-description"
-            className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#8A1538]/20 focus:border-[#8A1538]/40"
+            className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#A29374]/20 focus:border-[#A29374]/40"
             rows={3}
             placeholder={t('snapshots.descriptionPlaceholder')}
             value={description}
@@ -106,7 +106,7 @@ export function CreateSnapshotPage() {
         <div className="flex justify-end">
           <Button
             onClick={handleFreezeClick}
-            style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+            style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
             className="text-white"
           >
             <Camera className="h-4 w-4 mr-1.5" />
@@ -136,7 +136,7 @@ export function CreateSnapshotPage() {
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t('actions.cancel')}</Button>
             <Button
               onClick={handleConfirmFreeze}
-              style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+              style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
               className="text-white"
             >
               <Camera className="h-4 w-4 mr-1.5" />

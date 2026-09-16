@@ -103,7 +103,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
     <PageContainer>
       <button
         onClick={() => router.push(backHref)}
-        className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#8A1538]"
+        className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-[#A29374]"
       >
         {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('bulkChange.back', { defaultValue: 'Back to bulk changes' })}
       </button>
@@ -121,7 +121,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.submittedBy', { defaultValue: 'Submitted by' })}</p>
-            <p className="mt-0.5 flex items-start gap-1.5 text-sm font-medium text-[#8A1538]">
+            <p className="mt-0.5 flex items-start gap-1.5 text-sm font-medium text-[#A29374]">
               <User className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" /> <span className="min-w-0 break-words">{task.SUBMITTED_BY}</span>
             </p>
           </div>
@@ -247,12 +247,12 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       </div>
 
       {isPending && canApprove && (
-        <div className="rounded-lg border border-[#8A1538]/15 bg-[#FCF4F6] p-4">
+        <div className="rounded-lg border border-[#A29374]/15 bg-[#F4F0E8] p-4">
           <Input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder={t('bulkChange.approvalNote', { defaultValue: 'Reason for approval / rejection (required)…' })}
-            className="mb-3 bg-white focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+            className="mb-3 bg-white focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
           />
           <div className="flex items-center justify-end gap-2">
             <Button

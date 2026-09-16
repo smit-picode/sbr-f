@@ -54,6 +54,15 @@ interface DataTableProps<TData, TValue> {
   getRowClassName?: (row: TData) => string | undefined;
 }
 
+// A sticky cell is a descendant of the hovered row, not the hovered element itself, so it needs
+// the `group-hover:` variant of whatever tint the row uses. These have to be spelled out as
+// literals: Tailwind only emits CSS for class names it can see verbatim in the source, so a
+// `group-hover:*` string assembled at runtime compiles to nothing and the cell silently keeps
+// its base background. Add an entry here whenever a new row tint is introduced.
+const STICKY_CELL_HOVER_CLASS: Record<string, string> = {
+  'hover:bg-warn-tint': 'group-hover:bg-warn-tint',
+};
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -166,10 +175,7 @@ export function DataTable<TData, TValue>({
             ) : (
               table.getRowModel().rows.map((row) => {
                 const rowClassName = getRowClassName?.(row.original);
-                // The sticky cell is a descendant of the row (which carries `group`), not the
-                // hovered element itself, so its own hover tint needs `group-hover:` — plain
-                // `hover:` on a sibling cell never fires just because another cell was hovered.
-                const stickyClassName = rowClassName?.replace(/(^|\s)hover:/g, '$1group-hover:');
+                const stickyClassName = rowClassName ? STICKY_CELL_HOVER_CLASS[rowClassName] : undefined;
                 return (
                 <TableRow
                   key={row.id}
@@ -181,7 +187,11 @@ export function DataTable<TData, TValue>({
                     return (
                     <TableCell
                       key={cell.id}
-                      className={cn(isSticky && cn('sticky start-0 z-10', stickyClassName || 'bg-white group-hover:bg-panel'))}
+                      // The opaque base background is never optional — a sticky cell without one
+                      // lets horizontally scrolled columns show through underneath it. Row classes
+                      // layer on top (tailwind-merge lets a later bg win) rather than replacing it,
+                      // since a row class may supply only a hover tint and no base colour.
+                      className={cn(isSticky && cn('sticky start-0 z-10 bg-white group-hover:bg-panel', stickyClassName))}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

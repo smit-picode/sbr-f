@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useNearestDialogContainer } from '@/hooks';
 import { useGetIsicValuesQuery, useGetIsic2DigitValuesQuery } from '@/features/lookups/api/lookupsApi';
 import { useTranslation } from 'react-i18next';
 
@@ -11,8 +12,8 @@ import { useTranslation } from 'react-i18next';
  * Pick an ISIC code from the SBR_ISIC_LKP classification list.
  *
  * Replaces free-text ISIC entry so an invalid code cannot be typed — the value can only ever
- * come from the lookup. Built on Radix's Popover (same family as Select/DropdownMenu, already
- * used inside Dialogs in this app without issue) rather than a hand-rolled
+ * come from the lookup. Built on Radix's Popover, portaled into the nearest Dialog via
+ * `useNearestDialogContainer` (see popover.tsx's own note) rather than a hand-rolled
  * `createPortal(..., document.body)` panel — that approach rendered fine but its search input
  * and scroll didn't respond inside a modal, because a Dialog's FocusScope/scroll-lock only
  * recognizes content portaled through Radix's own layer stack as "inside" the modal. The list is
@@ -50,6 +51,7 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  const { ref: containerRef, container } = useNearestDialogContainer<HTMLDivElement>();
 
   // Both hooks are always called (React hook rules — no conditional calls), but only one of the
   // two ever has an active subscriber per rendered instance since digitMode is fixed per usage,
@@ -83,7 +85,7 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <div className="relative">
+      <div ref={containerRef} className="relative">
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -94,7 +96,7 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
           >
             {value ? (
               <span className="min-w-0 flex-1 truncate">
-                <span className="font-mono text-xs font-medium text-[#8A1538]">{value}</span>
+                <span className="font-mono text-xs font-medium text-[#A29374]">{value}</span>
                 {selected?.DESCRIPTION && <span className="ms-2 text-slate-600">{selected.DESCRIPTION}</span>}
               </span>
             ) : (
@@ -121,8 +123,9 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
       </div>
 
       <PopoverContent
+        container={container}
         onOpenAutoFocus={(e) => { e.preventDefault(); searchRef.current?.focus(); }}
-        className="flex w-[var(--radix-popover-trigger-width)] max-h-[min(360px,var(--radix-popover-content-available-height))] flex-col overflow-hidden p-0"
+        className="flex w-[var(--radix-popover-trigger-width)] max-h-[min(260px,var(--radix-popover-content-available-height))] flex-col overflow-hidden p-0"
       >
         <div className="relative shrink-0 border-b border-slate-100 p-2">
           <Search className="pointer-events-none absolute start-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
@@ -132,7 +135,7 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
             placeholder={t('isicSelect.searchPlaceholder', { defaultValue: 'Search by code or activity…' })}
-            className="h-8 ps-7 text-xs shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+            className="h-8 ps-7 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             autoComplete="off"
           />
         </div>
@@ -162,7 +165,7 @@ export function IsicCodeSelect({ value, onChange, disabled, invalid, digitMode =
                       onClick={() => select(o.CODE)}
                       className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
                     >
-                      <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.CODE === value ? 'text-[#8A1538]' : 'text-transparent'}`} />
+                      <Check className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${o.CODE === value ? 'text-[#A29374]' : 'text-transparent'}`} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-mono text-xs font-medium text-slate-700">{o.CODE}</span>
                         {o.DESCRIPTION && <span className="block text-xs text-slate-500">{o.DESCRIPTION}</span>}

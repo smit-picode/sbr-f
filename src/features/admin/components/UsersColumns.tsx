@@ -19,7 +19,7 @@ export const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes(
 // stays inside the design-system palette (slate, blue, emerald, amber) plus the maroon theme
 // accent, dropping the off-palette purple/orange/rose.
 const ROLE_BADGE_PALETTE: { badge: string; dot: string }[] = [
-  { badge: 'bg-[#8A1538]/10 text-[#8A1538]', dot: 'bg-[#8A1538]' }, // maroon (theme accent)
+  { badge: 'bg-[#A29374]/10 text-[#A29374]', dot: 'bg-[#A29374]' }, // maroon (theme accent)
   { badge: 'bg-slate-100 text-slate-700', dot: 'bg-slate-500' },    // slate
   { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' }, // emerald
   { badge: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },        // blue
@@ -72,8 +72,8 @@ export const getUsersColumns = ({
       header: t('admin.users.colUser'),
       cell: ({ row }) => (
         <div>
-          <p className="text-sm font-semibold text-slate-900">{row.original.NAME}</p>
-          <p className="text-xs text-slate-400">{row.original.EMAIL}</p>
+          <p className="text-[13px] font-semibold text-slate-800">{row.original.NAME}</p>
+          <p className="text-[11.5px] text-slate-400">{row.original.EMAIL}</p>
         </div>
       ),
     },
@@ -105,7 +105,7 @@ export const getUsersColumns = ({
       id: 'CREATED_AT',
       accessorKey: 'CREATED_AT',
       header: t('admin.users.colCreatedAt'),
-      cell: ({ getValue }) => <span className="text-sm text-slate-700">{formatDate(getValue<string>())}</span>,
+      cell: ({ getValue }) => <span className="text-[12px] text-slate-500">{formatDate(getValue<string>())}</span>,
     },
   ];
 

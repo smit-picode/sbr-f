@@ -229,7 +229,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                 if (errors.NAME_ENU) setErrors((prev) => { const n = { ...prev }; delete n.NAME_ENU; return n; });
               }}
               maxLength={500}
-              className={`focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
+              className={`focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
             />
             {errors.NAME_ENU && <p className="text-xs text-red-500 mt-0.5">{errors.NAME_ENU}</p>}
           </div>
@@ -281,7 +281,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                     </div>
                     <StatusBadge status={r.EST_STATUS} className="shrink-0 text-[10px]" />
                     {isMain
-                      ? <Badge className="rounded-md bg-[#8A1538] text-white text-[10px] font-bold">MAIN</Badge>
+                      ? <Badge className="rounded-md bg-[#A29374] text-white text-[10px] font-bold">MAIN</Badge>
                       : <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>}
                     <button
                       type="button"
@@ -309,7 +309,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('enterpriseEdit.searchPlaceholder', { defaultValue: 'Search by SBR ID, name, or CR...' })}
-                  className="pl-8 bg-white focus:ring-1 focus:ring-[#8A1538]/30 focus:border-[#8A1538]/40"
+                  className="pl-8 bg-white focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40"
                 />
               </div>
               {debouncedSearch && (
@@ -347,7 +347,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
         <DialogFooter className="px-6 py-4 border-t border-slate-100 shrink-0">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-          <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
+          <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

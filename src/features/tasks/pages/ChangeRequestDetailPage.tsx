@@ -24,7 +24,7 @@ import { ROUTES } from '@/constants/routes';
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
+  SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
   SBR_ADDRESSES: 'bg-sky-50 text-sky-700',
@@ -450,12 +450,12 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           )}
 
           {pending && canApprove && (
-            <div className="rounded-lg border border-[#8A1538]/15 bg-[#FCF4F6] p-4">
+            <div className="rounded-lg border border-[#A29374]/15 bg-[#F4F0E8] p-4">
               <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={t('changeRequests.approvalNote', { defaultValue: 'Reason for approval / rejection (required)…' })}
-                className="mb-3 bg-white focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+                className="mb-3 bg-white focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
               />
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-slate-600">
@@ -540,10 +540,10 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(parentSbrId))}
-                className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
+                className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A29374]/40 hover:bg-[#F4F0E8]"
               >
-                <Building2 className="h-4 w-4 shrink-0 text-[#8A1538]" />
-                <span className="font-mono text-sm font-medium text-[#8A1538]">SBR #{parentSbrId}</span>
+                <Building2 className="h-4 w-4 shrink-0 text-[#A29374]" />
+                <span className="font-mono text-sm font-medium text-[#A29374]">SBR #{parentSbrId}</span>
               </button>
             </div>
           )}
@@ -556,9 +556,9 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                 <button
                   type="button"
                   onClick={() => router.push(`/enterprises/${relEnterprise.ENTERPRISE_ID}`)}
-                  className="mb-3 flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
+                  className="mb-3 flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A29374]/40 hover:bg-[#F4F0E8]"
                 >
-                  <Layers className="h-4 w-4 shrink-0 text-[#8A1538]" />
+                  <Layers className="h-4 w-4 shrink-0 text-[#A29374]" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-slate-800">{relEnterprise.NAME_ENU ?? `#${relEnterprise.ENTERPRISE_ID}`}</span>
                     <span className="block text-xs text-slate-500">
@@ -596,7 +596,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                       key={m.SBR_ID}
                       type="button"
                       onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(m.SBR_ID))}
-                      className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#8A1538]/40 hover:bg-[#FCF4F6]"
+                      className="flex w-full items-center gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-left transition-colors hover:border-[#A29374]/40 hover:bg-[#F4F0E8]"
                     >
                       <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
                       <span className="min-w-0 flex-1">
@@ -604,7 +604,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                         <span className="block text-xs text-slate-500">{m.MOCI_CR_NUM ? `CR ${m.MOCI_CR_NUM} · ` : ''}#{m.SBR_ID}</span>
                       </span>
                       {m.MAIN_BRANCH_FLG === 'MAIN' ? (
-                        <span className="shrink-0 rounded bg-[#8A1538] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
+                        <span className="shrink-0 rounded bg-[#A29374] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
                       ) : m.MAIN_BRANCH_FLG === 'BRANCH' ? (
                         <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{t('changeRequests.branch', { defaultValue: 'BRANCH' })}</span>
                       ) : null}

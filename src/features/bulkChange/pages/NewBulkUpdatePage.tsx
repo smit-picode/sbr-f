@@ -163,7 +163,7 @@ export function NewBulkUpdatePage() {
         <Button
           onClick={handleNext}
           disabled={!canGoNext || submitting}
-          style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+          style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
           className="text-white"
         >
           {step === STEP_CONFIRM

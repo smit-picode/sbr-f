@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import { Building2, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useNearestDialogContainer } from '@/hooks';
 import { useGetEstablishmentsListQuery } from '@/features/establishments/api/establishmentsApi';
 import { nullableText } from '@/utils/format';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,12 @@ import { useTranslation } from 'react-i18next';
  * Replaces free-text SBR ID entry so a non-existent ID cannot be typed — the value can only
  * ever come from a record that exists (2026-08-11 requirements call). Mirrors the enterprise
  * search already used in the Enterprise Group modals: debounced query, small result list,
- * click to select.
+ * click to select. Built on Radix's Popover (same family as Select/DropdownMenu, already used
+ * inside Dialogs in this app without issue), portaled into the nearest Dialog via
+ * `useNearestDialogContainer` (see popover.tsx's own note), rather than a hand-rolled
+ * `createPortal(..., document.body)` panel — that approach rendered fine but its scroll didn't
+ * respond inside a modal, because a Dialog's FocusScope/scroll-lock only recognizes content
+ * portaled through Radix's own layer stack as "inside" the modal.
  *
  * Search matches on NAME_ENU / NAME_ARA / NPC_NAME_* only — that is what the list procedure's
  * p_search covers. Searching by typing the SBR ID itself needs the procedure's column filter,
@@ -35,16 +41,7 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  // The panel is portaled to <body> (see below) so a modal's `overflow-y-auto` body can't clip
-  // it — position it in fixed/viewport coordinates from the input's own rect instead of relying
-  // on CSS `absolute` positioning off a `relative` ancestor. `maxHeight` is capped to whatever
-  // room is actually left in the viewport (flipping above the input when there's more room
-  // there) so the list scrolls within the panel instead of running past the screen edge with
-  // nothing able to scroll it back into view.
-  const [panelRect, setPanelRect] = useState<{ left: number; width: number; maxHeight: number; top?: number; bottom?: number } | null>(null);
+  const { ref: containerRef, container } = useNearestDialogContainer<HTMLDivElement>();
 
   const debouncedQuery = useDebounce(query, 400);
 
@@ -53,47 +50,6 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
     { skip: !open || !debouncedQuery }
   );
   const results = data?.data ?? [];
-
-  // Close on outside click so the panel never sits over the rest of the form. The panel itself
-  // lives in a portal (outside containerRef in the DOM), so it needs its own ref checked too.
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (containerRef.current?.contains(target)) return;
-      if (panelRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
-  }, [open]);
-
-  // Track the input's viewport position while open, so the portaled panel stays anchored under
-  // it even when an ancestor (e.g. a modal's scrollable body) scrolls or the window resizes.
-  useLayoutEffect(() => {
-    if (!open) return;
-    const update = () => {
-      const rect = inputRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const margin = 8;
-      const spaceBelow = window.innerHeight - rect.bottom - margin;
-      const spaceAbove = rect.top - margin;
-      const openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
-      const maxHeight = Math.max(160, Math.min(320, openUp ? spaceAbove : spaceBelow));
-      setPanelRect(
-        openUp
-          ? { left: rect.left, width: rect.width, maxHeight, bottom: window.innerHeight - rect.top + 4 }
-          : { left: rect.left, width: rect.width, maxHeight, top: rect.bottom + 4 }
-      );
-    };
-    update();
-    window.addEventListener('resize', update);
-    document.addEventListener('scroll', update, true);
-    return () => {
-      window.removeEventListener('resize', update);
-      document.removeEventListener('scroll', update, true);
-    };
-  }, [open]);
 
   const select = (sbrId: number) => {
     onChange(sbrId);
@@ -114,7 +70,7 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
       <div className="flex items-center gap-2">
         <span className="inline-flex flex-1 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
           <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
-          <span className="font-mono text-xs font-medium text-[#8A1538]">{value}</span>
+          <span className="font-mono text-xs font-medium text-[#A29374]">{value}</span>
         </span>
         {!disabled && (
           <button
@@ -131,56 +87,53 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
   }
 
   return (
-    <div ref={containerRef} className="relative">
-      <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-      <Input
-        ref={inputRef}
-        value={query}
-        disabled={disabled}
-        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        placeholder={placeholder ?? t('common.searchEstablishmentPlaceholder', { defaultValue: 'Search establishments by name...' })}
-        className={`ps-8 shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20 ${className ?? ''}`}
-        autoComplete="off"
-      />
+    <Popover open={open && !!debouncedQuery} onOpenChange={setOpen}>
+      <div ref={containerRef} className="relative">
+        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        <PopoverTrigger asChild>
+          <Input
+            value={query}
+            disabled={disabled}
+            onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            placeholder={placeholder ?? t('common.searchEstablishmentPlaceholder', { defaultValue: 'Search establishments by name...' })}
+            className={`ps-8 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${className ?? ''}`}
+            autoComplete="off"
+          />
+        </PopoverTrigger>
+      </div>
 
-      {open && debouncedQuery && panelRect && createPortal(
-        <div
-          ref={panelRef}
-          className="fixed z-50 overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white shadow-float"
-          style={{
-            left: panelRect.left,
-            width: panelRect.width,
-            maxHeight: panelRect.maxHeight,
-            ...(panelRect.top !== undefined ? { top: panelRect.top } : { bottom: panelRect.bottom }),
-          }}
-        >
-          {isFetching ? (
-            <p className="px-3 py-2 text-xs text-slate-400">{t('common.searching', { defaultValue: 'Searching…' })}</p>
-          ) : results.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-slate-400">{t('common.noMatchingEstablishments', { defaultValue: 'No matching establishments.' })}</p>
-          ) : (
-            <ul>
-              {results.map((e) => (
-                <li key={e.ID}>
-                  <button
-                    type="button"
-                    onClick={() => select(e.SBR_ID)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
-                  >
-                    <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-slate-800">{nullableText(e.NAME_ENU)}</span>
-                      <span className="block font-mono text-xs text-slate-400">{e.SBR_ID}</span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>,
-        document.body
-      )}
-    </div>
+      {/* The input is the trigger and must keep focus while typing, so the popover's own
+          auto-focus (which would otherwise jump to the first result) is suppressed. */}
+      <PopoverContent
+        container={container}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="w-[var(--radix-popover-trigger-width)] max-h-[min(320px,var(--radix-popover-content-available-height))] overflow-y-auto overscroll-contain p-0"
+      >
+        {isFetching ? (
+          <p className="px-3 py-2 text-xs text-slate-400">{t('common.searching', { defaultValue: 'Searching…' })}</p>
+        ) : results.length === 0 ? (
+          <p className="px-3 py-2 text-xs text-slate-400">{t('common.noMatchingEstablishments', { defaultValue: 'No matching establishments.' })}</p>
+        ) : (
+          <ul>
+            {results.map((e) => (
+              <li key={e.ID}>
+                <button
+                  type="button"
+                  onClick={() => select(e.SBR_ID)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50"
+                >
+                  <Building2 className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-slate-800">{nullableText(e.NAME_ENU)}</span>
+                    <span className="block font-mono text-xs text-slate-400">{e.SBR_ID}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }

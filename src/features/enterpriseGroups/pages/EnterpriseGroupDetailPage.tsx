@@ -25,7 +25,7 @@ import {
   GitFork, ShieldCheck, Activity, Info, Network, History,
 } from 'lucide-react';
 
-const MAROON = '#8A1538';
+const MAROON = '#A29374';
 
 // Overview-panel row with the per-attribute history popover (same pattern as ContactDetailPage)
 function DetailField({ recordId, fieldKey, label, value, canViewHistory, pendingCount }: {
@@ -54,13 +54,13 @@ function DetailField({ recordId, fieldKey, label, value, canViewHistory, pending
         disabled={!canViewHistory}
         className="group flex min-w-0 flex-1 items-center justify-between gap-2 text-start disabled:cursor-default"
       >
-        <span className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
+        <span className="flex items-center gap-1.5 text-[11px] text-slate-400 shrink-0">
           {label}
           <PendingFieldBadge count={pendingCount} />
         </span>
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 text-right">
+        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-800 text-right">
           {value}
-          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#8A1538]" />}
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A29374]" />}
         </span>
       </button>
       {open && (
@@ -103,12 +103,12 @@ function StatField({ recordId, fieldKey, label, value, canViewHistory, pendingCo
         disabled={!canViewHistory}
         className="group w-full min-w-0 text-start disabled:cursor-default"
       >
-        <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 mb-0.5">
           {label}
           <PendingFieldBadge count={pendingCount} />
-          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#8A1538]" />}
+          {canViewHistory && <History className="h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A29374]" />}
         </p>
-        <p className="text-sm font-semibold text-slate-800">{value}</p>
+        <p className="text-[14px] font-bold text-slate-800">{value}</p>
       </button>
       {open && (
         <FieldHistoryPopover
@@ -296,12 +296,12 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
 
         {/* ── UCI node ─────────────────────────────────────────── */}
         <div
-          className="absolute rounded-2xl border border-[#8A1538]/30 bg-[#FFF5F7] px-5 py-3 text-center"
+          className="absolute rounded-2xl border border-[#A29374]/30 bg-dune-tint px-5 py-3 text-center"
           style={{ width: NODE_W, left: cx - NODE_W / 2, top: UCI_Y }}
           onMouseEnter={() => setTooltip(uciTooltip)}
           onMouseLeave={() => setTooltip(null)}
         >
-          <p className="text-[10px] font-semibold text-[#8A1538]/70 mb-0.5">
+          <p className="text-[10px] font-semibold text-[#A29374]/70 mb-0.5">
             UCI{uci.type ? ` · ${uci.type.toUpperCase()}` : ''}
           </p>
           <p className="text-sm font-bold text-slate-800 leading-snug">{nullableText(uci.name)}</p>
@@ -315,7 +315,7 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
             width: NODE_W,
             left: cx - NODE_W / 2,
             top: GROUP_Y,
-            background: 'linear-gradient(135deg, #8A1538 0%, #6D0D2A 100%)',
+            background: 'linear-gradient(135deg, #A29374 0%, #87795D 100%)',
           }}
           onMouseEnter={() => setTooltip(groupTooltip)}
           onMouseLeave={() => setTooltip(null)}
@@ -332,10 +332,10 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
             onMouseEnter={() => setTooltip(memberTooltip(m))}
             onMouseLeave={() => setTooltip(null)}
             className={`absolute rounded-xl border border-slate-200 px-3 py-2.5 text-center bg-white transition-all ${
-              onMemberClick ? 'cursor-pointer hover:shadow-md hover:border-[#8A1538]/50' : ''}`}
+              onMemberClick ? 'cursor-pointer hover:shadow-md hover:border-[#A29374]/50' : ''}`}
             style={{ width: MEMBER_W, left: membersStartX + i * (MEMBER_W + H_GAP), top: MEMBER_Y }}
           >
-            <p className={`text-[10px] font-mono font-semibold ${m.isHead ? 'text-[#8A1538]' : 'text-slate-400'}`}>
+            <p className={`text-[10px] font-mono font-semibold ${m.isHead ? 'text-[#A29374]' : 'text-slate-400'}`}>
               ENT-{m.enterpriseId}{m.isHead ? ' ★' : ''}
             </p>
             <p className="text-xs font-semibold text-slate-700 leading-snug mt-0.5 line-clamp-2">
@@ -377,12 +377,12 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
     <div
       className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
         onClick ? 'cursor-pointer hover:bg-slate-50' : ''
-      } ${member.IS_GROUP_HEAD ? 'border-[#8A1538]/30 bg-[#8A1538]/5' : 'border-slate-200 bg-white'}`}
+      } ${member.IS_GROUP_HEAD ? 'border-[#A29374]/30 bg-[#A29374]/5' : 'border-slate-200 bg-white'}`}
       onClick={onClick}
     >
       {/* Orbit icon — maroon bg for head enterprise, gray for others */}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-        member.IS_GROUP_HEAD ? 'bg-[#8A1538]' : 'bg-slate-100'
+        member.IS_GROUP_HEAD ? 'bg-[#A29374]' : 'bg-slate-100'
       }`}>
         <Orbit className={`h-5 w-5 ${member.IS_GROUP_HEAD ? 'text-white' : 'text-slate-400'}`} />
       </div>
@@ -394,7 +394,7 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
             {nullableText(member.NAME_ENU)}
           </p>
           {!!member.IS_GROUP_HEAD && (
-            <span className="inline-flex items-center rounded-md bg-[#8A1538] px-2 py-0.5 text-[10px] font-bold text-white">
+            <span className="inline-flex items-center rounded-md bg-[#A29374] px-2 py-0.5 text-[10px] font-bold text-white">
               {groupHeadLabel}
             </span>
           )}
@@ -506,7 +506,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         back={{ label: t('enterpriseGroupDetail.backLink', { defaultValue: 'Enterprise Groups' }), onClick: () => router.push('/enterprise-groups') }}
         chips={
           <>
-            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#C73050' }}>
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold font-mono text-white" style={{ background: '#A29374' }}>
               <GitFork className="h-3 w-3" />
               {formatGroupCode(group.ENTERPRISE_GROUP_ID)}
             </span>
@@ -583,7 +583,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
-          <History className="h-3.5 w-3.5 text-[#8A1538]" /> {t('fieldHistory.clickHint')}
+          <History className="h-3.5 w-3.5 text-[#A29374]" /> {t('fieldHistory.clickHint')}
         </p>
       )}
 

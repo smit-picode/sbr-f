@@ -43,7 +43,7 @@ export function BulkChangeHistoryPage() {
     {
       accessorKey: 'ID',
       header: t('bulkChange.cols.task', { defaultValue: 'Bulk Task' }),
-      cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-blue-700">{String(getValue())}</span>,
+      cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span>,
     },
     {
       accessorKey: 'SUBMITTED_BY',
@@ -51,7 +51,7 @@ export function BulkChangeHistoryPage() {
       cell: ({ getValue }) => (
         <span className="flex items-center gap-1.5 text-sm">
           <User className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-[#8A1538]">{String(getValue())}</span>
+          <span className="text-[#A29374]">{String(getValue())}</span>
         </span>
       ),
     },
@@ -118,7 +118,7 @@ export function BulkChangeHistoryPage() {
             </Button>
             {canSubmit && (
               <Button
-                style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }}
+                style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
                 className="text-white gap-1.5"
                 onClick={() => router.push('/tasks/bulk-change/new')}
               >

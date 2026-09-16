@@ -7,7 +7,7 @@ interface PageContainerProps {
 
 export function PageContainer({ children, className }: PageContainerProps) {
   return (
-    <div className={cn('flex flex-col gap-4', className)}>
+    <div className={cn('flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300', className)}>
       {children}
     </div>
   );

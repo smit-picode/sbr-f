@@ -27,10 +27,10 @@ If "all" — run the full audit below then apply fixes in order.
 **Updated 2026-09 — QInsights redesign.** The palette below replaced the earlier blue-700/dark-sidebar/Inter theme project-wide (tokens defined in `src/app/globals.css`'s `@theme` block).
 
 ```
-Primary:   adaam        (#8A1538)   — buttons, links, active states, accents
-Primary deep: adaam-deep(#6D0D2A)   — gradient end, hover-deepen
-Primary tint: adaam-tint(#F6E7EC)   — active nav pill bg, soft badges
-Secondary: dune         (#A29374)   — logo badge, avatar circles, warm accents
+Primary:   adaam        (#A29374)   — buttons, links, active states, accents (aliased to `dune` — replaced the earlier maroon #8A1538 app-wide 2026-09-15)
+Primary deep: adaam-deep(#87795D)   — gradient end, hover-deepen
+Primary tint: adaam-tint(#F4F0E8)   — active nav pill bg, soft badges
+Secondary: dune         (#A29374)   — logo badge, avatar circles, warm accents — same color as `adaam` above
 Sidebar:   white                     — floating rounded rail (NOT dark anymore)
 Body bg:   #F7F8FA                  — page background
 Surface:   white                     — cards, tables, modals

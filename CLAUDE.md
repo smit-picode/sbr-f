@@ -18,7 +18,7 @@ Statistical Business Register UI for NPC Qatar. **Next.js 14 (App Router) + RTK 
 
 ## Skills (on-demand — invoke instead of inlining the recipe)
 - `add-feature` — scaffold a feature: types → api slice → columns → edit modal → page → route → nav
-- `ui-design` — apply the maroon design system to new UI
+- `ui-design` — apply the dune design system to new UI
 - `code-review`, `typescript-review`, `bug-review` — review passes
 
 ---
@@ -28,7 +28,7 @@ Statistical Business Register UI for NPC Qatar. **Next.js 14 (App Router) + RTK 
 2. **Filters:** wrap filter state in `cleanParams()` before passing to a query hook; any filter change also resets `page: 1`.
 3. **Edit modals:** implement `hasChanges()`; if none → `toast.info('No changes detected.')` and return. `toast.success` on ok, `toast.error` in catch, both buttons disabled while loading.
 4. **Display:** `nullableText()` for nullable cells; `<StatusBadge>` for status; `formatDate`/`formatNumber` for those. Never raw `null`/`''`.
-5. **Theme:** maroon `#A71D3A` (this build overrides the blue-700 in the design-system doc). Dropdowns use the themed `Select`, never native `<select>`. Soft focus ring on filter inputs: `focus:border-[#A71D3A]/40 focus:ring-[#A71D3A]/20`. (`rules/styling.md`)
+5. **Theme:** dune `#A29374` (this build overrides the blue-700 in the design-system doc, and replaces the earlier maroon `#8A1538`/`#A71D3A` palette everywhere — buttons, badges, hovers, borders, skeletons, tab highlights). Dropdowns use the themed `Select`, never native `<select>`. Soft focus ring on filter inputs: `focus:border-[#A29374]/40 focus:ring-[#A29374]/20`. (`rules/styling.md`)
 6. **Shared utils/components:** before changing anything in `src/utils`, `src/hooks`, or `src/components`, grep all callers and follow `rules/common-function-rule.md` — modify only if no caller breaks, else add a new function.
 7. **Constants:** enums/labels/options live in `src/features/{feature}/constants/` and must match the backend enums. Never inline. (`rules/constants-enums.md`)
 8. **i18n:** user-facing strings via `t('key', { defaultValue })`; keep `public/locales/en.json` + `ar.json` valid JSON.

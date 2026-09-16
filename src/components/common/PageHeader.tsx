@@ -74,13 +74,14 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
         </button>
       )}
 
-      {/* Toolbar: language toggle + notification bell + avatar — one shared frosted-glass pill
-          container (matching the reference), with thin dividers so each item still reads as
-          its own control instead of blending into one blob. */}
+      {/* Toolbar: language toggle + notification bell + avatar. Two layers of background, both
+          kept — a shared outer frosted-glass pill grouping all three (removed once, then asked
+          back), plus each item keeping its own distinct pill/circle background inside it, so
+          every control still reads as its own button rather than blending into the group. */}
       <div
-        className="absolute top-4 end-4 z-10 flex items-center gap-1.5 divide-x divide-white/20 rounded-full p-1.5"
+        className="absolute top-4 end-4 z-10 flex items-center gap-2 rounded-full p-1.5"
         style={{
-          background: 'rgba(255,255,255,.22)',
+          background: 'rgba(255,255,255,.14)',
           boxShadow: '0 4px 20px rgba(0,0,0,.15)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
@@ -88,16 +89,26 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
       >
         <button
           onClick={toggleLanguage}
-          className="h-9 px-3.5 rounded-full text-[12px] font-semibold text-white hover:bg-white/25 transition-colors"
+          className="h-9 px-3.5 rounded-full text-[12px] font-semibold text-white transition-colors hover:bg-white/30"
           title={isArabic ? 'Switch to English' : 'التبديل إلى العربية'}
-          style={!isArabic ? { fontFamily: 'var(--font-cairo), sans-serif' } : undefined}
+          style={{
+            background: 'rgba(255,255,255,.16)',
+            boxShadow: '0 2px 8px rgba(0,0,0,.12)',
+            ...(!isArabic ? { fontFamily: 'var(--font-cairo), sans-serif' } : {}),
+          }}
         >
           {isArabic ? 'English' : 'عربي'}
         </button>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button className="relative h-9 w-9 rounded-full flex items-center justify-center text-white hover:bg-white/25 transition-colors">
+              <button
+                className="relative h-9 w-9 rounded-full flex items-center justify-center text-white transition-colors hover:bg-white/30"
+                style={{
+                  background: 'rgba(255,255,255,.16)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,.12)',
+                }}
+              >
                 <Bell className="h-[16px] w-[16px]" />
                 <span className="absolute top-2 end-2.5 w-1.5 h-1.5 rounded-full bg-dune-light" />
               </button>
@@ -115,7 +126,7 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
         </TooltipProvider>
         <div
           className="h-9 w-9 rounded-full bg-dune text-white font-bold text-[12px] flex items-center justify-center"
-          style={{ boxShadow: '0 0 0 2px rgba(255,255,255,.55)' }}
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,.12), 0 0 0 2px rgba(255,255,255,.55)' }}
           title={user?.email ?? ''}
         >
           {initialsOf(user)}

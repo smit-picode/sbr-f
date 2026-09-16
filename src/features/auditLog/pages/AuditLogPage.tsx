@@ -156,7 +156,7 @@ export function AuditLogPage() {
           <Input
             type="number"
             placeholder={t('filters.filterByRecordId')}
-            className="w-48 h-8 text-xs shadow-none focus:border-[#8A1538]/40 focus:ring-[#8A1538]/20"
+            className="w-48 h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             min="1"
             value={recordIdInput}
             onKeyDown={(e) => {

@@ -1,9 +1,14 @@
 @import "tailwindcss";
+/* Provides the `animate-in`/`animate-out`, `fade-in-0`, `zoom-in-95`, `slide-in-from-*` utilities
+   already written throughout Dialog/Popover/Tooltip/DropdownMenu — those classes had no matching
+   CSS without this plugin, so every open/close transition on those components was silently
+   inert (an instant show/hide, no animation) until now. */
+@import "tw-animate-css";
 
 @theme {
-  --color-adaam: #8A1538;
-  --color-adaam-deep: #6D0D2A;
-  --color-adaam-tint: #F6E7EC;
+  --color-adaam: #A29374;
+  --color-adaam-deep: #87795D;
+  --color-adaam-tint: #F4F0E8;
 
   --color-dune: #A29374;
   --color-dune-light: #C0AC86;
@@ -53,11 +58,11 @@
 }
 
 :root {
-  --brand-crimson: #8A1538;
-  --brand-crimson-dark: #6D0D2A;
+  --brand-crimson: #A29374;
+  --brand-crimson-dark: #87795D;
   --brand-navy: #1a3a52;
-  --brand-gradient: linear-gradient(to right, #8A1538 0%, #6D0D2A 40%, #1a3a52 100%);
-  --brand-button-gradient: linear-gradient(90deg, #8A1538 0%, #1a3a52 100%);
+  --brand-gradient: linear-gradient(to right, #A29374 0%, #87795D 40%, #1a3a52 100%);
+  --brand-button-gradient: linear-gradient(90deg, #A29374 0%, #1a3a52 100%);
   --interactive: #2B7A9E;
   --interactive-hover: #1f6080;
 }
@@ -67,8 +72,12 @@
 }
 
 body {
-  /* Plus Jakarta Sans for Latin (reference design); Cairo supplies Arabic glyphs */
-  font-family: var(--font-jakarta), var(--font-cairo), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Matches the reference's stack verbatim. Lusail (Qatar's national typeface) is not
+     distributed with either app, so text actually resolves to Calibri — which is notably
+     narrower and shorter-x-height than Plus Jakarta Sans, and was the real cause of our
+     text rendering ~1.2x wider than the client's at identical px sizes. Jakarta stays on
+     as a late fallback for machines without Calibri; Cairo supplies Arabic glyphs. */
+  font-family: 'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   background-color: #F7F8FA;
   color: #0f172a;
 }
@@ -76,8 +85,9 @@ body {
 /* In Arabic (RTL) mode, Noto Sans Arabic becomes the PRIMARY font for ALL text
    so Arabic + inline Latin render consistently — matches client website. LTR unaffected. */
 html[dir='rtl'] body {
-  /* font-family: var(--font-cairo), var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; */
-  font-family: var(--font-jakarta), var(--font-cairo), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Reference RTL stack, with Cairo kept ahead of Calibri because Calibri's Arabic coverage
+     is far weaker than Cairo's — Latin still resolves to Calibri via per-glyph fallback. */
+  font-family: 'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
 /* Hide scrollbar for horizontal nav overflow */
@@ -105,17 +115,19 @@ html[dir='rtl'] body {
   background: #94a3b8;
 }
 
-/* Skeleton shimmer — subtle on-theme sweep used for all loading placeholders.
-   A slate base with a faint dune-tinted highlight sliding across (the maroon `adaam` tint read
-   as a jarring red streak against the dark navy banner skeleton — dune is the neutral secondary
-   accent, so the sweep now reads as a soft warm-gray pulse instead). */
+/* Skeleton shimmer — simple, plain light-gray placeholder used for all loading states. Kept
+   neutral on purpose (no warm/dune or dark-navy tint) — a colored skeleton read as jarring/"off"
+   next to the app's white cards, plain light gray + a soft white sweep is the safer, cleaner
+   default. `.shimmer-dark` used to swap in a dark-navy base for the banner placeholder; it's now
+   just an alias to the same neutral look so every skeleton in the app matches, including the
+   banner stand-in. */
 @keyframes sbr-shimmer {
   100% { transform: translateX(100%); }
 }
 .shimmer {
   position: relative;
   overflow: hidden;
-  background-color: #e2e8f0; /* slate-200 base */
+  background-color: #EDEEF0; /* plain light neutral gray */
 }
 .shimmer::after {
   content: '';
@@ -125,9 +137,7 @@ html[dir='rtl'] body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(162, 147, 116, 0.10) 40%,
-    rgba(255, 255, 255, 0.65) 50%,
-    rgba(162, 147, 116, 0.10) 60%,
+    rgba(255, 255, 255, 0.75) 50%,
     transparent 100%
   );
   animation: sbr-shimmer 1.6s infinite;
@@ -140,22 +150,10 @@ html[dir='rtl'] .shimmer::after {
   .shimmer::after { animation: none; }
 }
 
-/* Dark variant — for a skeleton standing in for the PageHeader banner (dark navy + hero image),
-   not a plain white card. The default .shimmer's light slate-200 base flashed as a jarring
-   mismatch against the dark banner that appears once data loads. Combine with .shimmer:
-   `className="shimmer shimmer-dark"` — same markup/animation, only the two colors below change. */
+/* Alias — kept so existing `shimmer shimmer-dark` usages (banner placeholders) don't need every
+   caller updated; it no longer changes the color, just resolves to the same plain look above. */
 .shimmer-dark {
-  background-color: #16243a; /* one step lighter than the banner's #0E1A2B base, so the pulse reads against it */
-}
-.shimmer-dark::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(162, 147, 116, 0.16) 40%,
-    rgba(220, 210, 190, 0.32) 50%,
-    rgba(162, 147, 116, 0.16) 60%,
-    transparent 100%
-  );
+  background-color: #EDEEF0;
 }
 
 /* Native <select> option highlight — use theme gray instead of the OS blue */

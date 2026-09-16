@@ -69,7 +69,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
             rows={3}
             maxLength={500}
             placeholder={t('bulkChange.wizard.confirm.reasonPlaceholder', { defaultValue: 'Briefly describe why these records are being updated…' })}
-            className="w-full rounded-md border border-slate-200 p-2.5 text-sm text-slate-800 focus:border-[#8A1538]/40 focus:outline-none focus:ring-2 focus:ring-[#8A1538]/20"
+            className="w-full rounded-md border border-slate-200 p-2.5 text-sm text-slate-800 focus:border-[#A29374]/40 focus:outline-none focus:ring-2 focus:ring-[#A29374]/20"
           />
           <p className="text-xs text-slate-400">
             {/* SUBMIT_BULK takes a reason per item; the wizard collects one and the API applies

@@ -23,14 +23,14 @@ const PAGE_SIZE = 20;
 // design rather than the shadcn default's gray pill/segmented-control styling.
 const TAB_TRIGGER_CLASS =
   'group gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-2.5 pt-0 text-sm font-medium text-slate-500 shadow-none ' +
-  'data-[state=active]:border-[#8A1538] data-[state=active]:bg-transparent data-[state=active]:text-[#8A1538] data-[state=active]:font-semibold data-[state=active]:shadow-none';
+  'data-[state=active]:border-[#A29374] data-[state=active]:bg-transparent data-[state=active]:text-[#A29374] data-[state=active]:font-semibold data-[state=active]:shadow-none';
 
 // Count next to each tab's label — a plain muted number while inactive, a light pink pill
 // (matching the reference) once its tab is selected. Uses Radix's data-state on the parent
 // TabsTrigger via the `group` class above, so no extra "which tab is active" state is needed.
 const TAB_COUNT_CLASS =
   'rounded-full px-1.5 text-xs font-normal text-slate-400 ' +
-  'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#8A1538] group-data-[state=active]:font-semibold';
+  'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#A29374] group-data-[state=active]:font-semibold';
 
 function usePagedSlice<T>(rows: T[]) {
   const [page, setPage] = useState(1);

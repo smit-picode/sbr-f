@@ -190,7 +190,7 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val === 'MAIN' ? (
-        <Badge className="rounded-md bg-[#8A1538] text-white font-bold">MAIN</Badge>
+        <Badge className="rounded-md bg-[#A29374] text-white font-bold">MAIN</Badge>
       ) : val ? (
         <span className="text-xs text-slate-600">{val}</span>
       ) : (

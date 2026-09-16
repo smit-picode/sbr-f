@@ -170,12 +170,12 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
                 type="button"
                 onClick={() => onSelectTable(option.key)}
                 className={`flex flex-col items-start gap-2 rounded-xl border p-3 text-start transition-all ${
-                  isActive ? 'border-[#8A1538] bg-adaam-tint' : 'border-slate-200 hover:bg-slate-50'
+                  isActive ? 'border-[#A29374] bg-adaam-tint' : 'border-slate-200 hover:bg-slate-50'
                 }`}
               >
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                    isActive ? 'bg-[#8A1538] text-white' : 'bg-slate-100 text-slate-500'
+                    isActive ? 'bg-[#A29374] text-white' : 'bg-slate-100 text-slate-500'
                   }`}
                 >
                   <Icon className="h-4 w-4" />

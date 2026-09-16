@@ -51,11 +51,11 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
         className="group w-full min-w-0 text-start disabled:cursor-default"
       >
         <div className="flex items-center gap-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <p className="text-[10px] font-semibold text-slate-400 truncate">{label}</p>
           <PendingFieldBadge count={pendingCount} />
-          {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#8A1538]" />}
+          {canViewHistory && <History className="ms-auto h-3 w-3 shrink-0 text-slate-200 transition-colors group-hover:text-[#A29374]" />}
         </div>
-        <div className={`mt-0.5 truncate text-sm font-semibold text-slate-800 ${mono ? 'font-mono' : ''}`}>{value}</div>
+        <div className={`mt-1 truncate text-[13px] font-semibold leading-snug text-slate-800 ${mono ? 'font-mono text-[12px]' : ''}`}>{value}</div>
       </button>
       {open && (
         <FieldHistoryPopover
@@ -76,7 +76,7 @@ function DetailCard({ title, children }: { title: string; children: React.ReactN
   return (
     <div className="rounded-lg bg-white shadow-card">
       <div className="border-b border-slate-100 px-4 py-2.5">
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{title}</h2>
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">{title}</h2>
       </div>
       <div className="grid grid-cols-1 gap-x-6 gap-y-4 p-4 sm:grid-cols-2">{children}</div>
     </div>
@@ -94,8 +94,8 @@ function HighlightStrip({ items }: { items: StripItem[] }) {
         <div key={i} className="flex min-w-0 items-center gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">{it.icon}</span>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{it.label}</p>
-            <p className="truncate text-sm font-bold text-slate-800">{String(it.value)}</p>
+            <p className="text-[10px] font-semibold text-slate-400">{it.label}</p>
+            <p className="truncate text-[14px] font-bold text-slate-800">{String(it.value)}</p>
           </div>
         </div>
       ))}
@@ -207,7 +207,7 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
 
       {canViewHistory && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
-          <History className="h-3.5 w-3.5 text-[#8A1538]" /> {t('fieldHistory.clickHint')}
+          <History className="h-3.5 w-3.5 text-[#A29374]" /> {t('fieldHistory.clickHint')}
         </p>
       )}
 

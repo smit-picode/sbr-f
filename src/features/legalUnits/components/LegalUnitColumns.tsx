@@ -1,25 +1,8 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { LegalUnit } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
+import { SOURCE_BADGE, SOURCE_BADGE_FALLBACK } from '@/constants/sourceBadges';
 import { ExternalLink } from 'lucide-react';
-
-// Per-source badge palette. Each source keeps its own hue for at-a-glance recognition, but as a
-// soft tint with dark text rather than a solid dark block. The text shades are deliberately a
-// step darker than the old solid-background colours (QFZ #2B7A9E -> #22637F, QSTP #B5742B ->
-// #8F5C22): at 12px on a tint the originals fall below the 4.5:1 contrast floor the design
-// system requires for small text. Kept as inline hex, as the solid version was, because these
-// regulator colours sit outside the slate/blue/emerald/red/amber Tailwind palette.
-const SOURCE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
-  MOCI:     { bg: '#FBEAEE', text: '#8A1538', border: '#F3D3DB' },
-  QFC:      { bg: '#EEF2F6', text: '#1A3A52', border: '#D6DFE8' },
-  QFZ:      { bg: '#E9F4F8', text: '#22637F', border: '#CFE6EF' },
-  QSTP:     { bg: '#FDF3E7', text: '#8F5C22', border: '#F5E2C8' },
-  MOM_FARM: { bg: '#E8F5EE', text: '#196E49', border: '#C9E7D8' },
-};
-
-// Neutral slate for a source the palette above doesn't know, mirroring the previous
-// '#64748b' fallback so an unrecognised value still renders as a badge rather than bare text.
-const SOURCE_BADGE_FALLBACK = { bg: '#F1F5F9', text: '#475569', border: '#E2E8F0' };
 
 type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
 
@@ -54,8 +37,8 @@ export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void
           className="group inline-flex items-center gap-1.5 text-left"
         >
           <span className="font-mono text-xs font-medium text-adaam">SBR #{sbrId}</span>
-          <span className="text-sm text-slate-700 group-hover:text-[#8A1538] group-hover:underline group-hover:decoration-[#8A1538]">{nullableText(name)}</span>
-          <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-[#8A1538]" />
+          <span className="text-sm text-slate-700 group-hover:text-[#A29374] group-hover:underline group-hover:decoration-[#A29374]">{nullableText(name)}</span>
+          <ExternalLink className="h-3 w-3 shrink-0 text-slate-400 group-hover:text-[#A29374]" />
         </button>
       );
     },

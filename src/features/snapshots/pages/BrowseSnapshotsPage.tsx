@@ -84,7 +84,7 @@ export function BrowseSnapshotsPage() {
     {
       accessorKey: 'FROZEN_BY',
       header: t('snapshots.frozenBy'),
-      cell: ({ getValue }) => <span className="text-sm text-red-600">{getValue<string>()}</span>,
+      cell: ({ getValue }) => <span className="text-sm text-adaam">{getValue<string>()}</span>,
     },
     {
       id: 'actions',

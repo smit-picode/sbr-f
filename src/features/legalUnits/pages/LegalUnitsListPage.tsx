@@ -34,7 +34,17 @@ export function LegalUnitsListPage() {
     const initialSearch = searchParams.get('search');
     return initialSearch ? { ...LEGAL_UNITS_DEFAULT_FILTERS, search: initialSearch } : LEGAL_UNITS_DEFAULT_FILTERS;
   });
-  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
+  // ?establishment=<SBR_ID> deep link from an establishment's "View in Legal Units" — seeds an
+  // ESTABLISHMENT equals <id> column filter so the ledger opens showing only that establishment's
+  // legal units. Uses the allow-listed column rather than free-text `search`, which matches on
+  // identifier text and would not reliably narrow to a numeric SBR ID. First load only, so
+  // clearing the filter or navigating to /legal-units afterwards behaves normally.
+  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>(() => {
+    const establishment = searchParams.get('establishment');
+    return establishment
+      ? [{ id: 'cf-establishment-deeplink', column: 'ESTABLISHMENT', operator: 'equals', value: establishment }]
+      : [];
+  });
   const { t } = useTranslation();
   const router = useRouter();
 

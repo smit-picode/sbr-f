@@ -265,10 +265,11 @@ export function Sidebar() {
         style={{
           background: RAIL_GRADIENT,
           height: 'calc(100vh - 32px)',
-          // Arabic mode: Cairo primary so nav text matches the client reference; English: Jakarta primary
+          // Mirrors the body stack in globals.css (Lusail → Calibri), so the rail renders in the
+          // same typeface as the reference. Arabic mode promotes Cairo for Arabic glyph coverage.
           fontFamily: i18n.language === 'ar'
-            ? 'var(--font-cairo), var(--font-jakarta), sans-serif'
-            : 'var(--font-jakarta), var(--font-cairo), sans-serif',
+            ? "'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, sans-serif"
+            : "'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), sans-serif",
         }}
       >
         {/* Brand */}

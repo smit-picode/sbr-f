@@ -77,7 +77,7 @@ export function BulkChangeUploadStep({ selectedTable, file, onFileSelected }: Bu
           }}
           onClick={() => inputRef.current?.click()}
           className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-10 text-center transition-colors ${
-            isDragOver ? 'border-[#8A1538] bg-[#8A1538]/5' : 'border-slate-200 hover:bg-slate-50'
+            isDragOver ? 'border-[#A29374] bg-[#A29374]/5' : 'border-slate-200 hover:bg-slate-50'
           }`}
         >
           <UploadCloud className="h-8 w-8 text-slate-400" />

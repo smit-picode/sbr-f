@@ -306,7 +306,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     if (!ed(f)) return 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none';
     return err(f)
       ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
-      : 'focus-visible:border-2 focus-visible:border-[#8A1538]/40 focus-visible:ring-0';
+      : 'focus-visible:border-2 focus-visible:border-[#A29374]/40 focus-visible:ring-0';
   };
 
   const handleSubmit = () => {
@@ -778,7 +778,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-            <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #8A1538, #6D0D2A)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
+            <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -33,7 +33,7 @@ import type { AuthRole } from '@/types';
 const ROLE_CARD_ICONS: LucideIcon[] = [ShieldCheck, Building2, Eye, Landmark, UserCircle2];
 const ROLE_CARD_TINTS: { bg: string; color: string }[] = [
   { bg: 'bg-violet-50', color: 'text-violet-600' },
-  { bg: 'bg-rose-50', color: 'text-[#A71D3A]' },
+  { bg: 'bg-rose-50', color: 'text-[#A29374]' },
   { bg: 'bg-blue-50', color: 'text-blue-700' },
   { bg: 'bg-amber-50', color: 'text-amber-600' },
   { bg: 'bg-emerald-50', color: 'text-emerald-600' },
@@ -251,7 +251,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={handleBackToLogin}
-                className="mb-6 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#A71D3A] transition-colors"
+                className="mb-6 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#A29374] transition-colors"
               >
                 <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
                 {t('login.backToLogin')}
@@ -279,7 +279,7 @@ export function LoginPage() {
                       type="button"
                       disabled={switchingRoleId !== null}
                       onClick={() => handleRolePick(role)}
-                      className="w-full flex items-center gap-4 rounded-xl bg-white p-4 text-start shadow-card hover:border-[#A71D3A]/40 hover:shadow transition-all group disabled:opacity-60"
+                      className="w-full flex items-center gap-4 rounded-xl bg-white p-4 text-start shadow-card hover:border-[#A29374]/40 hover:shadow transition-all group disabled:opacity-60"
                     >
                       <span className={`h-11 w-11 rounded-lg flex items-center justify-center shrink-0 ${tint.bg}`}>
                         {switching
@@ -289,12 +289,12 @@ export function LoginPage() {
                       <span className="flex-1 min-w-0">
                         <span className="block text-sm font-semibold text-slate-900">{role.ROLE_NAME}</span>
                         {role.IS_SCOPED && (
-                          <span className="block text-[10px] font-bold tracking-wide text-[#A71D3A] mt-0.5">
+                          <span className="block text-[10px] font-bold tracking-wide text-[#A29374] mt-0.5">
                             {t('admin.users.scopedBadge')}
                           </span>
                         )}
                       </span>
-                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#A71D3A] transition-colors rtl:rotate-180" />
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#A29374] transition-colors rtl:rotate-180" />
                     </button>
                   );
                 })}

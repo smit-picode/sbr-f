@@ -94,7 +94,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
       return val ? (
-        <div className="flex items-center gap-1.5 text-sm" style={{ color: '#8A1538' }}>
+        <div className="flex items-center gap-1.5 text-sm" style={{ color: '#A29374' }}>
           <Globe className="h-3.5 w-3.5" />
           <a href={val.startsWith('http') ? val : `https://${val}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="hover:underline truncate max-w-[140px]">
             {val}

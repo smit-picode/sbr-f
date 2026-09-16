@@ -112,9 +112,9 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
       <div className="relative z-10 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 text-white" style={{ background: 'linear-gradient(110deg,#6D0D2A,#8A1538)' }}>
+        <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 text-white" style={{ background: 'linear-gradient(110deg,#87795D,#A29374)' }}>
           <div className="min-w-0">
-            <p className="text-[11px]" style={{ color: '#f0cdd5' }}>{t('fieldHistory.title', { defaultValue: 'Attribute history' })}</p>
+            <p className="text-[11px]" style={{ color: '#F0E6D8' }}>{t('fieldHistory.title', { defaultValue: 'Attribute history' })}</p>
             <p className="truncate text-[16px] font-bold">{fieldLabel}</p>
           </div>
           <button type="button" onClick={onClose} className="shrink-0 text-white/80 transition-colors hover:text-white" aria-label="Close">
@@ -140,17 +140,17 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                 {changeVersions.map((v, i) => {
                   const on = i === selected;
                   const userEdit = isUserEdit(v);
-                  const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#8A1538';
+                  const dotColor = userEdit ? (v.audit?.approved ? '#1F8A5B' : '#E0A23C') : '#A29374';
                   return (
                     <button
                       key={v.ID ?? i}
                       type="button"
                       onClick={() => setSelected(i)}
-                      className={`relative mb-2 block w-full rounded-xl border px-3 py-2.5 text-start transition-colors ${on ? 'border-[#8A1538]/20 bg-[#FCF4F6]' : 'border-slate-200 hover:bg-slate-50'}`}
+                      className={`relative mb-2 block w-full rounded-xl border px-3 py-2.5 text-start transition-colors ${on ? 'border-[#A29374]/20 bg-[#F4F0E8]' : 'border-slate-200 hover:bg-slate-50'}`}
                     >
                       <span className="absolute -start-[14px] top-3.5 h-2.5 w-2.5 rounded-full border-2 border-white" style={{ background: dotColor }} />
                       <div className="flex items-center gap-1.5">
-                        <span className={`text-[13px] font-bold ${on ? 'text-[#8A1538]' : 'text-slate-700'}`}>{userEdit ? editedByUser : providedByRegulator}</span>
+                        <span className={`text-[13px] font-bold ${on ? 'text-[#A29374]' : 'text-slate-700'}`}>{userEdit ? editedByUser : providedByRegulator}</span>
                         {userEdit && v.audit?.approved && <ApprovedBadge />}
                       </div>
                       {userEdit ? (
@@ -172,7 +172,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
               {current && (isUserEdit(current) ? (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                   <div className="mb-2.5 flex items-center gap-2">
-                    <User className="h-4 w-4 text-[#8A1538]" />
+                    <User className="h-4 w-4 text-[#A29374]" />
                     <span className="text-[13px] font-bold text-slate-800">{editedByUser}</span>
                     {current.audit?.approved && <span className="ms-auto"><ApprovedBadge /></span>}
                   </div>
@@ -191,9 +191,9 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
               ) : (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                   <div className="mb-2.5 flex items-center gap-2">
-                    <Landmark className="h-4 w-4 text-[#8A1538]" />
+                    <Landmark className="h-4 w-4 text-[#A29374]" />
                     <span className="text-[13px] font-bold text-slate-800">{providedByRegulator}</span>
-                    {sourceOf(current) && <span className="ms-auto text-[10px] font-bold tracking-wide text-[#8A1538]">{sourceOf(current)}</span>}
+                    {sourceOf(current) && <span className="ms-auto text-[10px] font-bold tracking-wide text-[#A29374]">{sourceOf(current)}</span>}
                   </div>
                   <span className="inline-block rounded-md border border-slate-300 bg-white px-2 py-1 text-[12px] font-bold text-slate-800">{valueOf(current)}</span>
                   <div className="mt-3 space-y-1.5">

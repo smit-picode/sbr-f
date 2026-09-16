@@ -3,7 +3,7 @@ import type { SbrEnterpriseGroup } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { nullableText } from '@/utils/format';
-import { Users, MapPin, Network, Orbit } from 'lucide-react';
+import { Users, MapPin, GitFork, Orbit } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import { formatGroupCode } from '../constants';
 
@@ -43,15 +43,15 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
       const type = getValue<string>();
       if (type === 'Domestic') {
         return (
-          <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-pos-tint px-2 py-0.5 text-[11px] font-semibold text-pos">
             <MapPin className="h-3 w-3" />
             Domestic
           </span>
         );
       }
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-          <Network className="h-3 w-3" />
+        <span className="inline-flex items-center gap-1 rounded-full bg-warn-tint px-2 py-0.5 text-[11px] font-semibold text-warn-text">
+          <GitFork className="h-3 w-3" />
           {type}
         </span>
       );
@@ -91,7 +91,7 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#8A1538]/10 px-2 py-0.5 text-xs font-medium text-[#8A1538]">
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#A29374]/10 px-2 py-0.5 text-xs font-medium text-[#A29374]">
           <Orbit className="h-3.5 w-3.5" />
           {count}
         </span>

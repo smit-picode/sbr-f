@@ -52,7 +52,7 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#8A1538]/10 px-2 py-0.5 text-xs font-medium text-[#8A1538]">
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#A29374]/10 px-2 py-0.5 text-xs font-medium text-[#A29374]">
           <Layers className="h-3.5 w-3.5" />
           {count} {count === 1 ? t('table.unit', { lng: 'en' }) : t('table.units', { lng: 'en' })}
         </span>

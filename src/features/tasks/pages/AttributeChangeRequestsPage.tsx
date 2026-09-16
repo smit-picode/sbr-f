@@ -26,7 +26,7 @@ const TABLE_OPTIONS = [
 ];
 
 const TABLE_BADGE: Record<string, string> = {
-  SBR_ESTABLISHMENTS: 'bg-[#8A1538]/10 text-[#8A1538]',
+  SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
   SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
   SBR_CONTACTS: 'bg-emerald-50 text-emerald-700',
@@ -108,7 +108,7 @@ export function AttributeChangeRequestsPage() {
       cell: ({ getValue }) => (
         <span className="flex items-center gap-1.5 text-sm">
           <User className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-[#8A1538]">{(getValue() as string) ?? '—'}</span>
+          <span className="text-[#A29374]">{(getValue() as string) ?? '—'}</span>
         </span>
       ),
     },

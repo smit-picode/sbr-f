@@ -45,7 +45,7 @@ export const getSnapshotEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>
     accessorKey: 'ESTABLISHMENT_COUNT', header: t('columns.ESTABLISHMENTS'),
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
-      return <span className="text-xs font-medium text-[#8A1538]">{count} {count === 1 ? t('table.unit', { lng: 'en' }) : t('table.units', { lng: 'en' })}</span>;
+      return <span className="text-xs font-medium text-[#A29374]">{count} {count === 1 ? t('table.unit', { lng: 'en' }) : t('table.units', { lng: 'en' })}</span>;
     },
   },
   { accessorKey: 'LEGAL_TYPE', header: t('columns.LEGAL_TYPE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },

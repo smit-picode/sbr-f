@@ -42,6 +42,7 @@ export function Toaster() {
             key={t.id}
             className={cn(
               'flex items-start gap-3 px-4 py-3 rounded-lg border shadow-md text-sm font-medium pointer-events-auto',
+              'animate-in fade-in slide-in-from-right-4 duration-300',
               container
             )}
           >
