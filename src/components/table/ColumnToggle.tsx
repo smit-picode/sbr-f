@@ -45,10 +45,10 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
   return (
     <DropdownMenu onOpenChange={(open) => { if (!open) setQuery(''); }}>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 px-3 h-9 rounded-md bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-card">
+        <button className="flex items-center gap-2 px-3 h-9 rounded-full bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-card">
           <Columns3 className="h-3.5 w-3.5" />
           {t('columnsToggle.columns')}
-          <span className="text-[10px] font-bold rounded px-1.5 py-0.5 bg-[#A29374]/10 text-[#A29374]">
+          <span className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-[#A29374]/10 text-[#A29374]">
             {visible}/{total}
           </span>
         </button>
@@ -58,7 +58,7 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
           primitive's max-height still caps the whole menu to the available viewport space. */}
       <DropdownMenuContent align="end" className="w-64 p-0 flex flex-col overflow-y-hidden">
         {/* Search */}
-        <div className="shrink-0 p-2 border-b border-slate-100">
+        <div className="shrink-0 p-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             <input
@@ -66,13 +66,13 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
               placeholder={t('columnsToggle.findColumn')}
-              className="h-8 w-full rounded-md border border-slate-200 ps-8 pe-2.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A29374]/30"
+              className="h-9 w-full rounded-full border border-slate-200 ps-8 pe-2.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A29374]/30"
             />
           </div>
         </div>
 
         {/* Show all / Hide all */}
-        <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-slate-100 text-[11px]">
+        <div className="shrink-0 flex items-center justify-between px-3 pb-2 text-[11px]">
           <button onClick={showAll} className="font-semibold text-[#A29374] hover:underline">
             {t('columnsToggle.showAll')}
           </button>
@@ -91,7 +91,7 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
             filtered.map((column) => (
               <label
                 key={column.id}
-                className="flex items-center gap-2.5 px-3 py-1.5 text-xs text-slate-700 cursor-pointer hover:bg-slate-50"
+                className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 cursor-pointer hover:bg-slate-50"
               >
                 <Checkbox
                   checked={column.getIsVisible()}

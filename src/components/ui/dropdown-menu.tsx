@@ -27,7 +27,7 @@ const DropdownMenuContent = React.forwardRef<
         // ColumnToggle list) runs off-screen when the trigger sits near the top or bottom and
         // neither side has room for its full height. collisionPadding keeps an 8px gutter so it
         // never sits flush against the window edge.
-        'z-50 min-w-[8rem] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-md text-slate-900',
+        'z-50 min-w-[8rem] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-2xl bg-white p-1 shadow-float text-slate-900',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         className
       )}
