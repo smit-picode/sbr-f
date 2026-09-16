@@ -272,25 +272,30 @@ export function Sidebar() {
             : "'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), sans-serif",
         }}
       >
-        {/* Brand */}
-        <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0', collapsed ? 'justify-center px-2' : 'px-4')}>
-          <div className="h-9 w-9 rounded-full bg-dune flex items-center justify-center shrink-0">
-            <Image
-              src="/sbr-logo-white.png"
-              alt="NPC emblem"
-              width={20}
-              height={20}
-              priority
-              className="object-contain"
-            />
-          </div>
+        {/* Brand — matches SBR-design's own sidebar exactly: the official lockup (its own PNG
+            already carries "National Planning Council") stacked above "SBR Portal", not the
+            emblem-in-a-circle badge, which both isolated the emblem and altered its form.
+            Collapsed, the rail is too narrow to carry the lockup at a legible size, so it shows
+            the product name alone, per the same reference. */}
+        <button
+          type="button"
+          onClick={() => router.push('/home')}
+          className={cn('flex flex-col shrink-0 items-center gap-2.5 pt-5 pb-4', collapsed ? 'px-2' : 'px-4')}
+        >
           {!collapsed && (
-            <div className="leading-tight min-w-0">
-              <p className="font-extrabold text-[14px] text-ink truncate">SBR Portal</p>
-              <p className="text-[11px] mt-0.5 truncate text-slate-500">{t('login.brandingSub')}</p>
-            </div>
+            <Image
+              src="/assets/npc-logo-primary.png"
+              alt="National Planning Council"
+              width={257}
+              height={90}
+              priority
+              className="h-14 w-auto object-contain"
+            />
           )}
-        </div>
+          <span className={cn('font-extrabold text-ink leading-tight', collapsed ? 'text-[11px]' : 'text-[14.5px]')}>
+            {collapsed ? 'SBR' : 'SBR Portal'}
+          </span>
+        </button>
 
         {/* Navigation */}
         <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-2', collapsed ? 'px-2' : 'px-3')}>

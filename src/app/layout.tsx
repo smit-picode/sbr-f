@@ -23,7 +23,11 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'SBR Portal — NPC Qatar',
+  // Every page previously set its own `title: '{Page} — SBR Portal'` override, which beat this
+  // root default per Next.js's metadata inheritance — so the browser tab showed a different
+  // title on every route. All of those per-page overrides were removed so this one title now
+  // applies everywhere, consistently, as requested.
+  title: 'SBR Portal — Statistical Business Register',
   description: 'Statistical Business Register — National Planning Council Qatar',
   icons: {
     icon: '/sbr-logo.png',
