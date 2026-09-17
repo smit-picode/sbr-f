@@ -141,7 +141,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
     if (!w || !h) return base(true, '50%', '50%', ['58%', '80%'], o.legendWidth || 88);
     const nameW = o.legendWidth || 88;
     const entryExtra = 20 + 10 + 40 + 6 + 26;
-    let ringSpace = w - (nameW + entryExtra + 12);
+    const ringSpace = w - (nameW + entryExtra + 12);
     if (ringSpace < 96) {
       const entryW = nameW + entryExtra + 10;
       const perRow = Math.max(1, Math.floor(w / entryW));
