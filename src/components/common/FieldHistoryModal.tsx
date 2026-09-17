@@ -102,7 +102,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
   const providedByRegulator = t('fieldHistory.providedByRegulator', { defaultValue: 'Provided by regulator' });
 
   const ApprovedBadge = () => (
-    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold uppercase text-emerald-700">
+    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">
       {t('fieldHistory.approved', { defaultValue: 'Approved' })}
     </span>
   );

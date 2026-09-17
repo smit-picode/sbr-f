@@ -5,9 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { NoData } from '@/components/common/NoData';
+import { usePermission } from '@/hooks';
+import { ExecutiveHomePage } from './ExecutiveHomePage';
 
 export function HomePage() {
   const { t } = useTranslation();
+  // Role-gated Home page variant: a role holding home_executive.view sees the management
+  // dashboard instead of the plain placeholder below. SUPER_ADMIN gets it too, via
+  // usePermission's own bypass — same rule every other permission in the app follows.
+  const { canView: canViewExecutiveHome } = usePermission('home_executive');
+
+  if (canViewExecutiveHome) return <ExecutiveHomePage />;
 
   return (
     <PageContainer>

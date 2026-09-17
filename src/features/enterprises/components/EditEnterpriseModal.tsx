@@ -259,7 +259,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           {/* Establishments */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">{t('enterpriseEdit.establishments', { defaultValue: 'Establishments in this enterprise' })}</Label>
+              <Label className="text-[11.5px] font-semibold text-slate-500">{t('enterpriseEdit.establishments', { defaultValue: 'Establishments in this enterprise' })}</Label>
               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{currentRows.length} {t('table.units')}</span>
             </div>
 

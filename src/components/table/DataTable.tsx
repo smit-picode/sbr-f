@@ -47,10 +47,13 @@ interface DataTableProps<TData, TValue> {
   sortableColumns?: string[];
   stickyFirstColumn?: boolean;
   onRowClick?: (row: TData) => void;
-  // Extra classes for a specific row (e.g. a subtle amber tint for a row with a pending change
-  // request, matching the reference). Applied to the row and, when stickyFirstColumn is on, to
-  // its sticky first cell too — that cell needs its own opaque background to stay solid while
-  // the table scrolls horizontally underneath it, so it can't just inherit the row's.
+  // Extra classes for a specific row (e.g. a row with a pending change request, matching the
+  // reference exactly — read from SBR-design's own table.jsx rather than approximated: the
+  // persistent signal is a thin inset left accent line, NOT a full-row background wash; the
+  // amber tint itself only ever sits solid on the sticky first cell, the rest of the row stays
+  // white until hovered). Applied to the row and, when stickyFirstColumn is on, to its sticky
+  // first cell too — that cell needs its own opaque background to stay solid while the table
+  // scrolls horizontally underneath it, so it can't just inherit the row's.
   getRowClassName?: (row: TData) => string | undefined;
 }
 
@@ -59,8 +62,12 @@ interface DataTableProps<TData, TValue> {
 // literals: Tailwind only emits CSS for class names it can see verbatim in the source, so a
 // `group-hover:*` string assembled at runtime compiles to nothing and the cell silently keeps
 // its base background. Add an entry here whenever a new row tint is introduced.
+// A lighter custom shade rather than the shared `warn-tint` token — kept opaque (not an alpha
+// modifier) since this cell must stay solid while the table scrolls horizontally underneath it.
+// Same shade on hover as at rest (no darker hover variant) — a color shift on hover read as an
+// unwanted difference rather than an interaction cue.
 const STICKY_CELL_HOVER_CLASS: Record<string, string> = {
-  'hover:bg-warn-tint': 'group-hover:bg-warn-tint',
+  'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]': 'bg-[#FDF7E3] group-hover:bg-[#FDF7E3]',
 };
 
 export function DataTable<TData, TValue>({

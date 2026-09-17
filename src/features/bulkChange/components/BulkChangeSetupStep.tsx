@@ -214,19 +214,19 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
             <table className="w-full min-w-[720px] border-collapse">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t('bulkChange.wizard.setup.excelHeader', { defaultValue: 'Excel header' })}
                   </th>
-                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t('bulkChange.wizard.setup.attribute', { defaultValue: 'Attribute' })}
                   </th>
-                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t('bulkChange.wizard.setup.type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t('bulkChange.wizard.setup.required', { defaultValue: 'Required' })}
                   </th>
-                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th className="whitespace-nowrap px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t('bulkChange.wizard.setup.allowedValues', { defaultValue: 'Allowed values' })}
                   </th>
                 </tr>

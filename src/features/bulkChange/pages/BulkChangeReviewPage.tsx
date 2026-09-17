@@ -120,23 +120,23 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
 
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.submittedBy', { defaultValue: 'Submitted by' })}</p>
+            <p className="text-[11px] text-slate-400">{t('bulkChange.cols.submittedBy', { defaultValue: 'Submitted by' })}</p>
             <p className="mt-0.5 flex items-start gap-1.5 text-sm font-medium text-[#A29374]">
               <User className="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" /> <span className="min-w-0 break-words">{task.SUBMITTED_BY}</span>
             </p>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.submitted', { defaultValue: 'Submitted' })}</p>
+            <p className="text-[11px] text-slate-400">{t('bulkChange.cols.submitted', { defaultValue: 'Submitted' })}</p>
             <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{formatDate(task.SUBMITTED_AT)}</p>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.table', { defaultValue: 'Table' })}</p>
+            <p className="text-[11px] text-slate-400">{t('bulkChange.cols.table', { defaultValue: 'Table' })}</p>
             <p className="mt-0.5 break-words text-sm font-medium text-slate-800">
               {t(`nav.${tableKey.toLowerCase()}`, { defaultValue: tableKey })}
             </p>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">{t('bulkChange.cols.records', { defaultValue: 'Records' })}</p>
+            <p className="text-[11px] text-slate-400">{t('bulkChange.cols.records', { defaultValue: 'Records' })}</p>
             <p className="mt-0.5 break-words text-sm font-medium text-slate-800">
               {task.RECORDS} · {task.CHANGES} {t('bulkChange.changes', { defaultValue: 'Changes' })}
             </p>
@@ -168,7 +168,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
 
       {/* Reason */}
       <div className="rounded-lg bg-white shadow-card">
-        <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.reasonForChange', { defaultValue: 'Reason for Change' })}
         </div>
         <p className="px-5 py-3 text-sm text-slate-700">{fmt(task.REASON)}</p>
@@ -176,7 +176,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
 
       {/* Per-record diff */}
       <div className="rounded-lg bg-white shadow-card">
-        <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.confirmTitle', { defaultValue: 'Confirm Bulk Change' })}
         </div>
         <div className="overflow-x-auto">
@@ -185,7 +185,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
               <tr className="border-b border-slate-200">
                 <th className="w-10 px-3 py-2.5" />
                 {task.COLUMNS.map((col) => (
-                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {t(`bulkChange.reviewColumns.${col.key}`, { defaultValue: col.label })}
                   </th>
                 ))}
@@ -230,7 +230,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
                               </p>
                             )}
                             {!field.changed && (
-                              <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                              <p className="text-[10.5px] text-slate-400">
                                 {t('bulkChange.noChange', { defaultValue: 'No change' })}
                               </p>
                             )}

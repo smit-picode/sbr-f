@@ -401,26 +401,26 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         {/* Left: changes + reason + actions */}
         <div className="space-y-4 lg:col-span-2">
           <div className="rounded-lg bg-white shadow-card">
-            <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
               {isCreate
-                ? t('changeRequests.newRecordDetails', { defaultValue: 'New Record Details' })
-                : t('changeRequests.requestedChanges', { defaultValue: 'Requested Changes' })}
+                ? t('changeRequests.newRecordDetails', { defaultValue: 'New record details' })
+                : t('changeRequests.requestedChanges', { defaultValue: 'Requested changes' })}
             </div>
             <div className="divide-y divide-slate-50">
               {r.fields.map((f: ChangeRequestField) => (
                 <div
                   key={f.field}
-                  className="grid items-center gap-x-4 px-5 py-3 text-sm"
+                  className="grid items-center gap-x-4 px-5 py-3 text-[13px]"
                   style={{ gridTemplateColumns: isCreate ? '11rem 1fr' : '11rem 1fr auto 1fr' }}
                 >
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{fieldLabel(t, f.field)}</span>
+                  <span className="font-semibold text-slate-700">{fieldLabel(t, f.field)}</span>
                   {isCreate ? (
-                    <span className="min-w-0 font-semibold text-slate-800">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                    <span className="min-w-0 font-bold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
                   ) : (
                     <>
-                      <span className="min-w-0 text-slate-400 line-through">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                      <span className="min-w-0 font-semibold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
+                      <span className="min-w-0 text-slate-500 line-through decoration-slate-300">{f.old == null || f.old === '' ? '—' : String(f.old)}</span>
+                      <ArrowRight className="mx-auto h-3.5 w-3.5 shrink-0 text-slate-400 rtl:rotate-180" />
+                      <span className="min-w-0 font-bold text-emerald-700">{f.new == null || f.new === '' ? '—' : String(f.new)}</span>
                     </>
                   )}
                 </div>
@@ -444,8 +444,8 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
           {r.CHANGE_REASON && (
             <div className="rounded-lg bg-white shadow-card">
-              <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.reasonForChange', { defaultValue: 'Reason for Change' })}</div>
-              <p className="px-5 py-3 text-sm text-slate-700">{r.CHANGE_REASON}</p>
+              <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">{t('changeRequests.reasonForChange', { defaultValue: 'Reason for change' })}</div>
+              <p className="px-5 py-3 text-[13.5px] leading-relaxed text-slate-700">{r.CHANGE_REASON}</p>
             </div>
           )}
 
@@ -477,8 +477,8 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
           {!pending && r.APPROVAL_REASON && (
             <div className="rounded-lg bg-white shadow-card">
-              <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.approvalReason', { defaultValue: 'Approval Reason' })}</div>
-              <p className="px-5 py-3 text-sm text-slate-700">{r.APPROVAL_REASON}</p>
+              <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">{t('changeRequests.approvalReason', { defaultValue: 'Approval reason' })}</div>
+              <p className="px-5 py-3 text-[13.5px] leading-relaxed text-slate-700">{r.APPROVAL_REASON}</p>
             </div>
           )}
         </div>
@@ -487,10 +487,10 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         <div className="space-y-4">
           <div className="rounded-lg bg-white shadow-card overflow-hidden">
             <div className="border-b border-slate-200 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="text-[12px] font-bold tracking-[0.08em] text-slate-400">
                 {isCreate
-                  ? t('changeRequests.recordStatus', { defaultValue: 'Record Status' })
-                  : t('changeRequests.currentRecord', { defaultValue: 'Current Record' })}
+                  ? t('changeRequests.recordStatus', { defaultValue: 'Record status' })
+                  : t('changeRequests.currentRecord', { defaultValue: 'Current record' })}
               </p>
             </div>
             {contextSections.length === 0 ? (
@@ -504,7 +504,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                 {contextSections.map((sec, idx) => (
                   <div key={sec.section} className={idx > 0 ? 'border-t border-slate-200' : ''}>
                     <div className="bg-slate-50 px-4 py-2 border-b border-slate-100">
-                      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{trSection(t, sec.section)}</p>
+                      <p className="text-[11px] font-semibold tracking-[0.1em] text-slate-400">{trSection(t, sec.section)}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3 p-4">
                       {sec.visible.map((f) => (
@@ -536,7 +536,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
           {parentSbrId != null && (
             <div className="rounded-lg bg-white p-5 shadow-card">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.parentEstablishment', { defaultValue: 'Parent Establishment' })}</p>
+              <p className="mb-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">{t('changeRequests.parentEstablishment', { defaultValue: 'Parent establishment' })}</p>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.LEGAL_UNIT_DETAIL(parentSbrId))}
@@ -551,7 +551,7 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           {/* Establishment request → related records (parent enterprise + child counts) */}
           {showRelatedRecords && (
             <div className="rounded-lg bg-white p-5 shadow-card">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('changeRequests.relatedRecords', { defaultValue: 'Related Records' })}</p>
+              <p className="mb-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">{t('changeRequests.relatedRecords', { defaultValue: 'Related records' })}</p>
               {relEnterprise && (
                 <button
                   type="button"
@@ -584,8 +584,8 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           {/* Enterprise request → member establishments */}
           {r.TABLE_NAME === 'SBR_ENTERPRISES' && (
             <div className="rounded-lg bg-white p-5 shadow-card">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {t('changeRequests.memberEstablishments', { defaultValue: 'Member Establishments' })} ({members.length})
+              <p className="mb-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
+                {t('changeRequests.memberEstablishments', { defaultValue: 'Member establishments' })} ({members.length})
               </p>
               {members.length === 0 ? (
                 <p className="text-sm text-slate-400">—</p>

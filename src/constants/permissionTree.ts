@@ -9,6 +9,13 @@ export interface PermissionNode {
 // The frontend uses this tree to render grouped permission sections.
 export const PERMISSION_TREE: PermissionNode[] = [
   {
+    key: 'home',
+    label: 'Home',
+    children: [
+      { key: 'home_executive.view', label: 'Executive Dashboard' },
+    ],
+  },
+  {
     key: 'establishments',
     label: 'Establishments',
     children: [

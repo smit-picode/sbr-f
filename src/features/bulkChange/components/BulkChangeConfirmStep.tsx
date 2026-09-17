@@ -33,25 +33,25 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
         </h2>
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {t('bulkChange.wizard.confirm.table', { defaultValue: 'Table' })}
             </p>
             <p className="mt-0.5 text-sm font-medium text-slate-800">{tableLabel}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {t('bulkChange.wizard.confirm.file', { defaultValue: 'File' })}
             </p>
             <p className="mt-0.5 truncate text-sm font-medium text-slate-800">{fmt(fileName)}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {t('bulkChange.wizard.confirm.recordsToUpdate', { defaultValue: 'Records to update' })}
             </p>
             <p className="mt-0.5 text-sm font-medium text-slate-800">{validation.validRows}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {t('bulkChange.wizard.confirm.excludedErrors', { defaultValue: 'Excluded (errors)' })}
             </p>
             <p className="mt-0.5 text-sm font-medium text-slate-800">{validation.errorRows}</p>
@@ -82,7 +82,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
       </div>
 
       <div className="rounded-lg bg-white shadow-card">
-        <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.wizard.confirm.recordsThatWillBeUpdated', { defaultValue: 'Records that will be updated' })}
         </div>
         <div className="overflow-x-auto">
@@ -91,7 +91,7 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
               <tr className="border-b border-slate-200">
                 <th className="w-10 px-3 py-2.5" />
                 {columns.map((col) => (
-                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {col.label}
                   </th>
                 ))}

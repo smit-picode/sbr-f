@@ -246,22 +246,22 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
       </div>
 
       <div className="rounded-lg bg-white shadow-card">
-        <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.wizard.validate.rowDetails', { defaultValue: 'Row details' })}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse">
             <thead>
               <tr className="border-b border-slate-200">
-                <th className="w-16 px-5 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                <th className="w-16 px-5 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                   {t('bulkChange.wizard.validate.row', { defaultValue: 'Row' })}
                 </th>
                 {columns.map((col) => (
-                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <th key={col.key} className="whitespace-nowrap px-3 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                     {col.label}
                   </th>
                 ))}
-                <th className="w-64 min-w-[220px] px-3 py-2.5 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                <th className="w-64 min-w-[220px] px-3 py-2.5 text-start text-[11.5px] font-semibold text-slate-500">
                   {t('bulkChange.wizard.validate.status', { defaultValue: 'Status' })}
                 </th>
               </tr>

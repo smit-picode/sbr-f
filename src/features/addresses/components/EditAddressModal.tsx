@@ -284,7 +284,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
           </div>
 
           <div className="col-span-2 pt-2">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">{t('editAddress.sections.metadata')}</p>
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-slate-400 border-b border-slate-100 pb-1">{t('editAddress.sections.metadata')}</p>
           </div>
           <div className="space-y-1">
             <label className="text-slate-400 text-xs">{t('editAddress.fields.validFrom')}</label>

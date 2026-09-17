@@ -171,7 +171,7 @@ export function EstablishmentsListPage() {
         sortableColumns={ESTABLISHMENTS_SORTABLE_COLUMNS}
         stickyFirstColumn
         onRowClick={canOpenDetail ? (row) => router.push(`/establishments/${row.SBR_ID}`) : undefined}
-        getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-warn-tint' : undefined)}
+        getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]' : undefined)}
       />
 
       <EditEstablishmentModal

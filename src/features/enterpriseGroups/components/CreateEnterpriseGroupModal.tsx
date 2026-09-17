@@ -288,7 +288,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
           {/* Member Enterprises */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-widest text-slate-400">{t('editEnterpriseGroup.memberEnterprises', { defaultValue: 'Member Enterprises' })}</span>
+              <span className="text-[11px] font-semibold tracking-[0.1em] text-slate-400">{t('editEnterpriseGroup.memberEnterprises', { defaultValue: 'Member Enterprises' })}</span>
               <span className="text-xs font-medium text-slate-500">{members.length}</span>
             </div>
 

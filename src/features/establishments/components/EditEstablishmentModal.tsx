@@ -50,7 +50,7 @@ function FieldErr({ msg }: { msg?: string }) {
 function SectionDivider({ title }: { title: string }) {
   return (
     <div className="col-span-2 pt-2">
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 pb-1">
+      <p className="text-[11px] font-semibold tracking-[0.1em] text-slate-400 border-b border-slate-100 pb-1">
         {title}
       </p>
     </div>

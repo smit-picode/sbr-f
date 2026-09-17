@@ -87,7 +87,7 @@ export function CreateSnapshotPage() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{t('snapshots.captureCaption')}</p>
+          <p className="text-[12px] font-medium text-slate-500">{t('snapshots.captureCaption')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {stats.map(({ key, icon: Icon, count, label, bg, text }) => (
               <div key={key} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
