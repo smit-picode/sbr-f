@@ -2,28 +2,25 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Landmark, Layers, TrendingUp, ClipboardList } from 'lucide-react';
+import { Building2, ClipboardList, Landmark, Layers, TrendingUp } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAppSelector } from '@/hooks';
+import { useAppSelector, usePermission } from '@/hooks';
 import { formatDate } from '@/utils/format';
 import { EChart, columns, donut, hbars, hbarsStacked, pareto, qatarMap, registerQatarMap, trend } from '@/lib/charts';
+import { useGetExecutiveSummaryQuery } from '../api/homeApi';
 import { ExecStatCard } from '../components/ExecStatCard';
 import { SegmentedToggle } from '../components/SegmentedToggle';
+import { SECTOR_COLOR } from '../data/chartColors';
 import {
-  BY_MUNICIPALITY,
-  EMPLOYMENT_BY_ACTIVITY,
-  EXEC_KPIS,
-  REGISTER_GROWTH,
-  SECTOR_BREAKDOWN,
-  SECTOR_COLOR,
-  SIZE_CLASSES,
   SOURCE_COLOR,
-  SOURCE_SECTOR_BREAKDOWN,
+  SURVEY_KPIS,
   SURVEY_RESPONSE_BY_ACTIVITY,
   SURVEY_RESPONSE_BY_SURVEY,
-} from '../data/executiveDashboardData';
+} from '../data/executiveDashboardDummy';
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 type GrowthMode = 'total' | 'source' | 'sector';
 type ResponseMode = 'survey' | 'activity';
@@ -46,10 +43,15 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
 
 export function ExecutiveHomePage() {
   const { t } = useTranslation();
+
+  // KPI cards link into the matching list page, but only for a viewer who may open it — the
+  // reference gates its cards the same way rather than routing to a page that would refuse them.
+  const { canView: canViewEstablishments } = usePermission('establishments');
+  const { canView: canViewEnterprises } = usePermission('enterprises');
   const user = useAppSelector((s) => s.auth.user);
+  const [mapReady, setMapReady] = useState(false);
   const [growthMode, setGrowthMode] = useState<GrowthMode>('total');
   const [responseMode, setResponseMode] = useState<ResponseMode>('survey');
-  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     registerQatarMap()
@@ -57,58 +59,144 @@ export function ExecutiveHomePage() {
       .catch(() => setMapReady(false));
   }, []);
 
+  // Every section on this page now comes from sbr-backend's TEMPORARY raw-SQL
+  // /home/executive-summary endpoint — see that controller's own comment for why it's temporary
+  // (standing in until a real summary procedure exists). Three queries (size class,
+  // register-size-by-month, growth %) come from the database side; the rest were written here
+  // directly against the same tables/columns, since no queries were supplied for them yet.
+  const { data: summaryRes, isLoading: summaryLoading } = useGetExecutiveSummaryQuery();
+  const summary = summaryRes?.data;
+
   const firstName = firstNameOf(user?.email);
   const asOf = useMemo(() => formatDate(new Date().toISOString()), []);
 
-  const growthCategories = REGISTER_GROWTH.map((g) => g.label);
+  // "Total" is real (sbr-backend's REGISTER_GROWTH_BY_MONTH_SQL); "By regulator"/"By sector" have
+  // no backend source yet (see executiveDashboardDummy.ts's own note) so they render illustrative
+  // dummy history instead — the toggle itself matches the SBR-design reference exactly.
+  const registerGrowthByMonth = summary?.registerGrowthByMonth ?? [];
+  const registerGrowthBySource = summary?.registerGrowthBySource ?? [];
+  const registerGrowthBySector = summary?.registerGrowthBySector ?? [];
   const growthOption = useMemo(() => {
     if (growthMode === 'total') {
       return trend({
-        categories: growthCategories,
-        series: [{ name: t('home.exec.establishments', { defaultValue: 'Establishments' }), data: REGISTER_GROWTH.map((g) => g.total) }],
+        categories: registerGrowthByMonth.map((g) => `${MONTH_LABELS[g.month - 1] ?? g.month} ${g.year}`),
+        series: [{ name: t('home.exec.establishments', { defaultValue: 'Establishments' }), data: registerGrowthByMonth.map((g) => g.count) }],
         yMin: 0,
       });
     }
-    const field = growthMode === 'source' ? 'bySource' : 'bySector';
+    const rows = growthMode === 'source' ? registerGrowthBySource : registerGrowthBySector;
     const colorMap = growthMode === 'source' ? SOURCE_COLOR : SECTOR_COLOR;
-    const last = REGISTER_GROWTH[REGISTER_GROWTH.length - 1][field] as Record<string, number>;
-    const keys = Object.keys(last).sort((a, b) => (last[b] || 0) - (last[a] || 0));
+
+    // One category per month present in the data, in the order the query returned them.
+    const monthKeys: string[] = [];
+    rows.forEach((r) => {
+      const key = `${r.year}-${r.month}`;
+      if (!monthKeys.includes(key)) monthKeys.push(key);
+    });
+
+    // Series ordered by their size in the latest month, so the legend leads with the biggest.
+    // A regulator or sector that existed earlier but has no row in the latest month is appended
+    // rather than dropped, otherwise its earlier points would vanish from the chart entirely.
+    const latest = monthKeys[monthKeys.length - 1];
+    const latestCounts: Record<string, number> = {};
+    rows.filter((r) => `${r.year}-${r.month}` === latest).forEach((r) => {
+      latestCounts[r.dimension ?? '—'] = r.count;
+    });
+    const keys = Object.keys(latestCounts).sort((a, b) => (latestCounts[b] || 0) - (latestCounts[a] || 0));
+    rows.forEach((r) => {
+      const key = r.dimension ?? '—';
+      if (!keys.includes(key)) keys.push(key);
+    });
+
+    const counts = new Map(rows.map((r) => [`${r.dimension ?? '—'}|${r.year}-${r.month}`, r.count]));
+
     return trend({
-      categories: growthCategories,
+      categories: monthKeys.map((key) => {
+        const [year, month] = key.split('-').map(Number);
+        return `${MONTH_LABELS[month - 1] ?? month} ${year}`;
+      }),
       series: keys.map((k) => ({
-        name: k,
+        name: k === '—' ? t('sector.unknown', { defaultValue: 'Unknown' }) : k,
         color: colorMap[k] || '#94A3B8',
-        data: REGISTER_GROWTH.map((g) => (g[field] as Record<string, number>)[k] ?? null),
+        data: monthKeys.map((mk) => counts.get(`${k}|${mk}`) ?? null),
       })),
       yMin: 0,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [growthMode]);
+  }, [growthMode, registerGrowthByMonth, registerGrowthBySource, registerGrowthBySector, t]);
 
-  const sectorDonutOption = useMemo(
-    () =>
-      donut({
-        items: SECTOR_BREAKDOWN.map((s) => ({ name: s.key === '—' ? t('sector.unknown', { defaultValue: 'Unknown' }) : s.key, value: s.count, color: SECTOR_COLOR[s.key] })),
-        totalLabel: t('home.exec.establishments', { defaultValue: 'Establishments' }),
-        legendWidth: 96,
-      }),
-    [t]
-  );
-
+  const sizeClass = summary?.sizeClass ?? [];
   const sizeClassOption = useMemo(
     () =>
       columns({
-        categories: SIZE_CLASSES.map((s) => `${t(`size.${s.key.toLowerCase()}`, { defaultValue: s.key })}\n${s.range}`),
-        series: [{ name: t('home.exec.establishments', { defaultValue: 'Establishments' }), data: SIZE_CLASSES.map((s) => s.count) }],
+        categories: sizeClass.map((s) => s.category ?? t('home.exec.sizeUnrecorded', { defaultValue: 'Unrecorded' })),
+        series: [{ name: t('home.exec.establishments', { defaultValue: 'Establishments' }), data: sizeClass.map((s) => s.count) }],
         gradient: true,
         labels: true,
         right: 26,
         xFontSize: 10,
-        greyIndex: SIZE_CLASSES.length - 1,
+        greyIndex: sizeClass.findIndex((s) => s.category == null),
       }),
-    [t]
+    [sizeClass, t]
   );
 
+  const sectorLabel = (sector: string | null) => sector ?? t('sector.unknown', { defaultValue: 'Unknown' });
+  const sectorColorOf = (sector: string | null) => SECTOR_COLOR[sector ?? '—'] ?? '#94A3B8';
+
+  const sectorBreakdown = summary?.sectorBreakdown ?? [];
+  const sectorDonutOption = useMemo(
+    () =>
+      donut({
+        items: sectorBreakdown.map((s) => ({ name: sectorLabel(s.sector), value: s.count, color: sectorColorOf(s.sector) })),
+        totalLabel: t('home.exec.establishments', { defaultValue: 'Establishments' }),
+        legendWidth: 96,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sectorBreakdown, t]
+  );
+
+  const employmentByActivity = summary?.employmentByActivity ?? [];
+  const paretoOption = useMemo(
+    () =>
+      pareto({
+        items: employmentByActivity.map((e) => ({ name: e.section, value: e.employees })),
+        valueLabel: t('home.exec.employees', { defaultValue: 'Employees' }),
+        cumLabel: t('home.exec.cumShare', { defaultValue: 'Cumulative share' }),
+        rotate: 30,
+        labelWidth: 96,
+      }),
+    [employmentByActivity, t]
+  );
+
+  const sourceSectorBreakdown = summary?.sourceSectorBreakdown ?? [];
+  const contributionOption = useMemo(() => {
+    const sources = [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))];
+    const sectors = [...new Set(sourceSectorBreakdown.map((s) => s.sector))];
+    return hbarsStacked({
+      categories: sources,
+      series: sectors.map((sec) => ({
+        name: sectorLabel(sec),
+        color: sectorColorOf(sec),
+        data: sources.map((src) => sourceSectorBreakdown.find((s) => (s.source ?? '—') === src && s.sector === sec)?.count ?? 0),
+      })),
+      barWidth: 14,
+      labelWidth: 70,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceSectorBreakdown, t]);
+
+  const municipalityBreakdown = summary?.municipalityBreakdown ?? [];
+  const mapOption = useMemo(
+    () =>
+      qatarMap({
+        byMunicipality: Object.fromEntries(municipalityBreakdown.map((m) => [m.municipality, m.count])),
+        unitLabel: t('home.exec.establishments', { defaultValue: 'establishments' }).toLowerCase(),
+      }),
+    [municipalityBreakdown, t]
+  );
+
+  // No survey data exists anywhere yet (confirmed by the database side) — this whole section is
+  // illustrative dummy data, kept only so the page still matches the SBR-design reference.
   const surveyResponseOption = useMemo(() => {
     if (responseMode === 'survey') {
       return hbars({
@@ -142,39 +230,14 @@ export function ExecutiveHomePage() {
     });
   }, [responseMode, t]);
 
-  const paretoOption = useMemo(
-    () =>
-      pareto({
-        items: EMPLOYMENT_BY_ACTIVITY.map((e) => ({ name: e.name, value: e.employees })),
-        valueLabel: t('home.exec.employees', { defaultValue: 'Employees' }),
-        cumLabel: t('home.exec.cumShare', { defaultValue: 'Cumulative share' }),
-        rotate: 30,
-        labelWidth: 96,
-      }),
-    [t]
-  );
-
-  const contributionOption = useMemo(() => {
-    const sectorKeys = SECTOR_BREAKDOWN.map((s) => s.key);
-    return hbarsStacked({
-      categories: SOURCE_SECTOR_BREAKDOWN.map((s) => s.source),
-      series: sectorKeys.map((sec) => ({
-        name: sec === '—' ? t('sector.unknown', { defaultValue: 'Unknown' }) : sec,
-        color: SECTOR_COLOR[sec],
-        data: SOURCE_SECTOR_BREAKDOWN.map((s) => (s.bySector as Record<string, number>)[sec] ?? 0),
-      })),
-      barWidth: 14,
-      labelWidth: 70,
-    });
-  }, [t]);
-
-  const mapOption = useMemo(() => qatarMap({ byMunicipality: BY_MUNICIPALITY, unitLabel: t('home.exec.establishments', { defaultValue: 'establishments' }).toLowerCase() }), [t]);
-
-  const top3Employment = EMPLOYMENT_BY_ACTIVITY.slice().sort((a, b) => b.employees - a.employees).slice(0, 3);
-  const totalEmployment = EMPLOYMENT_BY_ACTIVITY.reduce((s, e) => s + e.employees, 0);
-  const top3Pct = Math.round((top3Employment.reduce((s, e) => s + e.employees, 0) / (totalEmployment || 1)) * 100);
-  const unknownSize = SIZE_CLASSES.find((s) => s.key === 'Unknown')?.count ?? 0;
-  const totalSize = SIZE_CLASSES.reduce((s, c) => s + c.count, 0);
+  const top3Employment = employmentByActivity.slice(0, 3);
+  const totalEmployment = employmentByActivity.reduce((s, e) => s + e.employees, 0);
+  const top3Pct = totalEmployment === 0 ? 0 : Math.round((top3Employment.reduce((s, e) => s + e.employees, 0) / totalEmployment) * 100);
+  const unknownSize = sizeClass.find((s) => s.category == null)?.count ?? 0;
+  const totalSize = summary?.totalEstablishmentCount ?? sizeClass.reduce((s, c) => s + c.count, 0);
+  const activeEstablishmentCount = summary?.activeEstablishmentCount ?? 0;
+  const growthPct = summary?.growthPct;
+  const growthLabel = growthPct == null ? '—' : `${growthPct > 0 ? '+' : ''}${growthPct}%`;
 
   return (
     <PageContainer>
@@ -195,31 +258,40 @@ export function ExecutiveHomePage() {
         }
       />
 
-      {/* headline KPI band */}
+      {/* headline KPI band — first three wired to the real endpoint; Survey samples is dummy
+          (no survey data exists yet), kept only to match the SBR-design reference. */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <ExecStatCard
           icon={Building2}
-          value={EXEC_KPIS.activeEstablishments.toLocaleString()}
+          value={summaryLoading ? '—' : activeEstablishmentCount.toLocaleString()}
           label={t('home.exec.activeEst', { defaultValue: 'Active establishments' })}
-          sub={t('home.exec.totalInFrame', { defaultValue: '{{count}} total in the live frame', count: EXEC_KPIS.totalInFrame })}
+          sub={t('home.exec.totalInFrame2', { defaultValue: '{{active}} is active from {{total}} total in the live frame', active: activeEstablishmentCount, total: totalSize })}
+          href={canViewEstablishments ? '/establishments?estStatus=Active' : undefined}
         />
         <ExecStatCard
           icon={Layers}
-          value={EXEC_KPIS.enterprises.toLocaleString()}
+          value={summaryLoading ? '—' : (summary?.enterpriseCount ?? 0).toLocaleString()}
           label={t('home.mgr.tEnterprises', { defaultValue: 'Enterprises' })}
-          sub={t('home.exec.entGroups', { defaultValue: '{{count}} ent. groups', count: EXEC_KPIS.enterpriseGroups })}
+          sub={t('home.exec.entGroups2', {
+            defaultValue: '{{active}} is active ent. groups from total {{total}}',
+            active: summary?.activeEnterpriseGroupCount ?? 0,
+            total: summary?.enterpriseGroupCount ?? 0,
+          })}
+          href={canViewEnterprises ? '/enterprises?status=Active' : undefined}
         />
         <ExecStatCard
           icon={TrendingUp}
-          value={`+${EXEC_KPIS.frameGrowthYtdPct}%`}
-          label={t('home.exec.growth', { defaultValue: 'Frame growth (YTD)' })}
-          sub={t('home.exec.growthSub', { defaultValue: 'change in establishments since the Dec 2025 frame' })}
+          value={summaryLoading ? '—' : growthLabel}
+          label={t('home.exec.growthNew', { defaultValue: 'Frame growth' })}
+          sub={t('home.exec.growthSub5', {
+            defaultValue: 'newly registered establishments, last 3 months',
+          })}
         />
         <ExecStatCard
           icon={ClipboardList}
-          value={EXEC_KPIS.surveySamples.toLocaleString()}
-          label={t('home.exec.samples', { defaultValue: 'Survey samples' })}
-          sub={t('home.exec.avgResponse', { defaultValue: '{{pct}}% avg. response', pct: EXEC_KPIS.avgResponsePct })}
+          value={SURVEY_KPIS.samples.toLocaleString()}
+          label={t('home.exec.samples', { defaultValue: 'Survey Samples (PLACEHOLDER)' })}
+          sub={t('home.exec.avgResponse', { defaultValue: '{{pct}}% avg. response', pct: SURVEY_KPIS.avgResponsePct })}
         />
       </div>
 
@@ -229,7 +301,11 @@ export function ExecutiveHomePage() {
           <div className="mb-3 flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-[13.5px] font-bold text-slate-800">{t('home.exec.growth2', { defaultValue: 'Register size across frozen frames' })}</h2>
-              <p className="mt-0.5 text-[11px] text-slate-400">{t('home.exec.growth2Sub', { defaultValue: 'Each point is a published frame; the last is the live register.' })}</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                {growthMode === 'total'
+                  ? t('home.exec.growth2Sub2', { defaultValue: 'Each point is a published frame; the last is the live register.' })
+                  : t('home.exec.growthBreakdownSub2', { defaultValue: 'Active establishments at each month end, split by the selected dimension.' })}
+              </p>
             </div>
             <SegmentedToggle<GrowthMode>
               value={growthMode}
@@ -241,31 +317,37 @@ export function ExecutiveHomePage() {
               ]}
             />
           </div>
-          <EChart option={growthOption} height={224} />
+          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart option={growthOption} height={224} />}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.mgr.estBySector', { defaultValue: 'Establishments by sector' })} sub={t('home.exec.shareOfFrame', { defaultValue: 'Share of the live frame' })} />
-          <EChart option={sectorDonutOption} height={224} />
+          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart option={sectorDonutOption} height={224} />}
         </div>
       </div>
 
-      {/* map + size class + survey response */}
+      {/* map + size class + survey response (dummy — see executiveDashboardDummy.ts) */}
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.map', { defaultValue: 'Where the establishments are' })} sub={t('home.exec.mapSub', { defaultValue: 'Establishments by municipality, from the primary address' })} />
-          {mapReady ? <EChart option={mapOption} height={300} /> : <Skeleton className="h-[300px] w-full rounded-lg" />}
+          {mapReady && !summaryLoading ? <EChart option={mapOption} height={300} /> : <Skeleton className="h-[300px] w-full rounded-lg" />}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.sizeClass', { defaultValue: 'Establishments by size class' })} sub={t('home.exec.sizeClassSub', { defaultValue: 'NPC size classes — how the frame is stratified for sampling' })} />
-          <EChart option={sizeClassOption} height={244} />
-          <p className="mt-1 text-[11px] text-slate-400">
-            {t('home.exec.sizeNote', { defaultValue: '{{unknown}} of {{total}} units have no usable headcount, so they sit outside every size class. A recorded zero counts as unrecorded.', unknown: unknownSize, total: totalSize })}
-          </p>
+          {summaryLoading ? (
+            <Skeleton className="h-[244px] w-full rounded-lg" />
+          ) : (
+            <>
+              <EChart option={sizeClassOption} height={244} />
+              <p className="mt-1 text-[11px] text-slate-400">
+                {t('home.exec.sizeNote', { defaultValue: '{{unknown}} of {{total}} units have no recorded size category.', unknown: unknownSize, total: totalSize })}
+              </p>
+            </>
+          )}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-[13.5px] font-bold text-slate-800">{t('home.exec.surveyResponse', { defaultValue: 'Survey response rates' })}</h2>
+              <h2 className="text-[13.5px] font-bold text-slate-800">{t('home.exec.surveyResponse', { defaultValue: 'Survey response rates (PLACEHOLDER)' })}</h2>
               <p className="mt-0.5 text-[11px] text-slate-400">
                 {responseMode === 'survey'
                   ? t('home.exec.surveyResponseSub', { defaultValue: 'Across all periods of each survey' })
@@ -289,12 +371,18 @@ export function ExecutiveHomePage() {
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card lg:col-span-2">
           <SectionHead title={t('home.exec.concentration', { defaultValue: 'Where the jobs are' })} sub={t('home.exec.concentrationSub', { defaultValue: 'Recorded employment by economic activity, largest first, with cumulative share' })} />
-          <EChart option={paretoOption} height={268} />
-          <p className="mt-1 text-[11px] text-slate-500">{t('home.exec.concentrationNote', { defaultValue: 'Three activity sections account for {{pct}}% of all recorded employment.', pct: top3Pct })}</p>
+          {summaryLoading ? (
+            <Skeleton className="h-[268px] w-full rounded-lg" />
+          ) : (
+            <>
+              <EChart option={paretoOption} height={268} />
+              <p className="mt-1 text-[11px] text-slate-500">{t('home.exec.concentrationNote', { defaultValue: 'Three activity sections account for {{pct}}% of all recorded employment.', pct: top3Pct })}</p>
+            </>
+          )}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.contribution', { defaultValue: 'Who the register is assembled from' })} sub={t('home.exec.contributionSub', { defaultValue: 'Establishments by registration source, split by ownership sector' })} />
-          <EChart option={contributionOption} height={SOURCE_SECTOR_BREAKDOWN.length * 34 + 60} />
+          {summaryLoading ? <Skeleton className="h-[220px] w-full rounded-lg" /> : <EChart option={contributionOption} height={Math.max(220, [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))].length * 34 + 60)} />}
         </div>
       </div>
     </PageContainer>

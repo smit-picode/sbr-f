@@ -110,7 +110,7 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
                   <div className="flex flex-wrap items-center gap-1.5">
                     <User className="h-3.5 w-3.5 text-slate-400" />
                     <span className="text-[13px] font-semibold text-slate-700">{t('fieldHistory.editedByUser', { defaultValue: 'Edited by user' })}</span>
-                    <span className={`rounded px-1.5 py-0.5 text-[10.5px] font-semibold ${rejected ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10.5px] font-semibold ${rejected ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
                       {rejected ? t('fieldHistory.rejected', { defaultValue: 'Rejected' }) : t('fieldHistory.pendingApproval', { defaultValue: 'Pending approval' })}
                     </span>
                   </div>
@@ -144,7 +144,7 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
                     </span>
                     {userEdit
                       ? (v.audit?.approved && (
-                          <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">
+                          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">
                             {t('fieldHistory.approved', { defaultValue: 'Approved' })}
                           </span>
                         ))

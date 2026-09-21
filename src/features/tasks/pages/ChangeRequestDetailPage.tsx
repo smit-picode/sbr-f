@@ -384,9 +384,9 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
         chips={
           <>
             <span className="font-mono text-xs font-medium text-white/80">{r.REQUEST_CODE}</span>
-            <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
+            <span className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[r.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(r.TABLE_NAME)}</span>
             {isCreate && (
-              <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+              <span className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700">
                 {t('changeRequests.newRecordBadge', { defaultValue: 'New Record' })}
               </span>
             )}
@@ -427,14 +427,14 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
               ))}
               {r.addMembers.map((m) => (
                 <div key={`add-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
-                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">+ {memberLabel.added}</span>
+                  <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">+ {memberLabel.added}</span>
                   {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
                   <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>
               ))}
               {r.removeMembers.map((m) => (
                 <div key={`rem-${m.id}`} className="flex items-center gap-2 px-5 py-3 text-sm">
-                  <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700">− {memberLabel.removed}</span>
+                  <span className="rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700">− {memberLabel.removed}</span>
                   {m.name && <span className="font-medium text-slate-800">{m.name}</span>}
                   <span className="font-mono text-xs text-slate-400">#{m.id}</span>
                 </div>
@@ -604,9 +604,9 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                         <span className="block text-xs text-slate-500">{m.MOCI_CR_NUM ? `CR ${m.MOCI_CR_NUM} · ` : ''}#{m.SBR_ID}</span>
                       </span>
                       {m.MAIN_BRANCH_FLG === 'MAIN' ? (
-                        <span className="shrink-0 rounded bg-[#A29374] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
+                        <span className="shrink-0 rounded-full bg-[#A29374] px-1.5 py-0.5 text-[10px] font-bold text-white">{t('changeRequests.main', { defaultValue: 'MAIN' })}</span>
                       ) : m.MAIN_BRANCH_FLG === 'BRANCH' ? (
-                        <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{t('changeRequests.branch', { defaultValue: 'BRANCH' })}</span>
+                        <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{t('changeRequests.branch', { defaultValue: 'BRANCH' })}</span>
                       ) : null}
                     </button>
                   ))}

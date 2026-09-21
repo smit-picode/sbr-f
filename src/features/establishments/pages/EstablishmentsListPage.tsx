@@ -11,7 +11,7 @@ import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
-import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISHMENTS_SORTABLE_COLUMNS } from '../constants';
+import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISHMENTS_SORTABLE_COLUMNS, EST_STATUS_VALUES } from '../constants';
 import type { EstablishmentFilters, SbrEstablishment } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -37,12 +37,20 @@ export function EstablishmentsListPage() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  // Deep-link support: a `?search=` param (e.g. from the Enterprise detail "open
-  // establishment" action) seeds the search filter once on mount.
+  // Deep-link support for search and the home KPI's Active status filter.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const initialSearch = new URLSearchParams(window.location.search).get('search');
-    if (initialSearch) setFilters((prev) => ({ ...prev, search: initialSearch, page: 1 }));
+    const params = new URLSearchParams(window.location.search);
+    const initialSearch = params.get('search');
+    const initialEstStatus = params.get('estStatus');
+    if (initialSearch || initialEstStatus === EST_STATUS_VALUES.ACTIVE) {
+      setFilters((prev) => ({
+        ...prev,
+        ...(initialSearch ? { search: initialSearch } : {}),
+        ...(initialEstStatus === EST_STATUS_VALUES.ACTIVE ? { estStatus: EST_STATUS_VALUES.ACTIVE } : {}),
+        page: 1,
+      }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

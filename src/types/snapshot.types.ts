@@ -3,8 +3,7 @@ import type { SbrEnterprise } from './enterprise.types';
 import type { SbrContact } from './contact.types';
 import type { SbrAddress } from './address.types';
 
-// Frontend-only mock model (NPC-153 procedure for this feature is pending from the DB
-// engineer) — a Frozen Frame captures the live core tables at a point in time. Entity
+// Frontend-only mock model (the procedure for this feature is not yet delivered) — a Frozen Frame captures the live core tables at a point in time. Entity
 // counts are always derived from the array lengths below, never stored separately, so a
 // tab's row count and its badge can never drift apart.
 export interface Snapshot {

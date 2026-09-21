@@ -1,7 +1,6 @@
 import type { Snapshot, SbrEstablishment, SbrEnterprise, SbrContact, SbrAddress } from '@/types';
 
-// Frontend-only placeholder data (NPC-153's freeze procedure hasn't been delivered by the
-// DB engineer yet). Generated rather than hand-written so each snapshot's tab count always
+// Frontend-only placeholder data (the freeze procedure has not been delivered yet). Generated rather than hand-written so each snapshot's tab count always
 // matches its actual row count — no separate "counts" field to drift out of sync.
 
 const NAME_STEMS = [
@@ -122,7 +121,7 @@ function buildSnapshot(
   };
 }
 
-// Seed data — mirrors the point-in-time frames the DB engineer's design targets.
+// Seed data — mirrors the point-in-time frames the database-side design targets.
 export const MOCK_SNAPSHOTS: Snapshot[] = [
   buildSnapshot(4, '2025 Annual Business Register', 'Year-end frozen frame for the 2025 statistical business register.', '2025-12-31T00:00:00.000Z', 'admin@sbr.com', { establishments: 38, enterprises: 7, contacts: 25, addresses: 16 }),
   buildSnapshot(3, 'Q1 2026 Sampling Frame', 'Population frame for the Q1 2026 quarterly business survey.', '2026-03-31T00:00:00.000Z', 'analyst@npc.qa', { establishments: 41, enterprises: 8, contacts: 28, addresses: 18 }),

@@ -505,7 +505,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 className={`flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition-colors hover:border-[#A29374]/40 hover:bg-[#F4F0E8] ${lu.current ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50'}`}
               >
                 <span
-                  className="shrink-0 rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white"
+                  className="shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white"
                   style={{ background: SRC_COLOR[lu.source] ?? '#64748b' }}
                 >
                   {lu.source}

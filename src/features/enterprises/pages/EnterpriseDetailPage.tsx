@@ -262,7 +262,7 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
         <div className="flex items-center gap-2">
           <span className="font-mono text-[11px] font-bold text-[#A29374]">#{est.SBR_ID}</span>
           {isMain ? (
-            <Badge className="rounded bg-[#A29374] text-[10px] font-semibold text-white">{t('enterpriseDetail.mainUnit')}</Badge>
+            <Badge className="bg-[#A29374] text-[10px] font-semibold text-white">{t('enterpriseDetail.mainUnit')}</Badge>
           ) : (
             <Badge variant="secondary" className="text-[10px] font-semibold">{t('enterpriseDetail.branch')}</Badge>
           )}
@@ -353,9 +353,9 @@ function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[
         return (
           <li key={e.ID} className="rounded-md border border-slate-100 p-2.5">
             <div className="flex items-center gap-2">
-              <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[e.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{e.TABLE_NAME}</span>
+              <span className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold ${TABLE_BADGE[e.TABLE_NAME] ?? 'bg-slate-100 text-slate-600'}`}>{e.TABLE_NAME}</span>
               {recordId != null && <span className="font-mono text-[10.5px] text-[#A29374]">#{recordId}</span>}
-              <span className={`ml-auto rounded px-1.5 py-0.5 text-[11px] font-semibold ${statusCfg.cls}`}>{statusCfg.label}</span>
+              <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${statusCfg.cls}`}>{statusCfg.label}</span>
             </div>
             <p className="mt-1 text-[12.5px] text-slate-700">{nullableText(e.REASON)}</p>
             <p className="mt-0.5 text-[10.5px] text-slate-400">
@@ -394,7 +394,7 @@ function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${added ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${added ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
                   {added ? '+ Added' : '− Removed'}
                 </span>
                 <span className="text-[12.5px] font-semibold text-slate-700">

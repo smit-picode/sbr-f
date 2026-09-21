@@ -10,6 +10,7 @@ import { getEnterpriseColumns } from '../components/EnterpriseColumns';
 import { EnterprisesFiltersBar } from '../components/EnterprisesFilters';
 import { useGetEnterprisesListQuery } from '../api/enterprisesApi';
 import { ENTERPRISE_DEFAULT_FILTERS, ENTERPRISE_FILTER_COLUMNS } from '../constants';
+import { EST_STATUS_VALUES } from '@/features/establishments/constants';
 import type { EnterpriseFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
@@ -33,6 +34,16 @@ export function EnterprisesListPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
   const { t } = useTranslation();
   const router = useRouter();
+
+  // Deep-link support for the home KPI's Active status filter.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const initialStatus = new URLSearchParams(window.location.search).get('status');
+    if (initialStatus === EST_STATUS_VALUES.ACTIVE) {
+      setFilters((prev) => ({ ...prev, status: EST_STATUS_VALUES.ACTIVE, page: 1 }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);

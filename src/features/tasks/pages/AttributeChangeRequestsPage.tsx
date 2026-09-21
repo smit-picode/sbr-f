@@ -70,7 +70,7 @@ export function AttributeChangeRequestsPage() {
       header: t('changeRequests.cols.table', { defaultValue: 'Table' }),
       cell: ({ getValue }) => {
         const v = String(getValue());
-        return <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${TABLE_BADGE[v] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(v)}</span>;
+        return <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${TABLE_BADGE[v] ?? 'bg-slate-100 text-slate-600'}`}>{prettyTableName(v)}</span>;
       },
     },
     {

@@ -1,5 +1,5 @@
 // Bulk Change feature types — the wire contract of /api/v1/bulk-change, which fronts the
-// DBA's SBR_PORTAL_PKG.SUBMIT_BULK / DECIDE_BULK procedures.
+// SBR_PORTAL_PKG.SUBMIT_BULK / DECIDE_BULK database procedures.
 //
 // Those procedures are BEST-EFFORT, not atomic: every row commits independently, so a batch
 // can be partly submitted or partly decided. That is why STATUS has PARTIALLY_* members and

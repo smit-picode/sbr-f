@@ -106,7 +106,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
       const val = getValue<string>();
       const color = TABLE_COLORS[val] ?? 'bg-slate-100 text-slate-600';
       return (
-        <span className={`text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${color}`}>
           {prettyTableName(val)}
         </span>
       );
@@ -130,7 +130,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
       if (!val) return <span className="text-slate-400 text-xs">—</span>;
       const color = OPERATION_COLORS[val] ?? 'bg-slate-100 text-slate-600';
       return (
-        <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+        <span className={`font-mono text-xs px-2 py-0.5 rounded-full font-medium ${color}`}>
           {val}
         </span>
       );
@@ -180,7 +180,7 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
       if (!val) return <span className="text-slate-400 text-xs">—</span>;
       const color = STATUS_COLORS[val] ?? 'bg-slate-100 text-slate-600';
       return (
-        <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${color}`}>
+        <span className={`font-mono text-xs px-2 py-0.5 rounded-full font-medium ${color}`}>
           {val}
         </span>
       );
