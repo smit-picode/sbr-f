@@ -1258,5 +1258,55 @@
     "frozenByUser": "جمّده",
     "noData": "لا توجد إطارات مجمدة بعد",
     "noDataDesc": "قم بتجميد لقطة من صفحة إنشاء لقطة لتظهر هنا."
+  },
+  "home": {
+    "exec": {
+      "activeEst": "المنشآت النشطة",
+      "asOf": "اعتبارًا من",
+      "avgResponse": "{{pct}}% متوسط الاستجابة",
+      "badge": "تنفيذي",
+      "concentration": "أين توجد الوظائف",
+      "concentrationNote": "تمثل ثلاثة أقسام نشاط {{pct}}% من إجمالي العمالة المسجلة.",
+      "concentrationSub": "العمالة المسجلة حسب النشاط الاقتصادي، الأكبر أولاً، مع الحصة التراكمية",
+      "contribution": "مصدر تجميع السجل",
+      "contributionSub": "المنشآت حسب مصدر التسجيل، مقسمة حسب قطاع الملكية",
+      "cumShare": "الحصة التراكمية",
+      "employees": "الموظفون",
+      "entGroups2": "{{active}} نشطة من إجمالي {{total}} مجموعات مؤسسات",
+      "establishments": "منشأة",
+      "greeting": "مرحبًا",
+      "growth2": "حجم السجل عبر الأطر المجمّدة",
+      "growth2Sub2": "كل نقطة تمثل إطارًا منشورًا؛ والأخيرة هي السجل الحي.",
+      "growthBreakdownSub2": "المنشآت النشطة في نهاية كل شهر، مقسمة حسب البعد المحدد.",
+      "growthNew": "نمو الإطار",
+      "growthSub5": "منشآت مسجلة حديثًا، آخر 3 أشهر",
+      "map": "أين تقع المنشآت",
+      "mapSub": "المنشآت حسب البلدية، من العنوان الأساسي",
+      "responseByActivitySub": "حسب قسم النشاط الاقتصادي",
+      "samples": "عينات المسح (PLACEHOLDER)",
+      "shareOfFrame": "حصة الإطار الحي",
+      "sizeClass": "المنشآت حسب فئة الحجم",
+      "sizeClassSub": "فئات حجم NPC — كيفية تصنيف الإطار لأغراض المعاينة",
+      "sizeNote": "{{unknown}} من أصل {{total}} وحدة بدون فئة حجم مسجلة.",
+      "sizeUnrecorded": "غير مسجل",
+      "subtitle": "نظرة إدارية على السجل — التكوين، النمو، وتغطية المسح.",
+      "surveyResponse": "معدلات استجابة المسح (PLACEHOLDER)",
+      "surveyResponseSub": "عبر جميع فترات كل مسح",
+      "target": "الهدف",
+      "totalInFrame2": "{{active}} نشطة من إجمالي {{total}} في الإطار الحي",
+      "viewByActivity": "حسب النشاط",
+      "viewBySector": "حسب القطاع",
+      "viewBySource": "حسب الجهة المنظمة",
+      "viewBySurvey": "حسب المسح",
+      "viewTotal": "الإجمالي"
+    },
+    "mgr": {
+      "estBySector": "المنشآت حسب القطاع",
+      "tEnterprises": "المؤسسات"
+    }
+  },
+  "survey": {
+    "sampledUnits": "وحدات معاينة",
+    "sampledUnitsShort": "الردود"
   }
 }

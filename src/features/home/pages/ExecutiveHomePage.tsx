@@ -13,6 +13,7 @@ import { useGetExecutiveSummaryQuery } from '../api/homeApi';
 import { ExecStatCard } from '../components/ExecStatCard';
 import { SegmentedToggle } from '../components/SegmentedToggle';
 import { SECTOR_COLOR } from '../data/chartColors';
+import { QATAR_MUNICIPALITY_NAME_AR } from '../data/qatarMunicipalities';
 import {
   SOURCE_COLOR,
   SURVEY_KPIS,
@@ -42,7 +43,7 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
 }
 
 export function ExecutiveHomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // KPI cards link into the matching list page, but only for a viewer who may open it — the
   // reference gates its cards the same way rather than routing to a page that would refuse them.
@@ -116,7 +117,9 @@ export function ExecutiveHomePage() {
         return `${MONTH_LABELS[month - 1] ?? month} ${year}`;
       }),
       series: keys.map((k) => ({
-        name: k === '—' ? t('sector.unknown', { defaultValue: 'Unknown' }) : k,
+        // Kept in English regardless of language — it sits beside untranslated DB sector/source
+        // values (Private, MOCI, …) and translating only this one looked inconsistent.
+        name: k === '—' ? 'Unknown' : k,
         color: colorMap[k] || '#94A3B8',
         data: monthKeys.map((mk) => counts.get(`${k}|${mk}`) ?? null),
       })),
@@ -140,7 +143,8 @@ export function ExecutiveHomePage() {
     [sizeClass, t]
   );
 
-  const sectorLabel = (sector: string | null) => sector ?? t('sector.unknown', { defaultValue: 'Unknown' });
+  // Kept in English regardless of language — see the growthOption breakdown series above for why.
+  const sectorLabel = (sector: string | null) => sector ?? 'Unknown';
   const sectorColorOf = (sector: string | null) => SECTOR_COLOR[sector ?? '—'] ?? '#94A3B8';
 
   const sectorBreakdown = summary?.sectorBreakdown ?? [];
@@ -191,8 +195,9 @@ export function ExecutiveHomePage() {
       qatarMap({
         byMunicipality: Object.fromEntries(municipalityBreakdown.map((m) => [m.municipality, m.count])),
         unitLabel: t('home.exec.establishments', { defaultValue: 'establishments' }).toLowerCase(),
+        nameMap: i18n.language === 'ar' ? QATAR_MUNICIPALITY_NAME_AR : undefined,
       }),
-    [municipalityBreakdown, t]
+    [municipalityBreakdown, t, i18n.language]
   );
 
   // No survey data exists anywhere yet (confirmed by the database side) — this whole section is

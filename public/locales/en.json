@@ -1258,5 +1258,55 @@
     "frozenByUser": "Frozen by",
     "noData": "No frozen frames yet",
     "noDataDesc": "Freeze a snapshot from Create Snapshot to see it listed here."
+  },
+  "home": {
+    "exec": {
+      "activeEst": "Active establishments",
+      "asOf": "As of",
+      "avgResponse": "{{pct}}% avg. response",
+      "badge": "Executive",
+      "concentration": "Where the jobs are",
+      "concentrationNote": "Three activity sections account for {{pct}}% of all recorded employment.",
+      "concentrationSub": "Recorded employment by economic activity, largest first, with cumulative share",
+      "contribution": "Who the register is assembled from",
+      "contributionSub": "Establishments by registration source, split by ownership sector",
+      "cumShare": "Cumulative share",
+      "employees": "Employees",
+      "entGroups2": "{{active}} is active ent. groups from total {{total}}",
+      "establishments": "establishments",
+      "greeting": "Welcome",
+      "growth2": "Register size across frozen frames",
+      "growth2Sub2": "Each point is a published frame; the last is the live register.",
+      "growthBreakdownSub2": "Active establishments at each month end, split by the selected dimension.",
+      "growthNew": "Frame growth",
+      "growthSub5": "newly registered establishments, last 3 months",
+      "map": "Where the establishments are",
+      "mapSub": "Establishments by municipality, from the primary address",
+      "responseByActivitySub": "By economic activity section",
+      "samples": "Survey Samples (PLACEHOLDER)",
+      "shareOfFrame": "Share of the live frame",
+      "sizeClass": "Establishments by size class",
+      "sizeClassSub": "NPC size classes — how the frame is stratified for sampling",
+      "sizeNote": "{{unknown}} of {{total}} units have no recorded size category.",
+      "sizeUnrecorded": "Unrecorded",
+      "subtitle": "Management view of the register — composition, growth, and survey coverage.",
+      "surveyResponse": "Survey response rates (PLACEHOLDER)",
+      "surveyResponseSub": "Across all periods of each survey",
+      "target": "target",
+      "totalInFrame2": "{{active}} is active from {{total}} total in the live frame",
+      "viewByActivity": "By activity",
+      "viewBySector": "By sector",
+      "viewBySource": "By regulator",
+      "viewBySurvey": "By survey",
+      "viewTotal": "Total"
+    },
+    "mgr": {
+      "estBySector": "Establishments by sector",
+      "tEnterprises": "Enterprises"
+    }
+  },
+  "survey": {
+    "sampledUnits": "sampled units",
+    "sampledUnitsShort": "responses"
   }
 }

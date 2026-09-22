@@ -104,16 +104,36 @@ export function donut(o: DonutOptions): EChartOptionInput {
     return { orient: 'vertical', right: 6, top: 'middle', itemGap: o.items.length > 5 ? 6 : 8, formatter: fmt, textStyle: { rich } };
   }
 
-  function centreLabel(cx: number | string, cy: number | string) {
+  // Font size is capped by both text width and a fraction of the hole's own radius — smaller wins.
+  function centreLabel(cx: number | string, cy: number | string, innerRadiusPx?: number) {
     if (center.value == null || center.value === '') return undefined;
-    const size = 22;
+    const text = String(center.value);
+
+    // ~0.62em is a safe average advance width for bold digits/commas at this font.
+    const widthBudget = innerRadiusPx != null ? innerRadiusPx * 2 * 0.7 : 90;
+    const widthCap = Math.floor(widthBudget / (text.length * 0.62));
+
+    // 0.42 of the radius keeps the number (and the caption below it) clear of the hole's edge.
+    const radiusCap = innerRadiusPx != null ? Math.round(innerRadiusPx * 0.42) : 22;
+
+    const size = Math.max(9, Math.min(22, widthCap, radiusCap));
     const yNum = typeof cy === 'number' ? Math.round(cy + size * 0.11) : cy;
     const els: Record<string, unknown>[] = [
-      { type: 'text', x: cx, y: yNum, silent: true, z: 20, style: { text: String(center.value), align: 'center', verticalAlign: 'middle', fontSize: size, fontWeight: 800, fill: G[900] } },
+      { type: 'text', x: cx, y: yNum, silent: true, z: 20, style: { text, align: 'center', verticalAlign: 'middle', fontSize: size, fontWeight: 800, fill: G[900] } },
     ];
     if (center.label) {
       const capY = typeof yNum === 'number' ? Math.round(yNum + size * 0.5 + 3) : yNum;
-      els.push({ type: 'text', x: cx, y: capY, silent: true, z: 20, style: { text: String(center.label), align: 'center', verticalAlign: 'top', fontSize: 10.5, fill: G[400] } });
+      // The caption sits off-centre, where a circle is narrower, so it needs its own fit check.
+      const label = String(center.label);
+      let captionSize = 10.5;
+      if (typeof cy === 'number' && typeof capY === 'number' && innerRadiusPx != null) {
+        // Offset of the caption LINE's own vertical centre (not just its top edge) from cy.
+        const capCenterOffset = (capY - cy) + 10.5 * 0.6;
+        const chordWidth = 2 * Math.sqrt(Math.max(0, innerRadiusPx ** 2 - capCenterOffset ** 2)) * 0.85;
+        // 0.55em/char matches this file's own legend-text convention (see legendCfg's maxChars).
+        captionSize = Math.max(6, Math.min(10.5, Math.floor(chordWidth / (label.length * 0.55))));
+      }
+      els.push({ type: 'text', x: cx, y: capY, silent: true, z: 20, style: { text: label, align: 'center', verticalAlign: 'top', fontSize: captionSize, fill: G[400] } });
     }
     return els;
   }
@@ -122,7 +142,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
     return {
       tooltip: { trigger: 'item', formatter: (x: { marker: string; name: string; value: number }) => `${x.marker} <b>${x.name}</b><br/>${fmtNum(x.value)} · ${pct(x.value, total)}%` },
       legend: legendCfg(side, nameW),
-      graphic: centreLabel(ringCx, ringCy),
+      graphic: centreLabel(ringCx, ringCy, typeof rOuter[0] === 'number' ? rOuter[0] : undefined),
       series: [{
         type: 'pie',
         radius: rOuter,
@@ -340,6 +360,9 @@ export interface QatarMapOptions {
   unitLabel?: string;
   unitLabelOne?: string;
   color?: string;
+  // GeoJSON shapeName -> localized display name. The join to the GeoJSON always stays on the raw
+  // shapeName (that data has no Arabic names), so this only swaps what's shown, never what's matched.
+  nameMap?: Record<string, string>;
 }
 
 // Registers the 'qatar' map once the GeoJSON (fetched from /data/qatar-municipalities.geo.json)
@@ -364,9 +387,10 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
       formatter: (x: { value: number; name: string }) => {
         const v = x.value == null || Number.isNaN(x.value) ? 0 : x.value;
         const noun = v === 1 && o.unitLabelOne ? o.unitLabelOne : (o.unitLabel || '');
-        return `<b>${x.name}</b><br/>${fmtNum(v)} ${noun}`;
+        return `<b>${o.nameMap?.[x.name] ?? x.name}</b><br/>${fmtNum(v)} ${noun}`;
       },
     },
+    // itemWidth=thickness, itemHeight=length pre-rotation (echarts rotates 90° for horizontal) — do not swap.
     visualMap: {
       min: 0,
       max,
@@ -381,15 +405,23 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
       inRange: { color: [hexA(col, 0.08), hexA(col, 0.45), col] },
       outOfRange: { color: hexA(col, 0.05) },
     },
+    // Shrunk + shifted up so the map's southern tip doesn't overlap the visualMap legend at bottom:0.
     geo: {
       map: 'qatar',
       nameProperty: 'shapeName',
       roam: false,
-      layoutCenter: ['50%', '50%'],
-      layoutSize: '100%',
+      layoutCenter: ['50%', '42%'],
+      layoutSize: '82%',
       aspectScale: 0.92,
       itemStyle: { areaColor: hexA(col, 0.06), borderColor: '#fff', borderWidth: 1.4 },
-      label: { show: true, fontSize: 9.5, color: G[500], textBorderColor: '#fff', textBorderWidth: 2 },
+      label: {
+        show: true,
+        fontSize: 9.5,
+        color: G[500],
+        textBorderColor: '#fff',
+        textBorderWidth: 2,
+        formatter: (p: { name: string }) => o.nameMap?.[p.name] ?? p.name,
+      },
       emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { areaColor: hexA(C.dune, 0.55) } },
       select: { disabled: true },
     },
