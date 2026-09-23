@@ -13,18 +13,20 @@ interface EstablishmentFiltersProps {
   onFilterChange: (filters: Partial<EstablishmentFilters>) => void;
   onReset: () => void;
   isDefault?: boolean;
+  searchLoading?: boolean;
 }
 
-export function EstablishmentsFiltersBar({ filters, onFilterChange, onReset, isDefault = false }: EstablishmentFiltersProps) {
+export function EstablishmentsFiltersBar({ filters, onFilterChange, onReset, isDefault = false, searchLoading = false }: EstablishmentFiltersProps) {
   const { t } = useTranslation();
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
-      <SearchInput 
+      <SearchInput
         className="shadow-none"
         value={filters.search ?? ''}
         onChange={(v) => onFilterChange({ search: v, page: 1 })}
         placeholder={t('filters.searchByName')}
+        loading={searchLoading}
       />
 
       <Select value={filters.estStatus ?? ''} onValueChange={(v) => onFilterChange({ estStatus: v, page: 1 })}>

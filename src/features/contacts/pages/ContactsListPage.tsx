@@ -14,7 +14,7 @@ import { CONTACT_DEFAULT_FILTERS } from '../constants';
 import type { ContactFilters, SbrContact } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,7 +29,9 @@ function is401(error: unknown): boolean {
 }
 
 export function ContactsListPage() {
-  const [filters, setFilters] = useState<ContactFilters>(CONTACT_DEFAULT_FILTERS);
+  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
+  // happens when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState<ContactFilters>('sbr:contacts:filters', CONTACT_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrContact | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
@@ -54,7 +56,7 @@ export function ContactsListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<ContactFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const { canEdit: canEditContact, canSearch, canViewDetail } = usePermission('contacts');
   // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)

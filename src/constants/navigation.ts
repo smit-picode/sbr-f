@@ -15,6 +15,7 @@ export type NavGroup = {
   id: string;
   title: string;
   i18nKey: string;    // Translation key for the group label
+  icon: string;       // Shown as the group's single icon when the rail is collapsed
   items: NavItem[];
 };
 
@@ -27,6 +28,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'sbr-live-frame',
     title: 'SBR Live Frame',
     i18nKey: 'nav.sbrLiveFrame',
+    icon: 'Building2',
     items: [
       { title: 'Home',        href: '/home',        icon: 'Home',          permKey: '',                    i18nKey: 'nav.home'        },
       { title: 'Establishments', href: '/establishments',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.establishments', divider: true  },
@@ -41,6 +43,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'tasks',
     title: 'Tasks',
     i18nKey: 'nav.tasks',
+    icon: 'Inbox',
     items: [
       // Hidden in frontend until the Attribute Change Requests feature is ready to show to the client. Uncomment to restore.
       { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: ['approvals.view', 'approvals.approve'], i18nKey: 'nav.attributeChangeRequests', showCount: true },
@@ -59,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'frozen-frames',
     title: 'Frozen Frames',
     i18nKey: 'nav.frozenFrames',
+    icon: 'Camera',
     items: [
       { title: 'Create Snapshot',  href: '/snapshots/create',   icon: 'Camera',      permKey: '', i18nKey: 'nav.createSnapshot'  },
       // { title: 'Browse Snapshots', href: '/snapshots/browse',   icon: 'Database',    permKey: '', i18nKey: 'nav.browseSnapshots' },
@@ -69,6 +73,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'data-quality',
     title: 'Data Quality',
     i18nKey: 'nav.dataQuality',
+    icon: 'Gauge',
     items: [
       { title: 'Quality Dashboard',    href: '/quality/dashboard',  icon: 'Gauge',    permKey: '', i18nKey: 'nav.qualityDashboard'    },
       { title: 'Quality Findings',     href: '/quality/findings',   icon: 'Flag',     permKey: '', i18nKey: 'nav.qualityFindings'     },
@@ -79,6 +84,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'source-data',
     title: 'Source Data',
     i18nKey: 'nav.sourceData',
+    icon: 'Database',
     items: [
       { title: 'Source Catalog', href: '/sources', icon: 'Database', permKey: '', i18nKey: 'nav.sourceCatalog' },
     ],
@@ -87,6 +93,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'administration',
     title: 'Administration',
     i18nKey: 'nav.administration',
+    icon: 'ShieldCheck',
     items: [
       { title: 'User Management',  href: '/admin/users',          icon: 'Users',       permKey: 'admin_panel.users.view', i18nKey: 'admin.tabs.users',         sidebarLabel: 'Users', breadcrumbLabel: 'Users' },
       { title: 'Roles',            href: '/admin/roles',          icon: 'ShieldCheck', permKey: 'admin_panel.roles.view', i18nKey: 'admin.tabs.roles'                                                              },

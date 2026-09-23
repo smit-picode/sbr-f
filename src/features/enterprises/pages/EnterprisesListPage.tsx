@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
@@ -14,7 +14,7 @@ import { EST_STATUS_VALUES } from '@/features/establishments/constants';
 import type { EnterpriseFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
@@ -29,21 +29,22 @@ function is403(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
 }
 
+// Deep-link support for the home KPI's Active status filter takes priority over a restored
+// session, since it reflects the user's explicit intent from wherever they linked in.
+function readInitialFilters(): EnterpriseFilters | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const initialStatus = new URLSearchParams(window.location.search).get('status');
+  if (initialStatus !== EST_STATUS_VALUES.ACTIVE) return undefined;
+  return { ...ENTERPRISE_DEFAULT_FILTERS, status: EST_STATUS_VALUES.ACTIVE, page: 1 };
+}
+
 export function EnterprisesListPage() {
-  const [filters, setFilters] = useState<EnterpriseFilters>(ENTERPRISE_DEFAULT_FILTERS);
-  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
+  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
+  // happens when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState<EnterpriseFilters>('sbr:enterprises:filters', ENTERPRISE_DEFAULT_FILTERS, readInitialFilters);
+  const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:enterprises:columnFilters', []);
   const { t } = useTranslation();
   const router = useRouter();
-
-  // Deep-link support for the home KPI's Active status filter.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const initialStatus = new URLSearchParams(window.location.search).get('status');
-    if (initialStatus === EST_STATUS_VALUES.ACTIVE) {
-      setFilters((prev) => ({ ...prev, status: EST_STATUS_VALUES.ACTIVE, page: 1 }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -75,17 +76,17 @@ export function EnterprisesListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<EnterpriseFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const handleReset = useCallback(() => {
     setFilters(ENTERPRISE_DEFAULT_FILTERS);
     setColumnFilters([]);
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
     setColumnFilters(rows);
     setFilters((prev) => ({ ...prev, page: 1 }));
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const activeChips: FilterChip[] = [];
   if (filters.search) {

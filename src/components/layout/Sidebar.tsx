@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,7 +41,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NAV_GROUPS, type NavGroup, type NavItem } from '@/constants/navigation';
-import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { formatRole } from '@/utils/format';
@@ -82,11 +82,16 @@ const SIDEBAR_GROUPS_KEY = 'sbr_sidebar_groups';
 
 interface NavLinkProps {
   item: NavItem;
-  collapsed: boolean;
   count?: number;
+  // Fired on click in addition to the normal navigation — used by the collapsed-group flyout
+  // to close itself, since the sidebar stays mounted across route changes (a persistent layout
+  // element), so a stale open flyout would otherwise linger after navigating away.
+  onNavigate?: () => void;
 }
 
-function NavLink({ item, collapsed, count }: NavLinkProps) {
+// Only ever rendered expanded now: the collapsed rail shows one icon per GROUP (with its own
+// flyout, below), not one per item, so there is no longer a collapsed single-item variant here.
+function NavLink({ item, count, onNavigate }: NavLinkProps) {
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const Icon = ICON_MAP[item.icon];
@@ -98,41 +103,10 @@ function NavLink({ item, collapsed, count }: NavLinkProps) {
 
   const countLabel = count && count > 0 ? (count > 99 ? '99+' : String(count)) : null;
 
-  if (collapsed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            href={item.href}
-            className={cn(
-              'relative flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-colors',
-              isActive ? 'bg-adaam-tint text-adaam' : 'text-gray-500 hover:bg-gray-50'
-            )}
-          >
-            {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
-            <span className="sr-only">{label}</span>
-            {countLabel && (
-              <span className="absolute -top-1 -end-1 min-w-[16px] h-4 rounded-full bg-adaam text-white text-[9px] font-extrabold flex items-center justify-center px-0.5 leading-none shadow-sm">
-                {countLabel}
-              </span>
-            )}
-          </Link>
-        </TooltipTrigger>
-        {/* Portalled to <body>: the collapsed rail's <nav> is `overflow-y-auto overflow-x-hidden`,
-            so an inline side="right" tooltip was clipped at the sidebar edge. sideOffset clears
-            the 68px rail (trigger ends at 54px) so the label never sits on top of it. */}
-        <TooltipPortal>
-          <TooltipContent side="right" sideOffset={16} collisionPadding={8} className="shadow-lg">
-            {label}{countLabel ? ` (${countLabel})` : ''}
-          </TooltipContent>
-        </TooltipPortal>
-      </Tooltip>
-    );
-  }
-
   return (
     <Link
       href={item.href}
+      onClick={onNavigate}
       className={cn(
         'flex w-full items-center gap-2.5 ps-3 pe-2.5 h-8 rounded-full text-[13px] transition-colors',
         isActive ? 'bg-adaam-tint font-semibold text-adaam' : 'font-medium text-gray-600 hover:bg-gray-50'
@@ -160,6 +134,32 @@ export function Sidebar() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  // Collapsed-rail group flyout — one at a time, keyed by group id. Position is measured from
+  // the trigger icon each time it opens (fixed positioning, portalled past the rail's own
+  // overflow-y-auto/overflow-x-hidden clipping) rather than inherited from the icon's own
+  // ancestor, mirroring FieldHistoryPopover's approach to the same clipped-rail problem.
+  const [flyout, setFlyout] = useState<{ groupId: string; style: React.CSSProperties } | null>(null);
+
+  // Opens the flyout for one collapsed group, sized/positioned off the trigger icon's own
+  // rect. paddingInlineStart bridges the gap between the icon and the panel with invisible
+  // padding that is still part of THIS element's box — since the flyout below is rendered as a
+  // React child of the same hoverable wrapper (via createPortal, which preserves React's event
+  // tree even though the DOM node moves to <body>), the pointer never leaves that combined
+  // hit-test area while crossing from icon to panel, so mouseleave never fires mid-transit.
+  const openFlyout = (groupId: string, el: HTMLElement, itemCount: number) => {
+    const r = el.getBoundingClientRect();
+    const rail = el.closest('aside');
+    const railRect = (rail ?? el).getBoundingClientRect();
+    const rtl = getComputedStyle(el).direction === 'rtl';
+    const estimatedHeight = 40 + itemCount * 34 + 8;
+    const top = Math.max(8, Math.min(Math.round(r.top), window.innerHeight - estimatedHeight - 8));
+    setFlyout({
+      groupId,
+      style: rtl
+        ? { top, right: Math.round(window.innerWidth - r.left), paddingInlineStart: Math.round(r.left - railRect.left) + 8 }
+        : { top, left: Math.round(r.right), paddingInlineStart: Math.round(railRect.right - r.right) + 8 },
+    });
+  };
 
   // Restore persisted UI state after mount (avoids SSR hydration mismatch)
   useEffect(() => {
@@ -254,155 +254,190 @@ export function Sidebar() {
   const initials = effectiveUser?.email?.slice(0, 2).toUpperCase() ?? 'U';
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <aside
-        className={cn(
-          // Floating white rail (QInsights style) instead of a full-bleed maroon panel.
-          // sticky + own height (not h-screen) keeps it pinned with margin on all sides.
-          'flex flex-col shrink-0 sticky top-4 my-4 ms-4 rounded-3xl shadow-float transition-[width] duration-200 ease-out',
-          collapsed ? 'w-[68px]' : 'w-[236px]'
-        )}
-        style={{
-          background: RAIL_GRADIENT,
-          height: 'calc(100vh - 32px)',
-          // Mirrors the body stack in globals.css (Lusail → Calibri), so the rail renders in the
-          // same typeface as the reference. Arabic mode promotes Cairo for Arabic glyph coverage.
-          fontFamily: i18n.language === 'ar'
-            ? "'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, sans-serif"
-            : "'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), sans-serif",
-        }}
+    <aside
+      className={cn(
+        // Floating white rail (QInsights style) instead of a full-bleed maroon panel.
+        // sticky + own height (not h-screen) keeps it pinned with margin on all sides.
+        'flex flex-col shrink-0 sticky top-4 my-4 ms-4 rounded-3xl shadow-float transition-[width] duration-200 ease-out',
+        collapsed ? 'w-[68px]' : 'w-[236px]'
+      )}
+      style={{
+        background: RAIL_GRADIENT,
+        height: 'calc(100vh - 32px)',
+        // Mirrors the body stack in globals.css (Lusail → Calibri), so the rail renders in the
+        // same typeface as the reference. Arabic mode promotes Cairo for Arabic glyph coverage.
+        fontFamily: i18n.language === 'ar'
+          ? "'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, sans-serif"
+          : "'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), sans-serif",
+      }}
+    >
+      {/* Brand — matches SBR-design's own sidebar exactly: the official lockup (its own PNG
+          already carries "National Planning Council") stacked above "SBR Portal", not the
+          emblem-in-a-circle badge, which both isolated the emblem and altered its form.
+          Collapsed, the rail is too narrow to carry the lockup at a legible size, so it shows
+          the product name alone, per the same reference. */}
+      <button
+        type="button"
+        onClick={() => router.push('/home')}
+        className={cn('flex flex-col shrink-0 items-center gap-2.5 pt-5 pb-4', collapsed ? 'px-2' : 'px-4')}
       >
-        {/* Brand — matches SBR-design's own sidebar exactly: the official lockup (its own PNG
-            already carries "National Planning Council") stacked above "SBR Portal", not the
-            emblem-in-a-circle badge, which both isolated the emblem and altered its form.
-            Collapsed, the rail is too narrow to carry the lockup at a legible size, so it shows
-            the product name alone, per the same reference. */}
-        <button
-          type="button"
-          onClick={() => router.push('/home')}
-          className={cn('flex flex-col shrink-0 items-center gap-2.5 pt-5 pb-4', collapsed ? 'px-2' : 'px-4')}
-        >
-          {!collapsed && (
-            <Image
-              src="/assets/npc-logo-primary.png"
-              alt="National Planning Council"
-              width={257}
-              height={90}
-              priority
-              className="h-14 w-auto object-contain"
-            />
-          )}
-          <span className={cn('font-extrabold text-ink leading-tight', collapsed ? 'text-[11px]' : 'text-[14.5px]')}>
-            {collapsed ? 'SBR' : 'SBR Portal'}
-          </span>
-        </button>
+        {!collapsed && (
+          <Image
+            src="/assets/npc-logo-primary.png"
+            alt="National Planning Council"
+            width={257}
+            height={90}
+            priority
+            className="h-14 w-auto object-contain"
+          />
+        )}
+        <span className={cn('font-extrabold text-ink leading-tight', collapsed ? 'text-[11px]' : 'text-[14.5px]')}>
+          {collapsed ? 'SBR' : 'SBR Portal'}
+        </span>
+      </button>
 
-        {/* Navigation */}
-        <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-2', collapsed ? 'px-2' : 'px-3')}>
-          {NAV_GROUPS.filter(isGroupVisible).map((group) => {
-            const visibleItems = group.items.filter(isItemVisible);
-            if (visibleItems.length === 0) return null;
-            const isOpen = openGroups[group.id] !== false;
-            const groupActive = visibleItems.some(
-              (item) => pathname === item.href || pathname.startsWith(item.href + '/')
-            );
+      {/* Navigation */}
+      <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-2', collapsed ? 'px-2' : 'px-3')}>
+        {NAV_GROUPS.filter(isGroupVisible).map((group) => {
+          const visibleItems = group.items.filter(isItemVisible);
+          if (visibleItems.length === 0) return null;
+          const isOpen = openGroups[group.id] !== false;
+          const groupActive = visibleItems.some(
+            (item) => pathname === item.href || pathname.startsWith(item.href + '/')
+          );
 
-            const groupPendingCount = visibleItems.some((i) => i.showCount) ? pendingCount : 0;
+          const groupPendingCount = visibleItems.some((i) => i.showCount) ? pendingCount : 0;
 
-            if (collapsed) {
-              return (
-                <div key={group.id} className="py-1.5 border-t first:border-t-0 border-gray-100">
-                  <div className="flex flex-col gap-1">
-                    {visibleItems.map((item, idx) => (
-                      <div key={item.href} className="contents">
-                        {item.divider && idx > 0 && <div className="mx-2 my-1.5 h-px bg-gray-200" />}
-                        <NavLink item={item} collapsed count={item.showCount ? pendingCount : undefined} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-
+          if (collapsed) {
+            const GroupIcon = ICON_MAP[group.icon];
+            const groupLabel = t(group.i18nKey, { defaultValue: group.title });
+            const isFlyoutOpen = flyout?.groupId === group.id;
             return (
-              <div key={group.id} className="mb-1">
+              <div
+                key={group.id}
+                className="py-1.5 border-t first:border-t-0 border-gray-100"
+                onMouseEnter={(e) => openFlyout(group.id, e.currentTarget, visibleItems.length)}
+                onMouseLeave={() => setFlyout(null)}
+              >
                 <button
-                  onClick={() => toggleGroup(group.id)}
+                  type="button"
+                  onClick={() => { router.push(visibleItems[0].href); setFlyout(null); }}
+                  title={groupLabel}
                   className={cn(
-                    'flex w-full items-center gap-2 px-3 h-7 mt-1 rounded-full text-[11px] font-semibold transition-colors hover:bg-gray-50',
-                    groupActive ? 'text-dune-deep' : 'text-gray-400'
+                    'relative flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-colors',
+                    groupActive ? 'bg-adaam-tint text-adaam' : 'text-gray-500 hover:bg-gray-50'
                   )}
                 >
-                  <span className="truncate">{t(group.i18nKey, { defaultValue: group.title })}</span>
+                  {GroupIcon && <GroupIcon className="h-[19px] w-[19px] shrink-0" />}
+                  <span className="sr-only">{groupLabel}</span>
                   {groupPendingCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] rounded-full bg-adaam text-white text-[10px] font-extrabold flex items-center justify-center px-1 leading-none">
+                    <span className="absolute -top-0.5 -end-0.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-adaam text-white text-[9px] font-extrabold flex items-center justify-center leading-none">
                       {groupPendingCount > 99 ? '99+' : groupPendingCount}
                     </span>
                   )}
-                  <ChevronDown
-                    className={cn('h-[13px] w-[13px] ms-auto transition-transform', !isOpen && '-rotate-90')}
-                  />
                 </button>
-                {isOpen && (
-                  <div className="mt-1 flex flex-col gap-0.5">
-                    {visibleItems.map((item, idx) => (
-                      <div key={item.href} className="contents">
-                        {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-gray-200" />}
-                        <NavLink item={item} collapsed={false} count={item.showCount ? pendingCount : undefined} />
+                {isFlyoutOpen && flyout && createPortal(
+                  <div className="fixed z-50" style={flyout.style}>
+                    <div className="w-60 rounded-2xl bg-white p-2 shadow-float">
+                      <div className="px-3 pb-1 pt-1.5 text-[11px] font-semibold text-gray-400">{groupLabel}</div>
+                      <div className="flex flex-col gap-0.5">
+                        {visibleItems.map((item, idx) => (
+                          <div key={item.href} className="contents">
+                            {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-gray-200" />}
+                            <NavLink
+                              item={item}
+                              count={item.showCount ? pendingCount : undefined}
+                              onNavigate={() => setFlyout(null)}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             );
-          })}
-        </nav>
+          }
 
-        {/* Collapse Toggle */}
-        <button
-          onClick={toggleCollapsed}
-          className={cn(
-            'flex items-center gap-2 h-9 shrink-0 mx-3 mb-1 rounded-full text-[12px] font-semibold text-gray-500 transition-colors hover:bg-gray-50',
-            collapsed ? 'justify-center' : 'px-3'
-          )}
-          title={collapsed ? t('sidebar.expand', { defaultValue: 'Expand' }) : t('sidebar.collapse', { defaultValue: 'Collapse' })}
-        >
-          {collapsed ? (
-            <ChevronsRight className="h-[18px] w-[18px] rtl:rotate-180" />
-          ) : (
-            <>
-              <ChevronsLeft className="h-[18px] w-[18px] rtl:rotate-180" />
-              <span>{t('sidebar.collapse', { defaultValue: 'Collapse' })}</span>
-            </>
-          )}
-        </button>
-
-        {/* User */}
-        <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0 border-t border-gray-100', collapsed ? 'justify-center px-2' : 'px-4')}>
-          <div
-            className="h-9 w-9 rounded-full bg-dune flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-          >
-            {initials}
-          </div>
-          {!collapsed && (
-            <>
-              <div className="leading-tight min-w-0 flex-1">
-                <p className="text-[12.5px] font-semibold text-ink truncate">
-                  {effectiveUser?.email ?? 'User'}
-                </p>
-                <p className="text-[10.5px] truncate text-gray-500">{formatRole(effectiveUser?.role)}</p>
-              </div>
+          return (
+            <div key={group.id} className="mb-1">
               <button
-                onClick={handleLogout}
-                title={t('actions.signOut')}
-                className="h-7 w-7 flex items-center justify-center rounded-full text-gray-400 hover:text-adaam hover:bg-adaam-tint transition-colors"
+                onClick={() => toggleGroup(group.id)}
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 h-7 mt-1 rounded-full text-[11px] font-semibold transition-colors hover:bg-gray-50',
+                  groupActive ? 'text-dune-deep' : 'text-gray-400'
+                )}
               >
-                <LogOut className="h-[15px] w-[15px] rtl:rotate-180" />
+                <span className="truncate">{t(group.i18nKey, { defaultValue: group.title })}</span>
+                {groupPendingCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] rounded-full bg-adaam text-white text-[10px] font-extrabold flex items-center justify-center px-1 leading-none">
+                    {groupPendingCount > 99 ? '99+' : groupPendingCount}
+                  </span>
+                )}
+                <ChevronDown
+                  className={cn('h-[13px] w-[13px] ms-auto transition-transform', !isOpen && '-rotate-90')}
+                />
               </button>
-            </>
-          )}
+              {isOpen && (
+                <div className="mt-1 flex flex-col gap-0.5">
+                  {visibleItems.map((item, idx) => (
+                    <div key={item.href} className="contents">
+                      {item.divider && idx > 0 && <div className="mx-1 my-1.5 h-px bg-gray-200" />}
+                      <NavLink item={item} count={item.showCount ? pendingCount : undefined} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Collapse Toggle */}
+      <button
+        onClick={toggleCollapsed}
+        className={cn(
+          'flex items-center gap-2 h-9 shrink-0 mx-3 mb-1 rounded-full text-[12px] font-semibold text-gray-500 transition-colors hover:bg-gray-50',
+          collapsed ? 'justify-center' : 'px-3'
+        )}
+        title={collapsed ? t('sidebar.expand', { defaultValue: 'Expand' }) : t('sidebar.collapse', { defaultValue: 'Collapse' })}
+      >
+        {collapsed ? (
+          <ChevronsRight className="h-[18px] w-[18px] rtl:rotate-180" />
+        ) : (
+          <>
+            <ChevronsLeft className="h-[18px] w-[18px] rtl:rotate-180" />
+            <span>{t('sidebar.collapse', { defaultValue: 'Collapse' })}</span>
+          </>
+        )}
+      </button>
+
+      {/* User */}
+      <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0 border-t border-gray-100', collapsed ? 'justify-center px-2' : 'px-4')}>
+        <div
+          className="h-9 w-9 rounded-full bg-dune flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+        >
+          {initials}
         </div>
-      </aside>
-    </TooltipProvider>
+        {!collapsed && (
+          <>
+            <div className="leading-tight min-w-0 flex-1">
+              <p className="text-[12.5px] font-semibold text-ink truncate">
+                {effectiveUser?.email ?? 'User'}
+              </p>
+              <p className="text-[10.5px] truncate text-gray-500">{formatRole(effectiveUser?.role)}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title={t('actions.signOut')}
+              className="h-7 w-7 flex items-center justify-center rounded-full text-gray-400 hover:text-adaam hover:bg-adaam-tint transition-colors"
+            >
+              <LogOut className="h-[15px] w-[15px] rtl:rotate-180" />
+            </button>
+          </>
+        )}
+      </div>
+    </aside>
   );
 }

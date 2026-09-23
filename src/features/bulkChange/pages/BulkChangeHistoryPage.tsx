@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n';
-import { usePermission } from '@/hooks';
+import { usePermission, usePersistedState } from '@/hooks';
 import { formatDate } from '@/utils/format';
 import { cleanParams } from '@/utils/query';
 import { useGetBulkChangeHistoryQuery } from '../api/bulkChangeApi';
@@ -22,7 +22,9 @@ export function BulkChangeHistoryPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isArabic } = useLanguage();
-  const [filters, setFilters] = useState({ ...BULK_CHANGE_DEFAULT_FILTERS });
+  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
+  // when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState('sbr:bulkChangeHistory:filters', { ...BULK_CHANGE_DEFAULT_FILTERS });
 
   // Same two-layer rule as the queue: module access plus an editable table.
   const establishments = usePermission('establishments');
@@ -37,7 +39,7 @@ export function BulkChangeHistoryPage() {
 
   const handleFilterChange = useCallback((next: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...next }));
-  }, []);
+  }, [setFilters]);
 
   const columns: ColumnDef<BulkChangeTaskSummary>[] = [
     {

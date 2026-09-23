@@ -15,7 +15,7 @@ import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISH
 import type { EstablishmentFilters, SbrEstablishment } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { Building2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -30,29 +30,32 @@ function is401(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
 }
 
+// Deep-link support for search and the home KPI's Active status filter takes priority over a
+// restored session, since it reflects the user's explicit intent from wherever they linked in.
+function readInitialFilters(): EstablishmentFilters | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const params = new URLSearchParams(window.location.search);
+  const initialSearch = params.get('search');
+  const initialEstStatus = params.get('estStatus');
+  if (!initialSearch && initialEstStatus !== EST_STATUS_VALUES.ACTIVE) return undefined;
+  return {
+    ...ESTABLISHMENTS_DEFAULT_FILTERS,
+    ...(initialSearch ? { search: initialSearch } : {}),
+    ...(initialEstStatus === EST_STATUS_VALUES.ACTIVE ? { estStatus: EST_STATUS_VALUES.ACTIVE } : {}),
+    page: 1,
+  };
+}
+
 export function EstablishmentsListPage() {
-  const [filters, setFilters] = useState<EstablishmentFilters>(ESTABLISHMENTS_DEFAULT_FILTERS);
-  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
+  const [filters, setFilters] = usePersistedState<EstablishmentFilters>(
+    'sbr:establishments:filters',
+    ESTABLISHMENTS_DEFAULT_FILTERS,
+    readInitialFilters
+  );
+  const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:establishments:columnFilters', []);
   const [editTarget, setEditTarget] = useState<SbrEstablishment | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
-
-  // Deep-link support for search and the home KPI's Active status filter.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const initialSearch = params.get('search');
-    const initialEstStatus = params.get('estStatus');
-    if (initialSearch || initialEstStatus === EST_STATUS_VALUES.ACTIVE) {
-      setFilters((prev) => ({
-        ...prev,
-        ...(initialSearch ? { search: initialSearch } : {}),
-        ...(initialEstStatus === EST_STATUS_VALUES.ACTIVE ? { estStatus: EST_STATUS_VALUES.ACTIVE } : {}),
-        page: 1,
-      }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -70,7 +73,11 @@ export function EstablishmentsListPage() {
       : undefined,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
+  const { data, isLoading, isFetching, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
+  // isLoading is false once this exact args combo has cached data (e.g. paging/sorting back over
+  // an already-searched term) — isFetching still fires then, so the search box gets its own
+  // spinner for that revalidation instead of leaving the table looking idle mid-request.
+  const searchLoading = isFetching && !isLoading;
 
   const isValidationError = isError && is400(error);
   const isPermissionError = isError && is403(error);
@@ -85,17 +92,17 @@ export function EstablishmentsListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<EstablishmentFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const handleReset = useCallback(() => {
     setFilters(ESTABLISHMENTS_DEFAULT_FILTERS);
     setColumnFilters([]);
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
     setColumnFilters(rows);
     setFilters((prev) => ({ ...prev, page: 1 }));
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   // Active-filter chips — value is "active" when it isn't empty or the "__all__" sentinel
   const activeChips: FilterChip[] = [];
@@ -155,6 +162,7 @@ export function EstablishmentsListPage() {
           onFilterChange={handleFilterChange}
           onReset={handleReset}
           isDefault={JSON.stringify(filters) === JSON.stringify(ESTABLISHMENTS_DEFAULT_FILTERS)}
+          searchLoading={searchLoading}
         />
       )}
 

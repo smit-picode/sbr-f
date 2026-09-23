@@ -22,7 +22,7 @@ import {
 import type { EnterpriseGroupFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { RotateCcw, Plus, Network } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
@@ -32,8 +32,10 @@ function is401(e: unknown): boolean { return typeof e === 'object' && e !== null
 function is403(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 403; }
 
 export function EnterpriseGroupsListPage() {
-  const [filters, setFilters] = useState<EnterpriseGroupFilters>(ENTERPRISE_GROUP_DEFAULT_FILTERS);
-  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
+  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
+  // happens when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState<EnterpriseGroupFilters>('sbr:enterpriseGroups:filters', ENTERPRISE_GROUP_DEFAULT_FILTERS);
+  const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:enterpriseGroups:columnFilters', []);
   const [showCreate, setShowCreate] = useState(false);
   const { t } = useTranslation();
   const router = useRouter();
@@ -68,17 +70,17 @@ export function EnterpriseGroupsListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<EnterpriseGroupFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const handleReset = useCallback(() => {
     setFilters(ENTERPRISE_GROUP_DEFAULT_FILTERS);
     setColumnFilters([]);
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
     setColumnFilters(rows);
     setFilters((prev) => ({ ...prev, page: 1 }));
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const isDefault = JSON.stringify(filters) === JSON.stringify(ENTERPRISE_GROUP_DEFAULT_FILTERS) && columnFilters.length === 0;
 

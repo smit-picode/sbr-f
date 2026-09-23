@@ -378,8 +378,14 @@ export async function registerQatarMap(): Promise<void> {
 
 export function qatarMap(o: QatarMapOptions): EChartOption {
   const col = o.color || C.adaam;
-  const names = Object.keys(o.byMunicipality);
-  const data = names.map((n) => ({ name: n, value: o.byMunicipality[n] || 0 }));
+  // Every registered region gets an explicit entry (0 where the backend reported none) — a
+  // municipality left out of `data` entirely isn't colored by visualMap's own 0-value shade at
+  // all: it falls back to the chart's default series color, which is this same `col` at full
+  // opacity — identical to what visualMap paints at the MAXIMUM value. That made a
+  // 0-establishment municipality look indistinguishable from the single highest one.
+  const registeredNames: string[] = echarts.getMap('qatar')?.geoJson?.features?.map((f: { properties?: { shapeName?: string } }) => f.properties?.shapeName) ?? [];
+  const names: string[] = registeredNames.length ? registeredNames : Object.keys(o.byMunicipality);
+  const data = names.map((n: string) => ({ name: n, value: o.byMunicipality[n] || 0 }));
   const max = Math.max(...data.map((d) => d.value), 1);
   return {
     tooltip: {
@@ -422,7 +428,9 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
         textBorderWidth: 2,
         formatter: (p: { name: string }) => o.nameMap?.[p.name] ?? p.name,
       },
-      emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { areaColor: hexA(C.dune, 0.55) } },
+      // No fixed areaColor override here — a flat overlay hid the real value-based shade, making a
+      // 0-count region look identical to a high-count one the instant it was hovered.
+      emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { borderColor: C.dune, borderWidth: 2.2 } },
       select: { disabled: true },
     },
     series: [{ type: 'map', map: 'qatar', geoIndex: 0, data }],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -18,7 +18,7 @@ import { SOURCE_CODE_OPTIONS } from '@/constants';
 import type { LegalUnitFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { Table, RotateCcw, EyeOff } from 'lucide-react';
 
 function is400(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 400; }
@@ -27,23 +27,22 @@ function is403(e: unknown): boolean { return typeof e === 'object' && e !== null
 
 export function LegalUnitsListPage() {
   const searchParams = useSearchParams();
-  // Deep-link support (e.g. clicking a legal unit on the Establishment detail page):
-  // seed the search filter from ?search=... on first load only; normal navigation to
-  // /legal-units (no query param) behaves exactly as before.
-  const [filters, setFilters] = useState<LegalUnitFilters>(() => {
+  // Deep-link support (e.g. clicking a legal unit on the Establishment detail page): seed the
+  // search filter from ?search=... on first load — takes priority over a restored session since
+  // it reflects the user's explicit intent from wherever they linked in.
+  const [filters, setFilters] = usePersistedState<LegalUnitFilters>('sbr:legalUnits:filters', LEGAL_UNITS_DEFAULT_FILTERS, () => {
     const initialSearch = searchParams.get('search');
-    return initialSearch ? { ...LEGAL_UNITS_DEFAULT_FILTERS, search: initialSearch } : LEGAL_UNITS_DEFAULT_FILTERS;
+    return initialSearch ? { ...LEGAL_UNITS_DEFAULT_FILTERS, search: initialSearch } : undefined;
   });
   // ?establishment=<SBR_ID> deep link from an establishment's "View in Legal Units" — seeds an
   // ESTABLISHMENT equals <id> column filter so the ledger opens showing only that establishment's
   // legal units. Uses the allow-listed column rather than free-text `search`, which matches on
-  // identifier text and would not reliably narrow to a numeric SBR ID. First load only, so
-  // clearing the filter or navigating to /legal-units afterwards behaves normally.
-  const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>(() => {
+  // identifier text and would not reliably narrow to a numeric SBR ID.
+  const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:legalUnits:columnFilters', [], () => {
     const establishment = searchParams.get('establishment');
     return establishment
       ? [{ id: 'cf-establishment-deeplink', column: 'ESTABLISHMENT', operator: 'equals', value: establishment }]
-      : [];
+      : undefined;
   });
   const { t } = useTranslation();
   const router = useRouter();
@@ -78,17 +77,17 @@ export function LegalUnitsListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<LegalUnitFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const handleReset = useCallback(() => {
     setFilters(LEGAL_UNITS_DEFAULT_FILTERS);
     setColumnFilters([]);
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
     setColumnFilters(rows);
     setFilters((prev) => ({ ...prev, page: 1 }));
-  }, []);
+  }, [setFilters, setColumnFilters]);
 
   const isDefault = JSON.stringify(filters) === JSON.stringify(LEGAL_UNITS_DEFAULT_FILTERS) && columnFilters.length === 0;
 

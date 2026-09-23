@@ -14,12 +14,14 @@ import { ADDRESS_DEFAULT_FILTERS } from '../constants';
 import type { AddressFilters, SbrAddress } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
-import { useDebounce, usePermission } from '@/hooks';
+import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function AddressesListPage() {
-  const [filters, setFilters] = useState<AddressFilters>(ADDRESS_DEFAULT_FILTERS);
+  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
+  // happens when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState<AddressFilters>('sbr:addresses:filters', ADDRESS_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrAddress | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
@@ -43,7 +45,7 @@ export function AddressesListPage() {
 
   const handleFilterChange = useCallback((partial: Partial<AddressFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const { canEdit: canEditAddress, canSearch, canViewDetail } = usePermission('addresses');
   // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)

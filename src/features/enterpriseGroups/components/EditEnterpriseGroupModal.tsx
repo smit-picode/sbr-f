@@ -223,9 +223,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
       e.NAMES = t('editEnterpriseGroup.nameRequired', { defaultValue: 'Enter a group name in English or Arabic.' });
     }
-    if (!form.UCI_NAME.trim()) {
-      e.UCI_NAME = t('editEnterpriseGroup.uciNameRequired', { defaultValue: 'UCI name is required.' });
-    }
     if (form.GROUP_START_DATE && form.GROUP_START_DATE > todayISO()) {
       e.GROUP_START_DATE = t('editEnterpriseGroup.startDateFuture', { defaultValue: 'Group start date cannot be in the future.' });
     }

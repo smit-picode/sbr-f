@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
-import { usePermission } from '@/hooks';
+import { usePermission, usePersistedState } from '@/hooks';
 import { formatDate } from '@/utils/format';
 import { cleanParams } from '@/utils/query';
 import { useGetBulkChangeListQuery } from '../api/bulkChangeApi';
@@ -20,7 +20,9 @@ import type { BulkChangeTaskSummary } from '../types';
 export function BulkChangeListPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [filters, setFilters] = useState({ ...BULK_CHANGE_DEFAULT_FILTERS });
+  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
+  // when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState('sbr:bulkChange:filters', { ...BULK_CHANGE_DEFAULT_FILTERS });
 
   // Submitting needs BOTH layers the API enforces: module access (bulk_change.create) AND an
   // edit permission on at least one bulk-capable table. Hiding the button unless both hold
@@ -37,7 +39,7 @@ export function BulkChangeListPage() {
 
   const handleFilterChange = useCallback((next: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...next }));
-  }, []);
+  }, [setFilters]);
 
   const columns: ColumnDef<BulkChangeTaskSummary>[] = [
     {

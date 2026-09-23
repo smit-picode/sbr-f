@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -15,7 +15,7 @@ import { useGetChangeRequestsQuery, type ChangeRequestListItem, type ChangeReque
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 import { cleanParams } from '@/utils/query';
 import { formatDate } from '@/utils/format';
-import { usePermission } from '@/hooks';
+import { usePermission, usePersistedState } from '@/hooks';
 
 // Values stay as the real table names (sent to the backend); labels are display-only
 // (friendly names) — same logic as the Audit Log tab.
@@ -40,7 +40,9 @@ export function AttributeChangeRequestsPage() {
   const router = useRouter();
   const { canView, canApprove } = usePermission('approvals');
   const canAccess = canView || canApprove;
-  const [filters, setFilters] = useState<ChangeRequestFilters>(DEFAULT_FILTERS);
+  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
+  // when a row navigates to its detail page and the user comes back.
+  const [filters, setFilters] = usePersistedState<ChangeRequestFilters>('sbr:attributeChangeRequests:filters', DEFAULT_FILTERS);
 
   const queryParams = cleanParams({
     ...filters,
@@ -50,7 +52,7 @@ export function AttributeChangeRequestsPage() {
 
   const handleFilterChange = useCallback((partial: Partial<ChangeRequestFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
-  }, []);
+  }, [setFilters]);
 
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
