@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/common/ErrorState';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
@@ -40,13 +40,17 @@ interface BulkChangeValidateStepProps {
   selectedTable: BulkChangeTableKey;
   file: File | null;
   onValidated: (result: BulkChangeValidationResult | null, items: BulkChangeItemInput[]) => void;
+  // Lets the wizard disable Back while parsing/validating is in flight, so the operator can't
+  // navigate away mid-run — the work itself isn't harmed either way, but leaving it clickable
+  // invites exactly the "did something break?" confusion this whole step is meant to prevent.
+  onRunningChange?: (running: boolean) => void;
 }
 
 // Parses the uploaded workbook in the browser, then sends the parsed rows to
 // POST /bulk-change/validate. The server is what decides validity: it checks each row against
 // live data (does the record exist, is the column editable, is the value legal, does it
 // actually differ) and returns the real old/new diff. The browser only reads the file.
-export function BulkChangeValidateStep({ selectedTable, file, onValidated }: BulkChangeValidateStepProps) {
+export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRunningChange }: BulkChangeValidateStepProps) {
   const { t } = useTranslation();
   const entityType = ENTITY_TYPE_BY_TABLE[selectedTable];
   const { data: templateResponse } = useGetBulkChangeTemplateQuery(entityType);
@@ -57,6 +61,10 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
   // rows in the order they were posted, but only the parsed items know which sheet row that was.
   const [parsedItems, setParsedItems] = useState<BulkChangeItemInput[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  // Surfaced above the skeleton while isRunning — a large file's browser-side parse and the
+  // server's row-by-row validation can both take a real amount of time, and a bare skeleton with
+  // no explanation reads as a stall rather than as work in progress.
+  const [stage, setStage] = useState<'parsing' | 'validating'>('parsing');
   const [parseError, setParseError] = useState<string | null>(null);
   const [fileWarnings, setFileWarnings] = useState<string[]>([]);
 
@@ -64,6 +72,10 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
   // Re-run only when the inputs that define the result change, not on every parent render.
   const runKey = `${file?.name ?? ''}:${file?.lastModified ?? ''}:${entityType}:${template?.idColumn ?? ''}`;
   const lastRunKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    onRunningChange?.(isRunning);
+  }, [isRunning, onRunningChange]);
 
   useEffect(() => {
     if (!file || !template) return;
@@ -74,6 +86,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
 
     const run = async () => {
       setIsRunning(true);
+      setStage('parsing');
       setParseError(null);
       setFileWarnings([]);
       try {
@@ -112,6 +125,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
         }
         if (cancelled) return;
         setFileWarnings(warnings);
+        setStage('validating');
 
         const response = await validateBulkChange({ entityType, items: parsed.items }).unwrap();
         if (cancelled) return;
@@ -165,6 +179,21 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated }: Bul
   if (isRunning) {
     return (
       <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-3 rounded-lg border border-[#A29374]/30 bg-[#A29374]/5 p-4">
+          <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-[#A29374]" />
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {stage === 'parsing'
+                ? t('bulkChange.wizard.validate.stageParsing', { defaultValue: 'Reading your file…' })
+                : t('bulkChange.wizard.validate.stageValidating', { defaultValue: 'Validating rows against the register…' })}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {t('bulkChange.wizard.validate.stageHint', {
+                defaultValue: 'Large files can take a little while to process. Please keep this tab open and don’t navigate away until it finishes.',
+              })}
+            </p>
+          </div>
+        </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="mt-2 h-4 w-72" />

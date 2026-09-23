@@ -107,6 +107,7 @@ export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) 
                       placeholder={t('columnFilters.valuePlaceholder', { defaultValue: 'Value…' })}
                       value={row.value}
                       onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                      autoComplete="off"
                     />
                   )}
                   <button

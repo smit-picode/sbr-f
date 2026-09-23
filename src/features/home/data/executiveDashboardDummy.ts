@@ -5,6 +5,8 @@
 // (no per-regulator/per-sector monthly history exists to query). Kept clearly separate from the
 // real data in ../api/homeApi.ts so it is obvious what to delete once real sources exist.
 
+import { CHART_COLOR } from '@/lib/charts';
+
 export const SURVEY_KPIS = {
   samples: 16,
   avgResponsePct: 84,
@@ -28,12 +30,13 @@ export const SURVEY_RESPONSE_BY_ACTIVITY = [
   { name: 'Professional & tech', ratePct: 90.5, answered: 48, base: 53 },
 ];
 
+// One distinct theme hue per regulator so every growth-chart line can be told apart.
 export const SOURCE_COLOR: Record<string, string> = {
-  MOCI: '#A29374',
-  QFC: '#1A3A52',
-  QFZ: '#22637F',
-  QSTP: '#87795D',
-  MOM_FARM: '#196E49',
+  MOCI: CHART_COLOR.dune,
+  QFC: CHART_COLOR.info,
+  QFZ: CHART_COLOR.neg,
+  QSTP: CHART_COLOR.night,
+  MOM_FARM: CHART_COLOR.pos,
 };
 
 // Illustrative register-size history by regulator / by sector — the real /home/executive-summary

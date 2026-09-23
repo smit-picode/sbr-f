@@ -41,6 +41,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NAV_GROUPS, type NavGroup, type NavItem } from '@/constants/navigation';
+import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { formatRole } from '@/utils/format';
@@ -77,8 +78,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 const RAIL_GRADIENT = '#FFFFFF';
 
-const SIDEBAR_COLLAPSED_KEY = 'sbr_sidebar_collapsed';
-const SIDEBAR_GROUPS_KEY = 'sbr_sidebar_groups';
 
 interface NavLinkProps {
   item: NavItem;

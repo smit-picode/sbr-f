@@ -1,5 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, LoginResponse, UserPermission } from '@/types';
+import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
+
+// A sign-in or sign-out starts a new session, so neither the previous user's list filters
+// ('sbr:' keys in sessionStorage) nor their sidebar layout may carry over into it.
+const clearPersistedUiState = (): void => {
+  if (typeof window === 'undefined') return;
+  for (let i = sessionStorage.length - 1; i >= 0; i--) {
+    const key = sessionStorage.key(i);
+    if (key?.startsWith('sbr:')) sessionStorage.removeItem(key);
+  }
+  localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
+  localStorage.removeItem(SIDEBAR_GROUPS_KEY);
+};
 
 const initialState: AuthState = {
   token: null,
@@ -23,6 +36,7 @@ const authSlice = createSlice({
         localStorage.setItem('sbr_token', action.payload.token);
         localStorage.setItem('sbr_user', JSON.stringify(state.user));
         localStorage.setItem('sbr_roles', JSON.stringify(state.roles));
+        clearPersistedUiState();
       }
     },
     setPermissions: (state, action: PayloadAction<UserPermission[] | string[]>) => {
@@ -46,6 +60,7 @@ const authSlice = createSlice({
         localStorage.removeItem('sbr_user');
         localStorage.removeItem('sbr_permissions');
         localStorage.removeItem('sbr_roles');
+        clearPersistedUiState();
       }
     },
     hydrateAuth: (state) => {

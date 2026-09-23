@@ -35,26 +35,24 @@ export function trend(o: TrendOptions): EChartOption {
   const categories = singlePoint ? ['', ...o.categories] : o.categories;
   const seriesInput = singlePoint ? o.series.map((s) => ({ ...s, data: [s.data[0] ?? null, ...s.data] })) : o.series;
   const last = categories.length - 1;
+  // With several series every line gets its own end pill, stacked in a right-hand gutter.
+  const sideLabels = legend;
+
   const series = seriesInput.map((s, si) => {
     const col = s.color || CHART_PALETTE[si % CHART_PALETTE.length];
+    const pill = {
+      formatter: (x: { value: number }) => (o.format || fmtNum)(x.value),
+      color: '#fff',
+      backgroundColor: col,
+      borderRadius: 10,
+      padding: [3, 7],
+      fontSize: 11,
+      fontWeight: 700,
+    };
     const data = s.data.map((v, i) => {
       if (i !== last || s.endLabel === false) return v;
-      return {
-        value: v,
-        symbolSize: 9,
-        label: {
-          show: true,
-          position: 'top',
-          distance: 8,
-          formatter: (x: { value: number }) => (o.format || fmtNum)(x.value),
-          color: '#fff',
-          backgroundColor: col,
-          borderRadius: 10,
-          padding: [3, 7],
-          fontSize: 11,
-          fontWeight: 700,
-        },
-      };
+      if (sideLabels) return { value: v, symbolSize: 9 };
+      return { value: v, symbolSize: 9, label: { ...pill, show: true, position: 'top', distance: 8 } };
     });
     const st: Record<string, unknown> = {
       name: s.name,
@@ -68,7 +66,14 @@ export function trend(o: TrendOptions): EChartOption {
       lineStyle: { width: s.dashed ? 2 : 2.5, color: col, type: s.dashed ? 'dashed' : 'solid' },
       emphasis: { focus: 'series', scale: 1.6 },
       z: 3 - si,
+      // Matches SBR-design's reference trend() — nudges apart end labels that would overlap.
+      labelLayout: { hideOverlap: false, moveOverlap: 'shiftY' },
     };
+    // endLabel, not a point label: only endLabel is actually moved by shiftY when drawn.
+    if (sideLabels && s.endLabel !== false) {
+      st.endLabel = { ...pill, show: true, distance: 16, formatter: (x: { value: number }) => (o.format || fmtNum)(x.value) };
+      st.labelLine = { show: true, length2: 0, lineStyle: { color: col, width: 1 } };
+    }
     if (s.area !== false && si === 0) st.areaStyle = { color: vGrad(col) };
     return st;
   });
@@ -77,7 +82,8 @@ export function trend(o: TrendOptions): EChartOption {
     // pill-shaped end label placed above it, and when that point sits near the axis max (a
     // single-point series is the extreme case) the pill had too little room and got clipped
     // against the chart's own top edge.
-    grid: { left: 42, right: 22, top: legend ? 46 : 34, bottom: 26 },
+    // A wider right edge with several series leaves room for the side end-label column.
+    grid: { left: 42, right: sideLabels ? 68 : 22, top: legend ? 46 : 34, bottom: 26 },
     legend: legend ? { top: 0, left: 0 } : undefined,
     tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: G[300], type: 'dashed' } }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
     xAxis: { type: 'category', data: categories, boundaryGap: false, axisLabel: { margin: 10 } },

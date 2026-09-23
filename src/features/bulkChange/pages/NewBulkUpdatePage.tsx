@@ -28,6 +28,7 @@ export function NewBulkUpdatePage() {
   const [selectedTable, setSelectedTable] = useState<BulkChangeTableKey>('Establishments');
   const [file, setFile] = useState<File | null>(null);
   const [validation, setValidation] = useState<BulkChangeValidationResult | null>(null);
+  const [validating, setValidating] = useState(false);
   const [items, setItems] = useState<BulkChangeItemInput[]>([]);
   const [reason, setReason] = useState('');
 
@@ -142,7 +143,7 @@ export function NewBulkUpdatePage() {
       {step === STEP_SETUP && <BulkChangeSetupStep selectedTable={selectedTable} onSelectTable={handleSelectTable} />}
       {step === STEP_UPLOAD && <BulkChangeUploadStep selectedTable={selectedTable} file={file} onFileSelected={handleFileSelected} />}
       {step === STEP_VALIDATE && (
-        <BulkChangeValidateStep selectedTable={selectedTable} file={file} onValidated={handleValidated} />
+        <BulkChangeValidateStep selectedTable={selectedTable} file={file} onValidated={handleValidated} onRunningChange={setValidating} />
       )}
       {step === STEP_CONFIRM && validation && (
         <BulkChangeConfirmStep
@@ -155,7 +156,7 @@ export function NewBulkUpdatePage() {
       )}
 
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={handleBack} disabled={submitting}>
+        <Button variant="outline" onClick={handleBack} disabled={submitting || validating}>
           {step === STEP_SETUP
             ? t('bulkChange.wizard.cancel', { defaultValue: 'Cancel' })
             : t('bulkChange.wizard.back', { defaultValue: 'Back' })}

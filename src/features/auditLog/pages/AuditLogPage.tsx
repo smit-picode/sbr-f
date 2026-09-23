@@ -156,6 +156,7 @@ export function AuditLogPage() {
           <Input
             type="number"
             placeholder={t('filters.filterByRecordId')}
+            autoComplete="off"
             className="w-48 h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             min="1"
             value={recordIdInput}

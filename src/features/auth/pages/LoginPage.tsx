@@ -80,7 +80,7 @@ export function LoginPage() {
       if ((data.roles?.length ?? 0) > 1) {
         setPendingRoles(data.roles!);
       } else {
-        router.push('/establishments');
+        router.push('/home');
       }
     } catch (err) {
       const apiMsg = (err as { data?: { message?: string } })?.data?.message;
@@ -100,7 +100,7 @@ export function LoginPage() {
       } catch {
         // Ignore storage failures
       }
-      router.push('/establishments');
+      router.push('/home');
     } catch {
       setSwitchingRoleId(null);
       setLoginError(t('login.roleSwitchFailed', { defaultValue: 'Could not switch to that role. Please try again.' }));

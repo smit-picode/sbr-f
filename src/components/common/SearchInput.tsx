@@ -30,6 +30,7 @@ export function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete="off"
         className={`ps-10 pe-9 w-80 focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${className ?? ''}`}
       />
       {value && !loading && (
