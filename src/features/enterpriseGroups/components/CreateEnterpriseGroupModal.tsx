@@ -205,8 +205,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 value={form.UCI_NAME}
                 onChange={(e) => set('UCI_NAME', e.target.value)}
                 maxLength={200}
-                className="shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40"
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.UCI_NAME ? 'border-red-400' : ''}`}
               />
+              {errors.UCI_NAME && <p className="text-xs text-red-500 mt-0.5">{errors.UCI_NAME}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}</Label>

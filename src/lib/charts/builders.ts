@@ -27,8 +27,15 @@ export interface TrendOptions {
 
 export function trend(o: TrendOptions): EChartOption {
   const legend = o.series.length > 1;
-  const last = o.categories.length - 1;
-  const series = o.series.map((s, si) => {
+  // A single reading has nothing to connect a line/area to, so it rendered as a bare dot. A
+  // leading, blank-labeled category holding that same reading gives it a flat line/area instead
+  // — it never asserts an earlier reading actually existed, since the blank category carries no
+  // date and the segment stays perfectly flat.
+  const singlePoint = o.categories.length === 1;
+  const categories = singlePoint ? ['', ...o.categories] : o.categories;
+  const seriesInput = singlePoint ? o.series.map((s) => ({ ...s, data: [s.data[0] ?? null, ...s.data] })) : o.series;
+  const last = categories.length - 1;
+  const series = seriesInput.map((s, si) => {
     const col = s.color || CHART_PALETTE[si % CHART_PALETTE.length];
     const data = s.data.map((v, i) => {
       if (i !== last || s.endLabel === false) return v;
@@ -66,10 +73,14 @@ export function trend(o: TrendOptions): EChartOption {
     return st;
   });
   return {
-    grid: { left: 42, right: 22, top: legend ? 38 : 22, bottom: 26 },
+    // Extra top clearance beyond the usual legend allowance — the last point always carries a
+    // pill-shaped end label placed above it, and when that point sits near the axis max (a
+    // single-point series is the extreme case) the pill had too little room and got clipped
+    // against the chart's own top edge.
+    grid: { left: 42, right: 22, top: legend ? 46 : 34, bottom: 26 },
     legend: legend ? { top: 0, left: 0 } : undefined,
     tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: G[300], type: 'dashed' } }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
-    xAxis: { type: 'category', data: o.categories, boundaryGap: false, axisLabel: { margin: 10 } },
+    xAxis: { type: 'category', data: categories, boundaryGap: false, axisLabel: { margin: 10 } },
     yAxis: { type: 'value', min: o.yMin, max: o.yMax, splitNumber: 4, axisLabel: { formatter: (v: number) => fmtNum(v) }, scale: o.yMin == null },
     series,
   };
@@ -428,9 +439,8 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
         textBorderWidth: 2,
         formatter: (p: { name: string }) => o.nameMap?.[p.name] ?? p.name,
       },
-      // No fixed areaColor override here — a flat overlay hid the real value-based shade, making a
-      // 0-count region look identical to a high-count one the instant it was hovered.
-      emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { borderColor: C.dune, borderWidth: 2.2 } },
+      // 'inherit' holds each region's own value shade on hover; without it ECharts paints its default highlight.
+      emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { areaColor: 'inherit', borderColor: C.dune, borderWidth: 2.2 } },
       select: { disabled: true },
     },
     series: [{ type: 'map', map: 'qatar', geoIndex: 0, data }],
