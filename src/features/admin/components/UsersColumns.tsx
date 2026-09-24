@@ -79,8 +79,9 @@ export const getUsersColumns = ({
     },
     {
       id: 'ROLES',
+      // TanStack only lets a column sort when it has an accessor; the real sort is server-side (GET_USERS).
+      accessorFn: (user) => userRoleNames(user).join(', '),
       header: t('admin.users.colRoles'),
-      enableSorting: false,
       cell: ({ row }) => {
         const names = userRoleNames(row.original);
         if (names.length === 0) return <span className="text-slate-400">—</span>;

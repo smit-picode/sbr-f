@@ -1213,6 +1213,9 @@
       "FAILED": "Failed"
     },
     "decidedPartial": "{{succeeded}} of {{total}} changes {{decision}}; {{failed}} could not be applied.",
+    "pendingCount": "{{count}} pending",
+    "decisionBreakdown": "{{pending}} pending · {{approved}} approved · {{rejected}} rejected",
+    "partlyDecidedHint": "{{decided}} of {{total}} records were already decided individually. Approve or Reject applies only to the {{pending}} still pending.",
     "failedItemsTitle": "{{count}} row(s) from the upload could not be submitted."
   },
   "validation": {

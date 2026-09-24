@@ -16,7 +16,7 @@ import { formatDate } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { useDecideBulkChangeMutation, useGetBulkChangeByIdQuery } from '../api/bulkChangeApi';
 import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
-import { TABLE_BY_ENTITY_TYPE } from '../constants';
+import { BULK_CHANGE_STATUS_DEFAULTS, TABLE_BY_ENTITY_TYPE } from '../constants';
 import type { BulkChangeDecision } from '../types';
 
 const STATUS_KEYS = new Set(['EST_STATUS']);
@@ -57,6 +57,12 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   }
 
   const isPending = task.STATUS === 'PENDING';
+  // Members can be decided one by one from Attribute Change Requests while the batch stays PENDING;
+  // counted from each row's own status so this works whichever batch-view version is deployed.
+  const pendingRows = task.ROWS.filter((row) => row.status === 'PENDING').length;
+  const approvedRows = task.ROWS.filter((row) => row.status === 'APPROVED').length;
+  const rejectedRows = task.ROWS.filter((row) => row.status === 'REJECTED').length;
+  const isPartlyDecided = isPending && approvedRows + rejectedRows > 0;
   // Decided tasks are reached via the History list, not the pending queue — send Back there.
   const backHref = isPending ? '/tasks/bulk-change' : '/tasks/bulk-change/history';
   const tableKey = TABLE_BY_ENTITY_TYPE[task.ENTITY_TYPE];
@@ -140,6 +146,16 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
             <p className="mt-0.5 break-words text-sm font-medium text-slate-800">
               {task.RECORDS} · {task.CHANGES} {t('bulkChange.changes', { defaultValue: 'Changes' })}
             </p>
+            {isPartlyDecided && (
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                {t('bulkChange.decisionBreakdown', {
+                  defaultValue: '{{pending}} pending · {{approved}} approved · {{rejected}} rejected',
+                  pending: pendingRows,
+                  approved: approvedRows,
+                  rejected: rejectedRows,
+                })}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -197,12 +213,20 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
                 // individually from the Attribute Change Requests screen, or when it failed
                 // during a partial bulk decision.
                 const rowRejected = row.status === 'REJECTED';
+                const rowPending = row.status === 'PENDING';
+                const rowStatusLabel = t(`bulkChange.status.${row.status}`, {
+                  defaultValue: BULK_CHANGE_STATUS_DEFAULTS[row.status] ?? row.status,
+                });
                 return (
                   <tr key={row.auditLogId} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-3 align-top">
-                      {rowRejected
-                        ? <XCircle className="h-4 w-4 text-red-500" />
-                        : <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                    <td className="px-3 py-3 align-top" title={rowStatusLabel}>
+                      {rowRejected ? (
+                        <XCircle className="h-4 w-4 text-red-500" aria-label={rowStatusLabel} />
+                      ) : rowPending ? (
+                        <Clock className="h-4 w-4 text-amber-500" aria-label={rowStatusLabel} />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-label={rowStatusLabel} />
+                      )}
                     </td>
                     {task.COLUMNS.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);
@@ -248,6 +272,18 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
 
       {isPending && canApprove && (
         <div className="rounded-lg border border-[#A29374]/15 bg-[#F4F0E8] p-4">
+          {isPartlyDecided && (
+            <p className="mb-3 flex items-start gap-2 text-xs text-slate-600">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+              {t('bulkChange.partlyDecidedHint', {
+                defaultValue:
+                  '{{decided}} of {{total}} records were already decided individually. Approve or Reject applies only to the {{pending}} still pending.',
+                decided: approvedRows + rejectedRows,
+                total: task.ROWS.length,
+                pending: pendingRows,
+              })}
+            </p>
+          )}
           <Input
             value={note}
             onChange={(e) => setNote(e.target.value)}

@@ -73,7 +73,21 @@ export function BulkChangeListPage() {
     {
       accessorKey: 'RECORDS',
       header: t('bulkChange.cols.records', { defaultValue: 'Records' }),
-      cell: ({ getValue }) => <span className="text-sm text-slate-700">{String(getValue())}</span>,
+      cell: ({ row }) => {
+        const { RECORDS, PENDING_COUNT, APPROVED_COUNT, REJECTED_COUNT } = row.original;
+        // Some members were decided individually; show what is still left to review.
+        const partlyDecided = PENDING_COUNT != null && (APPROVED_COUNT ?? 0) + (REJECTED_COUNT ?? 0) > 0;
+        return (
+          <div>
+            <span className="text-sm text-slate-700">{String(RECORDS)}</span>
+            {partlyDecided && (
+              <p className="text-[11px] text-amber-700">
+                {t('bulkChange.pendingCount', { defaultValue: '{{count}} pending', count: PENDING_COUNT })}
+              </p>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'CHANGES',

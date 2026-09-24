@@ -33,6 +33,11 @@ export interface BulkChangeTaskSummary {
   STATUS: BulkChangeStatus;
   DECIDED_BY: string | null;
   DECIDED_AT: string | null;
+  // Per-member tally; a PENDING batch can already have some members decided individually.
+  // Optional because older deployments of the batch view don't return it.
+  PENDING_COUNT?: number;
+  APPROVED_COUNT?: number;
+  REJECTED_COUNT?: number;
 }
 
 export interface BulkChangeColumn {

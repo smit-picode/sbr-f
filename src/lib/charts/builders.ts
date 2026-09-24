@@ -69,8 +69,11 @@ export function trend(o: TrendOptions): EChartOption {
       // Matches SBR-design's reference trend() — nudges apart end labels that would overlap.
       labelLayout: { hideOverlap: false, moveOverlap: 'shiftY' },
     };
-    // endLabel, not a point label: only endLabel is actually moved by shiftY when drawn.
-    if (sideLabels && s.endLabel !== false) {
+    // Only the top (first, i.e. largest) series keeps a visible end-label pill — with several
+    // series the rest of the pills read as visual noise once the lines themselves are colour-coded
+    // by the legend, and every value (not just the top one) is already on the shared axis tooltip
+    // on hover, so nothing is actually lost by not drawing them at rest.
+    if (sideLabels && si === 0 && s.endLabel !== false) {
       st.endLabel = { ...pill, show: true, distance: 16, formatter: (x: { value: number }) => (o.format || fmtNum)(x.value) };
       st.labelLine = { show: true, length2: 0, lineStyle: { color: col, width: 1 } };
     }

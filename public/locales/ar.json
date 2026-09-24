@@ -1213,6 +1213,9 @@
       "FAILED": "فشل"
     },
     "decidedPartial": "تمت معالجة {{succeeded}} من {{total}} تغييرات ({{decision}})؛ تعذر تطبيق {{failed}}.",
+    "pendingCount": "{{count}} قيد الانتظار",
+    "decisionBreakdown": "{{pending}} قيد الانتظار · {{approved}} معتمد · {{rejected}} مرفوض",
+    "partlyDecidedHint": "تم البت في {{decided}} من أصل {{total}} سجلات بشكل فردي. يسري الاعتماد أو الرفض فقط على السجلات المتبقية قيد الانتظار وعددها {{pending}}.",
     "failedItemsTitle": "تعذر إرسال {{count}} صف من الملف المرفوع."
   },
   "validation": {

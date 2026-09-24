@@ -67,10 +67,10 @@ export const USER_STATUS_FILTER_OPTIONS: { value: string; i18nKey: string; label
 ];
 
 // Column ids the Users table exposes as sortable headers. A subset of the backend allowlist
-// (USERS_SORTABLE_COLUMNS in src/utils/enums.ts, which also accepts EMAIL): the User column
-// renders name + email in one cell and sorts by NAME, so EMAIL has no header of its own.
-// ROLES is not sortable — roles come from a joined association, not a column on SBR_USER.
-export const USERS_SORTABLE_COLUMNS: string[] = ['NAME', 'IS_ACTIVE', 'CREATED_AT'];
+// (USERS_SORTABLE_COLUMNS in sbr-backend's src/utils/enums.ts, which also accepts EMAIL): the
+// User column renders name + email in one cell and sorts by NAME, so EMAIL has no header of its
+// own. ROLES sorts by the user's active role names A-Z (GET_USERS, NPC-275).
+export const USERS_SORTABLE_COLUMNS: string[] = ['NAME', 'ROLES', 'IS_ACTIVE', 'CREATED_AT'];
 
 // Backend sentinel stored for unscoped role assignments
 export const GLOBAL_SCOPE_VALUE: string = 'GLOBAL';

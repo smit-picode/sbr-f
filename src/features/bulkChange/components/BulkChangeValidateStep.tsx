@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/common/ErrorState';
+import { TablePagination } from '@/components/table/TablePagination';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
 import { parseWorkbook } from '../utils/parseWorkbook';
 import {
@@ -67,6 +69,10 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
   const [stage, setStage] = useState<'parsing' | 'validating'>('parsing');
   const [parseError, setParseError] = useState<string | null>(null);
   const [fileWarnings, setFileWarnings] = useState<string[]>([]);
+  // Display-only paging of the row table; the full result still goes to onValidated untouched.
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
+  const rowDetailsRef = useRef<HTMLDivElement>(null);
 
   const template = templateResponse?.data;
   // Re-run only when the inputs that define the result change, not on every parent render.
@@ -133,6 +139,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
         const validation = response.data ?? null;
         setResult(validation);
         setParsedItems(parsed.items);
+        setPage(1);
         onValidated(validation, parsed.items);
       } catch (error) {
         if (cancelled) return;
@@ -224,6 +231,13 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
 
   // The identifier column plus every column the file actually touched.
   const columns = result.columns;
+  const pageStart = (page - 1) * limit;
+  const pageRows = result.rows.slice(pageStart, pageStart + limit);
+
+  const handlePageChange = (next: number) => {
+    setPage(next);
+    rowDetailsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -274,7 +288,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
         )}
       </div>
 
-      <div className="rounded-lg bg-white shadow-card">
+      <div ref={rowDetailsRef} className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.wizard.validate.rowDetails', { defaultValue: 'Row details' })}
         </div>
@@ -296,7 +310,8 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {result.rows.map((row, index) => {
+              {pageRows.map((row, pageIndex) => {
+                const index = pageStart + pageIndex;
                 // rows[] comes back in the order the items were posted, so index lines each
                 // one up with the parsed item that carries its real spreadsheet row number.
                 const rowNumber = parsedItems[index]?.rowNumber ?? index + 1;
@@ -367,6 +382,13 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
             </tbody>
           </table>
         </div>
+        <TablePagination
+          page={page}
+          limit={limit}
+          total={result.rows.length}
+          onPageChange={handlePageChange}
+          onLimitChange={setLimit}
+        />
       </div>
     </div>
   );
