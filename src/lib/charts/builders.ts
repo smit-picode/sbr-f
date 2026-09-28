@@ -101,6 +101,8 @@ export interface DonutOptions {
   items: DonutItem[];
   totalLabel?: string;
   legendWidth?: number;
+  // SBR-design's compact legend: name + count, no share, and the name column sized to the longest name.
+  compact?: boolean;
 }
 
 export function donut(o: DonutOptions): EChartOptionInput {
@@ -120,8 +122,15 @@ export function donut(o: DonutOptions): EChartOptionInput {
       const shown = name.length > maxChars ? `${name.slice(0, maxChars - 1)}…` : name;
       return `{n|${shown}}{v|${fmtNum(it.value)}}{p|${pct(it.value, total)}%}`;
     };
-    if (!side) return { bottom: 0, left: 'center', formatter: fmt, textStyle: { rich } };
-    return { orient: 'vertical', right: 6, top: 'middle', itemGap: o.items.length > 5 ? 6 : 8, formatter: fmt, textStyle: { rich } };
+    const fmtCompact = (name: string) => {
+      const it = o.items.find((i) => i.name === name);
+      if (!it) return name;
+      const shown = name.length > maxChars ? `${name.slice(0, maxChars - 1)}…` : name;
+      return `{n|${shown}}{v|${fmtNum(it.value)}}`;
+    };
+    const formatter = o.compact ? fmtCompact : fmt;
+    if (!side) return { bottom: 0, left: 'center', formatter, textStyle: { rich } };
+    return { orient: 'vertical', right: 6, top: 'middle', itemGap: o.items.length > 5 ? 6 : 8, formatter, textStyle: { rich } };
   }
 
   // Font size is capped by both text width and a fraction of the hole's own radius — smaller wins.
@@ -179,22 +188,31 @@ export function donut(o: DonutOptions): EChartOptionInput {
 
   const build = ((w: number, h: number) => {
     if (!w || !h) return base(true, '50%', '50%', ['58%', '80%'], o.legendWidth || 88);
-    const nameW = o.legendWidth || 88;
-    const entryExtra = 20 + 10 + 40 + 6 + 26;
-    const ringSpace = w - (nameW + entryExtra + 12);
+    const longest = o.items.reduce((m, i) => Math.max(m, i.name.length), 0);
+    const valueW = String(fmtNum(Math.max(0, ...o.items.map((i) => i.value || 0)))).length * 7 + 6;
+    let nameW = o.compact ? Math.min(longest * 6.4 + 4, 132) : o.legendWidth || 88;
+    const entryExtra = o.compact ? 20 + 10 + valueW : 20 + 10 + 40 + 6 + 26;
+    let ringSpace = w - (nameW + entryExtra + 12);
+    // Compact legends squeeze the name column before giving up and dropping the legend underneath.
+    if (o.compact && ringSpace < 104) {
+      nameW = Math.max(58, nameW - (104 - ringSpace));
+      ringSpace = w - (nameW + entryExtra + 12);
+    }
     if (ringSpace < 96) {
       const entryW = nameW + entryExtra + 10;
       const perRow = Math.max(1, Math.floor(w / entryW));
       const rows = Math.ceil(o.items.length / perRow);
-      const legendH = rows * 18 + 10;
-      const avail = h - legendH;
+      // A wrapped legend row renders ~25px tall (text + itemGap); budget that plus a fixed gap so the ring never touches it.
+      const legendH = rows * 25;
+      const ringLegendGap = 12;
+      const avail = h - legendH - ringLegendGap;
       const r = Math.max(20, Math.min(w, avail) / 2 - 5);
       return base(false, Math.round(w / 2), Math.round(avail / 2), [Math.round(r * 0.62), Math.round(r)], nameW);
     }
     const r = Math.max(24, Math.min(ringSpace, h) / 2 - 6);
     return base(true, Math.round(ringSpace / 2), Math.round(h / 2), [Math.round(r * 0.75), Math.round(r)], nameW);
   }) as EChartOptionInput & { optionKey?: string };
-  build.optionKey = JSON.stringify([o.items, o.totalLabel, o.legendWidth]);
+  build.optionKey = JSON.stringify(o.compact ? [o.items, o.totalLabel, o.legendWidth, true] : [o.items, o.totalLabel, o.legendWidth]);
   return build;
 }
 
@@ -238,6 +256,180 @@ export function columns(o: ColumnsOptions): EChartOption {
   };
 }
 
+// ---------- targetColumns: SBR-design's columns() with stacking, a target line, y max and unit ----------
+export interface TargetColumnsOptions {
+  categories: string[];
+  series: ColumnsSeries[];
+  stacked?: boolean;
+  gradient?: boolean;
+  labels?: boolean;
+  yMax?: number;
+  unit?: string;
+  refLines?: { value: number; label: string; color?: string }[];
+}
+
+export function targetColumns(o: TargetColumnsOptions): EChartOption {
+  const n = o.series.length;
+  const series: Record<string, unknown>[] = o.series.map((s, si) => {
+    const col = s.color || CHART_PALETTE[si % CHART_PALETTE.length];
+    const lastOrSingle = !o.stacked || si === n - 1;
+    return {
+      name: s.name,
+      type: 'bar',
+      stack: o.stacked ? 'a' : undefined,
+      barMaxWidth: 28,
+      data: s.data,
+      itemStyle: { color: o.gradient ? vGrad(col, 1, 0.55) : col, borderRadius: lastOrSingle ? [6, 6, 0, 0] : 0 },
+      label: o.labels && lastOrSingle
+        ? {
+            show: true, position: 'top', color: G[700], fontSize: 11, fontWeight: 700,
+            formatter: (x: { value: number; dataIndex: number }) =>
+              fmtNum(o.stacked ? o.series.reduce((sum, q) => sum + (q.data[x.dataIndex] || 0), 0) : x.value),
+          }
+        : undefined,
+      emphasis: { focus: o.stacked ? 'series' : 'none' },
+    };
+  });
+  if (o.refLines && series[0]) {
+    series[0].markLine = {
+      silent: true,
+      symbol: 'none',
+      data: o.refLines.map((r) => ({ yAxis: r.value, lineStyle: { color: r.color || G[400], type: 'dashed', width: 1.2 }, label: { formatter: r.label, position: 'insideEndTop', color: r.color || G[500], fontSize: 10, fontWeight: 700 } })),
+    };
+  }
+  return {
+    grid: { left: 40, right: 12, top: n > 1 ? 36 : 24, bottom: 26 },
+    legend: n > 1 ? { top: 0, left: 0 } : undefined,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(3,15,31,.04)' } },
+      formatter: (ps: { name: string; marker: string; seriesName: string; value: number }[]) =>
+        [`<b>${ps[0].name}</b>`, ...ps.map((p) => `${p.marker} ${p.seriesName}: <b>${fmtNum(p.value)}${o.unit || ''}</b>`)].join('<br/>'),
+    },
+    xAxis: { type: 'category', data: o.categories, axisLabel: { interval: 0, fontSize: 11, hideOverlap: false } },
+    yAxis: { type: 'value', max: o.yMax, splitNumber: 4, axisLabel: { formatter: (v: number) => fmtNum(v) } },
+    series,
+  };
+}
+
+// ---------- gauge (ring 0..max) ----------
+export interface GaugeOptions {
+  value: number;
+  max?: number;
+  color?: string;
+  width?: number;
+  valueSize?: number;
+  format?: (v: number) => string;
+}
+
+export function gauge(o: GaugeOptions): EChartOption {
+  const color = o.color || C.adaam;
+  const width = o.width || 12;
+  return {
+    tooltip: { show: false },
+    series: [{
+      type: 'gauge',
+      startAngle: 90,
+      endAngle: -270,
+      min: 0,
+      max: o.max || 100,
+      radius: '96%',
+      center: ['50%', '50%'],
+      progress: { show: true, roundCap: true, width, itemStyle: { color, shadowBlur: 8, shadowColor: hexA(color, 0.25) } },
+      axisLine: { roundCap: true, lineStyle: { width, color: [[1, G.line]] } },
+      pointer: { show: false },
+      axisTick: { show: false },
+      splitLine: { show: false },
+      axisLabel: { show: false },
+      title: { show: false },
+      detail: {
+        valueAnimation: true, offsetCenter: [0, 0], fontSize: o.valueSize || 26, fontWeight: 800, color: G[900],
+        formatter: (v: number) => (o.format ? o.format(v) : String(Math.round(v * 10) / 10)),
+      },
+      data: [{ value: o.value, name: '' }],
+    }],
+  };
+}
+
+// ---------- bubbleGrid (two categorical axes; bubble area = base, colour = rate) ----------
+
+// Diameter for a bubble of a given base; exported so a legend drawn outside the chart uses the same maths.
+export function bubbleSizeFor(base: number, max: number, maxBubble = 34): number {
+  return 8 + Math.sqrt((base || 0) / (max || 1)) * maxBubble;
+}
+
+export interface BubbleAxisItem { key: string; label: string; sub?: string; }
+export interface BubbleCell { row: string; col: string; size: number; value: number; label?: string; tip?: string; }
+export interface BubbleGridOptions {
+  rows: BubbleAxisItem[];
+  cols: BubbleAxisItem[];
+  cells: BubbleCell[];
+  midpoint?: number;
+  min?: number;
+  max?: number;
+  lowColor?: string;
+  midColor?: string;
+  highColor?: string;
+  labelWidth?: number;
+  maxBubble?: number;
+}
+
+export function bubbleGrid(o: BubbleGridOptions): EChartOption {
+  const ri: Record<string, number> = {};
+  const ci: Record<string, number> = {};
+  o.rows.forEach((r, i) => { ri[r.key] = i; });
+  o.cols.forEach((c, i) => { ci[c.key] = i; });
+  const maxSize = Math.max(1, ...o.cells.map((c) => c.size || 0));
+  const mid = o.midpoint ?? 90;
+  const lo = o.min ?? mid - 10;
+  const hi = o.max ?? 100;
+  const maxBubble = o.maxBubble || 34;
+  const bubbleSize = (base: number) => bubbleSizeFor(base, maxSize, maxBubble);
+  const data = o.cells
+    .filter((c) => ci[c.col] != null && ri[c.row] != null)
+    .map((c) => {
+      const lbl = c.label || '';
+      // The fill is dark at both poles and pale mid-scale, so the printed rate flips to white near the poles.
+      const t2 = Math.min(1, Math.abs((c.value ?? mid) - mid) / ((hi - lo) / 2));
+      const fits = !!lbl && bubbleSize(c.size) >= 4 + lbl.length * 6.2;
+      return { value: [ci[c.col], ri[c.row], c.size, c.value], tip: c.tip, lbl: fits ? lbl : '', label: { show: fits, color: t2 > 0.55 ? '#fff' : G[700] } };
+    });
+  return {
+    grid: { left: 8, right: 16, top: 10, bottom: 14, containLabel: true },
+    tooltip: { trigger: 'item', formatter: (p: { data?: { tip?: string } }) => p.data?.tip || '' },
+    xAxis: {
+      type: 'category',
+      position: 'top',
+      data: o.cols.map((c) => (c.sub ? `${c.label}\n${c.sub}` : c.label)),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: G[700], fontSize: 11, lineHeight: 15 },
+      splitLine: { show: true, lineStyle: { color: G.line } },
+    },
+    yAxis: {
+      type: 'category',
+      inverse: true,
+      data: o.rows.map((r) => (r.sub ? `${r.label}\n${r.sub}` : r.label)),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: G[700], fontSize: 11, lineHeight: 15, width: o.labelWidth || 150, overflow: 'truncate' },
+      splitLine: { show: true, lineStyle: { color: G.line } },
+    },
+    visualMap: {
+      type: 'continuous', min: lo, max: hi, dimension: 3, calculable: false, show: false,
+      inRange: { color: [o.lowColor || '#B23B3B', o.midColor || '#E7E5E4', o.highColor || '#047857'] },
+    },
+    series: [{
+      type: 'scatter',
+      data,
+      symbolSize: (v: number[]) => bubbleSize(v[2]),
+      itemStyle: { borderColor: '#fff', borderWidth: 1.5 },
+      label: { show: true, formatter: (p: { data: { lbl?: string } }) => p.data.lbl || '', fontSize: 10, fontWeight: 700 },
+      emphasis: { scale: 1.15, itemStyle: { shadowBlur: 12, shadowColor: 'rgba(3,15,31,.25)' } },
+    }],
+  };
+}
+
 // ---------- hbars (horizontal bars) ----------
 export interface HBarItem { name: string; value: number; color?: string; sub?: string; }
 export interface HBarsSingleOptions {
@@ -248,6 +440,8 @@ export interface HBarsSingleOptions {
   labelWidth?: number;
   share?: boolean;
   refLines?: { value: number; label: string; color?: string }[];
+  // false hides the value axis (labels and ticks), as SBR-design's compact distribution panels do.
+  axis?: boolean;
 }
 
 export function hbars(o: HBarsSingleOptions): EChartOption {
@@ -288,7 +482,9 @@ export function hbars(o: HBarsSingleOptions): EChartOption {
       formatter: (x: { name: string; value: number; data?: { sub?: string } }) =>
         `<b>${x.name}</b><br/>${fmtNum(x.value)}${o.unit || ''}${o.share === false ? '' : ` · ${pct(x.value, total)}%`}${x.data?.sub ? `<br/><span style="opacity:.75">${x.data.sub}</span>` : ''}`,
     },
-    xAxis: { type: 'value', splitLine: { lineStyle: { color: G.line } }, axisLabel: { formatter: (v: number) => fmtNum(v) }, max: o.max },
+    xAxis: o.axis === false
+      ? { type: 'value', show: false, splitLine: { lineStyle: { color: G.line } }, axisLabel: { show: false }, max: o.max }
+      : { type: 'value', splitLine: { lineStyle: { color: G.line } }, axisLabel: { formatter: (v: number) => fmtNum(v) }, max: o.max },
     yAxis: { type: 'category', data: cats, inverse: true, axisLine: { show: false }, axisLabel: { color: G[700], fontSize: 11.5, width: o.labelWidth || 96, overflow: 'truncate' } },
     series,
   };

@@ -38,6 +38,14 @@ function describeThrownValue(error: unknown): string | null {
   return null;
 }
 
+// RTK Query's failed-request shape (a proxy's HTML 413/502, or no response at all) — its status, if any.
+function requestFailureStatus(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null;
+  const obj = error as { status?: unknown; originalStatus?: unknown };
+  const status = obj.originalStatus ?? obj.status;
+  return typeof status === 'number' || typeof status === 'string' ? String(status) : null;
+}
+
 interface BulkChangeValidateStepProps {
   selectedTable: BulkChangeTableKey;
   file: File | null;
@@ -150,11 +158,17 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
         // handled and shown in the wizard's own UI below, but Next.js's dev overlay treats any
         // console.error as an unhandled crash and pops a blocking full-screen dialog over it.
         console.warn('Bulk change validate step failed:', error);
+        const failedStatus = requestFailureStatus(error);
         const msg =
           error instanceof Error
             ? error.message
             : describeThrownValue(error) ??
-              t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' });
+              (failedStatus
+                ? t('bulkChange.wizard.validate.requestFailed', {
+                    defaultValue: 'The file was read, but the server could not be reached or rejected the upload (HTTP {{status}}). Please try again or contact support.',
+                    status: failedStatus,
+                  })
+                : t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' }));
         setParseError(msg);
         setResult(null);
         onValidated(null, []);

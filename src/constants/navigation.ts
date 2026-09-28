@@ -70,6 +70,16 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: 'surveys',
+    title: 'Surveys',
+    i18nKey: 'nav.surveys',
+    icon: 'ClipboardList',
+    items: [
+      // Dummy-data screens (no survey source yet), so ungated like the other placeholder modules.
+      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: '', i18nKey: 'nav.surveySamples' },
+    ],
+  },
+  {
     id: 'data-quality',
     title: 'Data Quality',
     i18nKey: 'nav.dataQuality',

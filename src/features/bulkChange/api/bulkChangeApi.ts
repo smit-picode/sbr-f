@@ -1,3 +1,4 @@
+import type { FetchBaseQueryError, FetchBaseQueryMeta, QueryReturnValue } from '@reduxjs/toolkit/query';
 import { baseApi } from '@/services/api';
 import type { ApiResponse } from '@/types';
 import type {
@@ -11,6 +12,7 @@ import type {
   BulkChangeTemplate,
   BulkChangeValidationResult,
 } from '../types';
+import { gzipJsonBody } from '../utils/gzipJsonBody';
 
 // One current record for the export-and-prefill flow — the row's own ID plus
 // SBR_ID plus every column the template offers, keyed generically since the field set differs
@@ -66,14 +68,22 @@ export const bulkChangeApi = baseApi.injectEndpoints({
       ApiResponse<BulkChangeValidationResult>,
       { entityType: BulkChangeEntityType; items: BulkChangeItemInput[] }
     >({
-      query: (body) => ({ url: '/bulk-change/validate', method: 'POST', body }),
+      queryFn: async (arg, _api, _extra, baseQuery) => {
+        const { body, headers } = await gzipJsonBody(arg);
+        const result = await baseQuery({ url: '/bulk-change/validate', method: 'POST', body, headers });
+        return result as QueryReturnValue<ApiResponse<BulkChangeValidationResult>, FetchBaseQueryError, FetchBaseQueryMeta>;
+      },
     }),
 
     submitBulkChange: builder.mutation<
       ApiResponse<BulkChangeSubmitResponse>,
       { entityType: BulkChangeEntityType; items: BulkChangeItemInput[]; reason: string; fileName?: string }
     >({
-      query: (body) => ({ url: '/bulk-change', method: 'POST', body }),
+      queryFn: async (arg, _api, _extra, baseQuery) => {
+        const { body, headers } = await gzipJsonBody(arg);
+        const result = await baseQuery({ url: '/bulk-change', method: 'POST', body, headers });
+        return result as QueryReturnValue<ApiResponse<BulkChangeSubmitResponse>, FetchBaseQueryError, FetchBaseQueryMeta>;
+      },
       // A bulk submit creates N pending change requests, so the approvals queue and its
       // sidebar count go stale too, not just the bulk list.
       invalidatesTags: ['BulkChange', 'ChangeRequests', 'AuditLog'],
