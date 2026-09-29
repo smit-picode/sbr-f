@@ -8,7 +8,7 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { TablePagination } from '@/components/table/TablePagination';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
-import { parseWorkbook } from '../utils/parseWorkbook';
+import { parseWorkbookInWorker } from '../utils/parseWorkbookInWorker';
 import {
   BULK_CHANGE_MAX_ROWS,
   BULK_CHANGE_TABLES,
@@ -105,7 +105,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
       setFileWarnings([]);
       try {
         const editable = template.columns.filter((c) => !c.required).map((c) => c.key);
-        const parsed = await parseWorkbook(file, template.idColumn, editable);
+        const parsed = await parseWorkbookInWorker(file, template.idColumn, editable);
 
         if (parsed.items.length === 0) {
           throw new Error(t('bulkChange.wizard.validate.emptyFile', { defaultValue: 'The file contains no data rows.' }));
