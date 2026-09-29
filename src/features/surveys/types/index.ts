@@ -36,7 +36,6 @@ export interface SurveyResponseApiRow {
   SOURCE_CODE: string | null;
   SECTOR_ID: string | null;
   ISIC_CODE: string | null;
-  EMPLOYMENT_COUNT: number | null;
   RESPONSE_STATUS: ResponseStatus;
   COLLECTION_MODE: ResponseMode | null;
   RESPONDED_ON: string | null;
@@ -46,6 +45,23 @@ export interface SurveyResponseDetailApi extends SurveyResponseApiRow {
   // One row of the survey's answer view (V_SVY_AES, ...), keyed by column name.
   ANSWERS: Record<string, string | number | null> | null;
 }
+
+// One sampled period of an establishment (GET /surveys/establishments/:sbrId/participation).
+export interface SurveyParticipationApiRow {
+  SURVEY_ID: SurveyId;
+  PERIOD: string;
+  RESPONSE_STATUS: ResponseStatus;
+  RESPONDED_ON: string | null;
+}
+
+// GET /surveys/establishments/:sbrId/gdp: its AES accounts per year and the national totals per quarter.
+export interface SurveyGdpApi {
+  AES: { SURVEY_YEAR: number; RESPONSE_STATUS: ResponseStatus; TOTAL_TURNOVER: number | null; INTERMEDIATE_CONSUMPTION: number | null }[];
+  ECONOMY: { SURVEY_YEAR: number; QUARTER_NUM: number; VALUE_ADDED: number; PRODUCTION: number; INTERMEDIATE_CONSUMPTION: number }[];
+}
+
+export type GdpMeasure = 'valueAdded' | 'production' | 'intermediate';
+export type GdpAccounts = Record<GdpMeasure, number>;
 
 export interface SurveyResponsesFilter {
   surveyId?: SurveyId;

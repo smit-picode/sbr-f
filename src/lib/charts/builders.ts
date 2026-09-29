@@ -256,6 +256,41 @@ export function columns(o: ColumnsOptions): EChartOption {
   };
 }
 
+// ---------- spark (compact trend line; hollow points mark values that are not reported) ----------
+export interface SparkOptions {
+  data: number[];
+  categories: string[];
+  color?: string;
+  unit?: string;
+  format?: (v: number) => string;
+  solid?: boolean[];
+}
+
+export function spark(o: SparkOptions): EChartOption {
+  const col = o.color || C.adaam;
+  const last = o.data.length - 1;
+  const data = o.data.map((v, i) => {
+    if (o.solid) {
+      return {
+        value: v,
+        symbolSize: o.solid[i] ? 7 : 6,
+        itemStyle: o.solid[i] ? { color: col, borderColor: '#fff', borderWidth: 1.5 } : { color: '#fff', borderColor: col, borderWidth: 1.5 },
+      };
+    }
+    return i === last ? { value: v, symbolSize: 6, itemStyle: { color: col, borderColor: '#fff', borderWidth: 1.5 } } : v;
+  });
+  return {
+    grid: { left: 3, right: 3, top: 4, bottom: 3 },
+    xAxis: { type: 'category', show: false, boundaryGap: false, data: o.categories },
+    yAxis: { type: 'value', show: false, scale: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'none' }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
+    series: [{
+      type: 'line', data, smooth: 0.4, showSymbol: !!o.solid, symbol: 'circle', symbolSize: 0,
+      lineStyle: { width: 2, color: col }, areaStyle: { color: vGrad(col, 0.3, 0) }, itemStyle: { color: col },
+    }],
+  };
+}
+
 // ---------- targetColumns: SBR-design's columns() with stacking, a target line, y max and unit ----------
 export interface TargetColumnsOptions {
   categories: string[];

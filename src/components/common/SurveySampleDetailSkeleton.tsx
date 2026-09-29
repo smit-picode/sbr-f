@@ -10,8 +10,13 @@ export function SurveySampleDetailSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[206px] w-full rounded-xl" />)}
       </div>
       <Skeleton className="h-[72px] w-full rounded-lg" />
-      <div className="rounded-lg bg-white shadow-card">
-        <TableLoader rows={8} cols={9} />
+      <div className="overflow-hidden rounded-lg bg-white shadow-card">
+        {/* TableLoader renders bare <tr> rows, so they need a real table body around them. */}
+        <table className="w-full">
+          <tbody>
+            <TableLoader rows={8} cols={9} />
+          </tbody>
+        </table>
       </div>
     </div>
   );

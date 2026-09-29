@@ -5,8 +5,9 @@ export const gzipJsonBody = async (
   if (typeof CompressionStream === 'undefined') return { body, headers: {} };
   const stream = new Blob([JSON.stringify(body)]).stream().pipeThrough(new CompressionStream('gzip'));
   const compressed = await new Response(stream).blob();
+  // fetchBaseQuery strips Content-Type for Blob bodies, so the type must ride on the Blob itself.
   return {
-    body: compressed,
-    headers: { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' },
+    body: new Blob([compressed], { type: 'application/json' }),
+    headers: { 'Content-Encoding': 'gzip' },
   };
 };

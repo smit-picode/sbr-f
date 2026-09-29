@@ -10,7 +10,7 @@ import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { formatDate, nullableText } from '@/utils/format';
 import { useGetSurveyResponseDetailQuery } from '../api/surveysApi';
-import { ANSWERED_STATUSES, RESPONSE_STATUS_COLORS, RESPONSE_STATUS_KEY, SURVEY_QUESTIONS } from '../constants';
+import { ANSWERED_STATUSES, RESPONSE_FROM_ESTABLISHMENT, RESPONSE_STATUS_COLORS, RESPONSE_STATUS_KEY, SURVEY_QUESTIONS } from '../constants';
 import { parseSampleSlug } from '../utils/classify';
 import { surveyById } from '../utils/aggregate';
 import type { AnswerUnit } from '../types';
@@ -26,7 +26,7 @@ function formatAnswer(value: string | number | null | undefined, unit: AnswerUni
 }
 
 // One establishment's response to one survey period, reached from a sample's establishment list.
-export function SurveyResponsePage({ sampleKey, sbrId }: { sampleKey: string; sbrId: string }) {
+export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: string; sbrId: string; from?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { surveyId, period } = parseSampleSlug(sampleKey);
@@ -37,7 +37,10 @@ export function SurveyResponsePage({ sampleKey, sbrId }: { sampleKey: string; sb
     { skip: !survey || !period || !Number.isInteger(sbrIdNum) }
   );
   const detail = data?.data;
-  const back = { label: t('surveySamples.backToSample'), onClick: () => router.push(`/surveys/${sampleKey}`) };
+  // Opened from an establishment's survey participation, Back returns there instead of to the sample.
+  const back = from === RESPONSE_FROM_ESTABLISHMENT
+    ? { label: t('surveySamples.backToEst'), onClick: () => router.push(`/establishments/${sbrId}`) }
+    : { label: t('surveySamples.backToSample'), onClick: () => router.push(`/surveys/${sampleKey}`) };
 
   const answers = useMemo(() => {
     if (!survey || !detail?.ANSWERS || !ANSWERED_STATUSES.includes(detail.RESPONSE_STATUS)) return [];

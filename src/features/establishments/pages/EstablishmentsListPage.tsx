@@ -73,7 +73,7 @@ export function EstablishmentsListPage() {
       : undefined,
   });
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
+  const { data, currentData, isLoading, isFetching, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
   // isLoading is false once this exact args combo has cached data (e.g. paging/sorting back over
   // an already-searched term) — isFetching still fires then, so the search box gets its own
   // spinner for that revalidation instead of leaving the table looking idle mid-request.
@@ -176,6 +176,7 @@ export function EstablishmentsListPage() {
         columns={columns}
         data={records}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}

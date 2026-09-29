@@ -63,7 +63,7 @@ export function EnterprisesListPage() {
       : undefined,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetEnterprisesListQuery(queryParams);
+  const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetEnterprisesListQuery(queryParams);
 
   const isValidationError = isError && is400(error);
 
@@ -147,6 +147,7 @@ export function EnterprisesListPage() {
         columns={columns}
         data={records}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError && !isValidationError}
         onRetry={refetch}
         page={filters.page ?? 1}

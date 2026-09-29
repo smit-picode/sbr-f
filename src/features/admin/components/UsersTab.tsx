@@ -98,7 +98,7 @@ export function UsersTab({
   // Debounce only the text search — typing no longer fires an API call per keystroke
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const { data, isLoading, isError, refetch } = useGetUsersListQuery(
+  const { data, currentData, isLoading, isError, refetch, isFetching } = useGetUsersListQuery(
     cleanParams({ ...filters, search: debouncedSearch }),
     { skip: isCreateOpen }
   );
@@ -426,6 +426,7 @@ export function UsersTab({
         columns={columns}
         data={users}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError}
         onRetry={refetch}
         page={filters.page ?? 1}

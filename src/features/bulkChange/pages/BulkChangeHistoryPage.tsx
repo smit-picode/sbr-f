@@ -34,7 +34,7 @@ export function BulkChangeHistoryPage() {
   const canSubmit = bulkChange.canCreate
     && (establishments.canEdit || contacts.canEdit || addresses.canEdit);
 
-  const { data, isLoading, isError, refetch } = useGetBulkChangeHistoryQuery(cleanParams(filters));
+  const { data, currentData, isLoading, isError, refetch, isFetching } = useGetBulkChangeHistoryQuery(cleanParams(filters));
   const rows = data?.data ?? [];
 
   const handleFilterChange = useCallback((next: Partial<typeof filters>) => {
@@ -140,6 +140,7 @@ export function BulkChangeHistoryPage() {
         columns={columns}
         data={rows}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError}
         onRetry={refetch}
         page={filters.page}

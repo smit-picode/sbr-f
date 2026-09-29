@@ -1416,6 +1416,31 @@
       "small": "Small",
       "medium": "Medium",
       "large": "Large"
-    }
+    },
+    "participation": "Survey participation",
+    "participationCtx": "Which surveys and periods this establishment was sampled in, and whether it responded. Click a period to open the response.",
+    "respondedShort": "responded",
+    "neverSampled": "This establishment has not been included in any survey sample.",
+    "backToEst": "Back to establishment",
+    "gdpTitle": "Contribution to GDP",
+    "gdpVa": "Value added",
+    "gdpProd": "Production",
+    "gdpIc": "Intermediate consumption",
+    "gdpLevelEst": "This establishment",
+    "gdpLevelEconomy": "Total economy",
+    "gdpOfLabel": "of",
+    "gdpIsGdp": "QAR — this is GDP",
+    "gdpBasisReported": "QAR, reported in the AES {{y}}",
+    "gdpChipReported": "AES {{y}} return",
+    "gdpOpenReturn": "Open the survey return this figure comes from",
+    "gdpOfEconomyLead": "This establishment accounts for",
+    "gdpOfEconomyTrail": "of the total economy.",
+    "gdpIdentity": "Production less intermediate consumption equals value added at every level. Shares compare like with like: output against output, not against GDP.",
+    "gdpTrend": "This establishment’s {{m}}, since {{y}}",
+    "gdpMarkReported": "Reported in an AES return",
+    "gdpNoReturn": "This establishment has no complete Annual Economic Survey return yet, so its contribution cannot be shown.",
+    "gdpNoEconomyYear": "National totals for {{y}} are not available yet.",
+    "gdpInQarPlain": "QAR",
+    "gdpLeadEconomy": "Where this establishment sits inside the total economy, from its Annual Economic Survey returns."
   }
 }

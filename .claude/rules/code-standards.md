@@ -68,7 +68,7 @@ These rules apply to ALL code written in this repo. Claude must follow these wit
 
 ## Comment Rules
 - Write NO comments unless WHY is non-obvious
-- **Max ONE line per comment.** If it needs more than one line to explain, that's a sign the code itself needs a clearer name or a smaller function — fix that instead of writing a paragraph. Never stack multiple `//` lines into a block above a function/component/hook.
+- **Max ONE line per comment.** If it needs more than one line to explain, that's a sign the code itself needs a clearer name or a smaller function — fix that instead of writing a paragraph. Never stack multiple `//` lines into a block above a function/component/hook. Write the single line short and to the point from the start — don't draft several lines and glue them together, and never merge a directive comment (`eslint-disable-next-line`, `@ts-ignore`, `@ts-expect-error`) into a prose comment or into another directive; each directive stays alone on its own line immediately above the line it targets.
 - No TODO in committed code
 - No commented-out code blocks
 - **NEVER reference a ticket number (NPC-xxx or any other tracker ID) in code or comments** — not in variable/function names, comments, or docstrings. Explain the WHY in plain language instead (what the constraint is, what breaks without it) — a ticket ID rots the moment the tracker changes and means nothing to someone reading the code later. Applies to every completed task, no exceptions.

@@ -23,13 +23,16 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { TablePagination } from './TablePagination';
 import { ColumnToggle } from './ColumnToggle';
 import { useState, useRef } from 'react';
-import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowUpDown, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  // New rows are loading for a changed search/filter/sort/page: dims the current rows under a loader.
+  isRefreshing?: boolean;
   isError?: boolean;
   onRetry?: () => void;
   page: number;
@@ -74,6 +77,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
+  isRefreshing,
   isError,
   onRetry,
   page,
@@ -127,14 +131,24 @@ export function DataTable<TData, TValue>({
     sortDescFirst: false,
   });
 
+  const { t } = useTranslation();
   const colCount = columns.length;
+  const showRefreshing = !!isRefreshing && !isLoading;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end">
         <ColumnToggle table={table} />
       </div>
-      <div className="rounded-lg bg-white shadow-card overflow-hidden">
+      <div className="relative rounded-lg bg-white shadow-card overflow-hidden" aria-busy={showRefreshing || isLoading}>
+      {showRefreshing && (
+        <div className="absolute inset-0 z-30 flex items-start justify-center bg-white/60 pt-24" role="status">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-card">
+            <Loader2 className="h-4 w-4 animate-spin text-[#A29374]" />
+            {t('table.loading')}
+          </span>
+        </div>
+      )}
       <Table wrapperRef={scrollRef}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -1,7 +1,9 @@
 import { baseApi } from '@/services/api';
 import type { ApiResponse } from '@/types';
 import type {
+  SurveyGdpApi,
   SurveyId,
+  SurveyParticipationApiRow,
   SurveyResponseApiRow,
   SurveyResponseDetailApi,
   SurveyResponsesFilter,
@@ -25,8 +27,24 @@ export const surveysApi = baseApi.injectEndpoints({
       query: ({ sbrId, surveyId, period }) => ({ url: `/surveys/responses/${sbrId}`, params: { surveyId, period } }),
       providesTags: ['Surveys'],
     }),
+    // Establishment detail: every survey period it was sampled in.
+    getSurveyParticipation: builder.query<ApiResponse<SurveyParticipationApiRow[]>, number>({
+      query: (sbrId) => ({ url: `/surveys/establishments/${sbrId}/participation` }),
+      providesTags: ['Surveys'],
+    }),
+    // Establishment detail: its AES accounts and the national totals behind its GDP contribution.
+    getSurveyGdp: builder.query<ApiResponse<SurveyGdpApi>, number>({
+      query: (sbrId) => ({ url: `/surveys/establishments/${sbrId}/gdp` }),
+      providesTags: ['Surveys'],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetSurveySamplesQuery, useGetSurveyResponsesQuery, useGetSurveyResponseDetailQuery } = surveysApi;
+export const {
+  useGetSurveySamplesQuery,
+  useGetSurveyResponsesQuery,
+  useGetSurveyResponseDetailQuery,
+  useGetSurveyParticipationQuery,
+  useGetSurveyGdpQuery,
+} = surveysApi;

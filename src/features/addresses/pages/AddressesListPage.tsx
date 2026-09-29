@@ -34,7 +34,7 @@ export function AddressesListPage() {
     search: debouncedSearch,
   });
 
-  const { data, isLoading, isError, error, refetch } = useGetAddressesListQuery(queryParams);
+  const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetAddressesListQuery(queryParams);
 
   useEffect(() => {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
@@ -93,6 +93,7 @@ export function AddressesListPage() {
         columns={columns}
         data={records}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError}
         onRetry={refetch}
         page={filters.page ?? 1}

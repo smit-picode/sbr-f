@@ -1,5 +1,5 @@
 import { CHART_COLOR } from '@/lib/charts';
-import type { ResponseStatus, SizeBand, Survey, SurveyId, SurveyQuestion } from '../types';
+import type { GdpMeasure, ResponseStatus, SizeBand, Survey, SurveyId, SurveyQuestion } from '../types';
 
 // Select value meaning "no survey filter" — not a real survey id.
 export const ALL_SURVEYS = '__all__';
@@ -106,3 +106,13 @@ export const ISIC_SECTIONS: [string, number, number][] = [
   ['M', 69, 75], ['N', 77, 82], ['O', 84, 84], ['P', 85, 85], ['Q', 86, 88], ['R', 90, 93],
   ['S', 94, 96], ['T', 97, 98], ['U', 99, 99],
 ];
+
+// Contribution-to-GDP measure toggle, in display order, with each option's i18n key suffix.
+export const GDP_MEASURES: { key: GdpMeasure; labelKey: string }[] = [
+  { key: 'valueAdded', labelKey: 'gdpVa' },
+  { key: 'production', labelKey: 'gdpProd' },
+  { key: 'intermediate', labelKey: 'gdpIc' },
+];
+
+// ?from= value telling the survey response page it was opened from an establishment's detail page.
+export const RESPONSE_FROM_ESTABLISHMENT = 'establishment';

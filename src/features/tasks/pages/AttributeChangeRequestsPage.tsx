@@ -48,7 +48,7 @@ export function AttributeChangeRequestsPage() {
     ...filters,
     tableName: filters.tableName === '__all__' ? undefined : filters.tableName,
   });
-  const { data, isLoading, isError, refetch } = useGetChangeRequestsQuery(queryParams, { skip: !canAccess });
+  const { data, currentData, isLoading, isError, refetch, isFetching } = useGetChangeRequestsQuery(queryParams, { skip: !canAccess });
 
   const handleFilterChange = useCallback((partial: Partial<ChangeRequestFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -174,6 +174,7 @@ export function AttributeChangeRequestsPage() {
         columns={columns}
         data={records}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError}
         onRetry={refetch}
         page={filters.page ?? 1}

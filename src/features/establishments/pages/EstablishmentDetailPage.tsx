@@ -18,6 +18,8 @@ import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
+import { SurveyParticipation } from '@/features/surveys/components/SurveyParticipation';
+import { GdpContribution } from '@/features/surveys/components/GdpContribution';
 import type { SbrEstablishment } from '@/types';
 import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight, Activity } from 'lucide-react';
 
@@ -481,6 +483,9 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
           </div>
         </div>
       )}
+
+      <SurveyParticipation sbrId={e.SBR_ID} />
+      <GdpContribution sbrId={e.SBR_ID} />
 
       {legalUnits.length > 0 && (
         <div className="rounded-lg bg-white shadow-card">

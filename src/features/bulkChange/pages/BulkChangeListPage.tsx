@@ -34,7 +34,7 @@ export function BulkChangeListPage() {
   const canSubmit = bulkChange.canCreate
     && (establishments.canEdit || contacts.canEdit || addresses.canEdit);
 
-  const { data, isLoading, isError, refetch } = useGetBulkChangeListQuery(cleanParams(filters));
+  const { data, currentData, isLoading, isError, refetch, isFetching } = useGetBulkChangeListQuery(cleanParams(filters));
   const rows = data?.data ?? [];
 
   const handleFilterChange = useCallback((next: Partial<typeof filters>) => {
@@ -145,6 +145,7 @@ export function BulkChangeListPage() {
         columns={columns}
         data={rows}
         isLoading={isLoading}
+        isRefreshing={isFetching && !currentData}
         isError={isError}
         onRetry={refetch}
         page={filters.page}
