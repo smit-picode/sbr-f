@@ -20,6 +20,7 @@ import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { SurveyParticipation } from '@/features/surveys/components/SurveyParticipation';
 import { GdpContribution } from '@/features/surveys/components/GdpContribution';
+import { SHOW_ESTABLISHMENT_SURVEY_SECTIONS } from '../constants';
 import type { SbrEstablishment } from '@/types';
 import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight, Activity } from 'lucide-react';
 
@@ -484,8 +485,12 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         </div>
       )}
 
-      <SurveyParticipation sbrId={e.SBR_ID} />
-      <GdpContribution sbrId={e.SBR_ID} />
+      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && (
+        <>
+          <SurveyParticipation sbrId={e.SBR_ID} />
+          <GdpContribution sbrId={e.SBR_ID} />
+        </>
+      )}
 
       {legalUnits.length > 0 && (
         <div className="rounded-lg bg-white shadow-card">

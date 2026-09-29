@@ -126,3 +126,6 @@ export const ESTABLISHMENTS_SORTABLE_COLUMNS: string[] = [
   'SBR_ID', 'NAME_ENU', 'NAME_ARA', 'EST_STATUS', 'SECTOR_ID', 'LEGAL_TYPE',
   'SOURCE_CODE', 'MOCI_CR_NUM',
 ];
+
+// Survey participation / Contribution to GDP on the detail page; hidden until the survey data gaps are closed.
+export const SHOW_ESTABLISHMENT_SURVEY_SECTIONS: boolean = false;
