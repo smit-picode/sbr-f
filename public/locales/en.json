@@ -646,7 +646,19 @@
     "OPERATION": "Operation",
     "COLUMN_NAME": "Column name",
     "APPROVAL_DATE": "Approval date",
-    "APPROVAL_REASON": "Approval reason"
+    "APPROVAL_REASON": "Approval reason",
+    "RUN_ID": "Run ID",
+    "STARTED_AT": "Started at",
+    "FINISHED_AT": "Finished at",
+    "DURATION": "Duration",
+    "CURRENT_STEP": "Current step",
+    "FAILED_STEP": "Failed step",
+    "ERROR_MESSAGE": "Error",
+    "NOTES": "Note",
+    "STEP_NAME": "Step",
+    "EVENT": "Event",
+    "EVENT_AT": "Event at",
+    "MESSAGE": "Message"
   },
   "enterpriseGroups": {
     "createGroup": "Create group",
@@ -695,6 +707,15 @@
     "loadError": "Failed to load legal units. Please try again.",
     "allRecords": "All records",
     "current": "Current"
+  },
+  "pipelineLogs": {
+    "searchPlaceholder": "Search by run ID or note...",
+    "loadError": "Failed to load pipeline runs. Please try again.",
+    "stepLoadError": "Failed to load step log. Please try again.",
+    "viewSteps": "View steps",
+    "backToRuns": "Back to runs",
+    "runDetailTitle": "Pipeline Run #{{runId}}",
+    "runDetailDescription": "Step-by-step execution log for this run — read-only."
   },
   "enterpriseGroupDetail": {
     "backLink": "Enterprise Groups",
@@ -1177,7 +1198,9 @@
         "missingIdColumn": "The file has no {{idColumn}} column, so no row can be matched to a record.",
         "unknownHeaders": "These columns are not part of the template and will be reported as errors: {{headers}}",
         "parseFailed": "The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.",
-        "requestFailed": "The file was read, but the server could not be reached or rejected the upload (HTTP {{status}}). Please try again or contact support.",
+        "uploadTooLarge": "The upload is too large for the server to accept. Please split the file into smaller parts and try again.",
+        "connectionLost": "We could not reach the server, or the connection dropped before the check finished. Your file is fine. Please try again.",
+        "serverFailed": "The server could not check this file right now. Please try again, or contact support if it keeps happening.",
         "waiting": "Waiting for a file to validate…",
         "codes": {
           "ID_MISSING": "The record identifier is required.",

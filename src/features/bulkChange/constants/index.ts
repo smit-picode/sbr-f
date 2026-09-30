@@ -60,6 +60,12 @@ export const BULK_CHANGE_MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
 
 export const BULK_CHANGE_ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 
+// Validate is a read-only dry run, so a dropped connection (e.g. a server restart) is retried after these waits.
+export const BULK_VALIDATE_RETRY_DELAYS_MS: number[] = [5000, 10000];
+
+// Failures that mean the request never got a real answer, so retrying is worthwhile.
+export const BULK_TRANSIENT_FAILURE_STATUSES: (string | number)[] = ['FETCH_ERROR', 'TIMEOUT_ERROR', 502, 503, 504];
+
 // Rows-per-page default for both bulk-change lists.
 export interface BulkChangeFilterState {
   page: number;

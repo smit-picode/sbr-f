@@ -12,7 +12,9 @@ import type {
   BulkChangeTemplate,
   BulkChangeValidationResult,
 } from '../types';
+import { BULK_VALIDATE_RETRY_DELAYS_MS } from '../constants';
 import { gzipJsonBody } from '../utils/gzipJsonBody';
+import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
 
 // One current record for the export-and-prefill flow — the row's own ID plus
 // SBR_ID plus every column the template offers, keyed generically since the field set differs
@@ -68,11 +70,19 @@ export const bulkChangeApi = baseApi.injectEndpoints({
       ApiResponse<BulkChangeValidationResult>,
       { entityType: BulkChangeEntityType; items: BulkChangeItemInput[] }
     >({
-      queryFn: async (arg, _api, _extra, baseQuery) => {
+      queryFn: async (arg, api, _extra, baseQuery) => {
         const { body, headers } = await gzipJsonBody(arg);
-        const result = await baseQuery({ url: '/bulk-change/validate', method: 'POST', body, headers });
+        const send = () => baseQuery({ url: '/bulk-change/validate', method: 'POST', body, headers });
+        let result = await send();
+        for (const delay of BULK_VALIDATE_RETRY_DELAYS_MS) {
+          if (!result.error || !isTransientFailure(requestFailureStatus(result.error)) || api.signal.aborted) break;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          result = await send();
+        }
         return result as QueryReturnValue<ApiResponse<BulkChangeValidationResult>, FetchBaseQueryError, FetchBaseQueryMeta>;
       },
+      // The Validate step shows its own error panel, so the global toast would only duplicate it.
+      extraOptions: { silentErrors: true },
     }),
 
     submitBulkChange: builder.mutation<

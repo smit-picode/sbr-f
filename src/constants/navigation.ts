@@ -109,7 +109,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Roles',            href: '/admin/roles',          icon: 'ShieldCheck', permKey: 'admin_panel.roles.view', i18nKey: 'admin.tabs.roles'                                                              },
       { title: 'Rule Registry',    href: '/admin/rule-registry',  icon: 'SlidersVertical',  permKey: '',                       i18nKey: 'admin.tabs.ruleRegistry'                                                       },
       { title: 'Column Access',    href: '/admin/column-access',  icon: 'Columns2',    permKey: '',                       i18nKey: 'admin.tabs.columnAccess'                                                       },
-      { title: 'Pipeline Logs',    href: '/admin/pipeline-logs',  icon: 'DatabaseZap', permKey: '',                       i18nKey: 'admin.tabs.pipelineLogs'                                                       },
+      { title: 'Pipeline Logs',    href: '/admin/pipeline-logs',  icon: 'DatabaseZap', permKey: 'admin_panel.pipeline_logs.view', i18nKey: 'admin.tabs.pipelineLogs'                                                 },
       { title: 'Activity Logs',    href: '/admin/activity-logs',  icon: 'History',     permKey: '',                       i18nKey: 'admin.tabs.activityLogs'                                                       },
     ],
   },

@@ -116,6 +116,13 @@ export const PERMISSION_TREE: PermissionNode[] = [
           { key: 'admin_panel.users.search',      label: 'Search Users' },
         ],
       },
+      {
+        key: 'admin_panel.pipeline_logs',
+        label: 'Pipeline Logs Tab',
+        children: [
+          { key: 'admin_panel.pipeline_logs.view', label: 'View Pipeline Logs' },
+        ],
+      },
     ],
   },
   {

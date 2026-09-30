@@ -9,6 +9,7 @@ import { TablePagination } from '@/components/table/TablePagination';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
 import { parseWorkbookInWorker } from '../utils/parseWorkbookInWorker';
+import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
 import {
   BULK_CHANGE_MAX_ROWS,
   BULK_CHANGE_TABLES,
@@ -36,14 +37,6 @@ function describeThrownValue(error: unknown): string | null {
     if (typeof obj.type === 'string' && obj.type) return `${obj.type} error while reading the file`;
   }
   return null;
-}
-
-// RTK Query's failed-request shape (a proxy's HTML 413/502, or no response at all) — its status, if any.
-function requestFailureStatus(error: unknown): string | null {
-  if (!error || typeof error !== 'object') return null;
-  const obj = error as { status?: unknown; originalStatus?: unknown };
-  const status = obj.originalStatus ?? obj.status;
-  return typeof status === 'number' || typeof status === 'string' ? String(status) : null;
 }
 
 interface BulkChangeValidateStepProps {
@@ -84,7 +77,9 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
 
   const template = templateResponse?.data;
   // Re-run only when the inputs that define the result change, not on every parent render.
-  const runKey = `${file?.name ?? ''}:${file?.lastModified ?? ''}:${entityType}:${template?.idColumn ?? ''}`;
+  // Bumped by "Try again" so the same file re-runs without being picked again.
+  const [attempt, setAttempt] = useState(0);
+  const runKey = `${file?.name ?? ''}:${file?.lastModified ?? ''}:${entityType}:${template?.idColumn ?? ''}:${attempt}`;
   const lastRunKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -159,16 +154,20 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
         // console.error as an unhandled crash and pops a blocking full-screen dialog over it.
         console.warn('Bulk change validate step failed:', error);
         const failedStatus = requestFailureStatus(error);
+        let requestMessage: string | null = null;
+        if (failedStatus === 413) {
+          requestMessage = t('bulkChange.wizard.validate.uploadTooLarge', { defaultValue: 'The upload is too large for the server to accept. Please split the file into smaller parts and try again.' });
+        } else if (isTransientFailure(failedStatus)) {
+          requestMessage = t('bulkChange.wizard.validate.connectionLost', { defaultValue: 'We could not reach the server, or the connection dropped before the check finished. Your file is fine. Please try again.' });
+        } else if (failedStatus !== null) {
+          requestMessage = t('bulkChange.wizard.validate.serverFailed', { defaultValue: 'The server could not check this file right now. Please try again, or contact support if it keeps happening.' });
+        }
         const msg =
           error instanceof Error
             ? error.message
             : describeThrownValue(error) ??
-              (failedStatus
-                ? t('bulkChange.wizard.validate.requestFailed', {
-                    defaultValue: 'The file was read, but the server could not be reached or rejected the upload (HTTP {{status}}). Please try again or contact support.',
-                    status: failedStatus,
-                  })
-                : t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' }));
+              requestMessage ??
+              t('bulkChange.wizard.validate.parseFailed', { defaultValue: 'The file could not be read. Check that it is a valid .xlsx, .xls or .csv file.' });
         setParseError(msg);
         setResult(null);
         onValidated(null, []);
@@ -230,7 +229,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
   }
 
   if (parseError) {
-    return <ErrorState message={parseError} />;
+    return <ErrorState message={parseError} onRetry={() => setAttempt((n) => n + 1)} />;
   }
 
   if (!result) {

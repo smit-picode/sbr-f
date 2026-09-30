@@ -81,7 +81,9 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
     // 400 = validation error — handled per-component
     // suppress generic toasts while a session-expiry or permission redirect is already in progress
-    if (status !== 400 && !sessionExpiredInProgress && !permissionRedirectInProgress) {
+    // An endpoint that shows its own error panel opts out with extraOptions: { silentErrors: true }.
+    const silentErrors = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
+    if (status !== 400 && !silentErrors && !sessionExpiredInProgress && !permissionRedirectInProgress) {
       const data = result.error.data as { message?: string } | undefined;
       const msg = data?.message ?? i18n.t('common.somethingWentWrong', { defaultValue: 'Something went wrong. Please try again.' });
       toast.error(msg);
@@ -94,7 +96,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys'],
+  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs'],
   // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
   // multi-user portal: another user's edit turns a record PENDING in the DB without this
   // session ever knowing, so cached list data goes stale the moment someone else saves.
