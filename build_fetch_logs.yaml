@@ -1,0 +1,78 @@
+version: 0.1
+component: build
+timeoutInSeconds: 600
+shell: bash
+
+env:
+  variables:
+    ENVIRONMENT: "DEV" 
+    DEPLOYMENT_NAME: "sbr-frontend"
+    TAIL_LINES: "500"
+    REGION: "me-dcc-doha-1"
+
+steps:
+  - type: Command
+    name: "Install Kubectl"
+    command: |
+      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      chmod +x kubectl
+      mv kubectl /usr/local/bin/
+
+  - type: Command
+    name: "Setup and Fetch Logs"
+    command: |
+      # 1. Switch Cluster OCID and Namespace based on the selected environment
+      case "${ENVIRONMENT}" in
+        PROD)
+          CLUSTER_ID="ocid1.cluster.oc21.me-dcc-doha-1.aaaaaaaat5pfxrl224bhfyi7jwrqmv7kogwssnhlrqyobuss7cvnpjuikkmq"
+          ;;
+        UAT)
+          CLUSTER_ID="ocid1.cluster.oc21.me-dcc-doha-1.aaaaaaaa2qktt66jwo6qbdx6z5l6jwosasp6jjorinyp3edvzcsramltbzqa"
+          ;;
+        TEST)
+          CLUSTER_ID="ocid1.cluster.oc21.me-dcc-doha-1.aaaaaaaasriitta6y7mnmmzosqaelo64cpctuzrge77s74zuscauv6yfa2eq"
+          ;;
+        DEV)
+          CLUSTER_ID="ocid1.cluster.oc21.me-dcc-doha-1.aaaaaaaadid647eil65krromuop4iwdu67lgkyy5qtx34qxcfcnpadykv7rq"
+          ;;
+        *)
+          # Default to DEV
+          CLUSTER_ID="ocid1.cluster.oc21.me-dcc-doha-1.aaaaaaaadid647eil65krromuop4iwdu67lgkyy5qtx34qxcfcnpadykv7rq"
+          ;;
+      esac
+
+      case "${DEPLOYMENT}" in
+        FE)
+          NAMESPACE="sbr-fe"
+          DEPLOYMENT_NAME="sbr-frontend"
+          ;;
+        BE)
+          NAMESPACE="sbr-be"
+          DEPLOYMENT_NAME="sbr-backend"
+          ;;
+        esac
+      
+      echo "========================================================="
+      echo "Targeting Environment: ${ENVIRONMENT}"
+      echo "Targeting Deployment: ${DEPLOYMENT}"
+      echo "========================================================="
+
+      # 2. Authenticate using the Private Endpoint flag
+      REGION="me-dcc-doha-1"
+      mkdir -p ~/.kube
+      oci ce cluster create-kubeconfig \
+        --cluster-id ${CLUSTER_ID} \
+        --file ~/.kube/config \
+        --region ${REGION} \
+        --auth resource_principal \
+        --kube-endpoint PRIVATE_ENDPOINT
+      # oci ce cluster create-kubeconfig \
+      #   --cluster-id ${CLUSTER_ID} \
+      #   --file $HOME/.kube/config 
+      #   --region ${REGION} \
+      #   --token-version 2.0.0 \
+      #   --kube-endpoint PRIVATE_ENDPOINT
+        
+      # 3. Fetch logs
+      echo "Fetching last ${TAIL_LINES} lines for deployment/${DEPLOYMENT_NAME} in namespace ${NAMESPACE}..."
+      kubectl logs deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE} --tail=${TAIL_LINES} --all-containers=true

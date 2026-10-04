@@ -78,7 +78,7 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel, warning }:
           <Button variant="outline" onClick={onCancel} disabled={isLoading}>
             {t('actions.cancel')}
           </Button>
-          <Button onClick={handleConfirm} disabled={isLoading || submitting || !comment.trim()} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">
+          <Button onClick={handleConfirm} disabled={!comment.trim()} loading={isLoading || submitting} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">
             {isLoading || submitting ? t('actions.saving') : t('actions.confirmSave')}
           </Button>
         </DialogFooter>

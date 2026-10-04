@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -163,7 +163,8 @@ export function NewBulkUpdatePage() {
         </Button>
         <Button
           onClick={handleNext}
-          disabled={!canGoNext || submitting}
+          disabled={!canGoNext}
+          loading={submitting}
           style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
           className="text-white"
         >

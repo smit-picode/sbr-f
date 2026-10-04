@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { Check, ClipboardList, Clock, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';

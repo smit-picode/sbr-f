@@ -447,7 +447,7 @@ export function UsersTab({
           {dialogBody('create')}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsCreateOpen(false); resetDialogState(); }} disabled={isCreating}>{t('actions.cancel')}</Button>
-            <Button onClick={handleCreate} disabled={isCreating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isCreating ? t('admin.users.creating') : t('actions.confirmSave')}</Button>
+            <Button onClick={handleCreate} loading={isCreating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isCreating ? t('admin.users.creating') : t('actions.confirmSave')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -534,7 +534,7 @@ export function UsersTab({
           {dialogBody('edit')}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditTarget(null); resetDialogState(); }} disabled={isUpdating}>{t('actions.cancel')}</Button>
-            <Button onClick={handleUpdate} disabled={isUpdating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isUpdating ? t('admin.users.saving') : t('actions.saveChanges')}</Button>
+            <Button onClick={handleUpdate} loading={isUpdating} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isUpdating ? t('admin.users.saving') : t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

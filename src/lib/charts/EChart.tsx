@@ -14,13 +14,15 @@ interface EChartProps {
   height?: number | string;
   className?: string;
   onEvents?: Record<string, (params: unknown) => void>;
+  // SVG gives crisp vector output when a chart is printed to PDF.
+  renderer?: 'canvas' | 'svg';
 }
 
 // Thin React wrapper around a raw ECharts instance — ECharts owns and mutates its canvas
 // directly, which is why this isn't just `<div>{...}</div>` with option as a prop rendered
 // declaratively: the instance must be created once, resized via ResizeObserver, and have
 // `setOption` called imperatively whenever the option changes.
-export function EChart({ option, height = 240, className, onEvents }: EChartProps) {
+export function EChart({ option, height = 240, className, onEvents, renderer = 'canvas' }: EChartProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
   const optionRef = useRef(option);
@@ -43,7 +45,7 @@ export function EChart({ option, height = 240, className, onEvents }: EChartProp
     ensureChartTheme();
     const el = elRef.current;
     if (!el) return;
-    const chart = echarts.init(el, 'sbr');
+    const chart = echarts.init(el, 'sbr', { renderer });
     chartRef.current = chart;
     if (onEvents) {
       for (const [ev, handler] of Object.entries(onEvents)) chart.on(ev, handler);

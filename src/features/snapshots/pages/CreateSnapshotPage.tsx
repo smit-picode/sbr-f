@@ -1,42 +1,65 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
-import { Camera, Building2, Orbit, Users, MapPin } from 'lucide-react';
+import { Camera, Building2, Orbit, Users, MapPin, Network, Loader2 } from 'lucide-react';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
+import { NoData } from '@/components/common/NoData';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
-import { useAppDispatch, useAppSelector } from '@/hooks';
-import { createSnapshot } from '../store/snapshotsSlice';
-import { LIVE_COUNTS } from '../mockData';
+import { usePermission } from '@/hooks';
 import { toast } from '@/utils/toast';
+import { formatNumber } from '@/utils/format';
+import type { SnapshotEntity } from '@/types';
+import { useCreateSnapshotMutation, useGetSnapshotLiveCountsQuery } from '../api/snapshotsApi';
+import { SNAPSHOT_DESCRIPTION_MAX_LENGTH, SNAPSHOT_ENTITIES, SNAPSHOT_NAME_MAX_LENGTH } from '../constants';
+
+const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
+  establishments: Building2,
+  enterprises: Orbit,
+  enterprise_groups: Network,
+  contacts: Users,
+  addresses: MapPin,
+};
+
+function apiMessage(error: unknown): string | undefined {
+  const e = error as FetchBaseQueryError | undefined;
+  return (e && 'data' in e ? (e.data as { message?: string } | undefined)?.message : undefined) ?? undefined;
+}
 
 export function CreateSnapshotPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const frozenBy = useAppSelector((s) => s.auth.user?.email) ?? '—';
+  const { canCreate } = usePermission('snapshots');
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [nameError, setNameError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Each stat keeps a distinct hue (matching the reference mockup) rather than one uniform
-  // tint, so the four core tables read as separate categories at a glance. Colors drawn
-  // from the project's documented palette (slate/blue/emerald/red/amber) only.
-  const stats = [
-    { key: 'establishments', icon: Building2, count: LIVE_COUNTS.establishments, label: t('nav.establishments', { defaultValue: 'Establishments' }), bg: 'bg-red-50', text: 'text-red-600' },
-    { key: 'enterprises', icon: Orbit, count: LIVE_COUNTS.enterprises, label: t('nav.enterprises', { defaultValue: 'Enterprises' }), bg: 'bg-amber-50', text: 'text-amber-600' },
-    { key: 'contacts', icon: Users, count: LIVE_COUNTS.contacts, label: t('nav.contacts', { defaultValue: 'Contacts' }), bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    { key: 'addresses', icon: MapPin, count: LIVE_COUNTS.addresses, label: t('nav.addresses', { defaultValue: 'Addresses' }), bg: 'bg-blue-50', text: 'text-blue-600' },
-  ];
+  // Skipped without the permission — the shared API layer treats any 403 as a revoked session.
+  const { data: countsRes, isLoading: countsLoading } = useGetSnapshotLiveCountsQuery(undefined, { skip: !canCreate });
+  const [createSnapshot, { isLoading: creating }] = useCreateSnapshotMutation();
+  const counts = countsRes?.data ?? null;
+
+  if (!canCreate) {
+    return (
+      <PageContainer>
+        <PageHeader title={t('snapshots.createTitle')} description={t('snapshots.createDescription')} />
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
+          <NoData message={t('snapshots.noCreatePermission', { defaultValue: 'You do not have permission to create snapshots.' })} />
+        </div>
+      </PageContainer>
+    );
+  }
 
   const handleFreezeClick = () => {
     if (!name.trim()) {
@@ -47,12 +70,21 @@ export function CreateSnapshotPage() {
     setConfirmOpen(true);
   };
 
-  const handleConfirmFreeze = () => {
-    dispatch(createSnapshot({ name: name.trim(), description: description.trim(), frozenBy }));
-    toast.success(t('snapshots.createSuccess', { name: name.trim() }));
-    setConfirmOpen(false);
-    router.push('/snapshots/browse');
+  const handleConfirmFreeze = async () => {
+    try {
+      await createSnapshot({ name: name.trim(), description: description.trim() || undefined }).unwrap();
+      toast.success(t('snapshots.createSuccess', { name: name.trim() }));
+      setConfirmOpen(false);
+      router.push('/snapshots/browse');
+    } catch (error) {
+      // 400s aren't toasted by the shared API layer; other statuses already were.
+      if ((error as FetchBaseQueryError)?.status === 400) {
+        toast.error(apiMessage(error) ?? t('snapshots.createFailed', { defaultValue: 'The snapshot could not be created.' }));
+      }
+    }
   };
+
+  const countText = (key: (typeof SNAPSHOT_ENTITIES)[number]['countKey']) => (counts ? formatNumber(counts[key]) : '—');
 
   return (
     <PageContainer>
@@ -67,6 +99,7 @@ export function CreateSnapshotPage() {
           <Input
             id="snapshot-name"
             value={name}
+            maxLength={SNAPSHOT_NAME_MAX_LENGTH}
             onChange={(e) => { setName(e.target.value); if (nameError) setNameError(''); }}
             placeholder={t('snapshots.namePlaceholder')}
             className={`shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 ${nameError ? 'border-red-400' : ''}`}
@@ -80,6 +113,7 @@ export function CreateSnapshotPage() {
             id="snapshot-description"
             className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#A29374]/20 focus:border-[#A29374]/40"
             rows={3}
+            maxLength={SNAPSHOT_DESCRIPTION_MAX_LENGTH}
             placeholder={t('snapshots.descriptionPlaceholder')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -88,24 +122,30 @@ export function CreateSnapshotPage() {
 
         <div className="space-y-3">
           <p className="text-[12px] font-medium text-slate-500">{t('snapshots.captureCaption')}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {stats.map(({ key, icon: Icon, count, label, bg, text }) => (
-              <div key={key} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-md ${bg} ${text}`}>
-                  <Icon className="h-4.5 w-4.5" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {SNAPSHOT_ENTITIES.map(({ entity, countKey, i18nKey, label, tone }) => {
+              const Icon = ENTITY_ICON[entity];
+              return (
+                <div key={entity} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${tone}`}>
+                    <Icon className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    {countsLoading
+                      ? <Skeleton className="h-5 w-16" />
+                      : <p className="text-lg font-semibold text-slate-900 leading-none tabular-nums">{countText(countKey)}</p>}
+                    <p className="text-xs text-slate-500 mt-1 truncate">{t(i18nKey, { defaultValue: label })}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-lg font-semibold text-slate-900 leading-none">{count}</p>
-                  <p className="text-xs text-slate-500 mt-1">{label}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         <div className="flex justify-end">
           <Button
             onClick={handleFreezeClick}
+            disabled={countsLoading}
             style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
             className="text-white"
           >
@@ -115,8 +155,9 @@ export function CreateSnapshotPage() {
         </div>
       </div>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="max-w-md">
+      {/* Locked while the copy runs: the request only returns once all five tables are frozen. */}
+      <Dialog open={confirmOpen} onOpenChange={(o) => { if (!creating) setConfirmOpen(o); }}>
+        <DialogContent className="max-w-md" onEscapeKeyDown={(e) => { if (creating) e.preventDefault(); }} onPointerDownOutside={(e) => { if (creating) e.preventDefault(); }}>
           <DialogHeader>
             <DialogTitle>{t('snapshots.confirmTitle')}</DialogTitle>
             <DialogDescription>{t('snapshots.confirmDescription')}</DialogDescription>
@@ -125,22 +166,30 @@ export function CreateSnapshotPage() {
             <p className="text-sm font-medium text-slate-800">{name.trim()}</p>
             <p className="text-xs text-slate-500 mt-0.5">
               {t('snapshots.confirmSummary', {
-                establishments: LIVE_COUNTS.establishments,
-                enterprises: LIVE_COUNTS.enterprises,
-                contacts: LIVE_COUNTS.contacts,
-                addresses: LIVE_COUNTS.addresses,
+                establishments: countText('ESTABLISHMENT_COUNT'),
+                enterprises: countText('ENTERPRISE_COUNT'),
+                enterpriseGroups: countText('ENTERPRISE_GROUP_COUNT'),
+                contacts: countText('CONTACT_COUNT'),
+                addresses: countText('ADDRESS_COUNT'),
               })}
             </p>
           </div>
+          {creating && (
+            <p className="flex items-center gap-2 text-xs text-slate-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-adaam" />
+              {t('snapshots.freezing', { defaultValue: 'Copying all five tables — this can take a few seconds. Please keep this page open.' })}
+            </p>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t('actions.cancel')}</Button>
+            <Button variant="outline" disabled={creating} onClick={() => setConfirmOpen(false)}>{t('actions.cancel')}</Button>
             <Button
               onClick={handleConfirmFreeze}
+              loading={creating}
               style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
               className="text-white"
             >
-              <Camera className="h-4 w-4 mr-1.5" />
-              {t('snapshots.confirmButton')}
+              {!creating && <Camera className="h-4 w-4 mr-1.5" />}
+              {creating ? t('snapshots.freezingButton', { defaultValue: 'Freezing…' }) : t('snapshots.confirmButton')}
             </Button>
           </DialogFooter>
         </DialogContent>

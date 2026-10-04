@@ -1,18 +1,20 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
+import { NoData } from '@/components/common/NoData';
 import { SurveySampleDetailSkeleton } from '@/components/common/SurveySampleDetailSkeleton';
 import { SearchInput } from '@/components/common/SearchInput';
 import { DataTable } from '@/components/table/DataTable';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { nullableText } from '@/utils/format';
+import { usePermission } from '@/hooks';
 import { useGetSurveyResponsesQuery, useGetSurveySamplesQuery } from '../api/surveysApi';
 import { summarize, surveyById, toSampleRows } from '../utils/aggregate';
 import { SampleDistributionGrid } from '../components/SampleDistributionGrid';
@@ -40,10 +42,17 @@ function sortValue(r: SampleRow, field: string): string | number {
 export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const { canView: canViewSurveys } = usePermission('surveys');
+  const { canViewDetail, canEdit } = usePermission('establishments');
+  const canOpenEstablishment = canViewDetail || canEdit;
   const { surveyId, period } = parseSampleSlug(sampleKey);
   const survey = surveyById(surveyId);
-  const samplesQuery = useGetSurveySamplesQuery();
-  const responsesQuery = useGetSurveyResponsesQuery({ surveyId: survey?.id, period }, { skip: !survey || !period });
+  // Skip without surveys.view — a 403 here would trip the shared API layer's revoked-access handler.
+  const samplesQuery = useGetSurveySamplesQuery(undefined, { skip: !canViewSurveys });
+  const responsesQuery = useGetSurveyResponsesQuery(
+    { surveyId: survey?.id, period },
+    { skip: !canViewSurveys || !survey || !period },
+  );
   // A sample exists only if the database reports that survey period.
   const validSample = !!survey && !!samplesQuery.data?.data?.some((s) => s.SURVEY_ID === survey.id && s.PERIOD === period);
 
@@ -148,6 +157,18 @@ export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
     </button>
   );
 
+  if (!canViewSurveys) {
+    return (
+      <PageContainer>
+        <PageHeader title={t('surveySamples.overviewTitle')} />
+        {backLink}
+        <div className="rounded-xl bg-white shadow-card">
+          <NoData message={t('surveySamples.noViewPermission', { defaultValue: 'You do not have permission to view survey samples.' })} />
+        </div>
+      </PageContainer>
+    );
+  }
+
   if (samplesQuery.isLoading || (validSample && responsesQuery.isLoading)) {
     return (
       <PageContainer>
@@ -242,7 +263,13 @@ export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
         onLimitChange={(limit) => setPaging({ page: 1, limit })}
         onSortChange={(field, order) => { setSort(field && order ? { field, order } : null); resetPage(); }}
         sortableColumns={SORTABLE_COLUMNS}
-        onRowClick={(r) => router.push(`/surveys/${sampleSlug(survey.id, period)}/${r.frame.SBR_ID}`)}
+        onRowClick={(r) => {
+          const slug = sampleSlug(survey.id, period);
+          // Opens the establishment (its Back returns here); users who can't open establishments go straight to the response.
+          router.push(canOpenEstablishment
+            ? `/establishments/${r.frame.SBR_ID}?from=${encodeURIComponent(`/surveys/${slug}`)}`
+            : `/surveys/${slug}/${r.frame.SBR_ID}`);
+        }}
       />
     </PageContainer>
   );

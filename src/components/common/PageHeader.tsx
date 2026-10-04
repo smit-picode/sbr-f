@@ -66,7 +66,7 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
       {back && (
         <button
           onClick={back.onClick}
-          className="absolute top-4 start-4 z-10 inline-flex items-center gap-1.5 h-8 ps-2.5 pe-3.5 rounded-full text-[12px] font-semibold text-white/90 hover:bg-white/25 transition-colors"
+          className="absolute top-4 start-4 z-10 inline-flex items-center gap-1.5 h-8 ps-2.5 pe-3.5 rounded-full text-[12px] font-semibold text-white/90 hover:bg-white/25 hover:text-white active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 transition-[color,background-color,transform]"
           style={{ background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)' }}
         >
           <ChevronLeft className="h-3.5 w-3.5 rtl:rotate-180" />

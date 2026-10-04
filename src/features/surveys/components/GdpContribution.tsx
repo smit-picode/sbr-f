@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Check, TrendingUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,14 +16,27 @@ import type { GdpMeasure } from '../types';
 
 const SPARK_HEIGHT = 56;
 
-function Level({ label, sub, value, accent }: { label: string; sub: string; value: number | null; accent?: boolean }) {
+function Level({ label, sub, value, accent, hint }: { label: string; sub: string; value: number | null; accent?: boolean; hint?: string }) {
   return (
     <div className="min-w-[150px] flex-1">
       <div className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-400">{label}</div>
       <div className={cn('mt-1 font-extrabold leading-none', value == null ? 'text-[26px] text-slate-300' : accent ? 'text-[26px] text-adaam' : 'text-[22px] text-slate-900')}>
         {formatMoney(value)}
       </div>
-      <div className="mt-1 text-[11px] text-slate-500">{sub}</div>
+      <div className="mt-1 text-[11px] text-slate-500" title={hint}>{sub}</div>
+    </div>
+  );
+}
+
+function Connector({ pct, label }: { pct: number | null; label: string }) {
+  return (
+    <div className="flex shrink-0 flex-col items-center justify-center px-1 pt-4">
+      <span className="text-[12.5px] font-bold tabular-nums text-dune-deep">{pct == null ? ' ' : formatShare(pct)}</span>
+      <div className="flex items-center gap-1 text-slate-300">
+        <span className="h-px w-5 bg-current" />
+        <ArrowRight className="h-3 w-3 rtl:rotate-180" />
+      </div>
+      <span className="text-[10px] text-slate-400">{label}</span>
     </div>
   );
 }
@@ -36,6 +49,7 @@ export function GdpContribution({ sbrId }: { sbrId: number }) {
   const { data, isLoading, isError, refetch } = useGetSurveyGdpQuery(sbrId);
   const view = useMemo(() => (data?.data ? buildGdpView(data.data) : null), [data]);
 
+  const sectionLabel = (k: string) => `${k} · ${t(`surveySamples.isic.s${k}`)}`;
   const measureLabel = t(`surveySamples.${GDP_MEASURES.find((m) => m.key === measure)?.labelKey}`);
   const openReturn = (year: number) => router.push(`/surveys/${sampleSlug('AES', String(year))}/${sbrId}?from=${RESPONSE_FROM_ESTABLISHMENT}`);
 
@@ -103,7 +117,7 @@ export function GdpContribution({ sbrId }: { sbrId: number }) {
           <p className="text-[12.5px] font-medium text-slate-600">{t('surveySamples.gdpNoReturn')}</p>
         ) : (
           <>
-            <p className="mb-4 text-[11.5px] text-slate-500">{t('surveySamples.gdpLeadEconomy')}</p>
+            <p className="mb-4 text-[11.5px] text-slate-500">{view.activity ? t('surveySamples.gdpLeadActivity') : t('surveySamples.gdpLeadEconomy')}</p>
 
             <div className="flex flex-wrap items-start gap-1">
               <Level
@@ -112,19 +126,25 @@ export function GdpContribution({ sbrId }: { sbrId: number }) {
                 value={view.establishment[measure]}
                 accent
               />
-              <div className="flex shrink-0 flex-col items-center justify-center px-1 pt-4">
-                <span className="text-[12.5px] font-bold tabular-nums text-dune-deep">{formatShare(view.shareOfEconomy[measure])}</span>
-                <div className="flex items-center gap-1 text-slate-300">
-                  <span className="h-px w-5 bg-current" />
-                  <ArrowRight className="h-3 w-3 rtl:rotate-180" />
-                </div>
-                <span className="text-[10px] text-slate-400">{t('surveySamples.gdpOfLabel')}</span>
-              </div>
+              <Connector pct={view.activity ? view.shareOfActivity[measure] : view.shareOfEconomy[measure]} label={t('surveySamples.gdpOfLabel')} />
+              {view.activity && (
+                <>
+                  <Level
+                    label={sectionLabel(view.activity.section)}
+                    sub={t('surveySamples.gdpActivitySub')}
+                    hint={t('surveySamples.gdpActivityHint', { n: view.activity.units, y: view.referenceYear })}
+                    value={view.activity.accounts[measure]}
+                  />
+                  <Connector pct={view.activityShareOfEconomy[measure]} label={t('surveySamples.gdpOfLabel')} />
+                </>
+              )}
               <Level
                 label={t('surveySamples.gdpLevelEconomy')}
-                sub={view.economy
-                  ? (measure === 'valueAdded' ? t('surveySamples.gdpIsGdp') : t('surveySamples.gdpInQarPlain'))
-                  : t('surveySamples.gdpNoEconomyYear', { y: view.referenceYear })}
+                sub={!view.economy
+                  ? t('surveySamples.gdpNoEconomyYear', { y: view.referenceYear })
+                  : view.economyYear !== view.referenceYear
+                    ? t('surveySamples.gdpEconomyLatest', { y: view.economyYear })
+                    : (measure === 'valueAdded' ? t('surveySamples.gdpIsGdp') : t('surveySamples.gdpInQarPlain'))}
                 value={view.economy ? view.economy[measure] : null}
               />
             </div>

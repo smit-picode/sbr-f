@@ -583,7 +583,7 @@ export function RolesTab({
                   <Button
                     size="sm"
                     onClick={handleSavePermissions}
-                    disabled={isAssigning}
+                    loading={isAssigning}
                     style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
                     className="text-white hover:opacity-90 text-xs h-8 px-3"
                   >
@@ -690,7 +690,7 @@ export function RolesTab({
             </Button>
             <Button
               onClick={handleCreate}
-              disabled={isCreating}
+              loading={isCreating}
               style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
               className="text-white"
             >
@@ -725,7 +725,7 @@ export function RolesTab({
             </Button>
             <Button
               onClick={handleUpdate}
-              disabled={isUpdating}
+              loading={isUpdating}
               style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
               className="text-white"
             >

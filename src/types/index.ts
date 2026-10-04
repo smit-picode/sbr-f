@@ -11,3 +11,5 @@ export * from './legalUnit.types';
 export * from './lookup.types';
 export * from './snapshot.types';
 export * from './pipelineLog.types';
+export * from './analysis.types';
+export * from './sourceCatalog.types';

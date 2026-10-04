@@ -1,89 +1,110 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
-import { Building2, Orbit, Users, MapPin, Calendar, User } from 'lucide-react';
+import { Building2, Orbit, Users, MapPin, Network, Calendar, User } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
+import { PageLoader } from '@/components/common/Loader';
+import { NoData } from '@/components/common/NoData';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DataTable } from '@/components/table/DataTable';
-import { NoData } from '@/components/common/NoData';
-import { useAppSelector } from '@/hooks';
-import { formatDateTime } from '@/utils/format';
-import {
-  getSnapshotEstablishmentColumns, getSnapshotEnterpriseColumns,
-  getSnapshotContactColumns, getSnapshotAddressColumns,
-} from '../components/SnapshotColumns';
+import { usePermission } from '@/hooks';
+import { formatDateTime, formatNumber } from '@/utils/format';
+import type { SnapshotEntity } from '@/types';
+import { useGetSnapshotsQuery, useGetSnapshotTableQuery } from '../api/snapshotsApi';
+import { getSnapshotColumns } from '../components/SnapshotColumns';
+import { SNAPSHOT_DEFAULT_PAGE_SIZE, SNAPSHOT_ENTITIES, SNAPSHOT_LOOKUP_LIMIT } from '../constants';
 
-const PAGE_SIZE = 20;
+const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
+  establishments: Building2,
+  enterprises: Orbit,
+  enterprise_groups: Network,
+  contacts: Users,
+  addresses: MapPin,
+};
 
-// Underline-tab look (plain text + a bottom border on the active tab), matching the reference
-// design rather than the shadcn default's gray pill/segmented-control styling.
+// Underline-tab look (plain text + a bottom border on the active tab), matching the reference design.
 const TAB_TRIGGER_CLASS =
   'group gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-2.5 pt-0 text-sm font-medium text-slate-500 shadow-none ' +
   'data-[state=active]:border-[#A29374] data-[state=active]:bg-transparent data-[state=active]:text-[#A29374] data-[state=active]:font-semibold data-[state=active]:shadow-none';
 
-// Count next to each tab's label — a plain muted number while inactive, a light pink pill
-// (matching the reference) once its tab is selected. Uses Radix's data-state on the parent
-// TabsTrigger via the `group` class above, so no extra "which tab is active" state is needed.
 const TAB_COUNT_CLASS =
   'rounded-full px-1.5 text-xs font-normal text-slate-400 ' +
   'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#A29374] group-data-[state=active]:font-semibold';
 
-function usePagedSlice<T>(rows: T[]) {
+// One tab's table; Radix unmounts inactive tabs, so only the visible entity is ever fetched.
+function SnapshotEntityTable({ id, entity }: { id: number; entity: SnapshotEntity }) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const data = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  return { page, setPage, data, total: rows.length };
+  const [limit, setLimit] = useState(SNAPSHOT_DEFAULT_PAGE_SIZE);
+  const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotTableQuery({ id, entity, page, limit });
+  const columns = useMemo(() => getSnapshotColumns(entity, t), [entity, t]);
+  const rows = data?.data ?? [];
+  return (
+    <DataTable
+      columns={columns}
+      data={rows}
+      isLoading={isLoading || (isFetching && !rows.length)}
+      isError={isError}
+      onRetry={refetch}
+      page={page}
+      limit={limit}
+      total={data?.total ?? 0}
+      onPageChange={setPage}
+      onLimitChange={(l) => { setLimit(l); setPage(1); }}
+      stickyFirstColumn
+    />
+  );
 }
 
 export function SnapshotDetailPage({ id }: { id: number }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const snapshot = useAppSelector((s) => s.snapshots.items.find((sn) => sn.ID === id));
+  const { canView } = usePermission('snapshots');
+  // No get-one endpoint: the header comes from the (cached) list row for this snapshot.
+  const { data: listRes, isLoading } = useGetSnapshotsQuery({ page: 1, limit: SNAPSHOT_LOOKUP_LIMIT }, { skip: !canView });
+  const snapshot = listRes?.data?.find((s) => s.SNAPSHOT_ID === id);
+  const back = { label: t('snapshots.backToAll'), onClick: () => router.push('/snapshots/browse') };
 
-  const establishmentColumns = useMemo(() => getSnapshotEstablishmentColumns(t), [t]);
-  const enterpriseColumns = useMemo(() => getSnapshotEnterpriseColumns(t), [t]);
-  const contactColumns = useMemo(() => getSnapshotContactColumns(t), [t]);
-  const addressColumns = useMemo(() => getSnapshotAddressColumns(t), [t]);
-
-  const establishments = usePagedSlice(snapshot?.establishments ?? []);
-  const enterprises = usePagedSlice(snapshot?.enterprises ?? []);
-  const contacts = usePagedSlice(snapshot?.contacts ?? []);
-  const addresses = usePagedSlice(snapshot?.addresses ?? []);
-
-  if (!snapshot) {
+  if (!canView) {
     return (
       <PageContainer>
         <div className="rounded-lg bg-white shadow-card overflow-hidden">
-          <NoData message={t('snapshots.noData')} description={t('snapshots.noDataDesc')} />
+          <NoData message={t('snapshots.noViewPermission', { defaultValue: 'You do not have permission to view snapshots.' })} />
         </div>
       </PageContainer>
     );
   }
+  if (isLoading) return <PageContainer><PageLoader /></PageContainer>;
 
   return (
     <PageContainer>
       <PageHeader
-        title={snapshot.NAME}
-        description={
+        title={snapshot?.SNAPSHOT_NAME ?? t('snapshots.fallbackTitle', { defaultValue: 'Snapshot #{{id}}', id })}
+        description={snapshot && (
           <>
             {snapshot.DESCRIPTION && <span className="block">{snapshot.DESCRIPTION}</span>}
             <span className="flex flex-wrap items-center gap-1.5 mt-1">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {t('snapshots.frozenOnAt', { date: formatDateTime(snapshot.FROZEN_AT) })}
+                {t('snapshots.frozenOnAt', { date: formatDateTime(snapshot.CREATED_AT) })}
               </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1">
-                <User className="h-3.5 w-3.5" />
-                {t('snapshots.frozenByUser')} {snapshot.FROZEN_BY}
-              </span>
+              {snapshot.FROZEN_BY_NAME && (
+                <>
+                  <span>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" />
+                    {t('snapshots.frozenByUser')} {snapshot.FROZEN_BY_NAME}
+                  </span>
+                </>
+              )}
             </span>
           </>
-        }
-        back={{ label: t('snapshots.backToAll'), onClick: () => router.push('/snapshots/browse') }}
+        )}
+        back={back}
         actions={
           <Badge variant="warning" className="rounded-full whitespace-nowrap">
             {t('snapshots.readOnlyBadge')}
@@ -92,79 +113,23 @@ export function SnapshotDetailPage({ id }: { id: number }) {
       />
 
       <Tabs defaultValue="establishments">
-        {/* Underline tabs (not the shadcn pill default) to match the reference design — overridden
-            per-instance via className, since Tabs has no other caller in the app to break. */}
-        <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-slate-200 bg-transparent p-0">
-          <TabsTrigger value="establishments" className={TAB_TRIGGER_CLASS}>
-            <Building2 className="h-3.5 w-3.5" />
-            {t('nav.establishments', { defaultValue: 'Establishments' })}
-            <span className={TAB_COUNT_CLASS}>{establishments.total}</span>
-          </TabsTrigger>
-          <TabsTrigger value="enterprises" className={TAB_TRIGGER_CLASS}>
-            <Orbit className="h-3.5 w-3.5" />
-            {t('nav.enterprises', { defaultValue: 'Enterprises' })}
-            <span className={TAB_COUNT_CLASS}>{enterprises.total}</span>
-          </TabsTrigger>
-          <TabsTrigger value="contacts" className={TAB_TRIGGER_CLASS}>
-            <Users className="h-3.5 w-3.5" />
-            {t('nav.contacts', { defaultValue: 'Contacts' })}
-            <span className={TAB_COUNT_CLASS}>{contacts.total}</span>
-          </TabsTrigger>
-          <TabsTrigger value="addresses" className={TAB_TRIGGER_CLASS}>
-            <MapPin className="h-3.5 w-3.5" />
-            {t('nav.addresses', { defaultValue: 'Addresses' })}
-            <span className={TAB_COUNT_CLASS}>{addresses.total}</span>
-          </TabsTrigger>
+        <TabsList className="h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0">
+          {SNAPSHOT_ENTITIES.map(({ entity, countKey, i18nKey, label }) => {
+            const Icon = ENTITY_ICON[entity];
+            return (
+              <TabsTrigger key={entity} value={entity} className={TAB_TRIGGER_CLASS}>
+                <Icon className="h-3.5 w-3.5" />
+                {t(i18nKey, { defaultValue: label })}
+                {snapshot && <span className={TAB_COUNT_CLASS}>{formatNumber(snapshot[countKey])}</span>}
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
-
-        <TabsContent value="establishments">
-          <DataTable
-            columns={establishmentColumns}
-            data={establishments.data}
-            page={establishments.page}
-            limit={PAGE_SIZE}
-            total={establishments.total}
-            onPageChange={establishments.setPage}
-            onLimitChange={() => { /* fixed page size for this read-only view */ }}
-            stickyFirstColumn
-          />
-        </TabsContent>
-        <TabsContent value="enterprises">
-          <DataTable
-            columns={enterpriseColumns}
-            data={enterprises.data}
-            page={enterprises.page}
-            limit={PAGE_SIZE}
-            total={enterprises.total}
-            onPageChange={enterprises.setPage}
-            onLimitChange={() => { /* fixed page size for this read-only view */ }}
-            stickyFirstColumn
-          />
-        </TabsContent>
-        <TabsContent value="contacts">
-          <DataTable
-            columns={contactColumns}
-            data={contacts.data}
-            page={contacts.page}
-            limit={PAGE_SIZE}
-            total={contacts.total}
-            onPageChange={contacts.setPage}
-            onLimitChange={() => { /* fixed page size for this read-only view */ }}
-            stickyFirstColumn
-          />
-        </TabsContent>
-        <TabsContent value="addresses">
-          <DataTable
-            columns={addressColumns}
-            data={addresses.data}
-            page={addresses.page}
-            limit={PAGE_SIZE}
-            total={addresses.total}
-            onPageChange={addresses.setPage}
-            onLimitChange={() => { /* fixed page size for this read-only view */ }}
-            stickyFirstColumn
-          />
-        </TabsContent>
+        {SNAPSHOT_ENTITIES.map(({ entity }) => (
+          <TabsContent key={entity} value={entity}>
+            <SnapshotEntityTable id={id} entity={entity} />
+          </TabsContent>
+        ))}
       </Tabs>
     </PageContainer>
   );

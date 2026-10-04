@@ -1,89 +1,125 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrEstablishment, SbrEnterprise, SbrContact, SbrAddress } from '@/types';
+import type { TFunction } from 'i18next';
+import type { SnapshotEntity, SnapshotRow } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { nullableText, formatDate } from '@/utils/format';
+import { nullableText, formatDate, formatNumber } from '@/utils/format';
 
-type TFunc = (key: string, options?: { lng?: string }) => string;
-
-function MonoCell({ value }: { value: string | null | undefined }) {
-  return value ? (
-    <span className="font-mono text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{value}</span>
+function MonoCell({ value }: { value: unknown }) {
+  return value != null && value !== '' ? (
+    <span className="font-mono text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{String(value)}</span>
   ) : (
     <span className="text-slate-400">—</span>
   );
 }
 
-function TextCell({ value }: { value: string | null | undefined }) {
-  return <span className="text-sm text-slate-700">{nullableText(value ?? null)}</span>;
+function IdCell({ value, prefix = '' }: { value: unknown; prefix?: string }) {
+  return value != null ? <span className="font-mono text-xs font-medium text-adaam">{prefix}{String(value)}</span> : <span className="text-slate-400">—</span>;
 }
 
-function DateCell({ value }: { value: string | null | undefined }) {
-  return <span className="text-sm text-slate-600">{formatDate(value ?? null)}</span>;
+function TextCell({ value }: { value: unknown }) {
+  return <span className="text-sm text-slate-700">{nullableText(value == null ? null : String(value))}</span>;
 }
 
-// Read-only columns for a frozen frame's tabs — no edit action, no pending-request badges
-// (a snapshot can't have in-flight change requests), same cell styling as the live tables.
+function NumberCell({ value }: { value: unknown }) {
+  return <span className="text-sm text-slate-700 tabular-nums">{formatNumber(typeof value === 'number' ? value : value == null ? null : Number(value))}</span>;
+}
 
-export const getSnapshotEstablishmentColumns = (t: TFunc): ColumnDef<SbrEstablishment>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
-  { accessorKey: 'SOURCE_CODE', header: t('columns.SOURCE_CODE'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
-  { accessorKey: 'NAME_ENU', header: t('columns.NAME_ENU'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'TRADE_NAME_ENU', header: t('columns.TRADE_NAME_ENU'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'EST_STATUS', header: t('columns.EST_STATUS'), cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" /> },
-  { accessorKey: 'LEGAL_TYPE', header: t('columns.LEGAL_TYPE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'SECTOR_ID', header: t('columns.SECTOR'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'EMPLOYMENT_COUNT', header: t('columns.EMPLOYMENT_COUNT'), cell: ({ getValue }) => <span className="text-sm text-slate-700">{getValue<number | null>() ?? '—'}</span> },
-  { accessorKey: 'MAIN_BRANCH_FLG', header: t('columns.MAIN_BRANCH_FLG'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'VALID_FROM', header: t('columns.VALID_FROM'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-];
+function DateCell({ value }: { value: unknown }) {
+  return <span className="text-sm text-slate-600 whitespace-nowrap">{formatDate(value == null ? null : String(value))}</span>;
+}
 
-export const getSnapshotEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
-  { accessorKey: 'ENTERPRISE_ID', header: t('columns.ENTERPRISE_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span> },
-  { accessorKey: 'NAME_ENU', header: t('columns.NAME'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'MAIN_CR', header: t('columns.MAIN_CR'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
-  {
-    accessorKey: 'ESTABLISHMENT_COUNT', header: t('columns.ESTABLISHMENTS'),
-    cell: ({ getValue }) => {
-      const count = Number(getValue<number>() ?? 0);
-      return <span className="text-xs font-medium text-[#A29374]">{count} {count === 1 ? t('table.unit', { lng: 'en' }) : t('table.units', { lng: 'en' })}</span>;
-    },
-  },
-  { accessorKey: 'LEGAL_TYPE', header: t('columns.LEGAL_TYPE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'SECTOR_ID', header: t('columns.SECTOR'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'STATUS', header: t('columns.STATUS'), cell: ({ getValue }) => <StatusBadge status={getValue<string | null>()} className="rounded-md" /> },
-  { accessorKey: 'MAIN_ESTABLISHMENT_SBR_ID', header: t('columns.MAIN_UNIT'), cell: ({ getValue }) => { const val = getValue<number | null>(); return val != null ? <span className="font-mono text-xs font-medium text-adaam">#{val}</span> : <span className="text-slate-400">—</span>; } },
-  { accessorKey: 'VALID_FROM', header: t('columns.VALID_FROM'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-];
+type Kind = 'id' | 'mono' | 'text' | 'number' | 'date' | 'status';
 
-export const getSnapshotContactColumns = (t: TFunc): ColumnDef<SbrContact>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
-  { accessorKey: 'CONTACT_NAME', header: t('columns.CONTACT_NAME'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'ROLE', header: t('columns.ROLE'), cell: ({ getValue }) => { const val = getValue<string | null>(); return val ? <span className="text-xs font-medium bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">{val}</span> : <span className="text-slate-400">—</span>; } },
-  { accessorKey: 'PHONE', header: t('columns.PHONE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'MOBILE', header: t('columns.MOBILE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'EMAIL', header: t('columns.EMAIL'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'PO_BOX', header: t('columns.PO_BOX'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'WEBSITE', header: t('columns.WEBSITE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'SOURCE_CODE', header: t('columns.SOURCE_CODE'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
-  { accessorKey: 'PRIORITY', header: t('columns.PRIORITY'), cell: ({ getValue }) => <span className="text-sm text-slate-700">{getValue<number | null>() ?? '—'}</span> },
-  { accessorKey: 'VALID_FROM', header: t('columns.VALID_FROM'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-  { accessorKey: 'VALID_TO', header: t('columns.VALID_TO'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-];
+// [row key, column label key, English fallback, cell kind] — rows are raw frozen base-table rows.
+type Spec = [string, string, string, Kind];
 
-export const getSnapshotAddressColumns = (t: TFunc): ColumnDef<SbrAddress>[] => [
-  { accessorKey: 'SBR_ID', header: t('columns.SBR_ID'), cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">{String(getValue())}</span> },
-  { accessorKey: 'MUNICIPALITY_ID', header: t('columns.MUNICIPALITY_ID'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'ZONE', header: t('columns.ZONE'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'STREET', header: t('columns.STREET'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'BUILDING_NO', header: t('columns.BUILDING_NO'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'UNIT_NO', header: t('columns.UNIT_NO'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'FLOOR_NO', header: t('columns.FLOOR_NO'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'QARS', header: t('columns.QARS'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
-  { accessorKey: 'ELECTRICITY_NO', header: t('columns.ELECTRICITY_NO'), cell: ({ getValue }) => <TextCell value={getValue<string | null>()} /> },
-  { accessorKey: 'LATITUDE', header: t('columns.LATITUDE'), cell: ({ getValue }) => <span className="font-mono text-xs text-slate-600">{nullableText(getValue<string | null>())}</span> },
-  { accessorKey: 'LONGITUDE', header: t('columns.LONGITUDE'), cell: ({ getValue }) => <span className="font-mono text-xs text-slate-600">{nullableText(getValue<string | null>())}</span> },
-  { accessorKey: 'SOURCE_CODE', header: t('columns.SOURCE_CODE'), cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} /> },
-  { accessorKey: 'PRIORITY', header: t('columns.PRIORITY'), cell: ({ getValue }) => <span className="text-sm text-slate-700">{getValue<number | null>() ?? '—'}</span> },
-  { accessorKey: 'VALID_FROM', header: t('columns.VALID_FROM'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-  { accessorKey: 'VALID_TO', header: t('columns.VALID_TO'), cell: ({ getValue }) => <DateCell value={getValue<string | null>()} /> },
-];
+const SPECS: Record<SnapshotEntity, Spec[]> = {
+  establishments: [
+    ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
+    ['NAME_ENU', 'columns.NAME_ENU', 'Name (EN)', 'text'],
+    ['TRADE_NAME_ENU', 'columns.TRADE_NAME_ENU', 'Trade name (EN)', 'text'],
+    ['EST_STATUS', 'columns.EST_STATUS', 'Status', 'status'],
+    ['LEGAL_TYPE', 'columns.LEGAL_TYPE', 'Legal type', 'text'],
+    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
+    ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
+    ['EMPLOYMENT_COUNT', 'columns.EMPLOYMENT_COUNT', 'Employment count', 'number'],
+    ['MAIN_BRANCH_FLG', 'columns.MAIN_BRANCH_FLG', 'Main / branch', 'text'],
+    ['ASSOCIATED_ENTERPRISE_ID', 'columns.ASSOCIATED_ENTERPRISE_ID', 'Enterprise', 'id'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+  ],
+  enterprises: [
+    ['ENTERPRISE_ID', 'columns.ENTERPRISE_ID', 'Enterprise', 'id'],
+    ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
+    ['STATUS', 'columns.STATUS', 'Status', 'status'],
+    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
+    ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
+    ['EMPLOYMENT_COUNT', 'columns.EMPLOYMENT_COUNT', 'Employment count', 'number'],
+    ['ANNUAL_TURNOVER', 'columns.ANNUAL_TURNOVER', 'Annual turnover', 'number'],
+    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
+    ['MAIN_ESTABLISHMENT_SBR_ID', 'columns.MAIN_UNIT', 'Main unit', 'id'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+  ],
+  enterprise_groups: [
+    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
+    ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
+    ['STATUS', 'columns.STATUS', 'Status', 'status'],
+    ['UCI_NAME', 'columns.UCI_NAME', 'UCI name', 'text'],
+    ['UCI_COUNTRY', 'columns.UCI_COUNTRY', 'UCI country', 'text'],
+    ['MULTINATIONAL_GROUP_FLG', 'columns.MULTINATIONAL_GROUP_FLG', 'Multinational', 'text'],
+    ['FOREIGN_CONTROLLED_GROUP_FLG', 'columns.FOREIGN_CONTROLLED_GROUP_FLG', 'Foreign controlled', 'text'],
+    ['PRINCIPAL_ISIC_2DIGIT', 'columns.PRINCIPAL_ISIC_2DIGIT', 'Principal ISIC', 'mono'],
+    ['TOTAL_EMPLOYEES', 'columns.TOTAL_EMPLOYEES', 'Total employees', 'number'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+  ],
+  contacts: [
+    ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
+    ['CONTACT_NAME', 'columns.CONTACT_NAME', 'Contact name', 'text'],
+    ['ROLE', 'columns.ROLE', 'Role', 'text'],
+    ['PHONE', 'columns.PHONE', 'Phone', 'text'],
+    ['MOBILE', 'columns.MOBILE', 'Mobile', 'text'],
+    ['EMAIL', 'columns.EMAIL', 'Email', 'text'],
+    ['PO_BOX', 'columns.PO_BOX', 'P.O. Box', 'text'],
+    ['WEBSITE', 'columns.WEBSITE', 'Website', 'text'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
+    ['PRIORITY', 'columns.PRIORITY', 'Priority', 'number'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+  ],
+  addresses: [
+    ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
+    ['MUNICIPALITY_ID', 'columns.MUNICIPALITY_ID', 'Municipality', 'text'],
+    ['ZONE', 'columns.ZONE', 'Zone', 'text'],
+    ['STREET', 'columns.STREET', 'Street', 'text'],
+    ['BUILDING_NO', 'columns.BUILDING_NO', 'Building no.', 'text'],
+    ['UNIT_NO', 'columns.UNIT_NO', 'Unit no.', 'text'],
+    ['FLOOR_NO', 'columns.FLOOR_NO', 'Floor no.', 'text'],
+    ['QARS', 'columns.QARS', 'QARS', 'mono'],
+    ['ELECTRICITY_NO', 'columns.ELECTRICITY_NO', 'Electricity no.', 'text'],
+    ['LATITUDE', 'columns.LATITUDE', 'Latitude', 'mono'],
+    ['LONGITUDE', 'columns.LONGITUDE', 'Longitude', 'mono'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
+    ['PRIORITY', 'columns.PRIORITY', 'Priority', 'number'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+  ],
+};
+
+function renderCell(kind: Kind, value: unknown) {
+  switch (kind) {
+    case 'id': return <IdCell value={value} />;
+    case 'mono': return <MonoCell value={value} />;
+    case 'number': return <NumberCell value={value} />;
+    case 'date': return <DateCell value={value} />;
+    case 'status': return <StatusBadge status={value == null ? null : String(value)} className="rounded-md" />;
+    default: return <TextCell value={value} />;
+  }
+}
+
+// Read-only columns for a frozen frame's tabs — no edit action, no pending-request badges.
+export function getSnapshotColumns(entity: SnapshotEntity, t: TFunction): ColumnDef<SnapshotRow>[] {
+  return SPECS[entity].map(([key, labelKey, fallback, kind]) => ({
+    id: key,
+    accessorFn: (row) => row[key],
+    header: t(labelKey, { defaultValue: fallback }),
+    cell: ({ getValue }) => renderCell(kind, getValue()),
+  }));
+}

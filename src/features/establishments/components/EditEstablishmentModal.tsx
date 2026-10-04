@@ -778,7 +778,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-            <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
+            <Button onClick={handleSubmit} loading={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{t('actions.saveChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

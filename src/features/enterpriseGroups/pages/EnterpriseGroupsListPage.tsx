@@ -25,7 +25,7 @@ import { toast } from '@/utils/toast';
 import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { RotateCcw, Plus, Network } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 
 function is400(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 400; }
 function is401(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 401; }

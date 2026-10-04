@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Building2, Users, MapPin, Download, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -84,10 +84,13 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
 
   // Fetched only on click (lazy), never on mount — the export is a snapshot for this one
   // download, not something the page needs to keep current in the background.
-  const [fetchExport, { isFetching: isExporting }] = useLazyGetBulkChangeExportQuery();
+  const [fetchExport] = useLazyGetBulkChangeExportQuery();
+  // Covers both the export fetch and building the workbook, which can each take a moment.
+  const [downloading, setDownloading] = useState(false);
 
   const handleDownloadTemplate = async () => {
-    if (!template) return;
+    if (!template || downloading) return;
+    setDownloading(true);
     try {
       // Pre-fill with the operator's actual current records so nobody has to discover or type a
       // row ID themselves (see buildTemplateWorkbook's own note). If the export call fails for
@@ -114,6 +117,8 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
       URL.revokeObjectURL(url);
     } catch {
       toast.error(t('bulkChange.wizard.setup.templateFailed', { defaultValue: 'Could not build the template file.' }));
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -199,8 +204,8 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
               {t('bulkChange.wizard.setup.columnDictionaryDesc', { defaultValue: 'Use these exact column headers in your file.' })}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate} disabled={!template || isExporting}>
-            <Download className="h-4 w-4" />
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadTemplate} disabled={!template} loading={downloading}>
+            {!downloading && <Download className="h-4 w-4" />}
             {t('bulkChange.wizard.setup.downloadTemplate', { defaultValue: 'Download template' })}
           </Button>
         </div>

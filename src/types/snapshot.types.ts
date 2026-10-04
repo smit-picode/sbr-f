@@ -1,26 +1,39 @@
-import type { SbrEstablishment } from './establishment.types';
-import type { SbrEnterprise } from './enterprise.types';
-import type { SbrContact } from './contact.types';
-import type { SbrAddress } from './address.types';
+// Shapes returned by GET/POST /snapshots (SBR_SNAPSHOTS_API). Counts are cached at freeze time.
+export interface SnapshotLiveCounts {
+  ESTABLISHMENT_COUNT: number;
+  ADDRESS_COUNT: number;
+  CONTACT_COUNT: number;
+  ENTERPRISE_COUNT: number;
+  ENTERPRISE_GROUP_COUNT: number;
+}
 
-// Frontend-only mock model (the procedure for this feature is not yet delivered) — a Frozen Frame captures the live core tables at a point in time. Entity
-// counts are always derived from the array lengths below, never stored separately, so a
-// tab's row count and its badge can never drift apart.
-export interface Snapshot {
-  ID: number;
-  NAME: string;
+export interface SnapshotSummary extends SnapshotLiveCounts {
+  SNAPSHOT_ID: number;
+  SNAPSHOT_NAME: string;
   DESCRIPTION: string | null;
-  FROZEN_AT: string;
-  FROZEN_BY: string;
-  establishments: SbrEstablishment[];
-  enterprises: SbrEnterprise[];
-  contacts: SbrContact[];
-  addresses: SbrAddress[];
+  STATUS: string;
+  CREATED_AT: string;
+  FROZEN_BY_USER_ID: number | null;
+  FROZEN_BY_NAME: string | null;
 }
 
-export interface SnapshotCounts {
-  establishments: number;
-  enterprises: number;
-  contacts: number;
-  addresses: number;
+// Values of the backend's SNAPSHOT_ENTITY allow-list (underscore, not hyphen).
+export type SnapshotEntity = 'establishments' | 'enterprises' | 'enterprise_groups' | 'contacts' | 'addresses';
+
+export interface SnapshotListParams {
+  page?: number;
+  limit?: number;
 }
+
+export interface SnapshotTableParams extends SnapshotListParams {
+  id: number;
+  entity: SnapshotEntity;
+}
+
+export interface CreateSnapshotBody {
+  name: string;
+  description?: string;
+}
+
+// A frozen row is the full base-table row plus SNAPSHOT_ID; its columns differ per entity.
+export type SnapshotRow = Record<string, unknown> & { SNAPSHOT_ID: number };

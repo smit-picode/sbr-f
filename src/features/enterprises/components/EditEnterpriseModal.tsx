@@ -347,7 +347,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
         <DialogFooter className="px-6 py-4 border-t border-slate-100 shrink-0">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
-          <Button onClick={handleSubmit} disabled={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
+          <Button onClick={handleSubmit} loading={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

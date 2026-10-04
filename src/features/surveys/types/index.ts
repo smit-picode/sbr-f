@@ -36,6 +36,7 @@ export interface SurveyResponseApiRow {
   SOURCE_CODE: string | null;
   SECTOR_ID: string | null;
   ISIC_CODE: string | null;
+  EMPLOYMENT_COUNT: number | null;
   RESPONSE_STATUS: ResponseStatus;
   COLLECTION_MODE: ResponseMode | null;
   RESPONDED_ON: string | null;
@@ -56,6 +57,9 @@ export interface SurveyParticipationApiRow {
 
 // GET /surveys/establishments/:sbrId/gdp: its AES accounts per year and the national totals per quarter.
 export interface SurveyGdpApi {
+  ISIC_CODE: string | null;
+  // Full AES returns summed by 2-digit ISIC division, per year.
+  ACTIVITY: { SURVEY_YEAR: number; DIVISION: string; TOTAL_TURNOVER: number; INTERMEDIATE_CONSUMPTION: number; UNITS: number }[];
   AES: { SURVEY_YEAR: number; RESPONSE_STATUS: ResponseStatus; TOTAL_TURNOVER: number | null; INTERMEDIATE_CONSUMPTION: number | null }[];
   ECONOMY: { SURVEY_YEAR: number; QUARTER_NUM: number; VALUE_ADDED: number; PRODUCTION: number; INTERMEDIATE_CONSUMPTION: number }[];
 }

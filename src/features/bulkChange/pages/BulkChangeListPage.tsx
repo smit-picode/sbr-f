@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { History, Plus, User } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';

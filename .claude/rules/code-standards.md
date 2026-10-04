@@ -41,6 +41,7 @@ These rules apply to ALL code written in this repo. Claude must follow these wit
 - ALWAYS `toast.success()` on successful update
 - ALWAYS `toast.error()` in catch block
 - ALWAYS disable both buttons while `isLoading`
+- The button that triggers an async action ALWAYS gets `<Button loading={isLoading}>` (spinner + disabled + aria-busy) — never a bare `disabled` with no visual feedback
 - Form populated in `useEffect` with original record as dependency
 
 ## Column File Rules

@@ -126,6 +126,22 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'source_catalog',
+    label: 'Source Catalog',
+    children: [
+      { key: 'source_catalog.view', label: 'View Source Catalog' },
+    ],
+  },
+  {
+    // Survey Samples module (read-only). One .view gate for the nav item, the list/detail
+    // screens, every GET /surveys/* endpoint, and the survey widgets on Establishment Detail.
+    key: 'surveys',
+    label: 'Surveys',
+    children: [
+      { key: 'surveys.view', label: 'View Survey Samples' },
+    ],
+  },
+  {
     key: 'approvals',
     label: 'Approvals',
     children: [

@@ -1,3 +1,5 @@
+import { HOME_DASHBOARD_PERMISSIONS } from '@/features/home/constants';
+
 export type NavItem = {
   title: string;
   href: string;
@@ -30,7 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.sbrLiveFrame',
     icon: 'Building2',
     items: [
-      { title: 'Home',        href: '/home',        icon: 'Home',          permKey: '',                    i18nKey: 'nav.home'        },
+      { title: 'Home',        href: '/home',        icon: 'Home',          permKey: HOME_DASHBOARD_PERMISSIONS, i18nKey: 'nav.home'        },
       { title: 'Establishments', href: '/establishments',       icon: 'Building2',     permKey: 'establishments.view', i18nKey: 'nav.establishments', divider: true  },
       { title: 'Enterprises', href: '/enterprises', icon: 'Orbit',         permKey: 'enterprises.view',    i18nKey: 'nav.enterprises' },
       { title: 'Enterprise Groups', href: '/enterprise-groups', icon: 'GitFork', permKey: 'enterprise_groups.view', i18nKey: 'nav.enterpriseGroups' },
@@ -64,8 +66,8 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.frozenFrames',
     icon: 'Camera',
     items: [
-      { title: 'Create Snapshot',  href: '/snapshots/create',   icon: 'Camera',      permKey: '', i18nKey: 'nav.createSnapshot'  },
-      // { title: 'Browse Snapshots', href: '/snapshots/browse',   icon: 'Database',    permKey: '', i18nKey: 'nav.browseSnapshots' },
+      { title: 'Create Snapshot',  href: '/snapshots/create',   icon: 'Camera',      permKey: 'snapshots.create', i18nKey: 'nav.createSnapshot'  },
+      { title: 'Browse Snapshots', href: '/snapshots/browse',   icon: 'Database',    permKey: 'snapshots.view', i18nKey: 'nav.browseSnapshots' },
       { title: 'Analysis',         href: '/snapshots/analysis', icon: 'ChartColumn', permKey: '', i18nKey: 'nav.analysis'         },
     ],
   },
@@ -75,8 +77,8 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.surveys',
     icon: 'ClipboardList',
     items: [
-      // Dummy-data screens (no survey source yet), so ungated like the other placeholder modules.
-      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: '', i18nKey: 'nav.surveySamples' },
+      // Read-only Survey Samples module — gated by surveys.view like the other browse tabs.
+      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: 'surveys.view', i18nKey: 'nav.surveySamples' },
     ],
   },
   {
@@ -96,7 +98,7 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.sourceData',
     icon: 'Database',
     items: [
-      { title: 'Source Catalog', href: '/sources', icon: 'Database', permKey: '', i18nKey: 'nav.sourceCatalog' },
+      { title: 'Source Catalog', href: '/sources', icon: 'Database', permKey: 'source_catalog.view', i18nKey: 'nav.sourceCatalog' },
     ],
   },
   {

@@ -20,3 +20,18 @@ docker compose up
 
 If you ever run your own backend locally instead, just omit `NEXT_PUBLIC_API_URL`
 (it defaults to `http://localhost:4000`).
+
+## Production image (CI / deployed environments)
+
+A plain `docker build` produces the **production** image (the Dockerfile's last stage,
+`runner`): it runs `next build` and serves with `next start` on port 7000 — no dev
+server, no Next.js dev indicator. `docker compose` keeps using the `dev` stage.
+
+```bash
+docker build --build-arg NEXT_PUBLIC_API_URL=https://<api-host> -t sbr-frontend .
+docker run -p 7000:7000 sbr-frontend
+```
+
+`NEXT_PUBLIC_API_URL` is **required at build time**: Next.js inlines it into the
+browser bundle, so setting it on the running container has no effect. The build
+fails fast if it is missing. A different API URL means a new image build.

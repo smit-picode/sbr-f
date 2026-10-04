@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import {
   Home,
   Building2,
@@ -45,6 +46,7 @@ import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
 import { formatRole } from '@/utils/format';
+import { isNavGroupVisible, isNavItemVisible } from '@/utils/navAccess';
 import { useGetChangeRequestCountQuery } from '@/features/tasks/api/changeRequestsApi';
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -204,22 +206,9 @@ export function Sidebar() {
   const { data: changeRequestCountData } = useGetChangeRequestCountQuery(undefined, { skip: !canSeeChangeRequestCount });
   const pendingCount = changeRequestCountData?.data?.count ?? 0;
 
-  const hasPermission = (key: string) =>
-    permissions.some((p) => p.permissionName?.toLowerCase() === key.toLowerCase());
-  const hasAnyAdminPermission = permissions.some((p) => p.permissionName?.startsWith('admin_panel.'));
-
-  const isItemVisible = (item: NavItem) => {
-    if (isSuperAdmin || item.permKey === '') return true;
-    const keys = Array.isArray(item.permKey) ? item.permKey : [item.permKey];
-    return keys.some(hasPermission);
-  };
-
-  const isGroupVisible = (group: NavGroup) => {
-    if (group.id === 'administration') {
-      return isSuperAdmin || hasAnyAdminPermission;
-    }
-    return group.items.some(isItemVisible);
-  };
+  const navAccess = { isSuperAdmin, permissionNames: permissions.map((p) => p.permissionName) };
+  const isItemVisible = (item: NavItem) => isNavItemVisible(item, navAccess);
+  const isGroupVisible = (group: NavGroup) => isNavGroupVisible(group, navAccess);
 
   const toggleGroup = (id: string) => {
     setOpenGroups((prev) => {

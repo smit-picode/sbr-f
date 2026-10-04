@@ -107,9 +107,7 @@
     },
     "analysis": {
       "title": "Analysis",
-      "description": "Build custom analyses and visualisations on any frame table.",
-      "noData": "This feature will be implemented in the next phase",
-      "noDataDesc": ""
+      "description": "Build custom analyses and visualisations on any frame table."
     },
     "qualityDashboard": {
       "title": "Quality Dashboard",
@@ -658,7 +656,16 @@
     "STEP_NAME": "Step",
     "EVENT": "Event",
     "EVENT_AT": "Event at",
-    "MESSAGE": "Message"
+    "MESSAGE": "Message",
+    "ASSOCIATED_ENTERPRISE_ID": "Enterprise",
+    "ANNUAL_TURNOVER": "Annual turnover",
+    "ENTERPRISE_GROUP_ID": "Enterprise group",
+    "UCI_NAME": "UCI name",
+    "UCI_COUNTRY": "UCI country",
+    "MULTINATIONAL_GROUP_FLG": "Multinational",
+    "FOREIGN_CONTROLLED_GROUP_FLG": "Foreign controlled",
+    "PRINCIPAL_ISIC_2DIGIT": "Principal ISIC",
+    "TOTAL_EMPLOYEES": "Total employees"
   },
   "enterpriseGroups": {
     "createGroup": "Create group",
@@ -1269,7 +1276,7 @@
     "nameRequired": "Snapshot name is required.",
     "confirmTitle": "Freeze this snapshot?",
     "confirmDescription": "This captures the current SBR core tables as a point-in-time Frozen Frame. A frozen frame is read-only and cannot be edited afterwards.",
-    "confirmSummary": "{{establishments}} Establishments · {{enterprises}} Enterprises · {{contacts}} Contacts · {{addresses}} Addresses",
+    "confirmSummary": "{{establishments}} Establishments · {{enterprises}} Enterprises · {{enterpriseGroups}} Enterprise Groups · {{contacts}} Contacts · {{addresses}} Addresses",
     "confirmButton": "Freeze Now",
     "createSuccess": "Snapshot \"{{name}}\" frozen successfully.",
     "browseTitle": "Frozen Frames",
@@ -1286,7 +1293,13 @@
     "frozenOnAt": "Frozen on {{date}}",
     "frozenByUser": "Frozen by",
     "noData": "No frozen frames yet",
-    "noDataDesc": "Freeze a snapshot from Create Snapshot to see it listed here."
+    "noDataDesc": "Freeze a snapshot from Create Snapshot to see it listed here.",
+    "noCreatePermission": "You do not have permission to create snapshots.",
+    "noViewPermission": "You do not have permission to view snapshots.",
+    "createFailed": "The snapshot could not be created.",
+    "freezing": "Copying all five tables — this can take a few seconds. Please keep this page open.",
+    "freezingButton": "Freezing…",
+    "fallbackTitle": "Snapshot #{{id}}"
   },
   "home": {
     "exec": {
@@ -1309,6 +1322,7 @@
       "growthBreakdownSub2": "Active establishments at each month end, split by the selected dimension.",
       "growthNew": "Frame growth",
       "growthSub5": "newly registered establishments, last 3 months",
+      "growthSinceFirst": "change in establishments since {{since}}",
       "map": "Where the establishments are",
       "mapSub": "Establishments by municipality, from the primary address",
       "responseByActivitySub": "By economic activity section",
@@ -1359,6 +1373,7 @@
     "pending": "Pending",
     "crossTitle": "Response by activity and size",
     "crossLead": "Where an activity and a size class meet, across establishments with a recorded size. Row and column labels carry their own totals.",
+    "crossNoSize": "Size classes need an employee count for each establishment, and the survey data does not include one yet.",
     "crossPrinted": "A rate is printed inside a bubble once {{n}} units were sampled; below that the bubble is shown but the rate is not dependable.",
     "crossNote": "{{a}} at size {{s}} is the weakest group with a dependable base: {{r}}% across {{b}} sampled units.",
     "legSize": "Units sampled",
@@ -1463,7 +1478,483 @@
     "gdpMarkReported": "Reported in an AES return",
     "gdpNoReturn": "This establishment has no complete Annual Economic Survey return yet, so its contribution cannot be shown.",
     "gdpNoEconomyYear": "National totals for {{y}} are not available yet.",
+    "gdpActivitySub": "its activity, 1-digit ISIC",
+    "gdpActivityHint": "Reported by {{n}} sampled units in the AES {{y}}",
+    "gdpLeadActivity": "Where this establishment sits inside its activity, and where that activity sits inside the economy.",
     "gdpInQarPlain": "QAR",
+    "gdpEconomyLatest": "QAR, {{y}} — latest year available",
     "gdpLeadEconomy": "Where this establishment sits inside the total economy, from its Annual Economic Survey returns."
+  },
+  "analysis": {
+    "add": {
+      "title": "Add a block",
+      "description": "Pick what to analyse and how to show it — you can change both afterwards.",
+      "more": "All blocks…",
+      "quick": "Add"
+    },
+    "editor": {
+      "unit": "Unit of analysis",
+      "rows": "Rows",
+      "columns": "Columns",
+      "level1": "Outer level",
+      "level2": "Inner level",
+      "splitBy": "Split lines by",
+      "compareAcross": "Compare across",
+      "flowsOf": "Track movements of",
+      "categories": "Categories",
+      "series": "Split into series",
+      "titlePlaceholder": "Block title",
+      "subtitlePlaceholder": "Add a subtitle (optional)",
+      "liveHint": "Changes apply instantly · Ctrl+Z to undo",
+      "done": "Done",
+      "tabData": "Data",
+      "tabVisual": "Visual",
+      "content": "Content",
+      "markdownHint": "# heading · ## subheading · **bold** · *italic* · - bullet",
+      "joinHint": "Establishment fields are available through the link to each unit.",
+      "groupBy": "Group by",
+      "remove": "Remove",
+      "mapHint": "Maps always group by municipality.",
+      "measures": "Measures",
+      "oneMeasure": "This visual shows one measure.",
+      "addMeasure": "Add measure",
+      "columnsToShow": "Columns",
+      "fieldsToCheck": "Fields to check",
+      "addColumn": "Add",
+      "filters": "Filters",
+      "reportFiltersApply": "Report filters also apply.",
+      "frames": "Frames",
+      "dataFrom": "Data from",
+      "reportFrame": "Report frame ({{frame}})",
+      "compareWith": "Compare with",
+      "reportCompare": "Report setting ({{frame}})",
+      "reportNoCompare": "Report setting (none)",
+      "noCompare": "No comparison",
+      "ranking": "Ranking",
+      "sort": "Sort",
+      "show": "Show",
+      "all": "All categories",
+      "topN": "Top {{n}}",
+      "otherBucket": "Group the rest as “Other”",
+      "visual": "Visual",
+      "visualHint": "Switching keeps your data selection.",
+      "layout": "Layout",
+      "options": "Options",
+      "valuesAs": "Show values as",
+      "pctChange": "% change",
+      "showValues": "Show value labels",
+      "stacked": "Stack series",
+      "totals": "Show totals",
+      "sparkline": "Trend across frames",
+      "sparklineHint": "A sparkline of each measure over every frozen frame",
+      "crossFilter": "Respond to report clicks",
+      "crossFilterHint": "Clicking data in other blocks filters this one, and its own data can filter the report.",
+      "pickField": "Choose a field",
+      "searchFields": "Search fields…",
+      "noFields": "No matching fields",
+      "searchValues": "Search values…",
+      "min": "Min",
+      "max": "Max",
+      "textPlaceholder": "Type text…",
+      "emptyHint": "Keeps units where this field is not recorded.",
+      "notEmptyHint": "Keeps units where this field is recorded.",
+      "removeFilter": "Remove filter",
+      "addFilter": "Add filter"
+    },
+    "point": {
+      "filter": "Filter report: {{value}}",
+      "drill": "Drill into {{field}}",
+      "records": "View the underlying units"
+    },
+    "block": {
+      "drag": "Drag to reorder",
+      "isolated": "Ignores report clicks",
+      "edit": "Edit block",
+      "more": "More actions",
+      "viewRecords": "View underlying units",
+      "halfWidth": "Half width",
+      "fullWidth": "Full width",
+      "duplicate": "Duplicate",
+      "insertBelow": "Add block below",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "delete": "Delete block",
+      "deleted": "Block deleted — press Ctrl+Z to undo.",
+      "notApplied": "Not filtered by {{fields}}",
+      "notAppliedTip": "{{unit}} have no such field, so these filters are skipped for this block.",
+      "moving": "Moving block"
+    },
+    "vsFrame": "vs {{frame}}",
+    "filterCount": "{{count}} filters",
+    "export": {
+      "xlsx": "Export to Excel",
+      "csv": "Export to CSV",
+      "png": "Download image",
+      "filters": "Filters",
+      "disclosure": "Statistical disclosure control applied: cells built from fewer than {{min}} units are suppressed (x).",
+      "pngFailed": "This block has no chart to download.",
+      "done": "Export ready.",
+      "failed": "Export failed. Please try again.",
+      "preparing": "Preparing the workbook…",
+      "button": "Export",
+      "pdf": "PDF (print the report)",
+      "workbook": "Excel — one sheet per block",
+      "unit": "Unit",
+      "frame": "Frame",
+      "truncated": "First {{n}} of {{total}} units",
+      "from": "From",
+      "to": "To",
+      "units": "Units",
+      "step": "Step",
+      "suppressionNote": "x = suppressed for confidentiality (fewer than {{min}} units, a dominant unit, or to protect such a cell).",
+      "summary": "Summary",
+      "generated": "Generated",
+      "preparingBlock": "Preparing the export…"
+    },
+    "disclosure": {
+      "suppressed": "{{count}} cells suppressed for confidentiality",
+      "flagged": "{{count}} cells are confidential (fewer than {{min}} units or dominated) — suppressed in the published view and on export",
+      "secondaryTip": "Suppressed so a confidential neighbour cannot be recovered from the totals",
+      "dominanceTip": "One unit dominates this total — confidential",
+      "minTip": "Fewer than {{n}} units — confidential",
+      "suppressed_one": "{{count}} cell suppressed for confidentiality",
+      "flagged_one": "{{count}} cell is confidential (fewer than {{min}} units or dominated) — suppressed in the published view and on export"
+    },
+    "empty": {
+      "noUnits": "No units match these filters",
+      "error": "This block could not be computed.",
+      "mapNeedsMunicipality": "The map groups by municipality — pick Municipality as the dimension.",
+      "needsCompare": "Choose a frame to compare with.",
+      "noMovement": "No units moved between these frames."
+    },
+    "percentNotAdditive": "Percentages apply to counts and sums only.",
+    "completeness": {
+      "field": "Field",
+      "overall": "Overall"
+    },
+    "flow": {
+      "births": "Births",
+      "deaths": "Deaths",
+      "movedIn": "Moved in",
+      "movedOut": "Moved out",
+      "net": "Net change",
+      "unchanged": "{{n}} units kept the same category (not drawn)",
+      "new": "New units",
+      "ceased": "Ceased",
+      "outside": "Outside filter"
+    },
+    "vs": "vs",
+    "total": "Total",
+    "records": {
+      "range": "{{from}}–{{to}} of {{total}}",
+      "prev": "Previous page",
+      "next": "Next page",
+      "title": "Underlying units"
+    },
+    "text": {
+      "empty": "Empty commentary — edit this block to write."
+    },
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "present": {
+      "fullscreen": "Full screen",
+      "prev": "Previous",
+      "next": "Next",
+      "start": "Present"
+    },
+    "close": "Close",
+    "toolbar": {
+      "frame": "Frame",
+      "compare": "Compare",
+      "filters": "Filters",
+      "addReportFilter": "Filter all blocks",
+      "published": "Published view",
+      "internal": "Internal view",
+      "maskLocked": "Confidential cells are always suppressed for your role.",
+      "maskOn": "Confidential cells are suppressed, exactly as they will be exported.",
+      "maskOff": "Confidential cells are shown hatched. Switch to preview the published output.",
+      "undo": "Undo",
+      "redo": "Redo",
+      "saved": "Saved",
+      "focusedOn": "Focused on",
+      "clearAll": "Clear all"
+    },
+    "share": {
+      "canEdit": "Can edit",
+      "canView": "Can view",
+      "title": "Share “{{name}}”",
+      "description": "People see only fields their own permissions allow. Anyone who can view can duplicate it as a starting point.",
+      "search": "Add people or roles…",
+      "owner": "Owner",
+      "role": "Everyone with this role",
+      "remove": "Remove access",
+      "private": "Only you can see this analysis.",
+      "disclosure": "Viewers without the unsuppressed-export permission only ever export disclosure-controlled figures.",
+      "save": "Save access",
+      "button": "Share",
+      "saved": "Access updated.",
+      "roleSub": "Role"
+    },
+    "untitled": "Untitled analysis",
+    "copyOf": "Copy of {{name}}",
+    "duplicated": "Analysis duplicated.",
+    "new": "New analysis",
+    "templates": {
+      "title": "Start from a template",
+      "blank": "Blank analysis",
+      "blankDesc": "Start from an empty canvas",
+      "overview": {
+        "name": "Register overview",
+        "description": "Headline KPIs, activity, geography, size and growth"
+      },
+      "comparison": {
+        "name": "Frame vs frame",
+        "description": "Births, deaths and migrations between two frames"
+      },
+      "quality": {
+        "name": "Data quality check",
+        "description": "Completeness grid and lists of units to fix"
+      },
+      "tables": {
+        "name": "Statistical tables",
+        "description": "Publication-style cross-tabs with disclosure control"
+      },
+      "groups": {
+        "name": "Enterprise groups",
+        "description": "Group types, foreign control and employment"
+      }
+    },
+    "scope": {
+      "all": "All",
+      "mine": "My analyses",
+      "shared": "Shared with me"
+    },
+    "search": "Search analyses…",
+    "list": {
+      "noMatch": "No analyses match your search",
+      "emptyTitle": "No analyses yet",
+      "emptyBody": "Pick a template above or start from a blank canvas.",
+      "noDescription": "No description",
+      "you": "You",
+      "blocks": "{{count}} blocks",
+      "blocks_one": "{{count}} block"
+    },
+    "duplicate": "Duplicate analysis",
+    "deleteAnalysis": "Delete analysis",
+    "confirmDelete": "Delete “{{name}}”? People you shared it with lose access too. This cannot be undone.",
+    "deleted": "Analysis deleted.",
+    "notFound": "Analysis not found",
+    "back": "All analyses",
+    "notFoundBody": "It may have been deleted, or it was never shared with you.",
+    "name": "Analysis name",
+    "descriptionPlaceholder": "Add a short description…",
+    "viewOnly": "You can view and explore this analysis. Duplicate it to make your own changes.",
+    "emptyReport": {
+      "title": "Start building your analysis",
+      "body": "Add blocks: headline numbers, charts, maps, cross-tabs, record lists or commentary. Every block can target its own unit, frame and filters."
+    },
+    "frame": "Frame",
+    "notRecorded": "Not recorded",
+    "other": "Other",
+    "yes": "Yes",
+    "no": "No",
+    "measure": {
+      "count": "Number of {{unit}}",
+      "sum": "Total {{field}}",
+      "avg": "Average {{field}}",
+      "median": "Median {{field}}",
+      "min": "Minimum {{field}}",
+      "max": "Maximum {{field}}",
+      "distinct": "Distinct {{field}}"
+    },
+    "fields": {
+      "sbr_id": "SBR ID",
+      "name": "Name",
+      "status": "Status",
+      "source": "Registration source",
+      "sector": "Ownership sector",
+      "legal_type": "Legal type",
+      "main_branch": "Main / branch",
+      "reg_year": "Registration year",
+      "isic_section": "ISIC section",
+      "isic_division": "ISIC division",
+      "isic_group": "ISIC group",
+      "isic_class": "ISIC class",
+      "employment": "Employment",
+      "size_class": "Size class",
+      "turnover": "Annual turnover (QAR)",
+      "municipality": "Municipality",
+      "zone": "Zone",
+      "has_address": "Has address",
+      "has_street": "Has street",
+      "has_building": "Has building no.",
+      "has_coordinates": "Has coordinates",
+      "address_id": "Address ID",
+      "address_source": "Address source",
+      "contact_id": "Contact ID",
+      "role": "Contact role",
+      "contact_source": "Contact source",
+      "has_phone": "Has phone",
+      "has_mobile": "Has mobile",
+      "has_email": "Has email",
+      "has_website": "Has website",
+      "enterprise_id": "Enterprise ID",
+      "foreign_ownership_pct": "Foreign ownership %",
+      "foreign_controlled": "Foreign controlled",
+      "parent_country": "Parent country",
+      "establishment_count": "Establishments",
+      "group_id": "Group ID",
+      "in_group": "Part of a group",
+      "group_type": "Group type",
+      "uci_country": "UCI country",
+      "multinational": "Multinational",
+      "enterprise_count": "Enterprises"
+    },
+    "entities": {
+      "establishments": "Establishments",
+      "enterprises": "Enterprises",
+      "enterpriseGroups": "Enterprise groups",
+      "contacts": "Contacts",
+      "addresses": "Addresses"
+    },
+    "blockTypes": {
+      "kpi": {
+        "label": "KPI",
+        "description": "Headline numbers with change and trend"
+      },
+      "bar": {
+        "label": "Bar",
+        "description": "Rank categories side by side"
+      },
+      "column": {
+        "label": "Column",
+        "description": "Compare categories, stacked or grouped"
+      },
+      "line": {
+        "label": "Trend",
+        "description": "Evolution across frozen frames"
+      },
+      "donut": {
+        "label": "Donut",
+        "description": "Share of a whole"
+      },
+      "treemap": {
+        "label": "Treemap",
+        "description": "Nested proportions, e.g. ISIC hierarchy"
+      },
+      "sunburst": {
+        "label": "Sunburst",
+        "description": "Two-level breakdown as rings"
+      },
+      "map": {
+        "label": "Qatar map",
+        "description": "Choropleth by municipality"
+      },
+      "pivot": {
+        "label": "Pivot table",
+        "description": "Cross-tab with totals and percentages"
+      },
+      "heatmap": {
+        "label": "Heatmap",
+        "description": "Cross-tab with colour-scaled cells"
+      },
+      "records": {
+        "label": "Records",
+        "description": "The underlying units, exportable as is"
+      },
+      "delta": {
+        "label": "Change by category",
+        "description": "What grew and what shrank between frames"
+      },
+      "waterfall": {
+        "label": "Waterfall",
+        "description": "Start + births − deaths ± reclassified = end"
+      },
+      "sankey": {
+        "label": "Flows",
+        "description": "How units moved between categories"
+      },
+      "completeness": {
+        "label": "Completeness grid",
+        "description": "% of units with each field filled"
+      },
+      "text": {
+        "label": "Commentary",
+        "description": "Headings and narrative text"
+      }
+    },
+    "blockCategories": {
+      "numbers": "Numbers",
+      "charts": "Charts",
+      "tables": "Tables",
+      "geo": "Geography",
+      "comparison": "Frame comparison",
+      "quality": "Data quality",
+      "narrative": "Narrative"
+    },
+    "fieldGroups": {
+      "unit": "Unit",
+      "activity": "Economic activity",
+      "size": "Size & employment",
+      "location": "Location",
+      "contact": "Contact details",
+      "enterprise": "Enterprise",
+      "group": "Enterprise group"
+    },
+    "aggs": {
+      "count": "Count of units",
+      "count_distinct": "Distinct count",
+      "sum": "Sum",
+      "avg": "Average",
+      "median": "Median",
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "ops": {
+      "in": "is",
+      "not_in": "is not",
+      "between": "between",
+      "contains": "contains",
+      "empty": "is empty",
+      "not_empty": "is not empty"
+    },
+    "sort": {
+      "value_desc": "Largest first",
+      "value_asc": "Smallest first",
+      "key_asc": "A → Z",
+      "key_desc": "Z → A"
+    },
+    "percent": {
+      "none": "Values",
+      "total": "% of total",
+      "row": "% of row",
+      "column": "% of column"
+    },
+    "filterCount_one": "{{count}} filter",
+    "create": {
+      "blankTitle": "New analysis",
+      "templateTitle": "Create from template",
+      "duplicateTitle": "Duplicate analysis",
+      "blankBody": "Starts from an empty canvas.",
+      "templateBody": "Starts with {{count}} ready-made blocks you can change freely.",
+      "duplicateBody": "A private copy with {{count}} blocks, owned by you. Shares are not copied.",
+      "name": "Name",
+      "description": "Description (optional)",
+      "confirm": "Create analysis",
+      "duplicateConfirm": "Duplicate"
+    }
+  },
+  "sourceCatalog": {
+    "title": "Source Data Explorer",
+    "description": "Browse the raw data feeds from each regulator — read-only.",
+    "tables": "tables",
+    "browseTables": "Browse tables",
+    "backToCatalog": "All regulators",
+    "readOnly": "Read-only source",
+    "tablesIn": "Source tables",
+    "empty": "No source tables are registered yet.",
+    "notFound": "This regulator is not in the source catalog.",
+    "loadError": "Failed to load the source catalog. Please try again."
   }
 }

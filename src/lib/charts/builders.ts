@@ -436,7 +436,7 @@ export function bubbleGrid(o: BubbleGridOptions): EChartOption {
       type: 'category',
       position: 'top',
       data: o.cols.map((c) => (c.sub ? `${c.label}\n${c.sub}` : c.label)),
-      axisLine: { show: false },
+      axisLine: { show: true, lineStyle: { color: G.line } },
       axisTick: { show: false },
       axisLabel: { color: G[700], fontSize: 11, lineHeight: 15 },
       splitLine: { show: true, lineStyle: { color: G.line } },

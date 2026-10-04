@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -236,14 +237,24 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const { t } = useTranslation();
   const { isArabic } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
+  // Survey widgets on this page call GET /surveys/* — gated by surveys.view. Hide them without
+  // the grant so a missing permission never surfaces as a 403 (shared API layer logs the user out).
+  const { canView: canViewSurveys } = usePermission('surveys');
+  // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
+  const fromParam = searchParams.get('from');
+  const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
+  const back = fromSample
+    ? { label: t('surveySamples.backToSample'), onClick: () => router.push(fromSample) }
+    : { label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') };
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
 
   const BackLink = (
-    <button onClick={() => router.push('/establishments')} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
-      {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('establishmentDetail.allEstablishments')}
+    <button onClick={back.onClick} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
+      {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {back.label}
     </button>
   );
 
@@ -410,7 +421,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
             </HeaderNameField>
           ) : undefined
         }
-        back={{ label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') }}
+        back={back}
         chips={
           <>
             <span className="inline-flex items-center rounded-full bg-white/15 px-2 py-0.5 font-mono text-xs text-white">SBR #{e.SBR_ID}</span>
@@ -485,7 +496,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         </div>
       )}
 
-      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && (
+      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && canViewSurveys && (
         <>
           <SurveyParticipation sbrId={e.SBR_ID} />
           <GdpContribution sbrId={e.SBR_ID} />

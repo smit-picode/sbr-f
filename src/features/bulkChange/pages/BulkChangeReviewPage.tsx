@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, User, X, XCircle } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -295,16 +295,18 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
               variant="outline"
               onClick={() => doAction('REJECTED')}
               disabled={pendingAction !== null || !note.trim()}
+              loading={pendingAction === 'REJECTED'}
               className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
             >
-              <X className="h-4 w-4" /> {t('bulkChange.reject', { defaultValue: 'Reject' })}
+              {pendingAction !== 'REJECTED' && <X className="h-4 w-4" />} {t('bulkChange.reject', { defaultValue: 'Reject' })}
             </Button>
             <Button
               onClick={() => doAction('APPROVED')}
               disabled={pendingAction !== null || !note.trim()}
+              loading={pendingAction === 'APPROVED'}
               className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
             >
-              <Check className="h-4 w-4" /> {t('bulkChange.approve', { defaultValue: 'Approve' })}
+              {pendingAction !== 'APPROVED' && <Check className="h-4 w-4" />} {t('bulkChange.approve', { defaultValue: 'Approve' })}
             </Button>
           </div>
         </div>

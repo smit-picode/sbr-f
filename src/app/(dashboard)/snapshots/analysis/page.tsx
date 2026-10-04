@@ -1,5 +1,5 @@
-import { AnalysisPage } from '@/features/snapshots/pages/AnalysisPage';
+import { AnalysisListPage } from '@/features/analysis/pages/AnalysisListPage';
 
 export default function Page() {
-  return <AnalysisPage />;
+  return <AnalysisListPage />;
 }

@@ -127,5 +127,5 @@ export const ESTABLISHMENTS_SORTABLE_COLUMNS: string[] = [
   'SOURCE_CODE', 'MOCI_CR_NUM',
 ];
 
-// Survey participation / Contribution to GDP on the detail page; hidden until the survey data gaps are closed.
-export const SHOW_ESTABLISHMENT_SURVEY_SECTIONS: boolean = false;
+// Survey participation / Contribution to GDP cards on the establishment detail page.
+export const SHOW_ESTABLISHMENT_SURVEY_SECTIONS: boolean = true;

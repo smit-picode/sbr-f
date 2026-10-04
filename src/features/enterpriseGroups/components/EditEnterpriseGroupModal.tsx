@@ -501,7 +501,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isLoading}
+            loading={isLoading}
             style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
             className="text-white"
           >

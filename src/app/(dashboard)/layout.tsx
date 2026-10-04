@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter } from '@/hooks/useAppRouter';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { NavigationProgress } from '@/components/common/NavigationProgress';
 import { useAppDispatch } from '@/hooks';
 import { hydrateAuth, setPermissions } from '@/features/auth/authSlice';
 import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
@@ -69,6 +70,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardLayout>
       <PermissionLoader />
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
       {children}
     </DashboardLayout>
   );

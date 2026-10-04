@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -9,6 +9,7 @@ import { DataTable } from '@/components/table/DataTable';
 import { getPipelineStepLogColumns } from '../components/PipelineStepLogColumns';
 import { useGetPipelineStepLogQuery } from '../api/pipelineLogsApi';
 import { toast } from '@/utils/toast';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 function is401(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 401; }
 function is403(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 403; }
@@ -16,6 +17,8 @@ function is403(e: unknown): boolean { return typeof e === 'object' && e !== null
 export function PipelineRunDetailPage({ runId }: { runId: number }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
 
   const { data, isLoading, isError, error, refetch } = useGetPipelineStepLogQuery(runId);
 
@@ -41,15 +44,15 @@ export function PipelineRunDetailPage({ runId }: { runId: number }) {
 
       <DataTable
         columns={columns}
-        data={records}
+        data={records.slice((page - 1) * limit, page * limit)}
         isLoading={isLoading}
         isError={isError}
         onRetry={refetch}
-        page={1}
-        limit={records.length || 1}
+        page={page}
+        limit={limit}
         total={records.length}
-        onPageChange={() => {}}
-        onLimitChange={() => {}}
+        onPageChange={setPage}
+        onLimitChange={setLimit}
       />
     </PageContainer>
   );

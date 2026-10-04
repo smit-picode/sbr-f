@@ -242,7 +242,15 @@ export function ExecutiveHomePage() {
   const totalSize = summary?.totalEstablishmentCount ?? sizeClass.reduce((s, c) => s + c.count, 0);
   const activeEstablishmentCount = summary?.activeEstablishmentCount ?? 0;
   const growthPct = summary?.growthPct;
-  const growthLabel = growthPct == null ? '—' : `${growthPct > 0 ? '+' : ''}${growthPct}%`;
+  // A register younger than the 3-month window has no base to divide by, so fall back to its change since the first month on record.
+  const firstMonth = registerGrowthByMonth[0];
+  const lastMonth = registerGrowthByMonth[registerGrowthByMonth.length - 1];
+  const sinceFirstPct = firstMonth && lastMonth && firstMonth.count > 0
+    ? ((lastMonth.count - firstMonth.count) / firstMonth.count) * 100
+    : 0;
+  const growthValue = Math.round((growthPct ?? sinceFirstPct) * 10) / 10;
+  const growthLabel = `${growthValue > 0 ? '+' : ''}${growthValue}%`;
+  const growthSince = growthPct == null && firstMonth ? `${MONTH_LABELS[firstMonth.month - 1] ?? firstMonth.month} ${firstMonth.year}` : null;
 
   return (
     <PageContainer>
@@ -288,9 +296,9 @@ export function ExecutiveHomePage() {
           icon={TrendingUp}
           value={summaryLoading ? '—' : growthLabel}
           label={t('home.exec.growthNew', { defaultValue: 'Frame growth' })}
-          sub={t('home.exec.growthSub5', {
-            defaultValue: 'newly registered establishments, last 3 months',
-          })}
+          sub={growthSince
+            ? t('home.exec.growthSinceFirst', { defaultValue: 'change in establishments since {{since}}', since: growthSince })
+            : t('home.exec.growthSub5', { defaultValue: 'newly registered establishments, last 3 months' })}
         />
         <ExecStatCard
           icon={ClipboardList}

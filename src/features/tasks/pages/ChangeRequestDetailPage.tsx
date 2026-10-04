@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Check, X, User, Clock, Database, ArrowRight, Building2, Layers } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -464,11 +464,11 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
                     : (changeCount === 1 ? t('changeRequests.fieldOne', { defaultValue: 'field changed' }) : t('changeRequests.fieldMany', { defaultValue: 'fields changed' }))}
                 </span>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => doAction('reject')} disabled={approving || rejecting || !note.trim()} className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50">
-                    <X className="h-4 w-4" /> {t('changeRequests.reject', { defaultValue: 'Reject' })}
+                  <Button variant="outline" onClick={() => doAction('reject')} disabled={approving || rejecting || !note.trim()} loading={rejecting} className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50">
+                    {!rejecting && <X className="h-4 w-4" />} {t('changeRequests.reject', { defaultValue: 'Reject' })}
                   </Button>
-                  <Button onClick={() => doAction('approve')} disabled={approving || rejecting || !note.trim()} className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700">
-                    <Check className="h-4 w-4" /> {t('changeRequests.approve', { defaultValue: 'Approve' })}
+                  <Button onClick={() => doAction('approve')} disabled={approving || rejecting || !note.trim()} loading={approving} className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700">
+                    {!approving && <Check className="h-4 w-4" />} {t('changeRequests.approve', { defaultValue: 'Approve' })}
                   </Button>
                 </div>
               </div>

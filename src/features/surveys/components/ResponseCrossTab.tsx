@@ -66,14 +66,24 @@ export function ResponseCrossTab({ surveyId, rows }: { surveyId: string; rows: S
     };
   }, [x, t]);
 
-  if (!view) return null;
   const surveyName = surveyId === ALL_SURVEYS ? null : SURVEYS.find((s) => s.id === surveyId)?.name;
+  const title = surveyName ? `${t('surveySamples.crossTitle')} · ${surveyName}` : t('surveySamples.crossTitle');
+
+  if (!view) {
+    if (!rows.length) return null;
+    return (
+      <div className="rounded-xl bg-white p-4 shadow-card">
+        <div className="text-[12px] font-bold text-slate-700">{title}</div>
+        <p className="mt-1 text-[11.5px] text-slate-500">
+          {t('surveySamples.crossNoSize', { defaultValue: 'Size classes need an employee count for each establishment, and the survey data does not include one yet.' })}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl bg-white p-4 shadow-card">
-      <div className="text-[12px] font-bold text-slate-700">
-        {surveyName ? `${t('surveySamples.crossTitle')} · ${surveyName}` : t('surveySamples.crossTitle')}
-      </div>
+      <div className="text-[12px] font-bold text-slate-700">{title}</div>
       <p className="mb-3 text-[11.5px] text-slate-500">{t('surveySamples.crossLead')}</p>
 
       {/* Legend: the size encoding drawn with the chart's own sizing maths, and the colour ramp with the target marked. */}

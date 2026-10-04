@@ -55,8 +55,7 @@ export function toSampleRows(rows: SurveyResponseApiRow[]): SampleRow[] {
       SOURCE_CODE: r.SOURCE_CODE,
       SECTOR_ID: r.SECTOR_ID,
       ISIC_CODE: r.ISIC_CODE,
-      // No survey view carries a headcount yet, so there is no size class (the size chart stays hidden).
-      EMPLOYMENT_COUNT: null,
+      EMPLOYMENT_COUNT: r.EMPLOYMENT_COUNT ?? null,
     },
   }));
 }

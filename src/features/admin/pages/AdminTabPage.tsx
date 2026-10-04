@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { Shield, Users, Key, ArrowLeft, Plus } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';

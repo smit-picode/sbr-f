@@ -1,3 +1,4 @@
+import { isicSection } from './classify';
 import type { GdpAccounts, GdpMeasure, SurveyGdpApi } from '../types';
 
 const QUARTERS_PER_YEAR = 4;
@@ -9,7 +10,14 @@ export interface GdpView {
   establishment: GdpAccounts | null;
   // National totals for the reference year, only when all four quarters are in V_SVY_TOTAL_ECONOMY.
   economy: GdpAccounts | null;
+  // Year the economy totals are for: the reference year, else the latest year with all four quarters.
+  economyYear: number | null;
   shareOfEconomy: Record<GdpMeasure, number | null>;
+  // The establishment's ISIC section with what its sampled units reported that year; null without an ISIC code or any full return.
+  activity: { section: string; units: number; accounts: GdpAccounts } | null;
+  shareOfActivity: Record<GdpMeasure, number | null>;
+  // What the activity's sampled units reported, as a share of the national total.
+  activityShareOfEconomy: Record<GdpMeasure, number | null>;
   trendYears: number[];
   trend: Record<GdpMeasure, number[]>;
 }
@@ -39,8 +47,9 @@ export function buildGdpView(api: SurveyGdpApi): GdpView {
   const trendYears = [...reported.keys()].sort((a, b) => a - b);
   const referenceYear = trendYears.length ? trendYears[trendYears.length - 1] : null;
   const establishment = referenceYear != null ? reported.get(referenceYear) ?? null : null;
-  const economyYear = referenceYear != null ? byYear.get(referenceYear) : undefined;
-  const economy = economyYear && economyYear.quarters === QUARTERS_PER_YEAR ? economyYear.totals : null;
+  const completeYears = [...byYear.entries()].filter(([, v]) => v.quarters === QUARTERS_PER_YEAR).map(([y]) => y).sort((a, b) => a - b);
+  const economyYear = referenceYear != null && completeYears.includes(referenceYear) ? referenceYear : completeYears[completeYears.length - 1] ?? null;
+  const economy = economyYear != null ? byYear.get(economyYear)!.totals : null;
 
   const shareOfEconomy = Object.fromEntries(
     MEASURES.map((m) => [m, establishment && economy && economy[m] ? (establishment[m] / economy[m]) * 100 : null])
@@ -49,7 +58,26 @@ export function buildGdpView(api: SurveyGdpApi): GdpView {
     MEASURES.map((m) => [m, trendYears.map((y) => reported.get(y)![m])])
   ) as Record<GdpMeasure, number[]>;
 
-  return { referenceYear, establishment, economy, shareOfEconomy, trendYears, trend };
+  const section = isicSection(api.ISIC_CODE);
+  const inSection = section && referenceYear != null
+    ? (api.ACTIVITY ?? []).filter((a) => a.SURVEY_YEAR === referenceYear && isicSection(a.DIVISION) === section)
+    : [];
+  const activity = section && inSection.length
+    ? (() => {
+        const production = inSection.reduce((n, a) => n + a.TOTAL_TURNOVER, 0);
+        const intermediate = inSection.reduce((n, a) => n + a.INTERMEDIATE_CONSUMPTION, 0);
+        return { section, units: inSection.reduce((n, a) => n + a.UNITS, 0), accounts: { production, intermediate, valueAdded: production - intermediate } };
+      })()
+    : null;
+  const shareOfActivity = Object.fromEntries(
+    MEASURES.map((m) => [m, establishment && activity && activity.accounts[m] ? (establishment[m] / activity.accounts[m]) * 100 : null])
+  ) as Record<GdpMeasure, number | null>;
+
+  const activityShareOfEconomy = Object.fromEntries(
+    MEASURES.map((m) => [m, activity && economy && economy[m] ? (activity.accounts[m] / economy[m]) * 100 : null])
+  ) as Record<GdpMeasure, number | null>;
+
+  return { referenceYear, establishment, economy, economyYear, shareOfEconomy, activity, shareOfActivity, activityShareOfEconomy, trendYears, trend };
 }
 
 // Compact QAR amount (2.43M, 780.0B), as the design prints it.

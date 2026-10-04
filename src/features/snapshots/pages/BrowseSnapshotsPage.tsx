@@ -1,46 +1,41 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
-import { Database, Layers } from 'lucide-react';
+import { Database } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
-import { SearchInput } from '@/components/common/SearchInput';
+import { NoData } from '@/components/common/NoData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/table/DataTable';
-import { useAppSelector } from '@/hooks';
-import { useDebounce } from '@/hooks';
-import { formatDateTime } from '@/utils/format';
-import type { ColumnDef } from '@tanstack/react-table';
-import type { Snapshot } from '@/types';
+import { usePermission } from '@/hooks';
+import { formatDateTime, formatNumber, nullableText } from '@/utils/format';
+import type { SnapshotSummary } from '@/types';
+import { useGetSnapshotsQuery } from '../api/snapshotsApi';
+import { SNAPSHOT_DEFAULT_PAGE_SIZE, SNAPSHOT_ENTITIES } from '../constants';
 
 export function BrowseSnapshotsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const snapshots = useAppSelector((s) => s.snapshots.items);
-
-  const [search, setSearch] = useState('');
+  const { canView } = usePermission('snapshots');
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
-  const debouncedSearch = useDebounce(search, 400);
+  const [limit, setLimit] = useState(SNAPSHOT_DEFAULT_PAGE_SIZE);
 
-  const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase();
-    if (!q) return snapshots;
-    return snapshots.filter((s) => s.NAME.toLowerCase().includes(q) || s.FROZEN_BY.toLowerCase().includes(q));
-  }, [snapshots, debouncedSearch]);
+  const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotsQuery({ page, limit }, { skip: !canView });
+  const rows = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const open = (row: SnapshotSummary) => router.push(`/snapshots/browse/${row.SNAPSHOT_ID}`);
 
-  const paged = filtered.slice((page - 1) * limit, page * limit);
-
-  const columns: ColumnDef<Snapshot>[] = [
+  const columns = useMemo<ColumnDef<SnapshotSummary>[]>(() => [
     {
-      accessorKey: 'NAME',
+      accessorKey: 'SNAPSHOT_NAME',
       header: t('columns.NAME'),
       cell: ({ row }) => (
         <div className="min-w-[200px]">
-          <p className="text-sm font-semibold text-slate-800">{row.original.NAME}</p>
+          <p className="text-sm font-semibold text-slate-800">{row.original.SNAPSHOT_NAME}</p>
           {row.original.DESCRIPTION && (
             <p className="text-xs text-slate-500 truncate max-w-[280px]">{row.original.DESCRIPTION}</p>
           )}
@@ -48,55 +43,53 @@ export function BrowseSnapshotsPage() {
       ),
     },
     {
-      id: 'STATUS',
+      accessorKey: 'STATUS',
       header: t('columns.STATUS'),
-      cell: () => <Badge variant="info" className="rounded-full">{t('snapshots.statusFrozen')}</Badge>,
+      cell: ({ getValue }) => {
+        const status = getValue<string>();
+        return status === 'COMPLETE'
+          ? <Badge variant="info" className="rounded-full">{t('snapshots.statusFrozen')}</Badge>
+          : <Badge variant="warning" className="rounded-full">{status}</Badge>;
+      },
     },
     {
-      accessorKey: 'FROZEN_AT',
+      accessorKey: 'CREATED_AT',
       header: t('snapshots.frozenOn'),
-      cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDateTime(getValue<string>()).split(',')[0]}</span>,
+      cell: ({ getValue }) => <span className="text-sm text-slate-600 whitespace-nowrap">{formatDateTime(getValue<string>())}</span>,
     },
+    ...SNAPSHOT_ENTITIES.map<ColumnDef<SnapshotSummary>>(({ countKey, i18nKey, label }) => ({
+      accessorKey: countKey,
+      header: t(i18nKey, { defaultValue: label }),
+      cell: ({ getValue }) => <span className="text-sm text-slate-700 tabular-nums">{formatNumber(getValue<number | null>())}</span>,
+    })),
     {
-      id: 'ESTABLISHMENTS',
-      header: t('nav.establishments', { defaultValue: 'Establishments' }),
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-600">
-          <Layers className="h-3 w-3" />{row.original.establishments.length}
-        </span>
-      ),
-    },
-    {
-      id: 'ENTERPRISES',
-      header: t('nav.enterprises', { defaultValue: 'Enterprises' }),
-      cell: ({ row }) => <span className="text-sm text-slate-700">{row.original.enterprises.length}</span>,
-    },
-    {
-      id: 'CONTACTS',
-      header: t('nav.contacts', { defaultValue: 'Contacts' }),
-      cell: ({ row }) => <span className="text-sm text-slate-700">{row.original.contacts.length}</span>,
-    },
-    {
-      id: 'ADDRESSES',
-      header: t('nav.addresses', { defaultValue: 'Addresses' }),
-      cell: ({ row }) => <span className="text-sm text-slate-700">{row.original.addresses.length}</span>,
-    },
-    {
-      accessorKey: 'FROZEN_BY',
+      accessorKey: 'FROZEN_BY_NAME',
       header: t('snapshots.frozenBy'),
-      cell: ({ getValue }) => <span className="text-sm text-adaam">{getValue<string>()}</span>,
+      cell: ({ getValue }) => <span className="text-sm text-adaam">{nullableText(getValue<string | null>())}</span>,
     },
     {
       id: 'actions',
       header: t('columns.ACTIONS'),
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); router.push(`/snapshots/browse/${row.original.ID}`); }}>
+        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); open(row.original); }}>
           <Database className="h-3.5 w-3.5 mr-1.5" />
           {t('snapshots.browseAction')}
         </Button>
       ),
     },
-  ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [t]);
+
+  if (!canView) {
+    return (
+      <PageContainer>
+        <PageHeader title={t('snapshots.browseTitle')} description={t('snapshots.browseDescription')} />
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
+          <NoData message={t('snapshots.noViewPermission', { defaultValue: 'You do not have permission to view snapshots.' })} />
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
@@ -106,31 +99,31 @@ export function BrowseSnapshotsPage() {
         actions={
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Database className="h-4 w-4" />
-            <span className="font-medium text-slate-700">{filtered.length}</span>{' '}
-            {filtered.length === 1 ? t('snapshots.frameLabelOne') : t('snapshots.frameLabelMany')}
+            <span className="font-medium text-slate-700">{formatNumber(total)}</span>{' '}
+            {total === 1 ? t('snapshots.frameLabelOne') : t('snapshots.frameLabelMany')}
           </div>
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white shadow-card rounded-lg">
-        <SearchInput
-          className="shadow-none"
-          value={search}
-          onChange={(v) => { setSearch(v); setPage(1); }}
-          placeholder={t('snapshots.searchPlaceholder')}
+      {!isLoading && !isError && total === 0 ? (
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
+          <NoData message={t('snapshots.noData')} description={t('snapshots.noDataDesc')} />
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={rows}
+          isLoading={isLoading || (isFetching && !rows.length)}
+          isError={isError}
+          onRetry={refetch}
+          page={page}
+          limit={limit}
+          total={total}
+          onPageChange={setPage}
+          onLimitChange={(l) => { setLimit(l); setPage(1); }}
+          onRowClick={open}
         />
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={paged}
-        page={page}
-        limit={limit}
-        total={filtered.length}
-        onPageChange={setPage}
-        onLimitChange={(l) => { setLimit(l); setPage(1); }}
-        onRowClick={(row) => router.push(`/snapshots/browse/${row.ID}`)}
-      />
+      )}
     </PageContainer>
   );
 }

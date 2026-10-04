@@ -17,7 +17,7 @@ import { toast } from '@/utils/toast';
 import { useDebounce, usePermission, usePersistedState } from '@/hooks';
 import { Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
