@@ -117,6 +117,12 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
       e.NAMES = t('createEnterpriseGroup.nameRequired', { defaultValue: 'At least one group name (EN or AR) is required.' });
     }
+    if (!form.UCI_TYPE) {
+      e.UCI_TYPE = t('createEnterpriseGroup.uciTypeRequired', { defaultValue: 'UCI type is required.' });
+    }
+    if (!form.UCI_IDENTIFIER.trim()) {
+      e.UCI_IDENTIFIER = t('createEnterpriseGroup.uciIdRequired', { defaultValue: 'UCI ID is required.' });
+    }
     if (members.length === 0) {
       e.MEMBERS = t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' });
     }
@@ -151,8 +157,12 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
       toast.success(t('createEnterpriseGroup.submitSuccess', { defaultValue: 'Enterprise group creation submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
-    } catch {
-      toast.error(t('createEnterpriseGroup.submitError', { defaultValue: 'Failed to submit enterprise group. Please try again.' }));
+    } catch (error) {
+      const apiErr = error as { status?: number; data?: { message?: string } };
+      toast.error(
+        (apiErr.status === 400 && apiErr.data?.message)
+          || t('createEnterpriseGroup.submitError', { defaultValue: 'Failed to submit enterprise group. Please try again.' }),
+      );
     }
   };
 
@@ -212,13 +222,14 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}</Label>
               <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
+                <SelectTrigger className={`shadow-none ${errors.UCI_TYPE ? 'border-red-400' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_TYPE_OPTIONS.map((o) => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {errors.UCI_TYPE && <p className="text-xs text-red-500 mt-0.5">{errors.UCI_TYPE}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciCountry', { defaultValue: 'UCI country' })}</Label>
@@ -237,8 +248,9 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
                 value={form.UCI_IDENTIFIER}
                 onChange={(e) => set('UCI_IDENTIFIER', e.target.value)}
                 maxLength={100}
-                className="shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40"
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.UCI_IDENTIFIER ? 'border-red-400' : ''}`}
               />
+              {errors.UCI_IDENTIFIER && <p className="text-xs text-red-500 mt-0.5">{errors.UCI_IDENTIFIER}</p>}
             </div>
           </div>
 

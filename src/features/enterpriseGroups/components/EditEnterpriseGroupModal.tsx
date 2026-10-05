@@ -262,8 +262,12 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       toast.success(t('editEnterpriseGroup.updateSuccess', { defaultValue: 'Enterprise group update submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
-    } catch {
-      toast.error(t('editEnterpriseGroup.updateError', { defaultValue: 'Failed to submit enterprise group update. Please try again.' }));
+    } catch (error) {
+      const apiErr = error as { status?: number; data?: { message?: string } };
+      toast.error(
+        (apiErr.status === 400 && apiErr.data?.message)
+          || t('editEnterpriseGroup.updateError', { defaultValue: 'Failed to submit enterprise group update. Please try again.' }),
+      );
     }
   };
 

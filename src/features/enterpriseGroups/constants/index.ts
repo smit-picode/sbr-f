@@ -5,6 +5,8 @@ export const ENTERPRISE_GROUP_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Group Name (EN)',
   NAME_ARA: 'Group Name (AR)',
   UCI_NAME: 'UCI Name',
+  UCI_TYPE: 'UCI Type',
+  UCI_IDENTIFIER: 'UCI ID',
   MEMBERS: 'Member Enterprises',
   GROUP_HEAD: 'Group Head',
   GROUP_START_DATE: 'Group Start Date',
