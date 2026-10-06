@@ -318,7 +318,7 @@ export function ExecutiveHomePage() {
         <div className="rounded-lg bg-white p-5 shadow-card lg:col-span-2">
           <div className="mb-3 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-[13.5px] font-bold text-slate-800">{t('home.exec.growth2', { defaultValue: 'Register size' })}</h2>
+              <h2 className="text-[13.5px] font-bold text-slate-800">{t('home.exec.growth2', { defaultValue: 'Register size across frozen frames' })}</h2>
               <p className="mt-0.5 text-[11px] text-slate-400">
                 {growthMode === 'total'
                   ? t('home.exec.growth2Sub2', { defaultValue: 'Each point is a published frame; the last is the live register.' })

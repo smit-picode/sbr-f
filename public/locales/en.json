@@ -1385,7 +1385,7 @@
       "entGroups2": "{{active}} is active ent. groups from total {{total}}",
       "establishments": "establishments",
       "greeting": "Welcome",
-      "growth2": "Register size",
+      "growth2": "Register size across frozen frames",
       "growth2Sub2": "Each point is a published frame; the last is the live register.",
       "growthBreakdownSub2": "Active establishments at each month end, split by the selected dimension.",
       "growthNew": "Frame growth",
