@@ -32,6 +32,7 @@ docker build --build-arg NEXT_PUBLIC_API_URL=https://<api-host> -t sbr-frontend 
 docker run -p 7000:7000 sbr-frontend
 ```
 
-`NEXT_PUBLIC_API_URL` is **required at build time**: Next.js inlines it into the
-browser bundle, so setting it on the running container has no effect. The build
-fails fast if it is missing. A different API URL means a new image build.
+`NEXT_PUBLIC_API_URL` is read **at build time**: Next.js inlines it into the
+browser bundle, so setting it on the running container has no effect. A different
+API URL means a new image build. Leave it empty (or `''`) to call the site's own
+`/api/v1`, for deployments where the ingress forwards `/api` to the backend.

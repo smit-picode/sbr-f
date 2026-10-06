@@ -167,7 +167,7 @@ export function EstablishmentsListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={ESTABLISHMENT_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={ESTABLISHMENT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.establishments" value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

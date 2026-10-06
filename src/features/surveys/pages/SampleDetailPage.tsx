@@ -8,7 +8,6 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
-import { NoData } from '@/components/common/NoData';
 import { SurveySampleDetailSkeleton } from '@/components/common/SurveySampleDetailSkeleton';
 import { SearchInput } from '@/components/common/SearchInput';
 import { DataTable } from '@/components/table/DataTable';
@@ -42,17 +41,12 @@ function sortValue(r: SampleRow, field: string): string | number {
 export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { canView: canViewSurveys } = usePermission('surveys');
   const { canViewDetail, canEdit } = usePermission('establishments');
   const canOpenEstablishment = canViewDetail || canEdit;
   const { surveyId, period } = parseSampleSlug(sampleKey);
   const survey = surveyById(surveyId);
-  // Skip without surveys.view — a 403 here would trip the shared API layer's revoked-access handler.
-  const samplesQuery = useGetSurveySamplesQuery(undefined, { skip: !canViewSurveys });
-  const responsesQuery = useGetSurveyResponsesQuery(
-    { surveyId: survey?.id, period },
-    { skip: !canViewSurveys || !survey || !period },
-  );
+  const samplesQuery = useGetSurveySamplesQuery();
+  const responsesQuery = useGetSurveyResponsesQuery({ surveyId: survey?.id, period }, { skip: !survey || !period });
   // A sample exists only if the database reports that survey period.
   const validSample = !!survey && !!samplesQuery.data?.data?.some((s) => s.SURVEY_ID === survey.id && s.PERIOD === period);
 
@@ -156,18 +150,6 @@ export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
       <ChevronLeft className="h-4 w-4 rtl:rotate-180" /> {t('surveySamples.allSamples')}
     </button>
   );
-
-  if (!canViewSurveys) {
-    return (
-      <PageContainer>
-        <PageHeader title={t('surveySamples.overviewTitle')} />
-        {backLink}
-        <div className="rounded-xl bg-white shadow-card">
-          <NoData message={t('surveySamples.noViewPermission', { defaultValue: 'You do not have permission to view survey samples.' })} />
-        </div>
-      </PageContainer>
-    );
-  }
 
   if (samplesQuery.isLoading || (validSample && responsesQuery.isLoading)) {
     return (

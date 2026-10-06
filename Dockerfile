@@ -28,7 +28,6 @@ ARG NEXT_PUBLIC_ENV=production
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_ENV=$NEXT_PUBLIC_ENV \
     NEXT_TELEMETRY_DISABLED=1
-RUN test -n "$NEXT_PUBLIC_API_URL" || { echo "ERROR: build arg NEXT_PUBLIC_API_URL is required — it is baked into the client bundle." >&2; exit 1; }
 COPY . .
 RUN npm run build && npm prune --omit=dev
 

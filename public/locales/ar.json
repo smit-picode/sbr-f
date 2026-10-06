@@ -345,7 +345,65 @@
       "contains": "يحتوي",
       "equals": "يساوي",
       "starts_with": "يبدأ بـ",
-      "is_not": "لا يساوي"
+      "is_not": "لا يساوي",
+      "not_contains": "لا يحتوي",
+      "ends_with": "ينتهي بـ",
+      "is_empty": "فارغ",
+      "is_not_empty": "غير فارغ"
+    },
+    "columns": {
+      "establishments": {
+        "SBR_ID": "رقم SBR",
+        "NAME_ENU": "الاسم المسجّل (إنجليزي)",
+        "NAME_ARA": "الاسم المسجّل (عربي)",
+        "TRADE_NAME_ENU": "الاسم التجاري (إنجليزي)",
+        "TRADE_NAME_ARA": "الاسم التجاري (عربي)",
+        "NPC_NAME_ENU": "اسم NPC (إنجليزي)",
+        "NPC_NAME_ARA": "اسم NPC (عربي)",
+        "EST_STATUS": "الحالة",
+        "EST_STATUS_CATEGORY": "فئة الحالة",
+        "SECTOR_ID": "القطاع",
+        "LEGAL_TYPE": "النوع القانوني",
+        "ISIC_CODE": "رمز ISIC",
+        "EMPLOYMENT_COUNT": "عدد الموظفين",
+        "MAIN_BRANCH_FLG": "علامة الفرع",
+        "MAIN_BRANCH_SBR_ID": "رقم SBR للفرع الرئيسي",
+        "SOURCE_CODE": "المصدر",
+        "MOCI_CR_NUM": "رقم السجل التجاري (MOCI)"
+      },
+      "enterprises": {
+        "ENTERPRISE_ID": "رقم المؤسسة",
+        "NAME_ENU": "الاسم (إنجليزي)",
+        "NAME_ARA": "الاسم (عربي)",
+        "STATUS": "الحالة",
+        "SECTOR_ID": "القطاع",
+        "MOCI_CR_NUM": "السجل التجاري الرئيسي"
+      },
+      "enterpriseGroups": {
+        "ENTERPRISE_GROUP_ID": "رقم المجموعة",
+        "NAME_ENU": "الاسم (إنجليزي)",
+        "NAME_ARA": "الاسم (عربي)",
+        "UCI_NAME": "اسم الجهة المسيطرة النهائية",
+        "STATUS": "الحالة",
+        "PRINCIPAL_ISIC_2DIGIT": "رمز ISIC"
+      },
+      "legalUnits": {
+        "LEGAL_UNIT_ID": "معرف الوحدة القانونية",
+        "ESTABLISHMENT": "المنشأة (رقم SBR)",
+        "SOURCE_SYSTEM": "نظام المصدر",
+        "SOURCE_TABLE": "جدول المصدر",
+        "IDENTIFIER_TYPE": "نوع المعرف",
+        "IDENTIFIER_VALUE": "قيمة المعرف",
+        "SCD_COMMENT": "ملاحظة SCD"
+      },
+      "auditLog": {
+        "TABLE_NAME": "الجدول",
+        "OPERATION": "العملية",
+        "STATUS": "الحالة",
+        "CHANGE_REASON": "السبب",
+        "PREV_RECORD_ID": "معرف السجل السابق",
+        "NEW_RECORD_ID": "معرف السجل الجديد"
+      }
     }
   },
   "table": {
@@ -429,10 +487,10 @@
       "SBR_ID": "رقم SBR",
       "SOURCE_CODE": "المصدر",
       "EID": "رقم الهوية (EID)",
-      "NAME_ENU": "الاسم التنظيمي (إنجليزي)",
-      "NAME_ARA": "الاسم التنظيمي (عربي)",
-      "TRADE_NAME_ENU": "الاسم التجاري",
-      "NPC_NAME_ENU": "اسم NPC",
+      "NAME_ENU": "الاسم المسجّل (إنجليزي)",
+      "NAME_ARA": "الاسم المسجّل (عربي)",
+      "TRADE_NAME_ENU": "الاسم التجاري (إنجليزي)",
+      "NPC_NAME_ENU": "اسم NPC (إنجليزي)",
       "EST_STATUS": "الحالة",
       "EST_STATUS_CATEGORY": "فئة الحالة",
       "LEGAL_TYPE": "النوع القانوني",
@@ -452,7 +510,15 @@
       "CR_EXPIRY_DATE": "تاريخ انتهاء السجل التجاري",
       "CP_ISSUE_DATE": "تاريخ إصدار CP",
       "REG_DATE": "تاريخ التسجيل",
-      "VALID_FROM": "صالح من"
+      "VALID_FROM": "صالح من",
+      "TRADE_NAME_ARA": "الاسم التجاري (عربي)",
+      "NPC_NAME_ARA": "اسم NPC (عربي)"
+    },
+    "lifecycle": {
+      "enteredRegister": "الدخول إلى سجل SBR",
+      "crIssued": "إصدار السجل التجاري",
+      "cpIssued": "إصدار الرخصة التجارية",
+      "regIssued": "إصدار التسجيل"
     }
   },
   "fieldHistory": {
@@ -562,9 +628,9 @@
     "SBR_ID": "رقم SBR",
     "ID": "الرقم",
     "SOURCE_CODE": "رمز المصدر",
-    "NAME_ENU": "الاسم التنظيمي الإنجليزي",
-    "NAME_ENU_SOURCE": "مصدر الاسم التنظيمي الإنجليزي",
-    "NAME_ARA_SOURCE": "مصدر الاسم التنظيمي العربي",
+    "NAME_ENU": "الاسم المسجّل الإنجليزي",
+    "NAME_ENU_SOURCE": "مصدر الاسم المسجّل الإنجليزي",
+    "NAME_ARA_SOURCE": "مصدر الاسم المسجّل العربي",
     "TRADE_NAME_ENU": "الاسم التجاري الإنجليزي",
     "TRADE_NAME_ENU_SOURCE": "مصدر الاسم التجاري الإنجليزي",
     "TRADE_NAME_ARA": "الاسم التجاري العربي",
@@ -665,7 +731,8 @@
     "MULTINATIONAL_GROUP_FLG": "متعددة الجنسيات",
     "FOREIGN_CONTROLLED_GROUP_FLG": "خاضعة لسيطرة أجنبية",
     "PRINCIPAL_ISIC_2DIGIT": "النشاط الرئيسي (ISIC)",
-    "TOTAL_EMPLOYEES": "إجمالي الموظفين"
+    "TOTAL_EMPLOYEES": "إجمالي الموظفين",
+    "NAME_ARA": "الاسم المسجّل العربي"
   },
   "enterpriseGroups": {
     "createGroup": "إنشاء مجموعة",
@@ -828,10 +895,10 @@
     "fields": {
       "sbrId": "رقم SBR",
       "recordId": "رقم السجل",
-      "nameEnu": "الاسم التنظيمي (إنجليزي)",
-      "nameAra": "الاسم التنظيمي (عربي)",
-      "nameEnuSource": "مصدر الاسم التنظيمي الإنجليزي",
-      "nameAraSource": "مصدر الاسم التنظيمي العربي",
+      "nameEnu": "الاسم المسجّل (إنجليزي)",
+      "nameAra": "الاسم المسجّل (عربي)",
+      "nameEnuSource": "مصدر الاسم المسجّل الإنجليزي",
+      "nameAraSource": "مصدر الاسم المسجّل العربي",
       "tradeNameEnu": "الاسم التجاري (إنجليزي)",
       "tradeNameAra": "الاسم التجاري (عربي)",
       "tradeNameEnuSource": "مصدر الاسم التجاري الإنجليزي",
@@ -1317,7 +1384,7 @@
       "entGroups2": "{{active}} نشطة من إجمالي {{total}} مجموعات مؤسسات",
       "establishments": "منشأة",
       "greeting": "مرحبًا",
-      "growth2": "حجم السجل عبر الأطر المجمّدة",
+      "growth2": "حجم السجل",
       "growth2Sub2": "كل نقطة تمثل إطارًا منشورًا؛ والأخيرة هي السجل الحي.",
       "growthBreakdownSub2": "المنشآت النشطة في نهاية كل شهر، مقسمة حسب البعد المحدد.",
       "growthNew": "نمو الإطار",

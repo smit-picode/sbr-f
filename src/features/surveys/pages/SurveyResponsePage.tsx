@@ -8,9 +8,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
-import { NoData } from '@/components/common/NoData';
 import { formatDate, nullableText } from '@/utils/format';
-import { usePermission } from '@/hooks';
 import { useGetSurveyResponseDetailQuery } from '../api/surveysApi';
 import { ANSWERED_STATUSES, RESPONSE_FROM_ESTABLISHMENT, RESPONSE_STATUS_COLORS, RESPONSE_STATUS_KEY, SURVEY_QUESTIONS } from '../constants';
 import { parseSampleSlug } from '../utils/classify';
@@ -31,14 +29,12 @@ function formatAnswer(value: string | number | null | undefined, unit: AnswerUni
 export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: string; sbrId: string; from?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { canView } = usePermission('surveys');
   const { surveyId, period } = parseSampleSlug(sampleKey);
   const survey = surveyById(surveyId);
   const sbrIdNum = Number(sbrId);
-  // Skip without surveys.view — a 403 here would trip the shared API layer's revoked-access handler.
   const { data, isLoading, isError, error, refetch } = useGetSurveyResponseDetailQuery(
     { sbrId: sbrIdNum, surveyId: survey?.id ?? 'AES', period },
-    { skip: !canView || !survey || !period || !Number.isInteger(sbrIdNum) }
+    { skip: !survey || !period || !Number.isInteger(sbrIdNum) }
   );
   const detail = data?.data;
   // Opened from an establishment's survey participation, Back returns there instead of to the sample.
@@ -55,17 +51,6 @@ export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: stri
     return (
       <PageContainer>
         <PageLoader />
-      </PageContainer>
-    );
-  }
-
-  if (!canView) {
-    return (
-      <PageContainer>
-        <PageHeader title={t('surveySamples.overviewTitle')} back={back} />
-        <div className="rounded-xl bg-white shadow-card">
-          <NoData message={t('surveySamples.noViewPermission', { defaultValue: 'You do not have permission to view survey samples.' })} />
-        </div>
       </PageContainer>
     );
   }

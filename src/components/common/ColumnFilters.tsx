@@ -49,13 +49,16 @@ interface ColumnFiltersProps {
   columns: ColumnFilterOption[];
   value: ColumnFilterRow[];
   onChange: (rows: ColumnFilterRow[]) => void;
+  // i18n namespace holding one label per column value; each option's `label` is the fallback.
+  labelPrefix?: string;
 }
 
-export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) {
+export function ColumnFilters({ columns, value, onChange, labelPrefix }: ColumnFiltersProps) {
   const { t } = useTranslation();
   const counter = useRef(0);
 
   const opLabel = (op: string) => t(`columnFilters.op.${op}`, { defaultValue: OP_FALLBACK[op] ?? op });
+  const columnLabel = (c: ColumnFilterOption) => (labelPrefix ? t(`${labelPrefix}.${c.value}`, { defaultValue: c.label }) : c.label);
 
   const addRow = () => {
     counter.current += 1;
@@ -87,7 +90,7 @@ export function ColumnFilters({ columns, value, onChange }: ColumnFiltersProps) 
                     </SelectTrigger>
                     <SelectContent>
                       {columns.map((c) => (
-                        <SelectItem key={c.value} value={c.value} className="text-xs">{c.label}</SelectItem>
+                        <SelectItem key={c.value} value={c.value} className="text-xs">{columnLabel(c)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

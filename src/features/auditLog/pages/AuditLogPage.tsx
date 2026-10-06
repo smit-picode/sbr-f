@@ -194,7 +194,7 @@ export function AuditLogPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={AUDIT_LOG_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={AUDIT_LOG_FILTER_COLUMNS} labelPrefix="columnFilters.columns.auditLog" value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={clearAllAudit} />}

@@ -769,11 +769,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input type="date" className={inp('REG_CANCEL_DATE')} value={sel('REG_CANCEL_DATE').split('T')[0]} onChange={(e) => set('REG_CANCEL_DATE', e.target.value)} />
           </div>
 
-          {/* Metadata (read-only) */}
-          <SectionDivider title={t('editEstablishment.sections.metadata')} />
-          <ReadOnlyField label={t('editEstablishment.fields.validFrom')} value={frame?.VALID_FROM ? new Date(frame.VALID_FROM).toLocaleDateString('en-GB') : '—'} />
-          <ReadOnlyField label={t('editEstablishment.fields.validTo')} value={frame?.VALID_TO ? new Date(frame.VALID_TO).toLocaleDateString('en-GB') : '—'} />
-
           </div>
 
           <DialogFooter>

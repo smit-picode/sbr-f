@@ -138,7 +138,7 @@ export function EnterprisesListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={ENTERPRISE_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={ENTERPRISE_FILTER_COLUMNS} labelPrefix="columnFilters.columns.enterprises" value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

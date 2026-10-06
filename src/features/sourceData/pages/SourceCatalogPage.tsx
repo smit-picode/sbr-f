@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Landmark, Table2 } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';

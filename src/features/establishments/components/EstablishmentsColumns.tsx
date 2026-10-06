@@ -53,27 +53,27 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
   {
     accessorKey: 'NAME_ENU',
     header: t('columns.NAME_ENU'),
-    cell: ({ getValue, row }) => {
-      const nameEnu = getValue<string | null>();
-      const npcNameAra = row.original.NPC_NAME_ARA;
-      const showAra = npcNameAra && npcNameAra.trim() !== nameEnu?.trim();
-      return (
-        <div className="min-w-[280px]">
-          <p className="font-medium text-slate-800 text-sm leading-snug">{nullableText(nameEnu)}</p>
-          {showAra && (
-            <p className="text-xs text-slate-400 mt-0.5 leading-snug truncate max-w-[260px]" lang="ar" title={npcNameAra}>
-              {npcNameAra}
-            </p>
-          )}
-        </div>
-      );
-    },
+    cell: ({ getValue }) => (
+      <div className="min-w-[280px]">
+        <p className="font-medium text-slate-800 text-sm leading-snug">{nullableText(getValue<string | null>())}</p>
+      </div>
+    ),
     enableSorting: true,
   },
   {
     accessorKey: 'NAME_ENU_SOURCE',
     header: t('columns.NAME_ENU_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
+  },
+  {
+    accessorKey: 'NAME_ARA',
+    header: t('columns.NAME_ARA'),
+    cell: ({ getValue }) => (
+      <div className="min-w-[220px]">
+        <p className="font-medium text-slate-800 text-sm leading-snug" lang="ar">{nullableText(getValue<string | null>())}</p>
+      </div>
+    ),
+    enableSorting: true,
   },
   {
     accessorKey: 'NAME_ARA_SOURCE',
@@ -351,18 +351,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
   {
     accessorKey: 'REG_CANCEL_DATE',
     header: t('columns.REG_CANCEL_DATE'),
-    cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
-  },
-
-  // ── Validity & Timestamps
-  {
-    accessorKey: 'VALID_FROM',
-    header: t('columns.VALID_FROM'),
-    cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
-  },
-  {
-    accessorKey: 'VALID_TO',
-    header: t('columns.VALID_TO'),
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 

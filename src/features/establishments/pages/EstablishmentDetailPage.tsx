@@ -240,9 +240,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const searchParams = useSearchParams();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
-  // Survey widgets on this page call GET /surveys/* — gated by surveys.view. Hide them without
-  // the grant so a missing permission never surfaces as a 403 (shared API layer logs the user out).
-  const { canView: canViewSurveys } = usePermission('surveys');
   // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
   const fromParam = searchParams.get('from');
   const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
@@ -251,6 +248,8 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     : { label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') };
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
+  // The current row's VALID_FROM is when its latest version started, so entry into the register comes from the oldest version.
+  const { data: historyData } = useGetEstablishmentHistoryQuery(sbrId, { skip: !canOpenDetail || !canViewHistory });
 
   const BackLink = (
     <button onClick={back.onClick} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
@@ -301,12 +300,18 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     return [{ source: sc, table: m.table, idValue: String(idValue), current: isEmpty(e.VALID_TO) }];
   })();
 
+  const enteredRegister = (historyData?.data ?? [])
+    .map((v) => v.VALID_FROM)
+    .filter((d): d is string => !isEmpty(d))
+    .reduce<string | null>((min, d) => (min === null || new Date(d) < new Date(min) ? d : min), null);
+
   // Lifecycle events — synthesised from this establishment's own register / permit dates.
+  const ll = (k: string, fallback: string) => t(`establishmentDetail.lifecycle.${k}`, { defaultValue: fallback });
   const lifecycleEvents = [
-    { title: 'Entered register', date: e.VALID_FROM },
-    { title: 'Commercial registration issued', date: e.CR_ISSUE_DATE },
-    { title: 'Commercial permit issued', date: e.CP_ISSUE_DATE },
-    { title: 'Registration issued', date: e.REG_DATE },
+    { title: ll('enteredRegister', 'Entered SBR register'), date: enteredRegister },
+    { title: ll('crIssued', 'Commercial registration issued'), date: e.CR_ISSUE_DATE },
+    { title: ll('cpIssued', 'Commercial permit issued'), date: e.CP_ISSUE_DATE },
+    { title: ll('regIssued', 'Registration issued'), date: e.REG_DATE },
   ]
     .filter((ev) => !isEmpty(ev.date))
     .sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
@@ -340,8 +345,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const names = [
     F('NAME_ENU', fl('NAME_ENU', 'Regulatory Name (EN)'), { source: 'NAME_ENU_SOURCE' }),
     F('NAME_ARA', fl('NAME_ARA', 'Regulatory Name (AR)'), { source: 'NAME_ARA_SOURCE' }),
-    F('TRADE_NAME_ENU', fl('TRADE_NAME_ENU', 'Trade Name'), { source: 'TRADE_NAME_ENU_SOURCE' }),
-    F('NPC_NAME_ENU', fl('NPC_NAME_ENU', 'NPC Name'), { source: 'NPC_NAME_ENU_SOURCE' }),
+    F('TRADE_NAME_ENU', fl('TRADE_NAME_ENU', 'Trade Name (EN)'), { source: 'TRADE_NAME_ENU_SOURCE' }),
+    F('TRADE_NAME_ARA', fl('TRADE_NAME_ARA', 'Trade Name (AR)'), { source: 'TRADE_NAME_ARA_SOURCE' }),
+    F('NPC_NAME_ENU', fl('NPC_NAME_ENU', 'NPC Name (EN)'), { source: 'NPC_NAME_ENU_SOURCE' }),
+    F('NPC_NAME_ARA', fl('NPC_NAME_ARA', 'NPC Name (AR)'), { source: 'NPC_NAME_ARA_SOURCE' }),
   ].filter((f) => f.show);
 
   const statusClass = [
@@ -370,7 +377,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     F('CR_EXPIRY_DATE', fl('CR_EXPIRY_DATE', 'CR Expiry'), { date: true }),
     F('CP_ISSUE_DATE', fl('CP_ISSUE_DATE', 'CP Issue'), { date: true }),
     F('REG_DATE', fl('REG_DATE', 'Reg Date'), { date: true }),
-    F('VALID_FROM', fl('VALID_FROM', 'Valid From'), { date: true }),
   ].filter((f) => f.show);
 
   const renderCard = (titleKey: string, fields: FieldEntry[]) =>
@@ -496,7 +502,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         </div>
       )}
 
-      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && canViewSurveys && (
+      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && (
         <>
           <SurveyParticipation sbrId={e.SBR_ID} />
           <GdpContribution sbrId={e.SBR_ID} />

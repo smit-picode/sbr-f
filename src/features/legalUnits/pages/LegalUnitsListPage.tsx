@@ -174,7 +174,7 @@ export function LegalUnitsListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={LEGAL_UNIT_FILTER_COLUMNS} value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={LEGAL_UNIT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.legalUnits" value={columnFilters} onChange={handleColumnFiltersChange} />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

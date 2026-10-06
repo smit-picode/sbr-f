@@ -345,7 +345,65 @@
       "contains": "contains",
       "equals": "equals",
       "starts_with": "starts with",
-      "is_not": "is not"
+      "is_not": "is not",
+      "not_contains": "does not contain",
+      "ends_with": "ends with",
+      "is_empty": "is empty",
+      "is_not_empty": "is not empty"
+    },
+    "columns": {
+      "establishments": {
+        "SBR_ID": "SBR ID",
+        "NAME_ENU": "Name (EN)",
+        "NAME_ARA": "Name (AR)",
+        "TRADE_NAME_ENU": "Trade name (EN)",
+        "TRADE_NAME_ARA": "Trade name (AR)",
+        "NPC_NAME_ENU": "NPC name (EN)",
+        "NPC_NAME_ARA": "NPC name (AR)",
+        "EST_STATUS": "Status",
+        "EST_STATUS_CATEGORY": "Status category",
+        "SECTOR_ID": "Sector",
+        "LEGAL_TYPE": "Legal type",
+        "ISIC_CODE": "ISIC code",
+        "EMPLOYMENT_COUNT": "Employment count",
+        "MAIN_BRANCH_FLG": "Branch flag",
+        "MAIN_BRANCH_SBR_ID": "Main branch SBR ID",
+        "SOURCE_CODE": "Source",
+        "MOCI_CR_NUM": "MOCI CR"
+      },
+      "enterprises": {
+        "ENTERPRISE_ID": "Enterprise ID",
+        "NAME_ENU": "Name (EN)",
+        "NAME_ARA": "Name (AR)",
+        "STATUS": "Status",
+        "SECTOR_ID": "Sector",
+        "MOCI_CR_NUM": "Main CR"
+      },
+      "enterpriseGroups": {
+        "ENTERPRISE_GROUP_ID": "Group ID",
+        "NAME_ENU": "Name (EN)",
+        "NAME_ARA": "Name (AR)",
+        "UCI_NAME": "UCI Name",
+        "STATUS": "Status",
+        "PRINCIPAL_ISIC_2DIGIT": "ISIC Code"
+      },
+      "legalUnits": {
+        "LEGAL_UNIT_ID": "Legal Unit ID",
+        "ESTABLISHMENT": "Establishment (SBR ID)",
+        "SOURCE_SYSTEM": "Source System",
+        "SOURCE_TABLE": "Source Table",
+        "IDENTIFIER_TYPE": "Identifier Type",
+        "IDENTIFIER_VALUE": "Identifier Value",
+        "SCD_COMMENT": "SCD Comment"
+      },
+      "auditLog": {
+        "TABLE_NAME": "Table",
+        "OPERATION": "Operation",
+        "STATUS": "Status",
+        "CHANGE_REASON": "Reason",
+        "PREV_RECORD_ID": "Prev Record ID",
+        "NEW_RECORD_ID": "New Record ID"
+      }
     }
   },
   "table": {
@@ -431,8 +489,8 @@
       "EID": "EID",
       "NAME_ENU": "Regulatory Name (EN)",
       "NAME_ARA": "Regulatory Name (AR)",
-      "TRADE_NAME_ENU": "Trade Name",
-      "NPC_NAME_ENU": "NPC Name",
+      "TRADE_NAME_ENU": "Trade Name (EN)",
+      "NPC_NAME_ENU": "NPC Name (EN)",
       "EST_STATUS": "Status",
       "EST_STATUS_CATEGORY": "Status Category",
       "LEGAL_TYPE": "Legal Type",
@@ -452,7 +510,15 @@
       "CR_EXPIRY_DATE": "CR Expiry",
       "CP_ISSUE_DATE": "CP Issue",
       "REG_DATE": "Reg Date",
-      "VALID_FROM": "Valid From"
+      "VALID_FROM": "Valid From",
+      "TRADE_NAME_ARA": "Trade Name (AR)",
+      "NPC_NAME_ARA": "NPC Name (AR)"
+    },
+    "lifecycle": {
+      "enteredRegister": "Entered SBR register",
+      "crIssued": "Commercial registration issued",
+      "cpIssued": "Commercial permit issued",
+      "regIssued": "Registration issued"
     }
   },
   "fieldHistory": {
@@ -665,7 +731,8 @@
     "MULTINATIONAL_GROUP_FLG": "Multinational",
     "FOREIGN_CONTROLLED_GROUP_FLG": "Foreign controlled",
     "PRINCIPAL_ISIC_2DIGIT": "Principal ISIC",
-    "TOTAL_EMPLOYEES": "Total employees"
+    "TOTAL_EMPLOYEES": "Total employees",
+    "NAME_ARA": "Name (AR)"
   },
   "enterpriseGroups": {
     "createGroup": "Create group",
@@ -1317,7 +1384,7 @@
       "entGroups2": "{{active}} is active ent. groups from total {{total}}",
       "establishments": "establishments",
       "greeting": "Welcome",
-      "growth2": "Register size across frozen frames",
+      "growth2": "Register size",
       "growth2Sub2": "Each point is a published frame; the last is the live register.",
       "growthBreakdownSub2": "Active establishments at each month end, split by the selected dimension.",
       "growthNew": "Frame growth",

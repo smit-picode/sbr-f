@@ -7,11 +7,9 @@ import { ChevronRight } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
-import { NoData } from '@/components/common/NoData';
 import { SurveySamplesSkeleton } from '@/components/common/SurveySamplesSkeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CHART_COLOR, EChart, targetColumns } from '@/lib/charts';
-import { usePermission } from '@/hooks';
 import { useGetSurveyResponsesQuery, useGetSurveySamplesQuery } from '../api/surveysApi';
 import { distinctRows, toSampleRows, toSamples } from '../utils/aggregate';
 import { SampleDistributionGrid } from '../components/SampleDistributionGrid';
@@ -43,16 +41,10 @@ function KpiCard({ value, label }: { value: string; label: string }) {
 export function SurveySamplesPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { canView } = usePermission('surveys');
   const [surveyFilter, setSurveyFilter] = useState<string>(ALL_SURVEYS);
 
-  // Skip the fetches without the grant — the shared API layer treats any 403 as revoked access
-  // and would log the user out; same skip pattern as BrowseSnapshotsPage / EstablishmentDetailPage.
-  const samplesQuery = useGetSurveySamplesQuery(undefined, { skip: !canView });
-  const responsesQuery = useGetSurveyResponsesQuery(
-    surveyFilter === ALL_SURVEYS ? {} : { surveyId: surveyFilter as SurveyId },
-    { skip: !canView },
-  );
+  const samplesQuery = useGetSurveySamplesQuery();
+  const responsesQuery = useGetSurveyResponsesQuery(surveyFilter === ALL_SURVEYS ? {} : { surveyId: surveyFilter as SurveyId });
   // currentData, not data: while a new filter loads, data still holds the previous survey's rows.
   const responseRows = responsesQuery.currentData?.data;
 
@@ -118,12 +110,6 @@ export function SurveySamplesPage() {
     <PageContainer>
       <PageHeader title={t('surveySamples.overviewTitle')} description={t('surveySamples.overviewDesc')} />
 
-      {!canView ? (
-        <div className="rounded-xl bg-white shadow-card">
-          <NoData message={t('surveySamples.noViewPermission', { defaultValue: 'You do not have permission to view survey samples.' })} />
-        </div>
-      ) : (
-      <>
       <div className="flex items-center gap-3 rounded-lg bg-white p-4 shadow-card">
         <span className="text-[12px] font-semibold text-slate-500">{t('surveySamples.survey')}:</span>
         <Select value={surveyFilter} onValueChange={setSurveyFilter}>
@@ -225,8 +211,6 @@ export function SurveySamplesPage() {
           </table>
         </div>
       </div>
-      </>
-      )}
       </>
       )}
     </PageContainer>

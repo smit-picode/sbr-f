@@ -77,8 +77,8 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.surveys',
     icon: 'ClipboardList',
     items: [
-      // Read-only Survey Samples module — gated by surveys.view like the other browse tabs.
-      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: 'surveys.view', i18nKey: 'nav.surveySamples' },
+      // Dummy-data screens (no survey source yet), so ungated like the other placeholder modules.
+      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: '', i18nKey: 'nav.surveySamples' },
     ],
   },
   {

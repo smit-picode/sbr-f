@@ -79,15 +79,23 @@ export const ESTABLISHMENTS_DEFAULT_FILTERS = {
   mainBranchFLG: '',
 } as const;
 
-// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
-// the backend ESTABLISHMENT_FILTER_COLUMNS allow-list (establishments.controller).
+// Columns offered in the "Column filters" builder; each `value` must be in filter_expr of SBR_ESTABLISHMENTS_API (NPC_SBR).
 export const ESTABLISHMENT_FILTER_COLUMNS: { value: string; label: string }[] = [
   { value: 'SBR_ID', label: 'SBR ID' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
   { value: 'NAME_ARA', label: 'Name (AR)' },
+  { value: 'TRADE_NAME_ENU', label: 'Trade name (EN)' },
+  { value: 'TRADE_NAME_ARA', label: 'Trade name (AR)' },
+  { value: 'NPC_NAME_ENU', label: 'NPC name (EN)' },
+  { value: 'NPC_NAME_ARA', label: 'NPC name (AR)' },
   { value: 'EST_STATUS', label: 'Status' },
+  { value: 'EST_STATUS_CATEGORY', label: 'Status category' },
   { value: 'SECTOR_ID', label: 'Sector' },
   { value: 'LEGAL_TYPE', label: 'Legal type' },
+  { value: 'ISIC_CODE', label: 'ISIC code' },
+  { value: 'EMPLOYMENT_COUNT', label: 'Employment count' },
+  { value: 'MAIN_BRANCH_FLG', label: 'Branch flag' },
+  { value: 'MAIN_BRANCH_SBR_ID', label: 'Main branch SBR ID' },
   { value: 'SOURCE_CODE', label: 'Source' },
   { value: 'MOCI_CR_NUM', label: 'MOCI CR' },
 ];
