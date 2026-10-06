@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/i18n';
 import { usePermission } from '@/hooks';
-import { formatDate } from '@/utils/format';
+import { formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { useDecideBulkChangeMutation, useGetBulkChangeByIdQuery } from '../api/bulkChangeApi';
 import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
@@ -133,7 +133,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
           </div>
           <div className="min-w-0">
             <p className="text-[11px] text-slate-400">{t('bulkChange.cols.submitted', { defaultValue: 'Submitted' })}</p>
-            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{formatDate(task.SUBMITTED_AT)}</p>
+            <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{formatDateTime(task.SUBMITTED_AT)}</p>
           </div>
           <div className="min-w-0">
             <p className="text-[11px] text-slate-400">{t('bulkChange.cols.table', { defaultValue: 'Table' })}</p>

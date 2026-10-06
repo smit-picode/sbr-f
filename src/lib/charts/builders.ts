@@ -3,7 +3,7 @@
 // shapes; these turn that into ECharts option objects (grid, tooltip, series, ...).
 import * as echarts from 'echarts';
 import type { EChartOption, EChartOptionInput } from './EChart';
-import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, vGrad } from './theme';
+import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, sharesTo100, vGrad } from './theme';
 
 const C = CHART_COLOR;
 
@@ -131,6 +131,9 @@ export interface DonutOptions {
 export function donut(o: DonutOptions): EChartOptionInput {
   const total = o.items.reduce((s, i) => s + (i.value || 0), 0);
   const center = { value: fmtNum(total), label: o.totalLabel || '' };
+  const itemShares = sharesTo100(o.items.map((i) => i.value || 0));
+  const shareByName = new Map<string, number>();
+  o.items.forEach((i, k) => { if (!shareByName.has(i.name)) shareByName.set(i.name, itemShares[k]); });
 
   function legendCfg(side: boolean, nameW: number) {
     const rich = {
@@ -143,7 +146,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
       const it = o.items.find((i) => i.name === name);
       if (!it) return name;
       const shown = name.length > maxChars ? `${name.slice(0, maxChars - 1)}…` : name;
-      return `{n|${shown}}{v|${fmtNum(it.value)}}{p|${pct(it.value, total)}%}`;
+      return `{n|${shown}}{v|${fmtNum(it.value)}}{p|${shareByName.get(name) ?? pct(it.value, total)}%}`;
     };
     const fmtCompact = (name: string) => {
       const it = o.items.find((i) => i.name === name);
@@ -192,7 +195,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
 
   function base(side: boolean, ringCx: number | string, ringCy: number | string, rOuter: (number | string)[], nameW: number): EChartOption {
     return {
-      tooltip: { trigger: 'item', formatter: (x: { marker: string; name: string; value: number }) => `${x.marker} <b>${x.name}</b><br/>${fmtNum(x.value)} · ${pct(x.value, total)}%` },
+      tooltip: { trigger: 'item', formatter: (x: { marker: string; name: string; value: number }) => `${x.marker} <b>${x.name}</b><br/>${fmtNum(x.value)} · ${shareByName.get(x.name) ?? pct(x.value, total)}%` },
       legend: legendCfg(side, nameW),
       graphic: centreLabel(ringCx, ringCy, typeof rOuter[0] === 'number' ? rOuter[0] : undefined),
       series: [{

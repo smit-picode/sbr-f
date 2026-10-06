@@ -25,7 +25,7 @@ import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters } from '@/types'
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
-import { useDebounce } from '@/hooks';
+import { useDebounce, useAppSelector } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 
 function getApiError(err: unknown, fallback: string): string {
@@ -66,6 +66,7 @@ export function UsersTab({
   const { t } = useTranslation();
   const [filters, setFilters] = useState<AdminUserFilters>({ ...USERS_DEFAULT_FILTERS });
   const [editTarget, setEditTarget] = useState<SbrUser | null>(null);
+  const signedInEmail = useAppSelector((st) => st.auth.user?.email)?.trim().toLowerCase();
   const [viewTarget, setViewTarget] = useState<SbrUser | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -236,7 +237,9 @@ export function UsersTab({
   };
 
   // Shared dialog body for create + edit (per the onboarding reference design)
-  const dialogBody = (mode: 'create' | 'edit') => (
+  const dialogBody = (mode: 'create' | 'edit') => {
+    const isOwnAccount = mode === 'edit' && !!signedInEmail && form.EMAIL.trim().toLowerCase() === signedInEmail;
+    return (
     <div className="space-y-4 py-2">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
@@ -295,10 +298,10 @@ export function UsersTab({
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <Label htmlFor="user-status">{t('admin.users.statusLabel')}</Label>
-          <InfoTooltip content="This feature will be implemented in the next phase" />
+          {isOwnAccount && <InfoTooltip content={t('admin.users.statusSelfLocked', { defaultValue: 'You cannot deactivate your own account.' })} />}
         </div>
-        <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled>
-          <SelectTrigger id="user-status" className="focus:ring-[#A29374] opacity-60 cursor-not-allowed shadow-none">
+        <Select value={form.IS_ACTIVE} onValueChange={(v) => setForm(p => ({ ...p, IS_ACTIVE: v }))} disabled={isOwnAccount}>
+          <SelectTrigger id="user-status" className={`focus:ring-[#A29374] shadow-none ${isOwnAccount ? 'opacity-60 cursor-not-allowed' : ''}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -324,6 +327,7 @@ export function UsersTab({
       </div>
     </div>
   );
+  };
 
   return (
     <>

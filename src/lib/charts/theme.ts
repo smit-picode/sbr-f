@@ -65,6 +65,18 @@ export function pct(part: number, total: number): number {
   return total ? Math.round((part / total) * 100) : 0;
 }
 
+// Whole-number shares that always add up to 100, so a legend's percentages match its total.
+export function sharesTo100(values: number[]): number[] {
+  const total = values.reduce((a, b) => a + b, 0);
+  if (total <= 0 || values.some((v) => v < 0)) return values.map((v) => pct(v, total));
+  const exact = values.map((v) => (v / total) * 100);
+  const floors = exact.map(Math.floor);
+  let left = 100 - floors.reduce((a, b) => a + b, 0);
+  const order = exact.map((e, i) => ({ i, r: e - floors[i] })).sort((a, b) => b.r - a.r);
+  for (const { i } of order) { if (left-- <= 0) break; floors[i] += 1; }
+  return floors;
+}
+
 let themeRegistered = false;
 // Registers the 'sbr' ECharts theme once — safe to call from every chart-bearing component;
 // only the first call actually does anything (registerTheme itself isn't idempotent-safe to

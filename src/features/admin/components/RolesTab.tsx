@@ -107,7 +107,7 @@ function PermissionGrid({
               }`}
             >
               <span
-                className={`flex h-4 w-4 items-center justify-center rounded border shrink-0 ${
+                className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 ${
                   granted ? 'border-[#A29374] bg-[#A29374] text-white' : 'border-slate-300'
                 }`}
               >
@@ -233,7 +233,7 @@ function RolesTabSkeleton() {
             <div className="grid sm:grid-cols-2 gap-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2">
-                  <span className="h-4 w-4 rounded shimmer shrink-0" />
+                  <span className="h-4 w-4 rounded-full shimmer shrink-0" />
                   <span className="h-3 flex-1 shimmer rounded" />
                 </div>
               ))}

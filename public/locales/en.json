@@ -1156,6 +1156,7 @@
       "statusActive": "Active",
       "statusInactive": "Inactive",
       "statusLabel": "Status",
+      "statusSelfLocked": "You cannot deactivate your own account.",
       "assignedRolesLabel": "Assigned roles",
       "assignedRolesHint": "A user can hold multiple roles; effective permissions follow the active role. Set an optional per-role expiry date.",
       "scopedBadge": "SCOPED",

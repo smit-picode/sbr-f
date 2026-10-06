@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { Button } from '@/components/ui/button';
 import { usePermission, usePersistedState } from '@/hooks';
-import { formatDate } from '@/utils/format';
+import { formatDateTime } from '@/utils/format';
 import { cleanParams } from '@/utils/query';
 import { useGetBulkChangeListQuery } from '../api/bulkChangeApi';
 import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
@@ -60,7 +60,7 @@ export function BulkChangeListPage() {
     {
       accessorKey: 'SUBMITTED_AT',
       header: t('bulkChange.cols.submitted', { defaultValue: 'Submitted' }),
-      cell: ({ getValue }) => <span className="text-sm text-slate-500">{formatDate(getValue<string | null>())}</span>,
+      cell: ({ getValue }) => <span className="text-sm text-slate-500">{formatDateTime(getValue<string | null>())}</span>,
     },
     {
       accessorKey: 'ENTITY_TYPE',
