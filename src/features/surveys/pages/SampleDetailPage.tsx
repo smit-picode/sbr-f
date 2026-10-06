@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/common/PageContainer';
+import { SurveysAccessGuard } from '../components/SurveysAccessGuard';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { SurveySampleDetailSkeleton } from '@/components/common/SurveySampleDetailSkeleton';
@@ -38,7 +39,7 @@ function sortValue(r: SampleRow, field: string): string | number {
   return r.status;
 }
 
-export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
+function SampleDetailContent({ sampleKey }: { sampleKey: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { canViewDetail, canEdit } = usePermission('establishments');
@@ -254,5 +255,13 @@ export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
         }}
       />
     </PageContainer>
+  );
+}
+
+export function SampleDetailPage({ sampleKey }: { sampleKey: string }) {
+  return (
+    <SurveysAccessGuard>
+      <SampleDetailContent sampleKey={sampleKey} />
+    </SurveysAccessGuard>
   );
 }

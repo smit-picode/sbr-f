@@ -77,8 +77,7 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.surveys',
     icon: 'ClipboardList',
     items: [
-      // Dummy-data screens (no survey source yet), so ungated like the other placeholder modules.
-      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: '', i18nKey: 'nav.surveySamples' },
+      { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: 'surveys.view', i18nKey: 'nav.surveySamples' },
     ],
   },
   {

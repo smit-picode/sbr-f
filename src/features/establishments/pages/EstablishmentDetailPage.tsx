@@ -240,6 +240,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const searchParams = useSearchParams();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
+  const { canView: canViewSurveys } = usePermission('surveys');
   // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
   const fromParam = searchParams.get('from');
   const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
@@ -502,7 +503,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         </div>
       )}
 
-      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && (
+      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && canViewSurveys && (
         <>
           <SurveyParticipation sbrId={e.SBR_ID} />
           <GdpContribution sbrId={e.SBR_ID} />

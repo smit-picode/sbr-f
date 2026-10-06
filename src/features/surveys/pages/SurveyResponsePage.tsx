@@ -5,6 +5,7 @@ import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ClipboardList } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
+import { SurveysAccessGuard } from '../components/SurveysAccessGuard';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -26,7 +27,7 @@ function formatAnswer(value: string | number | null | undefined, unit: AnswerUni
 }
 
 // One establishment's response to one survey period, reached from a sample's establishment list.
-export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: string; sbrId: string; from?: string }) {
+function SurveyResponseContent({ sampleKey, sbrId, from }: { sampleKey: string; sbrId: string; from?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { surveyId, period } = parseSampleSlug(sampleKey);
@@ -142,5 +143,13 @@ export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: stri
         )}
       </div>
     </PageContainer>
+  );
+}
+
+export function SurveyResponsePage({ sampleKey, sbrId, from }: { sampleKey: string; sbrId: string; from?: string }) {
+  return (
+    <SurveysAccessGuard>
+      <SurveyResponseContent sampleKey={sampleKey} sbrId={sbrId} from={from} />
+    </SurveysAccessGuard>
   );
 }

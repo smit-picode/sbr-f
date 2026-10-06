@@ -19,16 +19,27 @@ export const SURVEY_RESPONSE_BY_SURVEY = [
   { name: 'FDI Quarterly', ratePct: 81.7, sampledUnits: 410 },
 ];
 
-// Response rate by ISIC activity section, lowest first — flags where to direct survey follow-up.
-export const SURVEY_RESPONSE_BY_ACTIVITY = [
-  { name: 'Construction', ratePct: 74.2, answered: 89, base: 120 },
-  { name: 'Accommodation & food', ratePct: 78.6, answered: 66, base: 84 },
-  { name: 'Transport & storage', ratePct: 81.3, answered: 39, base: 48 },
-  { name: 'Wholesale & retail', ratePct: 83.9, answered: 187, base: 223 },
-  { name: 'Manufacturing', ratePct: 86.1, answered: 62, base: 72 },
-  { name: 'Admin & support', ratePct: 88.4, answered: 214, base: 242 },
-  { name: 'Professional & tech', ratePct: 90.5, answered: 48, base: 53 },
+// A section with fewer sampled units than this has a rate too unstable to rank, so its bar is muted.
+export const SURVEY_RESPONSE_MIN_BASE = 10;
+
+const ACTIVITY_SECTIONS = [
+  { code: 'S', name: 'Other services', answered: 8, base: 13 },
+  { code: 'C', name: 'Manufacturing', answered: 35, base: 50 },
+  { code: 'I', name: 'Accommodation & food', answered: 71, base: 100 },
+  { code: 'F', name: 'Construction', answered: 89, base: 120 },
+  { code: 'H', name: 'Transport & storage', answered: 39, base: 48 },
+  { code: 'G', name: 'Wholesale & retail', answered: 187, base: 223 },
+  { code: 'N', name: 'Admin & support', answered: 214, base: 242 },
+  { code: 'M', name: 'Professional & technical', answered: 48, base: 53 },
+  { code: 'J', name: 'Information & comms', answered: 9, base: 9 },
+  { code: 'L', name: 'Real estate', answered: 6, base: 6 },
+  { code: 'Q', name: 'Health & social work', answered: 4, base: 4 },
 ];
+
+// Response rate by ISIC activity section, lowest first — flags where to direct survey follow-up.
+export const SURVEY_RESPONSE_BY_ACTIVITY = ACTIVITY_SECTIONS
+  .map((s) => ({ ...s, ratePct: Math.round((s.answered / s.base) * 1000) / 10 }))
+  .sort((x, y) => x.ratePct - y.ratePct);
 
 // One distinct theme hue per regulator so every growth-chart line can be told apart.
 export const SOURCE_COLOR: Record<string, string> = {

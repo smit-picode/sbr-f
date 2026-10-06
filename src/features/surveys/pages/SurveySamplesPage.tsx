@@ -5,6 +5,7 @@ import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
+import { SurveysAccessGuard } from '../components/SurveysAccessGuard';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { SurveySamplesSkeleton } from '@/components/common/SurveySamplesSkeleton';
@@ -38,7 +39,7 @@ function KpiCard({ value, label }: { value: string; label: string }) {
   );
 }
 
-export function SurveySamplesPage() {
+function SurveySamplesContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const [surveyFilter, setSurveyFilter] = useState<string>(ALL_SURVEYS);
@@ -214,5 +215,13 @@ export function SurveySamplesPage() {
       </>
       )}
     </PageContainer>
+  );
+}
+
+export function SurveySamplesPage() {
+  return (
+    <SurveysAccessGuard>
+      <SurveySamplesContent />
+    </SurveysAccessGuard>
   );
 }

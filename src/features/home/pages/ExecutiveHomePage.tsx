@@ -18,6 +18,7 @@ import {
   SOURCE_COLOR,
   SURVEY_KPIS,
   SURVEY_RESPONSE_BY_ACTIVITY,
+  SURVEY_RESPONSE_MIN_BASE,
   SURVEY_RESPONSE_BY_SURVEY,
 } from '../data/executiveDashboardDummy';
 
@@ -116,7 +117,7 @@ export function ExecutiveHomePage() {
         const [year, month] = key.split('-').map(Number);
         return `${MONTH_LABELS[month - 1] ?? month} ${year}`;
       }),
-      series: keys.map((k) => ({
+      series: keys.filter((k) => monthKeys.some((mk) => (counts.get(`${k}|${mk}`) ?? 0) > 0)).map((k) => ({
         // Kept in English regardless of language — it sits beside untranslated DB sector/source
         // values (Private, MOCI, …) and translating only this one looked inconsistent.
         name: k === '—' ? 'Unknown' : k,
@@ -175,7 +176,7 @@ export function ExecutiveHomePage() {
   const sourceSectorBreakdown = summary?.sourceSectorBreakdown ?? [];
   const contributionOption = useMemo(() => {
     const sources = [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))];
-    const sectors = [...new Set(sourceSectorBreakdown.map((s) => s.sector))];
+    const sectors = [...new Set(sourceSectorBreakdown.filter((s) => s.count > 0).map((s) => s.sector))];
     return hbarsStacked({
       categories: sources,
       series: sectors.map((sec) => ({
@@ -220,21 +221,25 @@ export function ExecutiveHomePage() {
       });
     }
     return hbars({
-      items: SURVEY_RESPONSE_BY_ACTIVITY.map((s) => ({
-        name: s.name,
-        value: s.ratePct,
-        color: s.ratePct >= 90 ? '#3FB185' : s.ratePct >= 80 ? '#BF9F5F' : '#DF7878',
-        sub: `${s.answered}/${s.base} ${t('survey.sampledUnitsShort', { defaultValue: 'responses' })}`,
-      })),
+      items: SURVEY_RESPONSE_BY_ACTIVITY.map((s) => {
+        const thinBase = s.base < SURVEY_RESPONSE_MIN_BASE;
+        return {
+          name: `${s.code} · ${s.name}`,
+          value: s.ratePct,
+          color: thinBase ? '#D1D5DB' : s.ratePct >= 90 ? '#3FB185' : s.ratePct >= 80 ? '#BF9F5F' : '#DF7878',
+          sub: `${s.name} · ${s.answered}/${s.base} ${t('survey.sampledUnitsShort', { defaultValue: 'responses' })}${thinBase ? ` · ${t('home.exec.thinBase', { defaultValue: 'small base' })}` : ''}`,
+        };
+      }),
       share: false,
       unit: '%',
       max: 100,
       barWidth: 10,
-      labelWidth: 118,
+      labelWidth: 150,
       refLines: [{ value: 90, label: `${t('home.exec.target', { defaultValue: 'target' })} 90%`, color: '#A29374' }],
     });
   }, [responseMode, t]);
 
+  const lowestActivity = SURVEY_RESPONSE_BY_ACTIVITY.find((s) => s.base >= SURVEY_RESPONSE_MIN_BASE);
   const top3Employment = employmentByActivity.slice(0, 3);
   const totalEmployment = employmentByActivity.reduce((s, e) => s + e.employees, 0);
   const top3Pct = totalEmployment === 0 ? 0 : Math.round((top3Employment.reduce((s, e) => s + e.employees, 0) / totalEmployment) * 100);
@@ -330,11 +335,11 @@ export function ExecutiveHomePage() {
               ]}
             />
           </div>
-          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart option={growthOption} height={224} />}
+          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart confineTooltip option={growthOption} height={224} />}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.mgr.estBySector', { defaultValue: 'Establishments by sector' })} sub={t('home.exec.shareOfFrame', { defaultValue: 'Share of the live frame' })} />
-          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart option={sectorDonutOption} height={224} />}
+          {summaryLoading ? <Skeleton className="h-[224px] w-full rounded-lg" /> : <EChart confineTooltip option={sectorDonutOption} height={224} />}
         </div>
       </div>
 
@@ -342,7 +347,7 @@ export function ExecutiveHomePage() {
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.map', { defaultValue: 'Where the establishments are' })} sub={t('home.exec.mapSub', { defaultValue: 'Establishments by municipality, from the primary address' })} />
-          {mapReady && !summaryLoading ? <EChart option={mapOption} height={300} /> : <Skeleton className="h-[300px] w-full rounded-lg" />}
+          {mapReady && !summaryLoading ? <EChart confineTooltip option={mapOption} height={300} /> : <Skeleton className="h-[300px] w-full rounded-lg" />}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.sizeClass', { defaultValue: 'Establishments by size class' })} sub={t('home.exec.sizeClassSub', { defaultValue: 'NPC size classes — how the frame is stratified for sampling' })} />
@@ -350,7 +355,7 @@ export function ExecutiveHomePage() {
             <Skeleton className="h-[244px] w-full rounded-lg" />
           ) : (
             <>
-              <EChart option={sizeClassOption} height={244} />
+              <EChart confineTooltip option={sizeClassOption} height={244} />
               <p className="mt-1 text-[11px] text-slate-400">
                 {t('home.exec.sizeNote', { defaultValue: '{{unknown}} of {{total}} units have no recorded size category.', unknown: unknownSize, total: totalSize })}
               </p>
@@ -376,7 +381,17 @@ export function ExecutiveHomePage() {
               ]}
             />
           </div>
-          <EChart option={surveyResponseOption} height={responseMode === 'survey' ? SURVEY_RESPONSE_BY_SURVEY.length * 34 + 44 : SURVEY_RESPONSE_BY_ACTIVITY.length * 30 + 44} />
+          <EChart confineTooltip option={surveyResponseOption} height={responseMode === 'survey' ? SURVEY_RESPONSE_BY_SURVEY.length * 34 + 44 : SURVEY_RESPONSE_BY_ACTIVITY.length * 26 + 44} />
+          {responseMode === 'activity' && lowestActivity && (
+            <p className="mt-1 text-[11px] text-slate-500">
+              {t('home.exec.lowestNote', {
+                defaultValue: '{{name}} has the lowest dependable response rate at {{rate}}%, across {{base}} sampled units.',
+                name: lowestActivity.name,
+                rate: lowestActivity.ratePct,
+                base: lowestActivity.base,
+              })}
+            </p>
+          )}
         </div>
       </div>
 
@@ -388,14 +403,14 @@ export function ExecutiveHomePage() {
             <Skeleton className="h-[268px] w-full rounded-lg" />
           ) : (
             <>
-              <EChart option={paretoOption} height={268} />
+              <EChart confineTooltip option={paretoOption} height={268} />
               <p className="mt-1 text-[11px] text-slate-500">{t('home.exec.concentrationNote', { defaultValue: 'Three activity sections account for {{pct}}% of all recorded employment.', pct: top3Pct })}</p>
             </>
           )}
         </div>
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.contribution', { defaultValue: 'Who the register is assembled from' })} sub={t('home.exec.contributionSub', { defaultValue: 'Establishments by registration source, split by ownership sector' })} />
-          {summaryLoading ? <Skeleton className="h-[220px] w-full rounded-lg" /> : <EChart option={contributionOption} height={Math.max(220, [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))].length * 34 + 60)} />}
+          {summaryLoading ? <Skeleton className="h-[220px] w-full rounded-lg" /> : <EChart confineTooltip option={contributionOption} height={Math.max(220, [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))].length * 34 + 60 + (new Set(sourceSectorBreakdown.filter((s) => s.count > 0).map((s) => s.sector)).size > 3 ? 24 : 0))} />}
         </div>
       </div>
     </PageContainer>

@@ -16,13 +16,15 @@ interface EChartProps {
   onEvents?: Record<string, (params: unknown) => void>;
   // SVG gives crisp vector output when a chart is printed to PDF.
   renderer?: 'canvas' | 'svg';
+  // Keeps the tooltip inside the chart's own box, so it never slides under the sidebar or a neighbouring card.
+  confineTooltip?: boolean;
 }
 
 // Thin React wrapper around a raw ECharts instance — ECharts owns and mutates its canvas
 // directly, which is why this isn't just `<div>{...}</div>` with option as a prop rendered
 // declaratively: the instance must be created once, resized via ResizeObserver, and have
 // `setOption` called imperatively whenever the option changes.
-export function EChart({ option, height = 240, className, onEvents, renderer = 'canvas' }: EChartProps) {
+export function EChart({ option, height = 240, className, onEvents, renderer = 'canvas', confineTooltip = false }: EChartProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
   const optionRef = useRef(option);
@@ -38,7 +40,9 @@ export function EChart({ option, height = 240, className, onEvents, renderer = '
   function applyOption(chart: echarts.ECharts, el: HTMLDivElement) {
     const o = optionRef.current;
     const resolved = typeof o === 'function' ? o(el.clientWidth, el.clientHeight) : o;
-    chart.setOption({ ...CHART_ANIMATION, ...resolved }, { notMerge: true });
+    const tooltip = resolved.tooltip as Record<string, unknown> | undefined;
+    const withTooltip = confineTooltip && tooltip && !Array.isArray(tooltip) ? { ...resolved, tooltip: { ...tooltip, confine: true } } : resolved;
+    chart.setOption({ ...CHART_ANIMATION, ...withTooltip }, { notMerge: true });
   }
 
   useEffect(() => {

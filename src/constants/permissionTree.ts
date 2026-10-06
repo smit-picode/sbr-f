@@ -133,6 +133,13 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'surveys',
+    label: 'Surveys',
+    children: [
+      { key: 'surveys.view', label: 'View Survey Samples' },
+    ],
+  },
+  {
     key: 'approvals',
     label: 'Approvals',
     children: [

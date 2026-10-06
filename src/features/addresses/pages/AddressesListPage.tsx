@@ -34,7 +34,14 @@ export function AddressesListPage() {
     search: debouncedSearch,
   });
 
-  const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetAddressesListQuery(queryParams);
+  // A number typed in the search box is tried as an SBR ID first; with no hit it falls back to the zone / street / QARS search.
+  const digitsOnly = /^\d+$/.test((debouncedSearch ?? '').trim()) ? (debouncedSearch ?? '').trim() : null;
+  const bySbrId = useGetAddressesListQuery(
+    digitsOnly ? cleanParams({ ...filters, search: '', sbrId: Number(digitsOnly) }) : queryParams,
+  );
+  const needsTextFallback = !!digitsOnly && !bySbrId.isFetching && bySbrId.currentData?.total === 0;
+  const byText = useGetAddressesListQuery(queryParams, { skip: !needsTextFallback });
+  const { data, currentData, isLoading, isError, error, refetch, isFetching } = needsTextFallback ? byText : bySbrId;
 
   useEffect(() => {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;

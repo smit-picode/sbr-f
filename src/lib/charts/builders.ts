@@ -7,6 +7,24 @@ import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, vGrad }
 
 const C = CHART_COLOR;
 
+// A wrapping legend grows by one row per overflow; chart grids reserve that height so it never covers the plot.
+const LEGEND_ROW_HEIGHT = 24;
+function legendRows(names: string[], width: number): number {
+  const available = Math.max(1, width - 8);
+  let rows = 1;
+  let used = 0;
+  for (const name of names) {
+    const itemWidth = 9 + 5 + name.length * 6.6 + 14;
+    if (used > 0 && used + itemWidth > available) {
+      rows += 1;
+      used = itemWidth;
+    } else {
+      used += itemWidth;
+    }
+  }
+  return rows;
+}
+
 // ---------- trend ----------
 export interface TrendSeries {
   name: string;
@@ -25,7 +43,7 @@ export interface TrendOptions {
   format?: (v: number) => string;
 }
 
-export function trend(o: TrendOptions): EChartOption {
+export function trend(o: TrendOptions): EChartOptionInput {
   const legend = o.series.length > 1;
   // A single reading has nothing to connect a line/area to, so it rendered as a bare dot. A
   // leading, blank-labeled category holding that same reading gives it a flat line/area instead
@@ -80,19 +98,24 @@ export function trend(o: TrendOptions): EChartOption {
     if (s.area !== false && si === 0) st.areaStyle = { color: vGrad(col) };
     return st;
   });
-  return {
-    // Extra top clearance beyond the usual legend allowance — the last point always carries a
-    // pill-shaped end label placed above it, and when that point sits near the axis max (a
-    // single-point series is the extreme case) the pill had too little room and got clipped
-    // against the chart's own top edge.
-    // A wider right edge with several series leaves room for the side end-label column.
-    grid: { left: 42, right: sideLabels ? 68 : 22, top: legend ? 46 : 34, bottom: 26 },
-    legend: legend ? { top: 0, left: 0 } : undefined,
-    tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: G[300], type: 'dashed' } }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
-    xAxis: { type: 'category', data: categories, boundaryGap: false, axisLabel: { margin: 10 } },
-    yAxis: { type: 'value', min: o.yMin, max: o.yMax, splitNumber: 4, axisLabel: { formatter: (v: number) => fmtNum(v) }, scale: o.yMin == null },
-    series,
-  };
+  const build = ((width: number): EChartOption => {
+    const legendExtra = legend ? (legendRows(o.series.map((s) => s.name), width) - 1) * LEGEND_ROW_HEIGHT : 0;
+    return {
+      // Extra top clearance beyond the usual legend allowance — the last point always carries a
+      // pill-shaped end label placed above it, and when that point sits near the axis max (a
+      // single-point series is the extreme case) the pill had too little room and got clipped
+      // against the chart's own top edge.
+      // A wider right edge with several series leaves room for the side end-label column.
+      grid: { left: 42, right: sideLabels ? 68 : 22, top: (legend ? 46 : 34) + legendExtra, bottom: 26 },
+      legend: legend ? { top: 0, left: 0 } : undefined,
+      tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: G[300], type: 'dashed' } }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
+      xAxis: { type: 'category', data: categories, boundaryGap: false, axisLabel: { margin: 10 } },
+      yAxis: { type: 'value', min: o.yMin, max: o.yMax, splitNumber: 4, axisLabel: { formatter: (v: number) => fmtNum(v) }, scale: o.yMin == null },
+      series,
+    };
+  }) as EChartOptionInput & { optionKey?: string };
+  build.optionKey = JSON.stringify([o.categories, o.series, o.yMin, o.yMax, o.unit]);
+  return build;
 }
 
 // ---------- donut ----------
@@ -532,7 +555,7 @@ export interface HBarsStackedOptions {
   labelWidth?: number;
 }
 
-export function hbarsStacked(o: HBarsStackedOptions): EChartOption {
+export function hbarsStacked(o: HBarsStackedOptions): EChartOptionInput {
   const series = o.series.map((s, si, arr) => ({
     name: s.name,
     type: 'bar',
@@ -545,14 +568,16 @@ export function hbarsStacked(o: HBarsStackedOptions): EChartOption {
       : undefined,
     emphasis: { focus: 'series' },
   }));
-  return {
-    grid: { left: 8, right: 64, top: 30, bottom: 6, containLabel: true },
+  const build = ((width: number): EChartOption => ({
+    grid: { left: 8, right: 64, top: 30 + (legendRows(o.series.map((q) => q.name), width) - 1) * LEGEND_ROW_HEIGHT, bottom: 6, containLabel: true },
     legend: { top: 0, left: 0 },
     tooltip: { trigger: 'item', formatter: (x: { name: string; marker: string; seriesName: string; value: number }) => `<b>${x.name}</b><br/>${x.marker} ${x.seriesName}: ${fmtNum(x.value)}` },
     xAxis: { type: 'value', splitLine: { lineStyle: { color: G.line } }, axisLabel: { formatter: (v: number) => fmtNum(v) } },
     yAxis: { type: 'category', data: o.categories, inverse: true, axisLine: { show: false }, axisLabel: { color: G[700], fontSize: 11.5, width: o.labelWidth || 70, overflow: 'truncate' } },
     series,
-  };
+  })) as EChartOptionInput & { optionKey?: string };
+  build.optionKey = JSON.stringify([o.categories, o.series, o.barWidth, o.labelWidth]);
+  return build;
 }
 
 // ---------- pareto ----------

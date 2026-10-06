@@ -487,6 +487,7 @@
       "SBR_ID": "SBR ID",
       "SOURCE_CODE": "Source",
       "EID": "EID",
+      "EID_SOURCE": "EID source",
       "NAME_ENU": "Regulatory Name (EN)",
       "NAME_ARA": "Regulatory Name (AR)",
       "TRADE_NAME_ENU": "Trade Name (EN)",
@@ -1393,6 +1394,8 @@
       "map": "Where the establishments are",
       "mapSub": "Establishments by municipality, from the primary address",
       "responseByActivitySub": "By economic activity section",
+      "lowestNote": "{{name}} has the lowest dependable response rate at {{rate}}%, across {{base}} sampled units.",
+      "thinBase": "small base",
       "samples": "Survey Samples (PLACEHOLDER)",
       "shareOfFrame": "Share of the live frame",
       "sizeClass": "Establishments by size class",
@@ -2023,5 +2026,8 @@
     "empty": "No source tables are registered yet.",
     "notFound": "This regulator is not in the source catalog.",
     "loadError": "Failed to load the source catalog. Please try again."
+  },
+  "surveys": {
+    "noViewPermission": "You do not have permission to view surveys."
   }
 }
