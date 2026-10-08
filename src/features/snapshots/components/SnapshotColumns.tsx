@@ -36,7 +36,7 @@ function DateCell({ value }: { value: unknown }) {
   return <span className="text-sm text-slate-600 whitespace-nowrap">{formatDate(value == null ? null : String(value))}</span>;
 }
 
-type Kind = 'id' | 'mono' | 'text' | 'arabic' | 'source' | 'number' | 'date' | 'status';
+type Kind = 'id' | 'entId' | 'grpId' | 'mono' | 'text' | 'arabic' | 'source' | 'number' | 'date' | 'status';
 
 // [row key, column label key, English fallback, cell kind] — rows are raw frozen base-table rows.
 type Spec = [string, string, string, Kind];
@@ -63,7 +63,7 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
     ['EST_STATUS_CATEGORY_SOURCE', 'columns.EST_STATUS_CATEGORY_SOURCE', 'EST status category source', 'source'],
     ['LEGAL_TYPE', 'columns.LEGAL_TYPE', 'Legal type', 'text'],
     ['LEGAL_TYPE_SOURCE', 'columns.LEGAL_TYPE_SOURCE', 'Legal type source', 'source'],
-    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
+    ['SECTOR_ID', 'columns.SECTOR_ID', 'Sector ID', 'text'],
     ['SECTOR_ID_SOURCE', 'columns.SECTOR_ID_SOURCE', 'Sector ID source', 'source'],
     ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
     ['ISIC_CODE_SOURCE', 'columns.ISIC_CODE_SOURCE', 'ISIC code source', 'source'],
@@ -96,28 +96,20 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
     ['REG_CANCEL_DATE', 'columns.REG_CANCEL_DATE', 'Reg cancel date', 'date'],
   ],
   enterprises: [
-    ['ENTERPRISE_ID', 'columns.ENTERPRISE_ID', 'Enterprise', 'id'],
+    ['ENTERPRISE_ID', 'columns.ENTERPRISE_ID', 'Enterprise', 'entId'],
     ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
-    ['STATUS', 'columns.STATUS', 'Status', 'status'],
     ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
-    ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
-    ['EMPLOYMENT_COUNT', 'columns.EMPLOYMENT_COUNT', 'Employment count', 'number'],
-    ['ANNUAL_TURNOVER', 'columns.ANNUAL_TURNOVER', 'Annual turnover', 'number'],
-    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
+    ['STATUS', 'columns.STATUS', 'Status', 'status'],
     ['MAIN_ESTABLISHMENT_SBR_ID', 'columns.MAIN_UNIT', 'Main unit', 'id'],
     ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
   ],
   enterprise_groups: [
-    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
-    ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
+    ['ENTERPRISE_GROUP_ID', 'columns.GROUP', 'Group', 'grpId'],
+    ['NAME_ENU', 'columns.GROUP_NAME', 'Group name', 'text'],
+    ['UCI_NAME', 'columns.UCI', 'Controlling institution (UCI)', 'text'],
+    ['PRINCIPAL_ISIC_2DIGIT', 'columns.PRINCIPAL_ACTIVITY', 'Principal activity', 'mono'],
+    ['TOTAL_EMPLOYEES', 'columns.EMPLOYEES', 'Employees', 'number'],
     ['STATUS', 'columns.STATUS', 'Status', 'status'],
-    ['UCI_NAME', 'columns.UCI_NAME', 'UCI name', 'text'],
-    ['UCI_COUNTRY', 'columns.UCI_COUNTRY', 'UCI country', 'text'],
-    ['MULTINATIONAL_GROUP_FLG', 'columns.MULTINATIONAL_GROUP_FLG', 'Multinational', 'text'],
-    ['FOREIGN_CONTROLLED_GROUP_FLG', 'columns.FOREIGN_CONTROLLED_GROUP_FLG', 'Foreign controlled', 'text'],
-    ['PRINCIPAL_ISIC_2DIGIT', 'columns.PRINCIPAL_ISIC_2DIGIT', 'Principal ISIC', 'mono'],
-    ['TOTAL_EMPLOYEES', 'columns.TOTAL_EMPLOYEES', 'Total employees', 'number'],
-    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
   ],
   contacts: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
@@ -125,12 +117,14 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
     ['ROLE', 'columns.ROLE', 'Role', 'text'],
     ['PHONE', 'columns.PHONE', 'Phone', 'text'],
     ['MOBILE', 'columns.MOBILE', 'Mobile', 'text'],
+    ['FAX', 'columns.FAX', 'Fax', 'text'],
     ['EMAIL', 'columns.EMAIL', 'Email', 'text'],
-    ['PO_BOX', 'columns.PO_BOX', 'P.O. Box', 'text'],
+    ['PO_BOX', 'columns.PO_BOX', 'PO box', 'text'],
     ['WEBSITE', 'columns.WEBSITE', 'Website', 'text'],
-    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source code', 'mono'],
     ['PRIORITY', 'columns.PRIORITY', 'Priority', 'number'],
     ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
+    ['VALID_TO', 'columns.VALID_TO', 'Valid to', 'date'],
   ],
   addresses: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
@@ -153,6 +147,8 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
 function renderCell(kind: Kind, value: unknown) {
   switch (kind) {
     case 'id': return <IdCell value={value} />;
+    case 'grpId': return <IdCell value={value} prefix="EGR-" />;
+    case 'entId': return <IdCell value={value} prefix="ENT-" />;
     case 'mono': return <MonoCell value={value} />;
     case 'arabic': return <ArabicCell value={value} />;
     case 'source': return <SourceCell value={value} />;
