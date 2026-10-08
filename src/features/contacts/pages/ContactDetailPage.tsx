@@ -18,7 +18,7 @@ import { formatDate, nullableText } from '@/utils/format';
 import { isContactFieldHistoryEnabled } from '../constants';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
-import { ChevronLeft, ChevronRight, Pencil, Briefcase, Phone, Database, History } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Phone, Database, History } from 'lucide-react';
 
 function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
@@ -69,6 +69,50 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
         />
       )}
     </div>
+  );
+}
+
+// Banner title with the same click-to-history behaviour as the card fields, white-tinted for the dark band.
+function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount }: {
+  recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  const { data, isLoading, isError } = useGetContactHistoryQuery(recordId, { skip: !open });
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <span className="relative inline-flex min-w-0" ref={wrapRef}>
+      <button
+        type="button"
+        onClick={canViewHistory ? () => setOpen((o) => !o) : undefined}
+        disabled={!canViewHistory}
+        className="group flex min-w-0 items-center gap-1.5 text-start disabled:cursor-default"
+      >
+        {children}
+        <PendingFieldBadge count={pendingCount} />
+        {canViewHistory && <History className="h-4 w-4 shrink-0 text-white/30 transition-colors group-hover:text-white" />}
+      </button>
+      {open && (
+        <FieldHistoryPopover
+          anchorRef={wrapRef}
+          versions={data?.data ?? []}
+          fieldKey={fieldKey}
+          fieldLabel={label}
+          isLoading={isLoading}
+          isError={isError}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </span>
   );
 }
 
@@ -163,7 +207,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
 
   const contactFields = [
     { k: 'SBR_ID', label: lbl('SBR_ID'), value: String(c.SBR_ID), show: showField('SBR_ID', c.SBR_ID), mono: true },
-    { k: 'CONTACT_NAME', label: lbl('CONTACT_NAME'), value: nullableText(c.CONTACT_NAME), show: showField('CONTACT_NAME', c.CONTACT_NAME), mono: false },
     { k: 'SOURCE_CODE', label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE, show: showField('SOURCE_CODE', c.SOURCE_CODE), mono: true },
   ].filter((f) => f.show);
 
@@ -185,7 +228,19 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   return (
     <PageContainer>
       <PageHeader
-        title={title}
+        title={
+          c.CONTACT_NAME ? (
+            <HeaderNameField
+              recordId={contactId}
+              fieldKey="CONTACT_NAME"
+              label={lbl('CONTACT_NAME')}
+              canViewHistory={canViewHistory && isContactFieldHistoryEnabled('CONTACT_NAME')}
+              pendingCount={pendingFields.CONTACT_NAME}
+            >
+              <span className="min-w-0 break-words">{title}</span>
+            </HeaderNameField>
+          ) : title
+        }
         description={c.ROLE ?? undefined}
         back={{ label: t('contactDetail.allContacts'), onClick: () => router.push('/contacts') }}
         chips={
@@ -213,7 +268,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
 
       <HighlightStrip
         items={[
-          { icon: <Briefcase className="h-4 w-4" />, label: lbl('ROLE'), value: c.ROLE },
           { icon: <Phone className="h-4 w-4" />, label: lbl('PHONE'), value: c.PHONE || c.MOBILE },
           { icon: <Database className="h-4 w-4" />, label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE },
         ]}

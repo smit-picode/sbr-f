@@ -99,8 +99,8 @@ export const en: Translations = {
   },
   filters: {
     searchByName: 'Search by name...',
-    searchByContact: 'Search by name, email, or phone...',
-    searchByAddress: 'Search by zone, street, or QARS...',
+    searchByContact: 'Search by name, email, phone, or SBR ID...',
+    searchByAddress: 'Search by zone, street, QARS, or SBR ID...',
     filterByRecordId: 'Filter by Record ID...',
     status: 'Status',
     sector: 'Sector',

@@ -37,5 +37,6 @@ export const {
   useGetSnapshotLiveCountsQuery,
   useGetSnapshotsQuery,
   useGetSnapshotTableQuery,
+  useLazyGetSnapshotTableQuery,
   useCreateSnapshotMutation,
 } = snapshotsApi;

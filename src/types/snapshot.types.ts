@@ -15,6 +15,8 @@ export interface SnapshotSummary extends SnapshotLiveCounts {
   CREATED_AT: string;
   FROZEN_BY_USER_ID: number | null;
   FROZEN_BY_NAME: string | null;
+  // Returned by the list procedure once it joins the user's email; absent today.
+  FROZEN_BY_EMAIL?: string | null;
 }
 
 // Values of the backend's SNAPSHOT_ENTITY allow-list (underscore, not hyphen).

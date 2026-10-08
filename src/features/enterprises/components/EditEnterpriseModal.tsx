@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,7 @@ import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
-import { Building2, X, Search } from 'lucide-react';
+import { Building2, X, Search, Unlink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { SbrEnterprise, EnterpriseEstablishment, AttachableEstablishment } from '@/types';
 
@@ -47,6 +47,8 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const [added, setAdded] = useState<EstabRow[]>([]);
   const [search, setSearch] = useState('');
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  // An original member is only marked removed after the user confirms; a just-added row is simply dropped.
+  const [pendingRemoval, setPendingRemoval] = useState<{ sbrId: number; name: string } | null>(null);
 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
@@ -285,7 +287,9 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                       : <Badge variant="secondary" className="rounded-md text-[10px]">BRANCH</Badge>}
                     <button
                       type="button"
-                      onClick={() => removeRow(r.SBR_ID)}
+                      onClick={() => (added.some((a) => a.SBR_ID === r.SBR_ID)
+                        ? removeRow(r.SBR_ID)
+                        : setPendingRemoval({ sbrId: r.SBR_ID, name: r.NAME_ENU ?? `#${r.SBR_ID}` }))}
                       className="text-slate-400 hover:text-red-600"
                       title={t('enterpriseEdit.remove', { defaultValue: 'Remove' })}
                     >
@@ -348,6 +352,35 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
         <DialogFooter className="px-6 py-4 border-t border-slate-100 shrink-0">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>{t('actions.cancel')}</Button>
           <Button onClick={handleSubmit} loading={isLoading} style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }} className="text-white">{isLoading ? t('actions.saving') : t('actions.saveChanges')}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={pendingRemoval !== null} onOpenChange={(o) => { if (!o) setPendingRemoval(null); }}>
+      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+        <div className="flex items-start gap-3.5 px-6 pb-5 pt-6">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F4F0E8] text-[#A29374]">
+            <Unlink className="h-[18px] w-[18px]" />
+          </span>
+          <div className="min-w-0 pe-6 pt-0.5">
+            <DialogTitle>{t('enterpriseEdit.removeConfirmTitle', { defaultValue: 'Remove establishment?' })}</DialogTitle>
+            <DialogDescription className="mt-2 text-[13px] leading-relaxed text-slate-500">
+              {t('enterpriseEdit.removeConfirmBody', {
+                defaultValue: '{{name}} will be removed from this enterprise once the change is approved. You can still review it before saving.',
+                name: pendingRemoval?.name ?? '',
+              })}
+            </DialogDescription>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 border-t border-slate-100 bg-slate-50/70 px-6 py-4 sm:space-x-0">
+          <Button variant="outline" onClick={() => setPendingRemoval(null)}>{t('actions.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button
+            onClick={() => { if (pendingRemoval) removeRow(pendingRemoval.sbrId); setPendingRemoval(null); }}
+            style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
+            className="text-white"
+          >
+            {t('enterpriseEdit.removeConfirm', { defaultValue: 'Remove' })}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

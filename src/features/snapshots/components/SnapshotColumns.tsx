@@ -169,6 +169,13 @@ function renderCell(kind: Kind, value: unknown) {
   }
 }
 
+export interface SnapshotExportColumn { key: string; label: string; kind: Kind }
+
+// The same columns as the table, as plain labels and kinds, for the Excel export.
+export function getSnapshotExportColumns(entity: SnapshotEntity, t: TFunction): SnapshotExportColumn[] {
+  return SPECS[entity].map(([key, labelKey, fallback, kind]) => ({ key, label: t(labelKey, { defaultValue: fallback }), kind }));
+}
+
 // Read-only columns for a frozen frame's tabs — no edit action, no pending-request badges.
 export function getSnapshotColumns(entity: SnapshotEntity, t: TFunction): ColumnDef<SnapshotRow>[] {
   return SPECS[entity].map(([key, labelKey, fallback, kind]) => ({

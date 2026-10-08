@@ -337,13 +337,18 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
   );
 }
 
-function ChangeHistoryList({ entries }: { entries: EnterpriseChangeHistoryEntry[] }) {
+function ChangeHistoryList({ entries, establishments }: { entries: EnterpriseChangeHistoryEntry[]; establishments: EnterpriseEstablishment[] }) {
   const { t } = useTranslation();
   if (!entries.length) return <p className="text-[12.5px] text-slate-400">{t('enterpriseDetail.noChangeHistory')}</p>;
   return (
-    <ul className="space-y-3">
+    <ul className="max-h-[360px] space-y-3 overflow-y-auto pe-1">
       {entries.map((e) => {
-        const recordId = e.NEW_RECORD_ID ?? e.PREV_RECORD_ID;
+        const rawId = e.NEW_RECORD_ID ?? e.PREV_RECORD_ID;
+        // An establishment change points at a row of its history; show the unit's SBR ID, as the design does.
+        const unit = e.TABLE_NAME === 'SBR_ESTABLISHMENTS'
+          ? establishments.find((m) => m.ID === e.NEW_RECORD_ID || m.ID === e.PREV_RECORD_ID)
+          : undefined;
+        const recordId = unit?.SBR_ID ?? rawId;
         const s = (e.STATUS || 'APPROVED').toUpperCase();
         const statusCfg = s === 'REJECTED'
           ? { cls: 'bg-red-50 text-red-700', label: 'Rejected' }
@@ -590,7 +595,7 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
           </SectionCard>
 
           <SectionCard title={t('enterpriseDetail.changeHistory')} count={changeHistory.length} icon={<ClipboardList className="h-4 w-4" />}>
-            <ChangeHistoryList entries={changeHistory} />
+            <ChangeHistoryList entries={changeHistory} establishments={establishments} />
           </SectionCard>
         </div>
       </div>

@@ -33,8 +33,8 @@ export const ar: Translations = {
   },
   filters: {
     searchByName: 'البحث بالاسم...',
-    searchByContact: 'البحث بالاسم أو البريد الإلكتروني أو الهاتف...',
-    searchByAddress: 'البحث بالمنطقة أو الشارع أو QARS...',
+    searchByContact: 'البحث بالاسم أو البريد الإلكتروني أو الهاتف أو رقم SBR...',
+    searchByAddress: 'البحث بالمنطقة أو الشارع أو QARS أو رقم SBR...',
     filterByRecordId: 'تصفية برقم السجل...',
     status: 'الحالة',
     sector: 'القطاع',
