@@ -150,7 +150,7 @@ function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHi
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="cursor-pointer text-white/50 transition-colors hover:text-white"
+          className="translate-y-[2px] cursor-pointer text-white/50 transition-colors hover:text-white"
           title={t('fieldHistory.title', { defaultValue: 'Attribute history' })}
         >
           <History className="h-4 w-4" />
@@ -377,7 +377,7 @@ function ChangeHistoryList({ entries, establishments }: { entries: EnterpriseCha
 
 function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[] }) {
   return (
-    <ul className="mt-3">
+    <ul className="mt-3 max-h-[360px] overflow-y-auto pe-1">
       {entries.map((e, i) => {
         const added = e.ACTION === 'ADD';
         const isLast = i === entries.length - 1;

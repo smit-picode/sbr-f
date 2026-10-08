@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, ClipboardList, Landmark, Layers, TrendingUp } from 'lucide-react';
+import { Building2, ClipboardList, Layers, Plus, ShieldCheck, TrendingUp } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppSelector, usePermission } from '@/hooks';
-import { formatDate } from '@/utils/format';
+import { useRouter } from '@/hooks/useAppRouter';
+import { formatDate, formatRole } from '@/utils/format';
 import { EChart, columns, donut, hbars, hbarsStacked, pareto, qatarMap, registerQatarMap, trend } from '@/lib/charts';
 import { useGetExecutiveSummaryQuery } from '../api/homeApi';
 import { ExecStatCard } from '../components/ExecStatCard';
@@ -51,6 +53,8 @@ export function ExecutiveHomePage() {
   const { canView: canViewEstablishments } = usePermission('establishments');
   const { canView: canViewEnterprises } = usePermission('enterprises');
   const user = useAppSelector((s) => s.auth.user);
+  const router = useRouter();
+  const isSuperAdmin = user?.role?.toUpperCase() === 'SUPER_ADMIN';
   const [mapReady, setMapReady] = useState(false);
   const [growthMode, setGrowthMode] = useState<GrowthMode>('total');
   const [responseMode, setResponseMode] = useState<ResponseMode>('survey');
@@ -261,19 +265,31 @@ export function ExecutiveHomePage() {
     <PageContainer>
       <PageHeader
         title={t('home.exec.greeting', { defaultValue: 'Welcome' }) + ', ' + firstName}
-        description={t('home.exec.subtitle', { defaultValue: 'Management view of the register — composition, growth, and survey coverage.' })}
+        description={isSuperAdmin
+          ? t('home.exec.adminSubtitle', { defaultValue: 'Administration control center — access risks and pending setup at a glance.' })
+          : t('home.exec.subtitle', { defaultValue: 'Management view of the register — composition, growth, and survey coverage.' })}
         chips={
           <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold text-white">
-            <Landmark className="h-3 w-3" />
-            {t('home.exec.badge', { defaultValue: 'Executive' })}
+            <ShieldCheck className="h-3 w-3" />
+            {user?.role
+              ? (user.role.toUpperCase() === 'SUPER_ADMIN' ? t('home.exec.roleSuperAdmin', { defaultValue: 'Super-admin' }) : formatRole(user.role))
+              : t('home.exec.badge', { defaultValue: 'Executive' })}
           </span>
         }
-        actions={
+        actions={isSuperAdmin ? (
+          <Button
+            onClick={() => router.push('/admin/users')}
+            style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
+            className="text-white hover:opacity-90"
+          >
+            <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
+          </Button>
+        ) : (
           <div className="text-end">
             <div className="text-[11px] text-white/70">{t('home.exec.asOf', { defaultValue: 'As of' })}</div>
             <div className="text-[13px] font-semibold text-white">{asOf}</div>
           </div>
-        }
+        )}
       />
 
       {/* headline KPI band — first three wired to the real endpoint; Survey samples is dummy
