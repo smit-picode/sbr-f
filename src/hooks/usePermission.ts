@@ -1,9 +1,6 @@
 import { useAppSelector } from '@/hooks';
 
-// Returns what the current user can do for a given section.
-// baseKey = section prefix e.g. 'establishments', 'contacts', 'addresses', 'audit_log', 'enterprises'
-// Checks for <baseKey>.view, <baseKey>.edit, <baseKey>.search, <baseKey>.view_detail,
-// <baseKey>.view_history in the user's permission list.
+// Returns the user's view/edit/search/detail/history rights for a section prefix.
 export function usePermission(baseKey: string) {
   const user = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);

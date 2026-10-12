@@ -1,11 +1,3 @@
-// Constants for the "New bulk update" wizard.
-//
-// The COLUMN DICTIONARY is no longer hardcoded here: it is served by
-// GET /bulk-change/template/:entityType, built from the backend's BULK_EDITABLE_COLUMNS —
-// the same specs the server validates against. Keeping a second copy in the UI is how a
-// template drifts into offering columns the API rejects (it previously offered CR_EXPIRY_DATE
-// and ROLE, both of which the single-record editors mark not-editable, and a SECTOR_ID value
-// of "Government" that is not in the SECTOR enum).
 import type { BulkChangeEntityType } from '../types';
 
 export type BulkChangeTableKey = 'Establishments' | 'Contacts' | 'Addresses';
@@ -13,10 +5,7 @@ export type BulkChangeTableKey = 'Establishments' | 'Contacts' | 'Addresses';
 export interface BulkChangeTableOption {
   key: BulkChangeTableKey;
   label: string;
-  // The friendly entity type SBR_PORTAL_PKG.SUBMIT_CHANGE dispatches on.
   entityType: BulkChangeEntityType;
-  // Reuses the app-wide nav.* translations instead of duplicating the same three
-  // table names under a new key — nav.establishments/contacts/addresses already exist.
   navKey: string;
   icon: 'Building2' | 'Users' | 'MapPin';
 }
@@ -39,31 +28,20 @@ export const TABLE_BY_ENTITY_TYPE: Record<BulkChangeEntityType, BulkChangeTableK
   ADDRESS: 'Addresses',
 };
 
-// Which identifier each entity's spreadsheet must carry.
-//
-// This is NOT cosmetic. SBR_PORTAL_PKG documents different identifier semantics per entity:
-// an establishment has one current row per SBR_ID, but an establishment has MANY contacts and
-// MANY addresses, so those two are addressed by the specific record ID being edited. A contacts
-// or addresses file keyed only on SBR_ID cannot say which row it means.
 export const BULK_CHANGE_ID_COLUMN: Record<BulkChangeEntityType, string> = {
   ESTABLISHMENT: 'SBR_ID',
   CONTACT: 'ID',
   ADDRESS: 'ID',
 };
 
-// Batch ceiling enforced by the API (BULK_MAX_ITEMS). Checked client-side too so an oversized
-// workbook is rejected before it is parsed and posted.
 export const BULK_CHANGE_MAX_ROWS = 200000;
 
-// Portal's documented bulk-upload file-size ceiling — checked before the file is read.
 export const BULK_CHANGE_MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
 
 export const BULK_CHANGE_ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 
-// Validate is a read-only dry run, so a dropped connection (e.g. a server restart) is retried after these waits.
 export const BULK_VALIDATE_RETRY_DELAYS_MS: number[] = [5000, 10000];
 
-// Failures that mean the request never got a real answer, so retrying is worthwhile.
 export const BULK_TRANSIENT_FAILURE_STATUSES: (string | number)[] = ['FETCH_ERROR', 'TIMEOUT_ERROR', 502, 503, 504];
 
 // Rows-per-page default for both bulk-change lists.
@@ -78,8 +56,6 @@ export const BULK_CHANGE_DEFAULT_FILTERS: BulkChangeFilterState = {
   limit: 10,
 };
 
-// Status -> badge classes. Rectangular (rounded-md) per the design reference; the PARTIALLY_*
-// states exist because a bulk decision is best-effort and can legitimately land half-applied.
 export const BULK_CHANGE_STATUS_CLASSES: Record<string, string> = {
   PENDING: 'bg-amber-50 text-amber-700',
   APPROVED: 'bg-emerald-50 text-emerald-700',
@@ -98,7 +74,6 @@ export const BULK_CHANGE_STATUS_DEFAULTS: Record<string, string> = {
   FAILED: 'Failed',
 };
 
-// Default English text for each server validation code, used as the i18n defaultValue.
 export const BULK_CHANGE_VALIDATION_DEFAULTS: Record<string, string> = {
   ID_MISSING: 'The record identifier is required.',
   ID_NOT_NUMERIC: 'The record identifier must be a positive whole number.',

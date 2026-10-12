@@ -13,10 +13,6 @@ export const EST_STATUS_OPTIONS = [
   { label: 'Inactive', value: 'Inactive' },
 ];
 
-// 'Mixed-Government' was renamed to 'State Owned' in the DB and in the pipeline
-// procedures that derive SECTOR_ID. `value` must stay
-// exactly the stored literal — it is sent as the `sectorId` query param and matched by the
-// backend SECTOR enum, so the old spelling would now filter to zero rows.
 export const SECTOR_OPTIONS = [
   { label: 'All', value: '' },
   { label: 'Private', value: 'Private' },

@@ -134,7 +134,6 @@ export function BlockCard(props: BlockCardProps) {
   const [menu, setMenu] = useState<MenuState | null>(null);
   const def = ANALYSIS_BLOCK_TYPE_MAP[block.type];
 
-  // A changed question invalidates the drill path.
   const dimsKey = `${block.query.entity}|${block.query.dimensions.join(',')}|${block.type}`;
   useEffect(() => { setDrill([]); }, [dimsKey]);
 
@@ -161,7 +160,6 @@ export function BlockCard(props: BlockCardProps) {
   const usesCompare = def.needsCompare || block.type === 'kpi' || (['pivot', 'bar', 'column'].includes(block.type) && query.dimensions.length === 1);
   const compare = query.compareTo && usesCompare ? query.compareTo : null;
   const hasChart = !['kpi', 'pivot', 'heatmap', 'records', 'completeness', 'text'].includes(block.type);
-  // Report and click filters on fields this block's unit doesn't have are skipped by the query — say so.
   const notApplied = [...new Set([
     ...analysis.filters.map((f) => f.field),
     ...(block.crossFilter ? cross.filter((c) => c.sourceBlockId !== block.id).map((c) => c.field) : []),

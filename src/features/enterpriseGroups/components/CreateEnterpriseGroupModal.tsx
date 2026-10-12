@@ -58,9 +58,7 @@ const EMPTY_FORM: FormState = {
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
-// A group cannot start in the future — confirmed with the team lead. Recomputed per
-// render rather than module-load time, so the cap stays correct across a session left open
-// past midnight.
+// A group cannot start in the future — confirmed with the team lead.
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
 export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGroupModalProps) {
@@ -96,7 +94,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
 
   const set = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // NAMES is one rule across the EN/AR pair, so typing in either clears it.
     const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
     if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
   };
@@ -112,7 +109,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
   };
 
   const handleSubmit = () => {
-    // Collect every failure so the summary lists them all, rather than one toast at a time.
     const e: Record<string, string> = {};
     if (!form.NAME_ENU.trim() && !form.NAME_ARA.trim()) {
       e.NAMES = t('createEnterpriseGroup.nameRequired', { defaultValue: 'At least one group name (EN or AR) is required.' });
@@ -171,7 +167,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
         )}
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* Names */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}</Label>
@@ -197,7 +192,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
           </div>
 
-          {/* UCI fields — no section header, just a subtle separator */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}</Label>
@@ -242,7 +236,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             </div>
           </div>
 
-          {/* Classification */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
@@ -286,7 +279,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
             </div>
           </div>
 
-          {/* Member Enterprises */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold tracking-[0.1em] text-slate-400">{t('editEnterpriseGroup.memberEnterprises', { defaultValue: 'Member Enterprises' })}</span>
@@ -342,7 +334,6 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
               </>
             )}
 
-            {/* Search box */}
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3 space-y-2">
               <p className="text-xs text-slate-500 font-medium">{t('editEnterpriseGroup.addMember', { defaultValue: 'Add a member enterprise' })}</p>
               <div className="relative">

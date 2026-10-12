@@ -34,7 +34,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  // Busy state for async actions: spinner, disabled, aria-busy. Ignored with asChild.
   loading?: boolean;
 }
 

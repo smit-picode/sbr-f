@@ -19,13 +19,7 @@ import {
 } from '../constants';
 import type { BulkChangeItemInput, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
-// Best-effort text for a caught value that isn't an Error instance. Covers two distinct shapes:
-// - RTK Query's own rejection from .unwrap() on a failed request — `{ status, data: { message } }`
-//   (the same shape services/api.ts's baseQueryWithErrorToast already reads to toast the server's
-//   message) — surfaced here too so the Validate step's own error panel shows that same plain
-//   sentence instead of falling through to a raw JSON dump of the whole error object.
-// - exceljs's browser-bundled zip/stream parsing, which can reject with a raw stream 'error'
-//   event or a plain object instead of a real Error for some malformed or unusually large files.
+// Best-effort text for a caught value that isn't an Error instance.
 function describeThrownValue(error: unknown): string | null {
   if (error === null || error === undefined) return null;
   if (typeof error === 'string') return error;
@@ -43,16 +37,10 @@ interface BulkChangeValidateStepProps {
   selectedTable: BulkChangeTableKey;
   file: File | null;
   onValidated: (result: BulkChangeValidationResult | null, items: BulkChangeItemInput[]) => void;
-  // Lets the wizard disable Back while parsing/validating is in flight, so the operator can't
-  // navigate away mid-run — the work itself isn't harmed either way, but leaving it clickable
-  // invites exactly the "did something break?" confusion this whole step is meant to prevent.
   onRunningChange?: (running: boolean) => void;
 }
 
-// Parses the uploaded workbook in the browser, then sends the parsed rows to
-// POST /bulk-change/validate. The server is what decides validity: it checks each row against
-// live data (does the record exist, is the column editable, is the value legal, does it
-// actually differ) and returns the real old/new diff. The browser only reads the file.
+// Parses the uploaded workbook in the browser
 export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRunningChange }: BulkChangeValidateStepProps) {
   const { t } = useTranslation();
   const entityType = ENTITY_TYPE_BY_TABLE[selectedTable];
@@ -60,24 +48,16 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
   const [validateBulkChange] = useValidateBulkChangeMutation();
 
   const [result, setResult] = useState<BulkChangeValidationResult | null>(null);
-  // Kept so each result row can be labelled with its real spreadsheet line: the server returns
-  // rows in the order they were posted, but only the parsed items know which sheet row that was.
   const [parsedItems, setParsedItems] = useState<BulkChangeItemInput[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  // Surfaced above the skeleton while isRunning — a large file's browser-side parse and the
-  // server's row-by-row validation can both take a real amount of time, and a bare skeleton with
-  // no explanation reads as a stall rather than as work in progress.
   const [stage, setStage] = useState<'parsing' | 'validating'>('parsing');
   const [parseError, setParseError] = useState<string | null>(null);
   const [fileWarnings, setFileWarnings] = useState<string[]>([]);
-  // Display-only paging of the row table; the full result still goes to onValidated untouched.
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
   const rowDetailsRef = useRef<HTMLDivElement>(null);
 
   const template = templateResponse?.data;
-  // Re-run only when the inputs that define the result change, not on every parent render.
-  // Bumped by "Try again" so the same file re-runs without being picked again.
   const [attempt, setAttempt] = useState(0);
   const runKey = `${file?.name ?? ''}:${file?.lastModified ?? ''}:${entityType}:${template?.idColumn ?? ''}:${attempt}`;
   const lastRunKey = useRef<string | null>(null);
@@ -146,12 +126,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
         onValidated(validation, parsed.items);
       } catch (error) {
         if (cancelled) return;
-        // Logged in full because the message shown below is intentionally short — this is the
-        // only place the real cause (a raw exceljs parse failure, or the server's own error
-        // shape from RTK Query's unwrap(), which is a plain {status, data} object, not an
-        // Error) survives for diagnosis. console.warn, not .error — this failure is already
-        // handled and shown in the wizard's own UI below, but Next.js's dev overlay treats any
-        // console.error as an unhandled crash and pops a blocking full-screen dialog over it.
         console.warn('Bulk change validate step failed:', error);
         const failedStatus = requestFailureStatus(error);
         let requestMessage: string | null = null;
@@ -178,8 +152,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
 
     void run();
     return () => { cancelled = true; };
-    // onValidated is a parent callback and is intentionally not a dependency — including it
-    // would re-parse the workbook on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runKey, file, template]);
 
@@ -242,7 +214,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
     );
   }
 
-  // The identifier column plus every column the file actually touched.
   const columns = result.columns;
   const pageStart = (page - 1) * limit;
   const pageRows = result.rows.slice(pageStart, pageStart + limit);
@@ -325,8 +296,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
             <tbody className="divide-y divide-slate-100">
               {pageRows.map((row, pageIndex) => {
                 const index = pageStart + pageIndex;
-                // rows[] comes back in the order the items were posted, so index lines each
-                // one up with the parsed item that carries its real spreadsheet row number.
                 const rowNumber = parsedItems[index]?.rowNumber ?? index + 1;
                 const rowIssues = issuesByRow.get(rowNumber) ?? [];
                 const hasError = row.status === 'ERROR';
@@ -350,12 +319,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                           )}
                           {fieldIssue && (
                             <p className="mt-0.5 text-xs text-red-600">
-                              {/* The server's own message is specific to this row (e.g. names the
-                                  actual value and the real allowed list) — rendered directly rather
-                                  than as an i18n defaultValue, since en.json/ar.json define a static
-                                  string for every code, and a loaded translation always wins over
-                                  defaultValue regardless of what it's set to. Falls back to the
-                                  generic, translated per-code text only when the server sent none. */}
                               {fieldIssue.message?.trim()
                                 ? fieldIssue.message
                                 : t(`bulkChange.wizard.validate.codes.${fieldIssue.code}`, {
@@ -374,7 +337,6 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                           </span>
                           {generalIssues.map((issue) => (
                             <p key={issue.code} className="mt-0.5 text-xs text-red-600">
-                              {/* Same server-message-first rule as the field-level issue above. */}
                               {issue.message?.trim()
                                 ? issue.message
                                 : t(`bulkChange.wizard.validate.codes.${issue.code}`, {

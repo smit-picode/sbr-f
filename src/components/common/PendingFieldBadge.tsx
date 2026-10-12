@@ -2,8 +2,7 @@
 
 import { Clock } from 'lucide-react';
 
-// Tiny inline indicator next to a field label showing how many PENDING change requests
-// target that attribute (so users see exactly which fields are awaiting approval).
+// Inline badge showing how many pending change requests target a field.
 export function PendingFieldBadge({ count }: { count?: number }) {
   if (!count || count < 1) return null;
   return (

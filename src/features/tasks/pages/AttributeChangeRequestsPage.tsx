@@ -17,8 +17,6 @@ import { cleanParams } from '@/utils/query';
 import { formatDate } from '@/utils/format';
 import { usePermission, usePersistedState } from '@/hooks';
 
-// Values stay as the real table names (sent to the backend); labels are display-only
-// (friendly names) — same logic as the Audit Log tab.
 const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_ENTERPRISE_GROUPS', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
 const TABLE_OPTIONS = [
   { value: '__all__', label: 'All Tables' },
@@ -40,8 +38,6 @@ export function AttributeChangeRequestsPage() {
   const router = useRouter();
   const { canView, canApprove } = usePermission('approvals');
   const canAccess = canView || canApprove;
-  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
-  // when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState<ChangeRequestFilters>('sbr:attributeChangeRequests:filters', DEFAULT_FILTERS);
 
   const queryParams = cleanParams({
@@ -57,8 +53,6 @@ export function AttributeChangeRequestsPage() {
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
 
-  // Reset is only meaningful once a real filter is applied (the table dropdown);
-  // pagination changes don't count as a filter.
   const hasActiveFilters = !!filters.tableName && filters.tableName !== '__all__';
 
   const columns: ColumnDef<ChangeRequestListItem>[] = [

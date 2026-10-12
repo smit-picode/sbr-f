@@ -34,8 +34,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   const batchId = Number(id);
   const { data, isLoading, isError, refetch } = useGetBulkChangeByIdQuery(batchId, { skip: !Number.isInteger(batchId) });
   const [decideBulkChange] = useDecideBulkChangeMutation();
-  // Deciding needs both layers the API enforces: module access (bulk_change.approve) AND the
-  // general approver right (approvals.approve), which SBR_PORTAL_PKG.DECIDE_BULK also checks.
   const approvals = usePermission('approvals');
   const bulkChange = usePermission('bulk_change');
   const canApprove = bulkChange.canApprove && approvals.canApprove;
@@ -57,13 +55,10 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   }
 
   const isPending = task.STATUS === 'PENDING';
-  // Members can be decided one by one from Attribute Change Requests while the batch stays PENDING;
-  // counted from each row's own status so this works whichever batch-view version is deployed.
   const pendingRows = task.ROWS.filter((row) => row.status === 'PENDING').length;
   const approvedRows = task.ROWS.filter((row) => row.status === 'APPROVED').length;
   const rejectedRows = task.ROWS.filter((row) => row.status === 'REJECTED').length;
   const isPartlyDecided = isPending && approvedRows + rejectedRows > 0;
-  // Decided tasks are reached via the History list, not the pending queue — send Back there.
   const backHref = isPending ? '/tasks/bulk-change' : '/tasks/bulk-change/history';
   const tableKey = TABLE_BY_ENTITY_TYPE[task.ENTITY_TYPE];
 
@@ -77,9 +72,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       const response = await decideBulkChange({ id: task.BATCH_ID, decision, reason: note.trim() }).unwrap();
       const result = response.data;
 
-      // DECIDE_BULK is best-effort: individual rows can fail on a row lock (ORA-20009) or a
-      // conflicting pending change (ORA-20012) while the rest go through. Report that honestly
-      // instead of claiming the whole batch succeeded.
       if (result && result.failed > 0) {
         toast.warning(
           t('bulkChange.decidedPartial', {
@@ -99,7 +91,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       }
       router.push('/tasks/bulk-change');
     } catch {
-      // The base query already surfaced the server message as a toast.
     } finally {
       setPendingAction(null);
     }
@@ -114,7 +105,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />} {t('bulkChange.back', { defaultValue: 'Back to bulk changes' })}
       </button>
 
-      {/* Header */}
       <div className="rounded-lg bg-white p-5 shadow-card">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs font-medium text-slate-500">{task.ID}</span>
@@ -160,7 +150,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Rows the procedure could not create at all — no change request exists for these. */}
       {task.FAILED_ITEMS.length > 0 && (
         <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
           <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -182,7 +171,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         </div>
       )}
 
-      {/* Reason */}
       <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.reasonForChange', { defaultValue: 'Reason for Change' })}
@@ -190,7 +178,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         <p className="px-5 py-3 text-sm text-slate-700">{fmt(task.REASON)}</p>
       </div>
 
-      {/* Per-record diff */}
       <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.confirmTitle', { defaultValue: 'Confirm Bulk Change' })}
@@ -209,9 +196,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {task.ROWS.map((row) => {
-                // A row's own status can diverge from the batch's when it was decided
-                // individually from the Attribute Change Requests screen, or when it failed
-                // during a partial bulk decision.
                 const rowRejected = row.status === 'REJECTED';
                 const rowPending = row.status === 'PENDING';
                 const rowStatusLabel = t(`bulkChange.status.${row.status}`, {
@@ -230,7 +214,6 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
                     </td>
                     {task.COLUMNS.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);
-                      // The identifier column isn't part of CHANGE_DATA — show the record id.
                       if (!field) {
                         return (
                           <td key={col.key} className="px-3 py-3 align-top">

@@ -45,7 +45,6 @@ export function CreateSnapshotPage() {
   const [nameError, setNameError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Skipped without the permission — the shared API layer treats any 403 as a revoked session.
   const { data: countsRes, isLoading: countsLoading } = useGetSnapshotLiveCountsQuery(undefined, { skip: !canCreate });
   const [createSnapshot, { isLoading: creating }] = useCreateSnapshotMutation();
   const counts = countsRes?.data ?? null;
@@ -77,7 +76,6 @@ export function CreateSnapshotPage() {
       setConfirmOpen(false);
       router.push('/snapshots/browse');
     } catch (error) {
-      // 400s aren't toasted by the shared API layer; other statuses already were.
       if ((error as FetchBaseQueryError)?.status === 400) {
         toast.error(apiMessage(error) ?? t('snapshots.createFailed', { defaultValue: 'The snapshot could not be created.' }));
       }
@@ -155,7 +153,6 @@ export function CreateSnapshotPage() {
         </div>
       </div>
 
-      {/* Locked while the copy runs: the request only returns once all five tables are frozen. */}
       <Dialog open={confirmOpen} onOpenChange={(o) => { if (!creating) setConfirmOpen(o); }}>
         <DialogContent className="max-w-md" onEscapeKeyDown={(e) => { if (creating) e.preventDefault(); }} onPointerDownOutside={(e) => { if (creating) e.preventDefault(); }}>
           <DialogHeader>

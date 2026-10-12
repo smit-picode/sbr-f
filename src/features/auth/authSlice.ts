@@ -2,8 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, LoginResponse, UserPermission } from '@/types';
 import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
 
-// A sign-in or sign-out starts a new session, so neither the previous user's list filters
-// ('sbr:' keys in sessionStorage) nor their sidebar layout may carry over into it.
+// A sign-in or sign-out starts a new session
 const clearPersistedUiState = (): void => {
   if (typeof window === 'undefined') return;
   for (let i = sessionStorage.length - 1; i >= 0; i--) {
@@ -40,7 +39,6 @@ const authSlice = createSlice({
       }
     },
     setPermissions: (state, action: PayloadAction<UserPermission[] | string[]>) => {
-      // Backend may return string[] or legacy UserPermission[] — normalise to UserPermission[]
       const normalised: UserPermission[] = (action.payload as Array<unknown>).map((p) =>
         typeof p === 'string' ? { permissionName: p } : (p as UserPermission)
       );
@@ -73,13 +71,13 @@ const authSlice = createSlice({
           state.token = token;
           state.isAuthenticated = true;
           if (userStr) {
-            try { state.user = JSON.parse(userStr); } catch { /* skip */ }
+            try { state.user = JSON.parse(userStr); } catch { }
           }
           if (permStr) {
-            try { state.permissions = JSON.parse(permStr); } catch { /* skip */ }
+            try { state.permissions = JSON.parse(permStr); } catch { }
           }
           if (rolesStr) {
-            try { state.roles = JSON.parse(rolesStr); } catch { /* skip */ }
+            try { state.roles = JSON.parse(rolesStr); } catch { }
           }
         }
       }

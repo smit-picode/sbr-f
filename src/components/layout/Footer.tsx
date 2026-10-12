@@ -3,9 +3,7 @@
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 
-// Shell footer — the NPC secondary (vertical) lockup on one side, the copyright line on the
-// other. Mirrors the reference's Footer (SBR-design/app/layout.jsx): the h-16 logo renders ~54px
-// of artwork, comfortably clear of the 30px on-screen minimum for the official mark.
+// Shell footer — the NPC secondary (vertical) lockup on one side, the copyright line on the other.
 export function Footer() {
   const { t } = useTranslation();
   return (

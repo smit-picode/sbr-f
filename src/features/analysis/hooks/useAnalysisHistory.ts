@@ -6,7 +6,6 @@ import { useAppDispatch } from '@/hooks';
 import { upsertAnalysis } from '../store/analysesSlice';
 
 const HISTORY_LIMIT = 100;
-// Keystrokes on the same field within this window collapse into one undo step.
 const COALESCE_MS = 900;
 
 export function useAnalysisHistory(analysis: Analysis | undefined) {

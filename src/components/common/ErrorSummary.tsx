@@ -3,29 +3,16 @@
 import { useTranslation } from 'react-i18next';
 
 interface ErrorSummaryProps {
-  /** Field key -> message. Render this component only when it has at least one entry. */
   errors: Record<string, string>;
-  /** Field key -> human label. Missing keys fall back to the raw key. */
   fieldLabels?: Record<string, string>;
-  /** When provided, each row becomes a button that scrolls/focuses the offending field. */
   onErrorClick?: (field: string) => void;
 }
 
-/**
- * Shared validation banner shown at the top of create/edit modals: an error count plus a list of
- * each failing field. Extracted from the byte-identical copies that previously lived in the
- * Establishment / Contact / Address edit modals, so every form presents validation the same way.
- *
- * `fieldLabels` and `onErrorClick` are optional: forms without a label map or scroll targets
- * (e.g. the short Enterprise / Enterprise Group forms) can pass just `errors`.
- */
+// Shared validation banner shown at the top of create/edit modals
 export function ErrorSummary({ errors, fieldLabels, onErrorClick }: ErrorSummaryProps) {
   const { t } = useTranslation();
   const errorCount = Object.keys(errors).length;
 
-  // No bottom margin here: DialogContent's own `grid gap-4` (sticky-layout modals) or the scroll
-  // body's top padding (flex-layout modals) already separates this from the form below — an mb-4
-  // doubled that into a wide empty strip.
   return (
     <div className="sticky top-0 z-20 p-4 bg-red-50 border border-red-200 rounded-lg">
       <div className="flex items-start gap-2 mb-2">

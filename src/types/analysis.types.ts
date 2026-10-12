@@ -1,5 +1,3 @@
-// A report is ordered blocks, each a query + a presentation, so changing the visual never loses the question.
-
 export type AnalysisEntity = 'establishments' | 'enterprises' | 'enterpriseGroups' | 'contacts' | 'addresses';
 
 export type AnalysisFieldType = 'category' | 'number' | 'boolean' | 'text' | 'id';
@@ -21,7 +19,6 @@ export interface AnalysisFilter {
 export interface AnalysisMeasure {
   id: string;
   agg: AnalysisAgg;
-  // null only for 'count' (count of units)
   field: string | null;
 }
 
@@ -29,9 +26,7 @@ export type AnalysisSort = 'value_desc' | 'value_asc' | 'key_asc' | 'key_desc';
 
 export interface AnalysisQuery {
   entity: AnalysisEntity;
-  // null = inherit the report's frame
   frame: string | null;
-  // null = inherit the report's comparison; 'none' = explicitly no comparison
   compareTo: string | null;
   dimensions: string[];
   measures: AnalysisMeasure[];
@@ -39,9 +34,7 @@ export interface AnalysisQuery {
   sort: AnalysisSort;
   limit: number | null;
   otherBucket: boolean;
-  // Records / completeness blocks: the fields to show or check
   columns: string[];
-  // Cap on the second dimension's categories (null = keep all); set per visual when resolving
   seriesLimit?: number | null;
 }
 
@@ -81,9 +74,7 @@ export interface AnalysisBlock {
   width: 'half' | 'full';
   query: AnalysisQuery;
   display: AnalysisBlockDisplay;
-  // Narrative blocks only (a light markdown subset: #, ##, **bold**, *italic*, - bullets)
   text: string;
-  // Opt out of report-wide cross-filtering (neither emits nor receives)
   crossFilter: boolean;
 }
 
@@ -123,14 +114,11 @@ export interface AnalysisCrossFilter {
   sourceBlockId: string;
 }
 
-// ---- Query service results (the future backend contract mirrors these) ----
-
 export type AnalysisDisclosureFlag = 'min' | 'dominance' | 'secondary';
 
 export interface AnalysisResultRow {
   keys: (string | null)[];
   values: (number | null)[];
-  // contributing units — drives disclosure control
   n: number;
   prev?: (number | null)[];
   prevN?: number;
@@ -160,7 +148,6 @@ export interface AnalysisCompletenessResult {
   kind: 'completeness';
   fields: string[];
   groups: (string | null)[];
-  // cells[fieldIndex][groupIndex] = share filled 0..1; last column is overall
   cells: number[][];
   groupN: number[];
 }

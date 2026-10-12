@@ -6,17 +6,26 @@ export interface SbrPermission {
 }
 
 // A permission is simply granted or not — no view/edit flags
-export type RolePermissionAssignment = number; // permissionId
+export type RolePermissionAssignment = number;
 
 export interface SbrRole {
   ID: number;
   ROLE_NAME: string;
-  // true = assignments may carry a regulator scope; false = always global
   IS_SCOPED?: boolean;
-  // Number of distinct users currently assigned this role (computed by the list endpoint)
+  CATEGORY_ID?: number | null;
+  CATEGORY?: string | null;
+  CATEGORY_ORDER?: number | null;
   USER_COUNT?: number;
   CREATED_AT: string;
   UPDATED_AT: string;
+}
+
+export interface RoleCategory {
+  ID: number;
+  CODE: string;
+  NAME_EN: string | null;
+  NAME_AR: string | null;
+  DISPLAY_ORDER: number | null;
 }
 
 export interface SbrRoleWithPermissions extends SbrRole {
@@ -26,7 +35,7 @@ export interface SbrRoleWithPermissions extends SbrRole {
 export interface UserRoleAssignment {
   ID: number;
   ROLE_ID: number;
-  SCOPE: string;
+  SCOPE: string | null;
   EXPIRES_AT: string | null;
   role?: { ID: number; ROLE_NAME: string; IS_SCOPED: boolean };
 }
@@ -43,6 +52,7 @@ export interface SbrUser {
   NAME: string;
   EMAIL: string;
   IS_ACTIVE: boolean;
+  DELETED_AT?: string | null;
   roleAssignments?: UserRoleAssignment[];
   CREATED_AT: string;
   UPDATED_AT: string;
@@ -58,8 +68,6 @@ export interface AdminRoleFilters {
   page?: number;
   limit?: number;
   search?: string;
-  // Server-side sort — sortBy must be one of ROLES_SORTABLE_COLUMNS (matches the
-  // backend allowlist in src/utils/enums.ts)
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -68,12 +76,8 @@ export interface AdminUserFilters {
   page?: number;
   limit?: number;
   search?: string;
-  // Narrows the list to users holding this role (SBR_ROLE.ID)
   roleId?: number;
-  // Narrows the list by account status — must match USER_STATUS_FILTER in the backend enums
   status?: string;
-  // Server-side sort — sortBy must be one of USERS_SORTABLE_COLUMNS (matches the
-  // backend allowlist in src/utils/enums.ts)
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }

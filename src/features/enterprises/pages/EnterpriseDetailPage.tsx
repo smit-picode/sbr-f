@@ -34,7 +34,6 @@ import {
 
 const MAROON = '#A29374';
 
-// Table-name pill colours (same palette as the Attribute Change Requests list)
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
@@ -51,9 +50,7 @@ function SummaryCell({ label, value }: { label: string; value: React.ReactNode }
   );
 }
 
-// Summary-strip cell for ENTERPRISE-level attributes (SBR_ENTERPRISES columns), as opposed to
-// FieldWithHistory below which shows establishment fields. Only attributes that are editable in
-// EditEnterpriseModal get a history affordance — derived/read-only cells stay plain SummaryCells.
+// Summary-strip cell for ENTERPRISE-level attributes (SBR_ENTERPRISES columns)
 function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canViewHistory }: {
   enterpriseId: number;
   fieldKey: string;
@@ -64,10 +61,8 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Lazily load the enterprise's change history only while this attribute's popover is open
   const { data, isLoading, isError } = useGetEnterpriseHistoryQuery(enterpriseId, { skip: !open });
 
-  // Close the anchored popover on outside click / Escape (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -84,7 +79,6 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
 
   return (
     <div className="relative min-w-0" ref={wrapRef}>
-      {/* Icon sits on the label line, matching the Establishments detail strip */}
       <div className="flex items-center gap-1.5">
         <p className="text-[11px] text-slate-400">{label}</p>
         {canViewHistory && (
@@ -114,10 +108,7 @@ function EnterpriseFieldWithHistory({ enterpriseId, fieldKey, label, value, canV
   );
 }
 
-// Banner-header name field — same lazy-load + toggle logic as EnterpriseFieldWithHistory, with a
-// white-tinted icon so it stays legible over the photo. Renders as a plain span (not its own
-// heading element) because this is passed as PageHeader's `title`, which supplies the actual
-// <h1> — nesting a second <h1> inside it would be invalid HTML.
+// Banner-header name field — same lazy-load + toggle logic as EnterpriseFieldWithHistory
 function EnterpriseHeaderNameWithHistory({ enterpriseId, label, value, canViewHistory }: {
   enterpriseId: number;
   label: string;
@@ -213,10 +204,8 @@ function FieldWithHistory({ label, value, sbrId, field, fieldLabel, pendingCount
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // These cards show establishment fields, so history is gated by establishments.view_history
   const { canViewHistory } = usePermission('establishments');
 
-  // Close the anchored popover on outside click / Escape (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -257,7 +246,6 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
   const activitiesCount = est.ISIC_CODE ? 1 : 0;
   return (
     <div className="rounded-lg border border-slate-200">
-      {/* header */}
       <div className={`rounded-t-lg px-4 py-3 ${isMain ? 'bg-[#A29374]/5' : 'bg-slate-50'}`}>
         <div className="flex items-center gap-2">
           <span className="font-mono text-[11px] font-bold text-[#A29374]">#{est.SBR_ID}</span>
@@ -274,7 +262,6 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
         <p className="mt-1 truncate text-[13.5px] font-bold text-slate-900">{nullableText(est.NAME_ENU)}</p>
         {est.MOCI_CR_NUM && <p className="font-mono text-[11.5px] text-slate-400">CR {est.MOCI_CR_NUM}</p>}
       </div>
-      {/* body */}
       <div className="space-y-3 p-4">
         <div className="grid grid-cols-2 gap-3 text-[12.5px] md:grid-cols-4">
           <FieldWithHistory label={t('enterpriseDetail.sector')} value={nullableText(est.SECTOR_ID)} sbrId={est.SBR_ID} field="SECTOR_ID" fieldLabel={t('enterpriseDetail.sector')} pendingCount={est.PENDING_FIELDS?.SECTOR_ID} />
@@ -291,7 +278,6 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
         )}
 
         <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-3 md:grid-cols-2">
-          {/* contacts */}
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
               <Users className="h-3 w-3" /> {t('enterpriseDetail.contacts')} <span className="text-slate-300">({est.contacts?.length ?? 0})</span>
@@ -311,7 +297,6 @@ function EstablishmentCard({ est, headSbrId, t, onOpen }: { est: EnterpriseEstab
               <p className="text-[12px] text-slate-400">—</p>
             )}
           </div>
-          {/* addresses */}
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
               <MapPin className="h-3 w-3" /> {t('enterpriseDetail.addresses')} <span className="text-slate-300">({est.addresses?.length ?? 0})</span>
@@ -344,7 +329,6 @@ function ChangeHistoryList({ entries, establishments }: { entries: EnterpriseCha
     <ul className="max-h-[360px] space-y-3 overflow-y-auto pe-1">
       {entries.map((e) => {
         const rawId = e.NEW_RECORD_ID ?? e.PREV_RECORD_ID;
-        // An establishment change points at a row of its history; show the unit's SBR ID, as the design does.
         const unit = e.TABLE_NAME === 'SBR_ESTABLISHMENTS'
           ? establishments.find((m) => m.ID === e.NEW_RECORD_ID || m.ID === e.PREV_RECORD_ID)
           : undefined;
@@ -383,7 +367,6 @@ function ProfilingChangesList({ entries }: { entries: EnterpriseProfilingChange[
         const isLast = i === entries.length - 1;
         return (
           <li key={e.ID} className="relative flex gap-3 pb-4 last:pb-0">
-            {/* Timeline rail: dot + connecting vertical line to the next entry */}
             <div className="relative flex w-2.5 flex-shrink-0 justify-center">
               {!isLast && (
                 <span
@@ -426,11 +409,8 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
   const { isArabic } = useLanguage();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
-  // canViewHistory here gates the ENTERPRISE-level attribute history (summary strip + name);
-  // the establishment cards below use their own establishments.view_history permission.
   const { canEdit, canViewDetail, canViewHistory: canViewEnterpriseHistory } = usePermission('enterprises');
   const { canViewHistory: canViewEstablishmentHistory } = usePermission('establishments');
-  // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEnterpriseByIdQuery(enterpriseId, { skip: !canOpenDetail });
 
@@ -468,7 +448,6 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
     );
   }
 
-  // Default arrays to [] so a partial payload can't crash .map/.length on this page
   const { enterprise, establishments = [], secondaryActivities = [], changeHistory = [], profilingChanges = [] } = data.data;
 
   return (
@@ -500,8 +479,6 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         )}
       />
 
-      {/* Attribute strip — its own card, separate from the banner (matches the reference's
-          two-card layout instead of welding the grid to the header). */}
       <div className="grid grid-cols-2 gap-4 rounded-lg bg-white px-6 py-4 shadow-card md:grid-cols-3 lg:grid-cols-6">
         <EnterpriseFieldWithHistory
           enterpriseId={enterprise.ENTERPRISE_ID}
@@ -531,7 +508,6 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
         </p>
       )}
 
-      {/* Economic activity — full width */}
       <SectionCard title={t('enterpriseDetail.economicActivity')} icon={<Briefcase className="h-4 w-4" />}>
             <div className="flex flex-col gap-6 md:flex-row md:gap-10">
               <div className="w-full md:max-w-md">
@@ -565,11 +541,8 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
             </div>
       </SectionCard>
 
-      {/* Linked establishments + rail */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Main column */}
         <div className="space-y-4 lg:col-span-2">
-          {/* Linked establishments */}
           <SectionCard title={t('enterpriseDetail.linkedEstablishments')} count={establishments.length} icon={<Building2 className="h-4 w-4" />}>
             <div className="space-y-3">
               {establishments.map((est) => (
@@ -585,7 +558,6 @@ export function EnterpriseDetailPage({ enterpriseId }: { enterpriseId: number })
           </SectionCard>
         </div>
 
-        {/* Right rail */}
         <div className="space-y-4">
           <SectionCard title={t('enterpriseDetail.profilingChanges')} count={profilingChanges.length} icon={<GitBranch className="h-4 w-4" />}>
             <p className="-mt-1 mb-1 text-[11px] text-slate-400">{t('enterpriseDetail.profilingDesc')}</p>

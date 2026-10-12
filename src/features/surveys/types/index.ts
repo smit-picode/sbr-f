@@ -1,5 +1,3 @@
-// Survey Samples types: the /surveys API contract (backed by the DB team's V_SVY_* views) and the screen models.
-
 export type SurveyId = 'AES' | 'QES' | 'FDI_A' | 'FDI_Q';
 export type SurveyFrequency = 'annual' | 'quarterly';
 export type ResponseStatus = 'Responded' | 'Partial' | 'Non-response' | 'Pending';
@@ -43,7 +41,6 @@ export interface SurveyResponseApiRow {
 }
 
 export interface SurveyResponseDetailApi extends SurveyResponseApiRow {
-  // One row of the survey's answer view (V_SVY_AES, ...), keyed by column name.
   ANSWERS: Record<string, string | number | null> | null;
 }
 
@@ -58,7 +55,6 @@ export interface SurveyParticipationApiRow {
 // GET /surveys/establishments/:sbrId/gdp: its AES accounts per year and the national totals per quarter.
 export interface SurveyGdpApi {
   ISIC_CODE: string | null;
-  // Full AES returns summed by 2-digit ISIC division, per year.
   ACTIVITY: { SURVEY_YEAR: number; DIVISION: string; TOTAL_TURNOVER: number; INTERMEDIATE_CONSUMPTION: number; UNITS: number }[];
   AES: { SURVEY_YEAR: number; RESPONSE_STATUS: ResponseStatus; TOTAL_TURNOVER: number | null; INTERMEDIATE_CONSUMPTION: number | null }[];
   ECONOMY: { SURVEY_YEAR: number; QUARTER_NUM: number; VALUE_ADDED: number; PRODUCTION: number; INTERMEDIATE_CONSUMPTION: number }[];
@@ -72,7 +68,6 @@ export interface SurveyResponsesFilter {
   period?: string;
 }
 
-// ── Screen models ───────────────────────────────────────────────────────────
 // The establishment fields the survey screens read.
 export interface SurveyFrame {
   SBR_ID: number;

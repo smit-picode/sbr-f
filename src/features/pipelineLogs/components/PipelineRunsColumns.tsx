@@ -11,7 +11,6 @@ export const getPipelineRunsColumns = (onOpenRun: (runId: number) => void, t: TF
   {
     accessorKey: 'RUN_ID',
     header: t('columns.RUN_ID', { defaultValue: 'RUN ID' }),
-    // No enableSorting here — the backend list has no sortBy param (direct SELECT, ordered RUN_ID DESC server-side), so a client-side sort would silently only reorder the current page.
     cell: ({ getValue }) => <span className="font-mono text-xs font-medium text-adaam">#{String(getValue())}</span>,
   },
   {
@@ -33,7 +32,6 @@ export const getPipelineRunsColumns = (onOpenRun: (runId: number) => void, t: TF
     },
   },
   {
-    // FINISHED_AT - STARTED_AT, formatted client-side — neither column stores a duration.
     id: 'DURATION',
     header: t('columns.DURATION', { defaultValue: 'DURATION' }),
     cell: ({ row }) => {

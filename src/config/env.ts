@@ -1,4 +1,4 @@
-// An explicit URL wins; otherwise local dev reaches the backend directly and any other host calls its own /api (reverse proxy).
+// An explicit URL wins; otherwise local dev calls the backend and other hosts use /api.
 function resolveApiUrl(): string {
   const configured = (process.env.NEXT_PUBLIC_API_URL ?? '').trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
   if (configured) return configured;
@@ -10,8 +10,6 @@ const env = {
   apiUrl: resolveApiUrl(),
   appEnv: process.env.NEXT_PUBLIC_ENV ?? 'development',
   isDev: process.env.NEXT_PUBLIC_ENV !== 'production',
-  // Show the inline "Actions" (edit) column in list tables. Editing is done from the
-  // detail page, so this is off. Flip to `true` to bring the column back everywhere.
   showActionsColumn: false,
 } as const;
 

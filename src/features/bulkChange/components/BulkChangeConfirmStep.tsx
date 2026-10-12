@@ -20,8 +20,6 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
   const tableOption = BULK_CHANGE_TABLES.find((o) => o.key === selectedTable);
   const tableLabel = tableOption ? t(tableOption.navKey, { defaultValue: tableOption.label }) : selectedTable;
 
-  // Only rows the server accepted go to /bulk-change on submit (see NewBulkUpdatePage's
-  // handleSubmit) — this preview must show exactly that set, not the full upload.
   const validRows = validation.rows.filter((row) => row.status === 'VALID');
   const columns = validation.columns;
 
@@ -72,8 +70,6 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
             className="w-full rounded-md border border-slate-200 p-2.5 text-sm text-slate-800 focus:border-[#A29374]/40 focus:outline-none focus:ring-2 focus:ring-[#A29374]/20"
           />
           <p className="text-xs text-slate-400">
-            {/* SUBMIT_BULK takes a reason per item; the wizard collects one and the API applies
-                it to every request in the batch, so each shows the same justification. */}
             {t('bulkChange.wizard.confirm.reasonHint', {
               defaultValue: 'This reason is recorded on every change request created by this upload.',
             })}

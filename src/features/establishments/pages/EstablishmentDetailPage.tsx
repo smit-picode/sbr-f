@@ -29,8 +29,6 @@ function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
 }
 
-// The legal units (regulator source records) that compose an establishment are derived from
-// its own source identifiers — there is no separate legal-units table. Mirrors the source map.
 const SRC_MAP: Record<string, { table: string; value: (e: SbrEstablishment) => string | null }> = {
   MOCI:     { table: 'MOCI_MV_ORG_DATA',     value: (e) => e.MOCI_CR_NUM || e.MOCI_ORG_ID },
   QFC:      { table: 'QFC_REGISTERED_FIRMS', value: (e) => e.QFC_NUMBER },
@@ -42,7 +40,6 @@ const SRC_COLOR: Record<string, string> = {
   MOCI: '#A29374', QFC: '#1a3a52', QFZ: '#2B7A9E', QSTP: '#B5742B', MOM_FARM: '#1F8A5B',
 };
 
-// Node colours cycled across the horizontal lifecycle timeline (oldest → newest).
 const LIFECYCLE_DOT_COLORS: string[] = ['#A29374', '#B5742B', '#1a3a52', '#1F8A5B'];
 
 type LegalUnit = { source: string; table: string; idValue: string; current: boolean };
@@ -61,10 +58,8 @@ function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHi
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Lazily load the record's change history only while this attribute's popover is open
   const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(recordId, { skip: !open });
 
-  // Close the anchored popover on outside click (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -241,7 +236,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
   const { canView: canViewSurveys } = usePermission('surveys');
-  // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
   const fromParam = searchParams.get('from');
   const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
   const back = fromSample
@@ -249,7 +243,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     : { label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') };
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
-  // The current row's VALID_FROM is when its latest version started, so entry into the register comes from the oldest version.
   const { data: historyData } = useGetEstablishmentHistoryQuery(sbrId, { skip: !canOpenDetail || !canViewHistory });
 
   const BackLink = (
@@ -292,7 +285,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const pendingFields = e.PENDING_FIELDS ?? {};
   const title = e.NAME_ENU || e.NPC_NAME_ENU || `Establishment #${e.SBR_ID}`;
 
-  // Legal units composing this establishment — derived from its source identifiers.
   const legalUnits: LegalUnit[] = (() => {
     const sc = e.SOURCE_CODE || 'MOCI';
     const m = SRC_MAP[sc] ?? SRC_MAP.MOCI;
@@ -333,7 +325,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   };
 
   // Field labels + section titles are localized via establishmentDetail.fields.* / .sections.*
-  // (English fallback text matches what was previously hardcoded here).
   const fl = (k: string, fallback: string) => t(`establishmentDetail.fields.${k}`, { defaultValue: fallback });
   const sl = (k: string, fallback: string) => t(`establishmentDetail.sections.${k}`, { defaultValue: fallback });
 
@@ -485,7 +476,6 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
                 const isLast = i === lifecycleEvents.length - 1;
                 return (
                   <li key={i} className="relative min-w-0 flex-1">
-                    {/* Connecting rail from this node to the next (hidden on the last node) */}
                     {!isLast && (
                       <span className="absolute top-[5px] h-px w-full bg-slate-200 start-[5px]" />
                     )}

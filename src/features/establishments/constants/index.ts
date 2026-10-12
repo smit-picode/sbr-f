@@ -1,9 +1,6 @@
-// Field Labels for error messages and form display
 export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Regulatory Name (English)',
   NAME_ARA: 'Regulatory Name (Arabic)',
-  // Pseudo-field: the shared "English or Arabic name required" rule (see NAMES_FIELD in
-  // EditEstablishmentModal) — listed once in the error summary rather than per input.
   NAMES: 'Regulatory Name',
   EST_STATUS: 'Est. Status',
   EST_STATUS_CATEGORY: 'Est. Status Category',
@@ -16,20 +13,14 @@ export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   SOURCE_CODE: 'Source Code',
 };
 
-// Enum Options from backend
 export const EST_STATUS_OPTIONS: (string | null)[] = ['Active', 'Inactive', null];
 
-// The two values Est. Status may hold. Kept separate from EST_STATUS_OPTIONS above,
-// which deliberately still carries `null` so validate() accepts records the pipeline never
-// assigned a status to; these two are what the edit dropdown actually offers.
 export const EST_STATUS_VALUES = { ACTIVE: 'Active', INACTIVE: 'Inactive' } as const;
 
-// What the Est. Status dropdown renders, in order.
 export const EST_STATUS_SELECT_OPTIONS: string[] = [EST_STATUS_VALUES.ACTIVE, EST_STATUS_VALUES.INACTIVE];
 export const MAIN_BRANCH_FLG_OPTIONS: string[] = ['MAIN', 'BRANCH'];
 export const ESTABLISHMENTS_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'MOM_FARM'];
 
-// Max length validations from backend validator
 export const ESTABLISHMENTS_MAX_LENGTHS: Record<string, number> = {
   NAME_ENU: 500,
   NAME_ARA: 500,
@@ -79,7 +70,6 @@ export const ESTABLISHMENTS_DEFAULT_FILTERS = {
   mainBranchFLG: '',
 } as const;
 
-// Columns offered in the "Column filters" builder; each `value` must be in filter_expr of SBR_ESTABLISHMENTS_API (NPC_SBR).
 export const ESTABLISHMENT_FILTER_COLUMNS: { value: string; label: string }[] = [
   { value: 'SBR_ID', label: 'SBR ID' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
@@ -100,40 +90,26 @@ export const ESTABLISHMENT_FILTER_COLUMNS: { value: string; label: string }[] = 
   { value: 'MOCI_CR_NUM', label: 'MOCI CR' },
 ];
 
-// Fields that are LOCKED (not user-editable). Everything else is editable.
-// These map to the "Is Editable = false" variables: identifiers, regulator IDs,
-// main regulator (SOURCE_CODE), all CR/CP/registration dates, and the branch flag.
 export const ESTABLISHMENT_LOCKED_FIELDS: string[] = [
-  'MOCI_ORG_ID',      // Organisation ID
-  'SOURCE_CODE',      // Main Regulator
-  'MOCI_CR_NUM',      // Commercial Registration ID (CR)
-  'MOCI_CP_NUM',      // Commercial Permit ID (CP)
-  'QFZ_SOURCE_ID',    // QFZ Source ID — regulator-issued, not user-maintained
+  'MOCI_ORG_ID',
+  'SOURCE_CODE',
+  'MOCI_CR_NUM',
+  'MOCI_CP_NUM',
+  'QFZ_SOURCE_ID',
   'CR_ISSUE_DATE', 'CR_EXPIRY_DATE', 'CR_CANCEL_DATE',
   'CP_ISSUE_DATE', 'CP_END_DATE', 'CP_CANCEL_DATE',
   'REG_DATE', 'REG_EXPIRY_DATE', 'REG_CANCEL_DATE',
-  'MAIN_BRANCH_FLG',  // Branch Flag
+  'MAIN_BRANCH_FLG',
 ];
 
-// Every `*_SOURCE` column is provenance the database owns — it records which system or user
-// last set the paired value, so the application must never write it. Matched by suffix rather
-// than listed one by one: SBR_ESTABLISHMENTS carries 17 of them today and the pipeline adds
-// more over time, and a suffix rule cannot fall out of date the way a hand-kept list would.
-// Requirement from the 2026-08-11 requirements call ("all source columns read-only, all over
-// the project"). The paired non-source field stays editable; only the provenance is locked.
 const SOURCE_FIELD_SUFFIX = '_SOURCE';
 
 export const isEstablishmentFieldEditable = (field: string): boolean =>
   !field.endsWith(SOURCE_FIELD_SUFFIX) && !ESTABLISHMENT_LOCKED_FIELDS.includes(field);
 
-// Columns SBR_ESTABLISHMENTS_API.GET_LIST accepts for full-dataset sorting — must match
-// ESTABLISHMENTS_SORTABLE_COLUMNS in sbr-backend/src/utils/enums.ts exactly. The table shows
-// 50+ columns but only these are real, indexable columns the procedure's dynamic ORDER BY
-// can sort by; everything else is disabled via DataTable's `sortableColumns` prop.
 export const ESTABLISHMENTS_SORTABLE_COLUMNS: string[] = [
   'SBR_ID', 'NAME_ENU', 'NAME_ARA', 'EST_STATUS', 'SECTOR_ID', 'LEGAL_TYPE',
   'SOURCE_CODE', 'MOCI_CR_NUM',
 ];
 
-// Survey participation / Contribution to GDP cards on the establishment detail page.
 export const SHOW_ESTABLISHMENT_SURVEY_SECTIONS: boolean = true;

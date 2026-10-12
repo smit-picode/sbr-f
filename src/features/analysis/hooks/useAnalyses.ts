@@ -34,7 +34,6 @@ export function useAnalysesStore(): { items: Analysis[]; hydrated: boolean } {
     try {
       localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(items));
     } catch {
-      // Storage full or blocked — analyses stay in memory for this session.
     }
   }, [items, hydrated]);
 

@@ -47,14 +47,12 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const [added, setAdded] = useState<EstabRow[]>([]);
   const [search, setSearch] = useState('');
   const [showCommentDialog, setShowCommentDialog] = useState(false);
-  // An original member is only marked removed after the user confirms; a just-added row is simply dropped.
   const [pendingRemoval, setPendingRemoval] = useState<{ sbrId: number; name: string } | null>(null);
 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
   const initialHeadSbrId = enterprise.MAIN_ESTABLISHMENT_SBR_ID;
 
-  // Reset form whenever the modal (re)opens
   useEffect(() => {
     if (open) {
       setName(enterprise.NAME_ENU ?? '');
@@ -68,14 +66,11 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   }, [open, enterprise]);
 
   const debouncedSearch = useDebounce(search, 400);
-  // Only offers establishments that aren't already attached to an enterprise, so a unit owned by
-  // another enterprise can't be attached twice (the backend applies ASSOCIATED_ENTERPRISE_ID IS NULL).
   const { data: searchData, isFetching: isSearching } = useGetAttachableEstablishmentsQuery(
     { search: debouncedSearch, limit: 6, page: 1 },
     { skip: !open || !debouncedSearch }
   );
 
-  // Current membership = original (minus removed) + added
   const currentRows: EstabRow[] = useMemo(() => {
     const kept = establishments
       .filter((e) => !removed.has(e.SBR_ID))
@@ -85,9 +80,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
 
   const memberIds = useMemo(() => new Set(currentRows.map((r) => r.SBR_ID)), [currentRows]);
 
-  // The head the enterprise will have after this edit. Derived rather than held in state so
-  // removing the current head automatically promotes the next remaining establishment, and
-  // adding it back restores it — the enterprise can never point at a non-member.
   const headSbrId = useMemo(
     () => (initialHeadSbrId != null && currentRows.some((r) => r.SBR_ID === initialHeadSbrId)
       ? initialHeadSbrId
@@ -95,11 +87,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     [initialHeadSbrId, currentRows]
   );
 
-  // Establishments removed in this session but not yet saved are local-only state — they are
-  // still attached to THIS enterprise in the database, so the /establishments/attachable search
-  // (which only offers units with ASSOCIATED_ENTERPRISE_ID IS NULL) can never find them again.
-  // Match them client-side from data the modal already has, so a removal can be undone before
-  // saving. Matched against the same "SBR ID, name, or CR" fields the picker searches by.
   const localRestoreMatches: AttachableEstablishment[] = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
     if (!q) return [];
@@ -126,7 +113,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     removed.size > 0;
 
   const removeRow = (sbrId: number) => {
-    // If it was a freshly added one, just drop it from `added`; otherwise mark removed
     if (added.some((a) => a.SBR_ID === sbrId)) {
       setAdded((prev) => prev.filter((a) => a.SBR_ID !== sbrId));
     } else {
@@ -135,9 +121,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   };
 
   const addRow = (u: AttachableEstablishment) => {
-    // A result that is still in `removed` is an original member the user is un-removing, not a
-    // new attachment — clear the removal instead of pushing a duplicate onto `added` (which would
-    // send it in both removeEstablishmentSbrIds and addEstablishmentSbrIds on save).
     if (removed.has(u.SBR_ID)) {
       setRemoved((prev) => { const n = new Set(prev); n.delete(u.SBR_ID); return n; });
     } else {
@@ -146,9 +129,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     setSearch('');
   };
 
-  // Advisory only (not a guard): true when the user is turning this enterprise Inactive while
-  // it's still a member of an enterprise group. Surfaced as a note in the comment dialog below —
-  // it never blocks the save.
   const groupWarning =
     status === 'Inactive' && status !== (enterprise.STATUS ?? '') && enterprise.ENTERPRISE_GROUP_ID != null
       ? 'This enterprise is currently linked to an enterprise group. Please remove it from the group before changing its status.'
@@ -178,8 +158,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           NAME_ENU: name,
           SECTOR_ID: sector,
           STATUS: status,
-          // Only sent when this edit moves the head (i.e. the current head was removed and
-          // another member was promoted) — the backend rejects a head that isn't a member.
           ...(headSbrId != null && headSbrId !== initialHeadSbrId ? { MAIN_ESTABLISHMENT_SBR_ID: headSbrId } : {}),
           addEstablishmentSbrIds: added.map((a) => a.SBR_ID),
           removeEstablishmentSbrIds: Array.from(removed),
@@ -209,7 +187,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
         )}
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* Read-only identity row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseId', { defaultValue: 'Enterprise ID' })}</Label>
@@ -221,7 +198,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
             </div>
           </div>
 
-          {/* Name */}
           <div className="space-y-1.5">
             <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}</Label>
             <Input
@@ -236,7 +212,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
             {errors.NAME_ENU && <p className="text-xs text-red-500 mt-0.5">{errors.NAME_ENU}</p>}
           </div>
 
-          {/* Sector + Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('enterpriseEdit.sector', { defaultValue: 'Sector' })}</Label>
@@ -258,7 +233,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
             </div>
           </div>
 
-          {/* Establishments */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-[11.5px] font-semibold text-slate-500">{t('enterpriseEdit.establishments', { defaultValue: 'Establishments in this enterprise' })}</Label>
@@ -304,7 +278,6 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
               <p className="text-xs text-slate-400">{t('enterpriseEdit.addAtLeastOneEstablishment', { defaultValue: 'At least one Establishment is required.' })}</p>
             )}
 
-            {/* Add establishment */}
             <div className="rounded-md bg-slate-50 border border-slate-200 p-3 space-y-2">
               <Label className="text-xs text-slate-500">{t('enterpriseEdit.addEstablishment', { defaultValue: 'Add an establishment to this enterprise' })}</Label>
               <div className="relative">

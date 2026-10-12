@@ -28,10 +28,8 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Lazily load the record's change history only while this attribute's popover is open
   const { data, isLoading, isError } = useGetAddressHistoryQuery(recordId, { skip: !open });
 
-  // Close the anchored popover on outside click (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -108,7 +106,6 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('addresses');
-  // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetAddressByIdQuery(addressId, { skip: !canOpenDetail });
 
@@ -242,7 +239,6 @@ export function AddressDetailPage({ addressId }: { addressId: number }) {
         open={editOpen}
         onClose={() => setEditOpen(false)}
         onSaved={(updated) => {
-          // Addresses are SCD2 — a save creates a new row id; follow it so the page stays current.
           if (updated.ID !== a.ID) router.replace(`/addresses/${updated.ID}`);
           else refetch();
         }}

@@ -15,7 +15,6 @@ export interface SnapshotSummary extends SnapshotLiveCounts {
   CREATED_AT: string;
   FROZEN_BY_USER_ID: number | null;
   FROZEN_BY_NAME: string | null;
-  // Returned by the list procedure once it joins the user's email; absent today.
   FROZEN_BY_EMAIL?: string | null;
 }
 
@@ -25,6 +24,7 @@ export type SnapshotEntity = 'establishments' | 'enterprises' | 'enterprise_grou
 export interface SnapshotListParams {
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 export interface SnapshotTableParams extends SnapshotListParams {

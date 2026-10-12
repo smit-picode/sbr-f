@@ -14,12 +14,13 @@ import {
   useGetRolesListQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
+  useGetRoleCategoriesQuery,
   useGetPermissionsListQuery,
   useGetRolePermissionsQuery,
   useAssignRolePermissionsMutation,
 } from '../api/adminApi';
-import { ADMIN_DEFAULT_FILTERS, ROLES_SORT_OPTIONS, ROLES_SORT_DEFAULT } from '../constants';
-import type { SbrRole, SbrPermission } from '@/types';
+import { ADMIN_DEFAULT_FILTERS, ROLES_SORT_OPTIONS, ROLES_SORT_DEFAULT, ROLE_NO_CATEGORY_VALUE } from '../constants';
+import type { SbrRole, SbrPermission, RoleCategory } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
@@ -256,7 +257,7 @@ export function RolesTab({
   canCreate?: boolean;
   onRegisterCreate?: (fn: () => void) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // ── local state ──
   const [selectedRole, setSelectedRole]   = useState<SbrRole | null>(null);
@@ -264,7 +265,7 @@ export function RolesTab({
   const [originalIds, setOriginalIds]     = useState<Set<number>>(new Set());
   const [isCreateOpen, setIsCreateOpen]   = useState(false);
   const [editTarget, setEditTarget]       = useState<SbrRole | null>(null);
-  const [form, setForm]                   = useState({ ROLE_NAME: '' });
+  const [form, setForm]                   = useState({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE });
   const [permSearch, setPermSearch]       = useState('');
   const [roleSort, setRoleSort]           = useState<string>(ROLES_SORT_DEFAULT);
 
@@ -305,6 +306,9 @@ export function RolesTab({
   );
 
   // ── mutations ──
+  const { data: categoriesData } = useGetRoleCategoriesQuery(undefined, { skip: !(isCreateOpen || editTarget) });
+  const categories = categoriesData?.data ?? [];
+  const categoryLabel = (c: RoleCategory) => (i18n.language === 'ar' && c.NAME_AR ? c.NAME_AR : c.NAME_EN ?? c.CODE);
   const [createRole,       { isLoading: isCreating  }] = useCreateRoleMutation();
   const [updateRole,       { isLoading: isUpdating  }] = useUpdateRoleMutation();
   const [assignPermissions,{ isLoading: isAssigning }] = useAssignRolePermissionsMutation();
@@ -346,7 +350,7 @@ export function RolesTab({
   // Register the "open create dialog" callback with the parent page header (gated by the create permission)
   useEffect(() => {
     if (canCreate && onRegisterCreate) {
-      onRegisterCreate(() => { setForm({ ROLE_NAME: '' }); setIsCreateOpen(true); });
+      onRegisterCreate(() => { setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE }); setIsCreateOpen(true); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canCreate, onRegisterCreate]);
@@ -419,12 +423,32 @@ export function RolesTab({
     }
   };
 
+  // A heading can be changed but not cleared, so "No category" is only offered while none is set.
+  const categoryField = (id: string, allowNone: boolean) => (
+    <div className="space-y-1">
+      <Label htmlFor={id}>{t('admin.roles.categoryLabel', { defaultValue: 'Category' })}</Label>
+      <Select value={form.CATEGORY} onValueChange={(v) => setForm((p) => ({ ...p, CATEGORY: v }))}>
+        <SelectTrigger id={id} className="shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20">
+          <SelectValue placeholder={t('admin.roles.noCategory', { defaultValue: 'No category' })} />
+        </SelectTrigger>
+        <SelectContent>
+          {allowNone && <SelectItem value={ROLE_NO_CATEGORY_VALUE}>{t('admin.roles.noCategory', { defaultValue: 'No category' })}</SelectItem>}
+          {categories.map((c) => <SelectItem key={c.ID} value={String(c.ID)}>{categoryLabel(c)}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   const handleCreate = async () => {
     if (!form.ROLE_NAME.trim()) { toast.error(t('admin.roles.nameRequired', { defaultValue: 'Role name is required.' })); return; }
     try {
-      await createRole({ ROLE_NAME: form.ROLE_NAME, permissions: [] }).unwrap();
+      await createRole({
+        ROLE_NAME: form.ROLE_NAME,
+        permissions: [],
+        ...(form.CATEGORY === ROLE_NO_CATEGORY_VALUE ? {} : { CATEGORY_ID: Number(form.CATEGORY) }),
+      }).unwrap();
       toast.success(t('admin.roles.createdSuccess', { defaultValue: 'Role created successfully!' }));
-      setForm({ ROLE_NAME: '' });
+      setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE });
       setIsCreateOpen(false);
     } catch (err) {
       toast.error(getApiError(err, t('admin.roles.createFailed', { defaultValue: 'Failed to create role. Please try again.' })));
@@ -434,12 +458,20 @@ export function RolesTab({
   const handleUpdate = async () => {
     if (!editTarget) return;
     if (!form.ROLE_NAME.trim()) { toast.error(t('admin.roles.nameRequired', { defaultValue: 'Role name is required.' })); return; }
-    if (form.ROLE_NAME === editTarget.ROLE_NAME) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
+    const nameChanged = form.ROLE_NAME !== editTarget.ROLE_NAME;
+    const categoryChanged = form.CATEGORY !== ROLE_NO_CATEGORY_VALUE && form.CATEGORY !== String(editTarget.CATEGORY_ID ?? '');
+    if (!nameChanged && !categoryChanged) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
     try {
-      await updateRole({ id: editTarget.ID, data: { ROLE_NAME: form.ROLE_NAME } }).unwrap();
+      await updateRole({
+        id: editTarget.ID,
+        data: {
+          ...(nameChanged ? { ROLE_NAME: form.ROLE_NAME } : {}),
+          ...(categoryChanged ? { CATEGORY_ID: Number(form.CATEGORY) } : {}),
+        },
+      }).unwrap();
       toast.success(t('admin.roles.updatedSuccess', { defaultValue: 'Role updated successfully!' }));
       setEditTarget(null);
-      setForm({ ROLE_NAME: '' });
+      setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE });
     } catch (err) {
       toast.error(getApiError(err, t('admin.roles.updateFailed', { defaultValue: 'Failed to update role. Please try again.' })));
     }
@@ -534,7 +566,7 @@ export function RolesTab({
                   {isEditable && (
                     <button
                       onClick={() => {
-                        setForm({ ROLE_NAME: role.ROLE_NAME });
+                        setForm({ ROLE_NAME: role.ROLE_NAME, CATEGORY: role.CATEGORY_ID != null ? String(role.CATEGORY_ID) : ROLE_NO_CATEGORY_VALUE });
                         setEditTarget(role);
                       }}
                       className="me-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-black/5 hover:text-[#A29374] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A29374]/30"
@@ -565,6 +597,7 @@ export function RolesTab({
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-[11.5px] text-slate-400">
+                    {selectedRole.CATEGORY ? `${selectedRole.CATEGORY} · ` : ''}
                     {selectedRole.IS_SCOPED
                       ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
                       : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
@@ -666,23 +699,7 @@ export function RolesTab({
                 className="focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
               />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <Label>Category</Label>
-                <InfoTooltip content="This feature will be implemented in the next phase." contentClassName="max-w-[220px]" />
-              </div>
-              <div className="relative">
-                <select
-                  disabled
-                  className="flex h-9 w-full appearance-none rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-400 cursor-not-allowed"
-                >
-                  <option>SBR Managers</option>
-                </select>
-                <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-slate-300">
-                  ▾
-                </span>
-              </div>
-            </div>
+            {categoryField('role-category', true)}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>
@@ -718,6 +735,7 @@ export function RolesTab({
                 className="focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
               />
             </div>
+            {categoryField('edit-role-category', editTarget?.CATEGORY_ID == null)}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating}>

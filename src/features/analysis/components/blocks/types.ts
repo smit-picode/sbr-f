@@ -13,7 +13,6 @@ export interface AnalysisPointEvent {
 export interface BlockViewProps {
   block: AnalysisBlock;
   query: AnalysisResolvedQuery;
-  // Published view: confidential cells are suppressed instead of just flagged
   masked: boolean;
   height: number;
   mode: AnalysisRenderMode;

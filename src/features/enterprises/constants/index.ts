@@ -1,4 +1,3 @@
-// Field labels for the edit modal's validation summary.
 export const ENTERPRISE_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Enterprise Name',
   SECTOR_ID: 'Sector',
@@ -13,8 +12,6 @@ export const ENTERPRISE_DEFAULT_FILTERS = {
   sectorId: '',
 } as const;
 
-// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
-// the backend ENTERPRISE_FILTER_COLUMNS allow-list (enterprises.controller).
 export const ENTERPRISE_FILTER_COLUMNS: { value: string; label: string }[] = [
   { value: 'ENTERPRISE_ID', label: 'Enterprise ID' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
@@ -24,8 +21,6 @@ export const ENTERPRISE_FILTER_COLUMNS: { value: string; label: string }[] = [
   { value: 'MOCI_CR_NUM', label: 'Main CR' },
 ];
 
-// ISIC Rev.4 code → activity title. The DB stores only the code, so this provides
-// the human-readable label shown in the Economic activity / Registered activities UI.
 export const ISIC_LABELS: Record<string, string> = {
   '0150': 'Mixed farming',
   '2599': 'Manufacture of other fabricated metal products',

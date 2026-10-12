@@ -22,11 +22,8 @@ export function BulkChangeHistoryPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isArabic } = useLanguage();
-  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
-  // when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState('sbr:bulkChangeHistory:filters', { ...BULK_CHANGE_DEFAULT_FILTERS });
 
-  // Same two-layer rule as the queue: module access plus an editable table.
   const establishments = usePermission('establishments');
   const contacts = usePermission('contacts');
   const addresses = usePermission('addresses');

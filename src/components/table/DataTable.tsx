@@ -22,7 +22,7 @@ import { NoData } from '@/components/common/NoData';
 import { ErrorState } from '@/components/common/ErrorState';
 import { TablePagination } from './TablePagination';
 import { ColumnToggle } from './ColumnToggle';
-import { useState, useRef } from 'react';
+import { useState, useRef, type ReactNode } from 'react';
 import { ArrowUp, ArrowDown, ArrowUpDown, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -31,7 +31,6 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
-  // New rows are loading for a changed search/filter/sort/page: dims the current rows under a loader.
   isRefreshing?: boolean;
   isError?: boolean;
   onRetry?: () => void;
@@ -40,35 +39,14 @@ interface DataTableProps<TData, TValue> {
   total: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
-  // Called with (field, order) when a column is sorted, or (null, null) when the user's
-  // third click cycles a column back to "no sort" — the caller must clear its own
-  // sortBy/sortOrder filter state in that case, or the list stays stuck on the last order.
   onSortChange?: (field: string | null, order: 'asc' | 'desc' | null) => void;
-  // Restricts which columns can be sorted when the server only accepts a subset of them
-  // (e.g. a table with 50+ display columns but a backend allowlist of ~8 sortable ones).
-  // Omit to fall back to each column's own `enableSorting` (the previous behavior).
   sortableColumns?: string[];
   stickyFirstColumn?: boolean;
   onRowClick?: (row: TData) => void;
-  // Extra classes for a specific row (e.g. a row with a pending change request, matching the
-  // reference exactly — read from SBR-design's own table.jsx rather than approximated: the
-  // persistent signal is a thin inset left accent line, NOT a full-row background wash; the
-  // amber tint itself only ever sits solid on the sticky first cell, the rest of the row stays
-  // white until hovered). Applied to the row and, when stickyFirstColumn is on, to its sticky
-  // first cell too — that cell needs its own opaque background to stay solid while the table
-  // scrolls horizontally underneath it, so it can't just inherit the row's.
   getRowClassName?: (row: TData) => string | undefined;
+  toolbarLeft?: ReactNode;
 }
 
-// A sticky cell is a descendant of the hovered row, not the hovered element itself, so it needs
-// the `group-hover:` variant of whatever tint the row uses. These have to be spelled out as
-// literals: Tailwind only emits CSS for class names it can see verbatim in the source, so a
-// `group-hover:*` string assembled at runtime compiles to nothing and the cell silently keeps
-// its base background. Add an entry here whenever a new row tint is introduced.
-// A lighter custom shade rather than the shared `warn-tint` token — kept opaque (not an alpha
-// modifier) since this cell must stay solid while the table scrolls horizontally underneath it.
-// Same shade on hover as at rest (no darker hover variant) — a color shift on hover read as an
-// unwanted difference rather than an interaction cue.
 const STICKY_CELL_HOVER_CLASS: Record<string, string> = {
   'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]': 'bg-[#FDF7E3] group-hover:bg-[#FDF7E3]',
 };
@@ -90,15 +68,13 @@ export function DataTable<TData, TValue>({
   stickyFirstColumn,
   onRowClick,
   getRowClassName,
+  toolbarLeft,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // When the caller supplies onSortChange, the server does the sorting across the
-  // whole dataset — `data` is just the current page, so client-side getSortedRowModel
-  // must be disabled here (manualSorting) or TanStack would re-sort only that page.
   const isServerSorted = !!onSortChange;
 
   const table = useReactTable({
@@ -106,17 +82,8 @@ export function DataTable<TData, TValue>({
     columns,
     state: { sorting, columnVisibility },
     onSortingChange: (updater) => {
-      // Compute the next value up front and pass setSorting a plain value rather than an
-      // updater function — React treats updater functions as pure and may invoke them
-      // outside a normal event context (e.g. Strict Mode's double-invoke check), so calling
-      // the parent's onSortChange (a different component's setState) from inside one throws
-      // "Cannot update a component while rendering a different component".
       const next = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(next);
-      // TanStack's own 3-click cycle (asc -> desc -> unsorted) resolves `next` to an empty
-      // array on the 3rd click. Skipping the callback in that case (as before) left the
-      // table's internal sort visually cleared while the parent's sortBy/sortOrder filter
-      // state kept its last value — the query never stopped requesting descending order.
       if (isServerSorted) {
         if (next[0]) onSortChange(next[0].id, next[0].desc ? 'desc' : 'asc');
         else onSortChange(null, null);
@@ -137,7 +104,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-end">
+      <div className={cn('flex items-center', toolbarLeft ? 'justify-between gap-3' : 'justify-end')}>
+        {toolbarLeft}
         <ColumnToggle table={table} />
       </div>
       <div className="relative rounded-lg bg-white shadow-card overflow-hidden" aria-busy={showRefreshing || isLoading}>
@@ -208,10 +176,6 @@ export function DataTable<TData, TValue>({
                     return (
                     <TableCell
                       key={cell.id}
-                      // The opaque base background is never optional — a sticky cell without one
-                      // lets horizontally scrolled columns show through underneath it. Row classes
-                      // layer on top (tailwind-merge lets a later bg win) rather than replacing it,
-                      // since a row class may supply only a hover tint and no base colour.
                       className={cn(isSticky && cn('sticky start-0 z-10 bg-white group-hover:bg-panel', stickyClassName))}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -225,7 +189,6 @@ export function DataTable<TData, TValue>({
           </TableBody>
       </Table>
 
-      {/* Render outside the scroll container so they fill the visible width */}
       {!isLoading && isError && (
         <div className="border-t border-slate-100">
           <ErrorState onRetry={onRetry} />

@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/i18n';
 
 // Direction-aware Select root: in Arabic (RTL) the trigger/content flip correctly.
-// In English (LTR) this is identical to Radix's default. Explicit `dir` prop still wins.
 const Select = (props: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => {
   const { dir } = useLanguage();
   return <SelectPrimitive.Root dir={dir} {...props} />;
@@ -44,8 +43,6 @@ const SelectContent = React.forwardRef<
       ref={ref}
       collisionPadding={collisionPadding}
       className={cn(
-        // Same viewport-fit rule as DropdownMenuContent: cap at the space Radix measured and
-        // scroll rather than running off-screen when the trigger sits near a window edge.
         'relative z-50 min-w-[8rem] max-h-[var(--radix-select-content-available-height)] overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-float',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         position === 'popper' && 'translate-y-1',

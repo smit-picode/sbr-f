@@ -10,21 +10,29 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { NoData } from '@/components/common/NoData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
+import { SearchInput } from '@/components/common/SearchInput';
 import { DataTable } from '@/components/table/DataTable';
-import { usePermission } from '@/hooks';
+import { useDebounce, usePermission } from '@/hooks';
 import { formatDateTime, formatNumber, nullableText } from '@/utils/format';
+import { cleanParams } from '@/utils/query';
 import type { SnapshotSummary } from '@/types';
 import { useGetSnapshotsQuery } from '../api/snapshotsApi';
-import { SNAPSHOT_DEFAULT_PAGE_SIZE, SNAPSHOT_ENTITIES } from '../constants';
+import { SNAPSHOT_ENTITIES } from '../constants';
 
 export function BrowseSnapshotsPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { canView } = usePermission('snapshots');
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(SNAPSHOT_DEFAULT_PAGE_SIZE);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search.trim(), 400);
 
-  const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotsQuery({ page, limit }, { skip: !canView });
+  const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotsQuery(
+    cleanParams({ page, limit, search: debouncedSearch }),
+    { skip: !canView },
+  );
   const rows = data?.data ?? [];
   const total = data?.total ?? 0;
   const open = (row: SnapshotSummary) => router.push(`/snapshots/browse/${row.SNAPSHOT_ID}`);
@@ -72,13 +80,19 @@ export function BrowseSnapshotsPage() {
     {
       accessorKey: 'FROZEN_BY_NAME',
       header: t('snapshots.frozenBy'),
-      // Shows the frozen-by email once the list procedure returns it; the display name until then.
-      cell: ({ row, getValue }) => (
-        <span className="inline-flex items-center gap-1.5 text-sm text-adaam">
-          <User className="h-3.5 w-3.5 shrink-0" />
-          {nullableText(row.original.FROZEN_BY_EMAIL ?? getValue<string | null>())}
-        </span>
-      ),
+      cell: ({ row, getValue }) => {
+        const { FROZEN_BY_EMAIL: email } = row.original;
+        const name = getValue<string | null>();
+        return (
+          <span className="inline-flex items-start gap-1.5 text-sm text-adaam">
+            <User className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>
+              {nullableText(email ?? name)}
+              {email && name && <span className="block text-xs text-slate-500">{name}</span>}
+            </span>
+          </span>
+        );
+      },
     },
     {
       id: 'actions',
@@ -118,7 +132,7 @@ export function BrowseSnapshotsPage() {
         }
       />
 
-      {!isLoading && !isError && total === 0 ? (
+      {!isLoading && !isError && total === 0 && !debouncedSearch && !search ? (
         <div className="rounded-lg bg-white shadow-card overflow-hidden">
           <NoData message={t('snapshots.noData')} description={t('snapshots.noDataDesc')} />
         </div>
@@ -135,6 +149,14 @@ export function BrowseSnapshotsPage() {
           onPageChange={setPage}
           onLimitChange={(l) => { setLimit(l); setPage(1); }}
           onRowClick={open}
+          toolbarLeft={
+            <SearchInput
+              className="shadow-none !w-[26rem] max-w-full"
+              value={search}
+              onChange={(v) => { setSearch(v); setPage(1); }}
+              placeholder={t('snapshots.searchPlaceholder')}
+            />
+          }
         />
       )}
     </PageContainer>

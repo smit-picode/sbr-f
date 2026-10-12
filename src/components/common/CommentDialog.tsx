@@ -12,8 +12,6 @@ interface Props {
   isLoading: boolean;
   onConfirm: (comment: string) => void;
   onCancel: () => void;
-  // Optional advisory note shown above the comment field (e.g. "still linked to a group") —
-  // informational only, never blocks onConfirm. Omit for the default behavior (no note).
   warning?: string;
 }
 
@@ -27,16 +25,12 @@ export function CommentDialog({ open, isLoading, onConfirm, onCancel, warning }:
     if (open) { setComment(''); setError(''); setSubmitting(false); }
   }, [open]);
 
-  // Reset submitting when the API call finishes (success or error).
-  // On success the dialog closes anyway; on error this re-enables the button.
   useEffect(() => {
     if (!isLoading) setSubmitting(false);
   }, [isLoading]);
 
   const handleConfirm = () => {
     if (!comment.trim()) { setError(t('comment.required')); return; }
-    // Guard against double-submit: isLoading from RTK Query updates on the next
-    // render cycle, leaving a window where a second click can fire a duplicate request.
     if (submitting) return;
     setSubmitting(true);
     onConfirm(comment.trim());

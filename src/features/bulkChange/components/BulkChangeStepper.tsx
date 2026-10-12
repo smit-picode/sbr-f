@@ -5,7 +5,7 @@ const STEP_KEYS = ['setUp', 'upload', 'validate', 'confirm'] as const;
 const STEP_DEFAULTS = ['Set up', 'Upload', 'Validate', 'Confirm'] as const;
 
 interface BulkChangeStepperProps {
-  currentStep: number; // 0-based index into STEP_KEYS
+  currentStep: number;
 }
 
 export function BulkChangeStepper({ currentStep }: BulkChangeStepperProps) {

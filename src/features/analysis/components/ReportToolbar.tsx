@@ -38,7 +38,6 @@ function Label({ children }: { children: React.ReactNode }) {
 export function ReportToolbar(p: Props) {
   const { t } = useTranslation();
   const { analysis, canEdit } = p;
-  // Report filters can use any field; each block applies those its unit has.
   const allFields = useMemo(() => [...new Set(ANALYSIS_ENTITY_ORDER.flatMap((e) => ANALYSIS_ENTITIES[e].fields))].filter((f) => !['sbr_id', 'enterprise_id', 'group_id', 'contact_id', 'address_id', 'name'].includes(f)), []);
 
   return (

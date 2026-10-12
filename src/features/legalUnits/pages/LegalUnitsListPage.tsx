@@ -28,17 +28,10 @@ function is403(e: unknown): boolean { return typeof e === 'object' && e !== null
 
 export function LegalUnitsListPage() {
   const searchParams = useSearchParams();
-  // Deep-link support (e.g. clicking a legal unit on the Establishment detail page): seed the
-  // search filter from ?search=... on first load — takes priority over a restored session since
-  // it reflects the user's explicit intent from wherever they linked in.
   const [filters, setFilters] = usePersistedState<LegalUnitFilters>('sbr:legalUnits:filters', LEGAL_UNITS_DEFAULT_FILTERS, () => {
     const initialSearch = searchParams.get('search');
     return initialSearch ? { ...LEGAL_UNITS_DEFAULT_FILTERS, search: initialSearch } : undefined;
   });
-  // ?establishment=<SBR_ID> deep link from an establishment's "View in Legal Units" — seeds an
-  // ESTABLISHMENT equals <id> column filter so the ledger opens showing only that establishment's
-  // legal units. Uses the allow-listed column rather than free-text `search`, which matches on
-  // identifier text and would not reliably narrow to a numeric SBR ID.
   const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:legalUnits:columnFilters', [], () => {
     const establishment = searchParams.get('establishment');
     return establishment

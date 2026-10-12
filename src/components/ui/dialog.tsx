@@ -51,10 +51,7 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-// DialogContent keeps its p-6 (unchanged spacing for every existing modal body) — several
-// modals already override it to p-0 with their own flex layout and pass a full className to
-// DialogHeader/DialogFooter (px-6 + border), so the defaults here stay inset rather than using a
-// negative-margin bleed, which would double up against those callers' own padding.
+// DialogContent keeps its p-6 (unchanged spacing for every existing modal body)
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn('flex flex-col space-y-1.5 text-center sm:text-left pb-3 border-b border-slate-100', className)} {...props} />
 );

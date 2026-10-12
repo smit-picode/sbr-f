@@ -1,34 +1,18 @@
 import type ExcelJS from 'exceljs';
 import type { BulkChangeItemInput } from '../types';
 
-// exceljs is ~250 kB and is only needed once the operator actually picks a file, so it is
-// imported on demand rather than bundled into the wizard's first load. Every entry point here
-// is already async, so this costs nothing at the call sites.
+// Exceljs is ~250 kB and is only needed once the operator actually picks a file
 type ExcelJsModule = typeof import('exceljs');
 
 const loadExcelJs = async (): Promise<ExcelJsModule> => {
   const mod = await import('exceljs');
-  // exceljs ships a CommonJS entry, so bundler interop can put the API on `default` or
-  // directly on the namespace. Accept either rather than assuming one.
   return (mod as unknown as { default?: ExcelJsModule }).default ?? mod;
 };
 
-// Client-side workbook reader for the bulk-change wizard.
-//
-// Parsing happens in the browser so no file ever has to be uploaded, stored or virus-scanned
-// server-side. It is NOT the validation step: everything that decides whether a row may be
-// submitted (does the record exist, is the column editable, is the value legal, does it
-// actually differ) is recomputed by POST /bulk-change/validate against live data. This module
-// only turns a spreadsheet into rows.
-
 export interface ParsedWorkbook {
-  // Column headers found in the file, in sheet order.
   headers: string[];
   items: BulkChangeItemInput[];
-  // Headers present in the file that are not part of the template. Reported so the operator
-  // can fix the file rather than silently having columns ignored.
   unknownHeaders: string[];
-  // Set when the file has rows but the identifier column is absent altogether.
   missingIdColumn: boolean;
 }
 
@@ -39,25 +23,20 @@ export class WorkbookParseError extends Error {
   }
 }
 
-// Excel cells arrive as strings, numbers, dates, formula results or rich text. Flatten each to
-// the string/number/null the API expects, without inventing values.
+// Excel cells arrive as strings, numbers, dates, formula results or rich text.
 const cellToPrimitive = (value: ExcelJS.CellValue): string | number | null => {
   if (value === null || value === undefined) return null;
   if (typeof value === 'string') return value.trim() === '' ? null : value.trim();
   if (typeof value === 'number') return value;
   if (typeof value === 'boolean') return value ? 'Y' : 'N';
-  // Dates are normalised to YYYY-MM-DD, the format CHANGE_DATA documents for date columns.
   if (value instanceof Date) return value.toISOString().slice(0, 10);
 
   if (typeof value === 'object') {
-    // Formula cell — take the computed result, not the formula text.
     if ('result' in value) return cellToPrimitive((value as { result: ExcelJS.CellValue }).result);
-    // Rich text — concatenate the runs.
     if ('richText' in value) {
       const text = (value as ExcelJS.CellRichTextValue).richText.map((run) => run.text).join('').trim();
       return text === '' ? null : text;
     }
-    // Hyperlink cell — the visible text is what the operator meant to type.
     if ('text' in value) {
       const text = String((value as { text: unknown }).text).trim();
       return text === '' ? null : text;
@@ -67,8 +46,7 @@ const cellToPrimitive = (value: ExcelJS.CellValue): string | number | null => {
   return String(value).trim() || null;
 };
 
-// Headers are matched case-insensitively and with surrounding whitespace stripped, so a file
-// with "sbr_id " still lines up with SBR_ID. Everything downstream uses the canonical name.
+// Headers are matched case-insensitively and with surrounding whitespace stripped
 const normaliseHeader = (raw: string): string => raw.trim().toUpperCase().replace(/\s+/g, '_');
 
 const readWorkbook = async (file: File): Promise<ExcelJS.Worksheet> => {
@@ -77,13 +55,10 @@ const readWorkbook = async (file: File): Promise<ExcelJS.Worksheet> => {
   const workbook = new ExcelJsLib.Workbook();
 
   if (file.name.toLowerCase().endsWith('.csv')) {
-    // exceljs's CSV reader takes a stream in Node; in the browser the text is loaded and
-    // written into a sheet directly, which keeps one code path for both formats downstream.
     const text = new TextDecoder().decode(buffer);
     const sheet = workbook.addWorksheet('CSV');
     const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
     lines.forEach((line) => {
-      // Split on commas that are not inside double quotes, then unquote.
       const cells = (line.match(/("([^"]|"")*"|[^,]*)(,|$)/g) ?? [])
         .map((cell) => cell.replace(/,$/, ''))
         .map((cell) => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
@@ -96,10 +71,6 @@ const readWorkbook = async (file: File): Promise<ExcelJS.Worksheet> => {
   try {
     await workbook.xlsx.load(buffer);
   } catch (cause) {
-    // exceljs's browser-bundled zip/XML parsing can reject with something other than a real
-    // Error for a large or unusual file (a raw stream event, a plain object) — wrap it in a
-    // WorkbookParseError so the real cause always reaches the UI as text instead of falling
-    // back to a generic "invalid file" message that hides what actually happened.
     const detail =
       cause instanceof Error
         ? cause.message
@@ -145,7 +116,7 @@ export const parseWorkbook = async (
   const items: BulkChangeItemInput[] = [];
 
   sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-    if (rowNumber === 1) return; // header
+    if (rowNumber === 1) return;
 
     const changeData: Record<string, string | number | null> = {};
     let id: number | null = null;
@@ -160,19 +131,13 @@ export const parseWorkbook = async (
         id = Number.isInteger(parsed) && parsed > 0 ? parsed : null;
         return;
       }
-      // Unknown headers are carried through rather than dropped: the server reports them as
-      // UNKNOWN_COLUMN against the specific row, which is more useful than silently ignoring
-      // a column the operator believed they were filling in.
       changeData[header] = value;
     });
 
-    // A wholly blank line (trailing rows Excel leaves behind) is skipped, not reported.
     if (!hasAnyValue) return;
 
     items.push({
       rowNumber,
-      // 0 is never a valid id; the server reports it as ID_MISSING / ID_NOT_NUMERIC against
-      // this row number, so the operator sees which spreadsheet line is at fault.
       id: id ?? 0,
       changeData,
     });
@@ -181,18 +146,7 @@ export const parseWorkbook = async (
   return { headers, items, unknownHeaders, missingIdColumn };
 };
 
-// Builds the downloadable starter template for an entity: one header row of the identifier
-// plus every editable column, with a comment row describing allowed values.
-//
-// `records`, when given, fills the sheet with the operator's actual current
-// rows instead of leaving it blank — the row's own ID rides along pre-filled, so an operator
-// building an upload for Contacts/Addresses never has to discover or type it themselves. Column
-// SHAPE is exactly idColumn + `columns`, in the order the caller passes them — `columns` already
-// includes SBR_ID as an ordinary (non-required) reference column for Contacts/Addresses (see
-// BulkChangeSetupStep's template.columns), so it rides along in the file too; parseWorkbook
-// accepts it back the same way as any other non-identifier column (present in allowedColumns,
-// its value carried through in changeData, silently dropped server-side — see
-// stripSbrIdReference in bulkChange.controller.ts) rather than being flagged UNKNOWN_COLUMN.
+// Builds the downloadable starter template for an entity
 export const buildTemplateWorkbook = async (
   entityLabel: string,
   idColumn: string,
@@ -207,7 +161,6 @@ export const buildTemplateWorkbook = async (
   sheet.addRow(headers);
   sheet.getRow(1).font = { bold: true };
 
-  // Second row documents each column so the operator does not have to keep the UI open.
   const hints = headers.map((header) => {
     if (header === idColumn) return 'required — must match an existing record';
     const spec = columns.find((c) => c.key === header);

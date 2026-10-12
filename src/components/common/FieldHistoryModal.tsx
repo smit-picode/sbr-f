@@ -15,15 +15,13 @@ interface AuditMeta {
   operation: string | null;
 }
 
-// A version row carries VALID_FROM/VALID_TO/SOURCE_CODE plus the audited fields, and
-// optionally `audit` metadata when the version resulted from a user edit.
+// A version row carries VALID_FROM/VALID_TO/SOURCE_CODE plus the audited fields
 export interface HistoryVersion {
   ID?: number;
   VALID_FROM?: string | null;
   VALID_TO?: string | null;
   SOURCE_CODE?: string | null;
   audit?: AuditMeta | null;
-  // Present on PENDING / REJECTED change-request entries (not applied versions)
   request?: boolean;
   status?: string;
   changes?: Record<string, { old: unknown; new: unknown }>;
@@ -82,8 +80,7 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
     return isNaN(d.getTime()) ? formatDate(raw) : d.toLocaleString('en-GB');
   };
 
-  // Collapse versions where THIS attribute's value did not change (other fields' edits create
-  // versions where this field is unchanged). Versions arrive newest-first.
+  // Collapse versions where THIS attribute's value did not change
   const normalize = (v: HistoryVersion) => {
     const raw = fieldKey ? (v as Record<string, unknown>)[fieldKey] : null;
     return raw == null || raw === '' ? '' : String(raw);
@@ -111,7 +108,6 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
     <div className="fixed inset-0 z-[60] flex justify-end">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
       <div className="relative z-10 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
-        {/* Header */}
         <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 text-white" style={{ background: 'linear-gradient(110deg,#87795D,#A29374)' }}>
           <div className="min-w-0">
             <p className="text-[11px]" style={{ color: '#F0E6D8' }}>{t('fieldHistory.title', { defaultValue: 'Attribute history' })}</p>
@@ -122,7 +118,6 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
           {isLoading ? (
             <p className="text-sm text-slate-500">{t('fieldHistory.loading', { defaultValue: 'Loading history…' })}</p>
@@ -134,7 +129,6 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
             <>
               <p className="text-[12px] text-slate-400">{countLabel}</p>
 
-              {/* Timeline */}
               <div className="relative ps-5">
                 <div className="absolute bottom-1.5 start-[6px] top-1.5 w-px bg-slate-200" />
                 {changeVersions.map((v, i) => {
@@ -168,7 +162,6 @@ export function FieldHistoryModal({ versions, fieldKey, fieldLabel, open, isLoad
                 })}
               </div>
 
-              {/* Selected detail */}
               {current && (isUserEdit(current) ? (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
                   <div className="mb-2.5 flex items-center gap-2">

@@ -84,20 +84,15 @@ const RAIL_GRADIENT = '#FFFFFF';
 interface NavLinkProps {
   item: NavItem;
   count?: number;
-  // Fired on click in addition to the normal navigation — used by the collapsed-group flyout
-  // to close itself, since the sidebar stays mounted across route changes (a persistent layout
-  // element), so a stale open flyout would otherwise linger after navigating away.
   onNavigate?: () => void;
 }
 
-// Only ever rendered expanded now: the collapsed rail shows one icon per GROUP (with its own
-// flyout, below), not one per item, so there is no longer a collapsed single-item variant here.
+// Only ever rendered expanded now
 function NavLink({ item, count, onNavigate }: NavLinkProps) {
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const Icon = ICON_MAP[item.icon];
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-  // In Arabic, always use the translation key so sidebarLabel (English-only short form) doesn't leak through
   const label = i18n.language === 'ar'
     ? t(item.i18nKey, { defaultValue: item.title })
     : (item.sidebarLabel ?? t(item.i18nKey, { defaultValue: item.title }));
@@ -135,18 +130,9 @@ export function Sidebar() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  // Collapsed-rail group flyout — one at a time, keyed by group id. Position is measured from
-  // the trigger icon each time it opens (fixed positioning, portalled past the rail's own
-  // overflow-y-auto/overflow-x-hidden clipping) rather than inherited from the icon's own
-  // ancestor, mirroring FieldHistoryPopover's approach to the same clipped-rail problem.
   const [flyout, setFlyout] = useState<{ groupId: string; style: React.CSSProperties } | null>(null);
 
-  // Opens the flyout for one collapsed group, sized/positioned off the trigger icon's own
-  // rect. paddingInlineStart bridges the gap between the icon and the panel with invisible
-  // padding that is still part of THIS element's box — since the flyout below is rendered as a
-  // React child of the same hoverable wrapper (via createPortal, which preserves React's event
-  // tree even though the DOM node moves to <body>), the pointer never leaves that combined
-  // hit-test area while crossing from icon to panel, so mouseleave never fires mid-transit.
+  // Opens the flyout for one collapsed group
   const openFlyout = (groupId: string, el: HTMLElement, itemCount: number) => {
     const r = el.getBoundingClientRect();
     const rail = el.closest('aside');
@@ -162,7 +148,6 @@ export function Sidebar() {
     });
   };
 
-  // Restore persisted UI state after mount (avoids SSR hydration mismatch)
   useEffect(() => {
     try {
       const c = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
@@ -170,7 +155,6 @@ export function Sidebar() {
       const g = localStorage.getItem(SIDEBAR_GROUPS_KEY);
       if (g) setOpenGroups(JSON.parse(g));
     } catch {
-      // Corrupt localStorage — keep defaults
     }
   }, []);
 
@@ -178,7 +162,6 @@ export function Sidebar() {
   const permissions = useAppSelector((s) => s.auth.permissions);
   const [localUser, setLocalUser] = useState<{ email: string; role: string } | null>(null);
 
-  // Fallback: read from localStorage if Redux isn't hydrated yet (hydration race condition fix)
   useEffect(() => {
     if (!user && typeof window !== 'undefined') {
       const stored = localStorage.getItem('sbr_user');
@@ -186,7 +169,6 @@ export function Sidebar() {
         try {
           setLocalUser(JSON.parse(stored));
         } catch {
-          // Invalid JSON
         }
       }
     }
@@ -216,7 +198,6 @@ export function Sidebar() {
       try {
         localStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify(next));
       } catch {
-        // Ignore storage failures
       }
       return next;
     });
@@ -228,7 +209,6 @@ export function Sidebar() {
       try {
         localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(next));
       } catch {
-        // Ignore storage failures
       }
       return next;
     });
@@ -244,26 +224,17 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        // Floating white rail (QInsights style) instead of a full-bleed maroon panel.
-        // sticky + own height (not h-screen) keeps it pinned with margin on all sides.
         'flex flex-col shrink-0 sticky top-4 my-4 ms-4 rounded-3xl shadow-float transition-[width] duration-200 ease-out',
         collapsed ? 'w-[68px]' : 'w-[236px]'
       )}
       style={{
         background: RAIL_GRADIENT,
         height: 'calc(100vh - 32px)',
-        // Mirrors the body stack in globals.css (Lusail → Calibri), so the rail renders in the
-        // same typeface as the reference. Arabic mode promotes Cairo for Arabic glyph coverage.
         fontFamily: i18n.language === 'ar'
           ? "'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, sans-serif"
           : "'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), sans-serif",
       }}
     >
-      {/* Brand — matches SBR-design's own sidebar exactly: the official lockup (its own PNG
-          already carries "National Planning Council") stacked above "SBR Portal", not the
-          emblem-in-a-circle badge, which both isolated the emblem and altered its form.
-          Collapsed, the rail is too narrow to carry the lockup at a legible size, so it shows
-          the product name alone, per the same reference. */}
       <button
         type="button"
         onClick={() => router.push('/home')}
@@ -284,7 +255,6 @@ export function Sidebar() {
         </span>
       </button>
 
-      {/* Navigation */}
       <nav className={cn('flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-2', collapsed ? 'px-2' : 'px-3')}>
         {NAV_GROUPS.filter(isGroupVisible).map((group) => {
           const visibleItems = group.items.filter(isItemVisible);
@@ -382,7 +352,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse Toggle */}
       <button
         onClick={toggleCollapsed}
         className={cn(
@@ -401,7 +370,6 @@ export function Sidebar() {
         )}
       </button>
 
-      {/* User */}
       <div className={cn('flex items-center gap-2.5 h-[58px] shrink-0 border-t border-gray-100', collapsed ? 'justify-center px-2' : 'px-4')}>
         <div
           className="h-9 w-9 rounded-full bg-dune flex items-center justify-center text-[11px] font-bold text-white shrink-0"

@@ -11,7 +11,6 @@ export function SurveySampleDetailSkeleton() {
       </div>
       <Skeleton className="h-[72px] w-full rounded-lg" />
       <div className="overflow-hidden rounded-lg bg-white shadow-card">
-        {/* TableLoader renders bare <tr> rows, so they need a real table body around them. */}
         <table className="w-full">
           <tbody>
             <TableLoader rows={8} cols={9} />

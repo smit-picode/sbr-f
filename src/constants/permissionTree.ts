@@ -4,9 +4,6 @@ export interface PermissionNode {
   children?: PermissionNode[];
 }
 
-// Parent keys (establishments, contacts, etc.) are UI-only group labels.
-// Only leaf nodes (with dots) exist in the DB.
-// The frontend uses this tree to render grouped permission sections.
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'home',
@@ -92,9 +89,6 @@ export const PERMISSION_TREE: PermissionNode[] = [
     children: [
       { key: 'admin_panel.view', label: 'View Admin Panel' },
       {
-        // UI-only group node: combines the Roles and Permissions sections into one
-        // "Roles & Permissions Tab" group, mirroring the merged admin tab.
-        // Leaf keys below are unchanged — all RBAC gating still works.
         key: 'admin_panel.roles_permissions',
         label: 'Roles & Permissions Tab',
         children: [
@@ -148,10 +142,6 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
-    // Module-level access to Bulk Change. These sit ON TOP of the per-entity permissions —
-    // granting them does not by itself allow editing any data. A bulk submit still requires
-    // the target table's Edit permission, and a bulk decision still requires
-    // "Approve / Reject Change Requests", both enforced by the API and the database.
     key: 'bulk_change',
     label: 'Bulk Change',
     children: [
@@ -162,7 +152,6 @@ export const PERMISSION_TREE: PermissionNode[] = [
   },
 ];
 
-// Flat set of all leaf permission keys
 export const CHILD_PERMISSION_KEYS = new Set(
   PERMISSION_TREE.flatMap(n => (n.children ?? []).map(c => c.key))
 );

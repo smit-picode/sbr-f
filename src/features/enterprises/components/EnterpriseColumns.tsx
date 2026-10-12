@@ -15,7 +15,6 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
         <span className="font-mono text-xs font-medium text-[#77748B]">ENT-{String(getValue())}</span>
-        {/* `!!` is required: the API sends Oracle's 1/0, and React renders a bare 0 as text. */}
         {!!row.original.HAS_PENDING_REQUEST && <PendingBadge />}
       </span>
     ),
@@ -34,8 +33,6 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {
     accessorKey: 'MAIN_CR',
     header: t('columns.MAIN_CR'),
-    // Comes from the joined mainUnit establishment; the backend orders it through that
-    // include (ENTERPRISE_MAIN_UNIT_SORT_COLUMNS in enterprises.controller.ts).
     enableSorting: true,
     cell: ({ getValue }) => {
       const val = getValue<string | null>();
@@ -58,14 +55,11 @@ export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
         </span>
       );
     },
-    // Derived, not a real column, but the list procedure now orders by the same member-count
-    // subquery it projects, so server-side sort is exact over the full dataset.
     enableSorting: true,
   },
   {
     accessorKey: 'LEGAL_TYPE',
     header: t('columns.LEGAL_TYPE'),
-    // Comes from the joined mainUnit establishment; ordered via that include on the backend.
     enableSorting: true,
     cell: ({ getValue }) => (
       <span className="text-sm text-slate-700" lang="ar">{nullableText(getValue<string | null>())}</span>

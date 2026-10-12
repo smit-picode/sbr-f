@@ -24,8 +24,6 @@ import {
 import { ANALYSIS_FRAME_CHRONO } from '../mock/frames';
 import { fieldGetter, getFrameRows, type AnalysisGetter, type AnalysisRow } from '../mock/generate';
 
-// Pure in-browser stand-in for the analysis endpoint; its request/result shapes are the backend contract.
-
 const SERIES_CAP = 10;
 const SEP = '\u0001';
 
@@ -111,7 +109,6 @@ function measure(entity: AnalysisEntity, rows: AnalysisRow[], m: AnalysisMeasure
       const mid = Math.floor(s.length / 2);
       return { value: s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2, dominant: false };
     }
-    // A reduce, not Math.min(...nums): spreading 100k+ values overflows the call stack.
     case 'min':
       return { value: nums.reduce((a, b) => (b < a ? b : a), nums[0]), dominant: false };
     case 'max':
@@ -187,7 +184,6 @@ function group(q: AnalysisResolvedQuery, rows: Tagged[], keep: (Set<string | nul
 
 function flagRows(rows: AnalysisResultRow[], dims: number): void {
   const min = ANALYSIS_DISCLOSURE.minCell;
-  // Secondary suppression: a lone confidential cell is recoverable from the total, so hide its smallest neighbour too.
   const lines: Map<string, AnalysisResultRow[]>[] = [];
   if (dims === 1) lines.push(new Map([['all', rows]]));
   if (dims === 2) {
@@ -263,7 +259,6 @@ function sortRows(q: AnalysisResolvedQuery, rows: AnalysisResultRow[]): Analysis
     const totals = new Map<string | null, number>();
     for (const r of rows) totals.set(r.keys[i], (totals.get(r.keys[i]) ?? 0) + (r.values[0] ?? 0));
     const keys = [...totals.keys()];
-    // Ordered dimensions (frames, size classes, years) always keep their natural order.
     const natural = dim === ANALYSIS_FRAME_DIMENSION || !!ANALYSIS_FIELDS[dim]?.order || dim === 'reg_year';
     keys.sort((a, b) => {
       if (a === ANALYSIS_OTHER_KEY || b === ANALYSIS_OTHER_KEY || a == null || b == null) return compareKeys(dim, a, b);

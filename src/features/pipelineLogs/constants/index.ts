@@ -5,7 +5,6 @@ export const PIPELINE_RUNS_DEFAULT_FILTERS = {
   status: '',
 } as const;
 
-// Real SBR.SBR_PIPELINE_RUNS.STATUS values (backend PIPELINE_RUN_STATUS enum) — not the SBR-design mockup's SUCCESS/PARTIAL wording.
 export const PIPELINE_RUN_STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'All statuses' },
   { value: 'RUNNING', label: 'Running' },
@@ -13,7 +12,6 @@ export const PIPELINE_RUN_STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'FAILED', label: 'Failed' },
 ];
 
-// Badge variant per real STATUS/EVENT value — mirrors the Badge component's variant palette.
 export const PIPELINE_STATUS_BADGE: Record<string, 'info' | 'success' | 'destructive'> = {
   RUNNING: 'info',
   COMPLETED: 'success',

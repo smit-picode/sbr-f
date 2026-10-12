@@ -9,16 +9,10 @@ import { useAppSelector } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PageHeaderProps {
-  // ReactNode (not just string) so a detail page can pass a name with its own click-to-history
-  // affordance baked in, same as every other prop here — purely additive, every existing caller
-  // already passes a plain translated string, which is itself a valid ReactNode.
   title: React.ReactNode;
   description?: React.ReactNode;
   actions?: React.ReactNode;
-  // Small pills next to the breadcrumb (e.g. record ID, StatusBadge) — used by detail pages.
   chips?: React.ReactNode;
-  // Overlay back-link rendered top-left of the banner, above the toolbar row — used by detail
-  // pages to return to their list. Omit for list pages, which have no "back".
   back?: { label: string; onClick: () => void };
 }
 
@@ -31,7 +25,6 @@ function crumbFor(pathname: string): { groupKey: string; groupTitle: string; ite
       }
     }
   }
-  // /admin root (before redirect resolves) falls back to the Administration group
   if (pathname.startsWith('/admin')) {
     const admin = NAV_GROUPS.find((g) => g.id === 'administration') ?? NAV_GROUPS[0];
     const first = admin.items[0];
@@ -74,10 +67,6 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
         </button>
       )}
 
-      {/* Toolbar: language toggle + notification bell + avatar. Two layers of background, both
-          kept — a shared outer frosted-glass pill grouping all three (removed once, then asked
-          back), plus each item keeping its own distinct pill/circle background inside it, so
-          every control still reads as its own button rather than blending into the group. */}
       <div
         className="absolute top-4 end-4 z-10 flex items-center gap-2 rounded-full p-1.5"
         style={{
@@ -113,10 +102,6 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
                 <span className="absolute top-2 end-2.5 w-1.5 h-1.5 rounded-full bg-dune-light" />
               </button>
             </TooltipTrigger>
-            {/* Portalled to <body>: the banner is `overflow-hidden` (for its rounded corners),
-                and this trigger sits right at its top-right edge, so an inline tooltip was
-                clipped against that boundary — same class of bug the sidebar rail already
-                hit. collisionPadding keeps it off the viewport edge too. */}
             <TooltipPortal>
               <TooltipContent side="bottom" collisionPadding={8} className="max-w-[220px] text-center text-xs">
                 This feature will be implemented in the next phase

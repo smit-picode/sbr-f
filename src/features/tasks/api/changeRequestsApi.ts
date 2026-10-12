@@ -38,11 +38,9 @@ export interface ChangeRequestRelatedMember {
 }
 
 export interface ChangeRequestRelated {
-  // SBR_ESTABLISHMENTS context
   enterprise?: ChangeRequestRelatedEnterprise | null;
   contactCount?: number;
   addressCount?: number;
-  // SBR_ENTERPRISES context
   members?: ChangeRequestRelatedMember[];
 }
 
@@ -89,12 +87,10 @@ export const changeRequestsApi = baseApi.injectEndpoints({
     }),
     approveChangeRequest: builder.mutation<ApiResponse<null>, { id: number; reason?: string }>({
       query: ({ id, reason }) => ({ url: `/change-requests/${id}/approve`, method: 'POST', body: { reason } }),
-      // The request may belong to a bulk batch, whose remaining-pending count changes with it.
       invalidatesTags: ['ChangeRequests', 'BulkChange', 'Establishments', 'Enterprises', 'Contacts', 'Addresses', 'AuditLog'],
     }),
     rejectChangeRequest: builder.mutation<ApiResponse<null>, { id: number; reason?: string }>({
       query: ({ id, reason }) => ({ url: `/change-requests/${id}/reject`, method: 'POST', body: { reason } }),
-      // Reject clears the row's pending state, so refresh the entity lists/detail badges too (mirrors approve).
       invalidatesTags: ['ChangeRequests', 'BulkChange', 'Establishments', 'Enterprises', 'Contacts', 'Addresses', 'AuditLog'],
     }),
   }),

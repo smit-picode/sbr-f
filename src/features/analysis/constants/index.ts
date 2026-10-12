@@ -16,7 +16,6 @@ export interface AnalysisFieldDef {
   label: string;
   type: AnalysisFieldType;
   group: AnalysisFieldGroup;
-  // Ordered domain for category fields whose order is meaningful (size classes, years…)
   order?: string[];
 }
 
@@ -89,7 +88,6 @@ export const ANALYSIS_FIELDS: Record<string, AnalysisFieldDef> = {
   enterprise_count: { id: 'enterprise_count', label: 'Enterprises', type: 'number', group: 'group' },
 };
 
-// Pseudo-dimension: one bucket per frame, for trends across frozen frames.
 export const ANALYSIS_FRAME_DIMENSION = '__frame';
 
 export interface AnalysisEntityDef {
@@ -176,7 +174,6 @@ export const ANALYSIS_ENTITIES: Record<AnalysisEntity, AnalysisEntityDef> = {
 
 export const ANALYSIS_ENTITY_ORDER: AnalysisEntity[] = ['establishments', 'enterprises', 'enterpriseGroups', 'contacts', 'addresses'];
 
-// Parent -> child level for click-to-drill.
 export const ANALYSIS_DRILL_PATHS: Record<string, string> = {
   isic_section: 'isic_division',
   isic_division: 'isic_group',
@@ -247,7 +244,6 @@ export interface AnalysisBlockTypeDef {
   minDims: number;
   maxDims: number;
   needsCompare: boolean;
-  // Blocks whose data points can be clicked to cross-filter / drill / list records
   interactive: boolean;
 }
 
@@ -282,7 +278,6 @@ export const ANALYSIS_DEFAULT_DISPLAY: AnalysisBlockDisplay = {
   sparkline: true,
 };
 
-// Disclosure control: confidential if fewer than minCell units, or one unit holds > dominance of a sum.
 export const ANALYSIS_DISCLOSURE = {
   minCell: 3,
   dominance: 0.85,
@@ -359,7 +354,6 @@ export const ANALYSIS_SIZE_CLASS_LABELS_AR: Record<string, string> = {
   large: 'كبيرة (250+)',
 };
 
-// Flow (births/deaths) pseudo-categories.
 export const FLOW_NEW = '__new__';
 export const FLOW_CEASED = '__ceased__';
 export const FLOW_OUTSIDE = '__outside__';

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppSelector, usePermission } from '@/hooks';
 import { useRouter } from '@/hooks/useAppRouter';
+import { cn } from '@/lib/utils';
 import { formatDate, formatRole } from '@/utils/format';
 import { EChart, columns, donut, hbars, hbarsStacked, pareto, qatarMap, registerQatarMap, trend } from '@/lib/charts';
 import { useGetExecutiveSummaryQuery } from '../api/homeApi';
@@ -48,8 +49,6 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
 export function ExecutiveHomePage() {
   const { t, i18n } = useTranslation();
 
-  // KPI cards link into the matching list page, but only for a viewer who may open it — the
-  // reference gates its cards the same way rather than routing to a page that would refuse them.
   const { canView: canViewEstablishments } = usePermission('establishments');
   const { canView: canViewEnterprises } = usePermission('enterprises');
   const user = useAppSelector((s) => s.auth.user);
@@ -65,20 +64,12 @@ export function ExecutiveHomePage() {
       .catch(() => setMapReady(false));
   }, []);
 
-  // Every section on this page now comes from sbr-backend's TEMPORARY raw-SQL
-  // /home/executive-summary endpoint — see that controller's own comment for why it's temporary
-  // (standing in until a real summary procedure exists). Three queries (size class,
-  // register-size-by-month, growth %) come from the database side; the rest were written here
-  // directly against the same tables/columns, since no queries were supplied for them yet.
   const { data: summaryRes, isLoading: summaryLoading } = useGetExecutiveSummaryQuery();
   const summary = summaryRes?.data;
 
   const firstName = firstNameOf(user?.email);
   const asOf = useMemo(() => formatDate(new Date().toISOString()), []);
 
-  // "Total" is real (sbr-backend's REGISTER_GROWTH_BY_MONTH_SQL); "By regulator"/"By sector" have
-  // no backend source yet (see executiveDashboardDummy.ts's own note) so they render illustrative
-  // dummy history instead — the toggle itself matches the SBR-design reference exactly.
   const registerGrowthByMonth = summary?.registerGrowthByMonth ?? [];
   const registerGrowthBySource = summary?.registerGrowthBySource ?? [];
   const registerGrowthBySector = summary?.registerGrowthBySector ?? [];
@@ -93,16 +84,12 @@ export function ExecutiveHomePage() {
     const rows = growthMode === 'source' ? registerGrowthBySource : registerGrowthBySector;
     const colorMap = growthMode === 'source' ? SOURCE_COLOR : SECTOR_COLOR;
 
-    // One category per month present in the data, in the order the query returned them.
     const monthKeys: string[] = [];
     rows.forEach((r) => {
       const key = `${r.year}-${r.month}`;
       if (!monthKeys.includes(key)) monthKeys.push(key);
     });
 
-    // Series ordered by their size in the latest month, so the legend leads with the biggest.
-    // A regulator or sector that existed earlier but has no row in the latest month is appended
-    // rather than dropped, otherwise its earlier points would vanish from the chart entirely.
     const latest = monthKeys[monthKeys.length - 1];
     const latestCounts: Record<string, number> = {};
     rows.filter((r) => `${r.year}-${r.month}` === latest).forEach((r) => {
@@ -122,8 +109,6 @@ export function ExecutiveHomePage() {
         return `${MONTH_LABELS[month - 1] ?? month} ${year}`;
       }),
       series: keys.filter((k) => monthKeys.some((mk) => (counts.get(`${k}|${mk}`) ?? 0) > 0)).map((k) => ({
-        // Kept in English regardless of language — it sits beside untranslated DB sector/source
-        // values (Private, MOCI, …) and translating only this one looked inconsistent.
         name: k === '—' ? 'Unknown' : k,
         color: colorMap[k] || '#94A3B8',
         data: monthKeys.map((mk) => counts.get(`${k}|${mk}`) ?? null),
@@ -205,8 +190,6 @@ export function ExecutiveHomePage() {
     [municipalityBreakdown, t, i18n.language]
   );
 
-  // No survey data exists anywhere yet (confirmed by the database side) — this whole section is
-  // illustrative dummy data, kept only so the page still matches the SBR-design reference.
   const surveyResponseOption = useMemo(() => {
     if (responseMode === 'survey') {
       return hbars({
@@ -251,7 +234,6 @@ export function ExecutiveHomePage() {
   const totalSize = summary?.totalEstablishmentCount ?? sizeClass.reduce((s, c) => s + c.count, 0);
   const activeEstablishmentCount = summary?.activeEstablishmentCount ?? 0;
   const growthPct = summary?.growthPct;
-  // A register younger than the 3-month window has no base to divide by, so fall back to its change since the first month on record.
   const firstMonth = registerGrowthByMonth[0];
   const lastMonth = registerGrowthByMonth[registerGrowthByMonth.length - 1];
   const sinceFirstPct = firstMonth && lastMonth && firstMonth.count > 0
@@ -260,6 +242,9 @@ export function ExecutiveHomePage() {
   const growthValue = Math.round((growthPct ?? sinceFirstPct) * 10) / 10;
   const growthLabel = `${growthValue > 0 ? '+' : ''}${growthValue}%`;
   const growthSince = growthPct == null && firstMonth ? `${MONTH_LABELS[firstMonth.month - 1] ?? firstMonth.month} ${firstMonth.year}` : null;
+  const frameGrowth = summary?.frameGrowth;
+  const noGrowthBaseline = !!frameGrowth && frameGrowth.pct == null;
+  const growthPctValue = !frameGrowth ? null : frameGrowth.pct != null ? Math.round(frameGrowth.pct * 10) / 10 : frameGrowth.net === 0 ? 0 : null;
 
   return (
     <PageContainer>
@@ -292,8 +277,6 @@ export function ExecutiveHomePage() {
         )}
       />
 
-      {/* headline KPI band — first three wired to the real endpoint; Survey samples is dummy
-          (no survey data exists yet), kept only to match the SBR-design reference. */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <ExecStatCard
           icon={Building2}
@@ -315,11 +298,23 @@ export function ExecutiveHomePage() {
         />
         <ExecStatCard
           icon={TrendingUp}
-          value={summaryLoading ? '—' : growthLabel}
+          value={summaryLoading ? '—' : frameGrowth ? `\u2066${frameGrowth.net > 0 ? '+' : ''}${frameGrowth.net.toLocaleString()}\u2069` : growthLabel}
+          valueNote={!summaryLoading && frameGrowth && (
+            <span dir="ltr" className={cn(
+              'rounded-full px-2 py-0.5 text-[11px] font-bold',
+              growthPctValue == null || growthPctValue === 0 ? 'bg-slate-100 text-slate-500' : growthPctValue < 0 ? 'bg-neg-tint text-neg-text' : 'bg-pos-tint text-pos-text',
+            )}>
+              {growthPctValue == null ? '—%' : `${growthPctValue > 0 ? '+' : ''}${growthPctValue}%`}
+            </span>
+          )}
           label={t('home.exec.growthNew', { defaultValue: 'Frame growth' })}
-          sub={growthSince
-            ? t('home.exec.growthSinceFirst', { defaultValue: 'change in establishments since {{since}}', since: growthSince })
-            : t('home.exec.growthSub5', { defaultValue: 'newly registered establishments, last 3 months' })}
+          sub={frameGrowth
+            ? noGrowthBaseline
+              ? t('home.exec.growthNoBaseline', { defaultValue: 'no baseline yet, under 3 months of history' })
+              : t('home.exec.growthNetSub', { defaultValue: 'net change in active establishments, last 3 months' })
+            : growthSince
+              ? t('home.exec.growthSinceFirst', { defaultValue: 'change in establishments since {{since}}', since: growthSince })
+              : t('home.exec.growthSub5', { defaultValue: 'newly registered establishments, last 3 months' })}
         />
         <ExecStatCard
           icon={ClipboardList}
@@ -329,7 +324,6 @@ export function ExecutiveHomePage() {
         />
       </div>
 
-      {/* growth trend + sector donut */}
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card lg:col-span-2">
           <div className="mb-3 flex flex-wrap items-start justify-between gap-4">
@@ -359,7 +353,6 @@ export function ExecutiveHomePage() {
         </div>
       </div>
 
-      {/* map + size class + survey response (dummy — see executiveDashboardDummy.ts) */}
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card">
           <SectionHead title={t('home.exec.map', { defaultValue: 'Where the establishments are' })} sub={t('home.exec.mapSub', { defaultValue: 'Establishments by municipality, from the primary address' })} />
@@ -411,7 +404,6 @@ export function ExecutiveHomePage() {
         </div>
       </div>
 
-      {/* employment concentration + source contribution */}
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="rounded-lg bg-white p-5 shadow-card lg:col-span-2">
           <SectionHead title={t('home.exec.concentration', { defaultValue: 'Where the jobs are' })} sub={t('home.exec.concentrationSub', { defaultValue: 'Recorded employment by economic activity, largest first, with cumulative share' })} />

@@ -38,7 +38,6 @@ function SurveyResponseContent({ sampleKey, sbrId, from }: { sampleKey: string; 
     { skip: !survey || !period || !Number.isInteger(sbrIdNum) }
   );
   const detail = data?.data;
-  // Opened from an establishment's survey participation, Back returns there instead of to the sample.
   const back = from === RESPONSE_FROM_ESTABLISHMENT
     ? { label: t('surveySamples.backToEst'), onClick: () => router.push(`/establishments/${sbrId}`) }
     : { label: t('surveySamples.backToSample'), onClick: () => router.push(`/surveys/${sampleKey}`) };
@@ -56,7 +55,6 @@ function SurveyResponseContent({ sampleKey, sbrId, from }: { sampleKey: string; 
     );
   }
 
-  // A 404 means the establishment wasn't sampled for that period; anything else is a real failure.
   const notFound = !survey || (isError && (error as { status?: number })?.status === 404);
   if (isError && !notFound) {
     return (

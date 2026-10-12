@@ -21,10 +21,6 @@ export const ADMIN_DEFAULT_FILTERS: { page: number; limit: number; search: strin
   search: '',
 };
 
-// Roles list is a master-detail sidebar, not a table, so sorting is offered through a
-// dropdown instead of column headers. `value` is the dropdown key; sortBy/sortOrder are sent
-// to the API. ROLES_SORT_DEFAULT sends neither, so the backend keeps its ID ASC ordering —
-// the order the list has always rendered in.
 export const ROLES_SORT_DEFAULT: string = 'default';
 
 export const ROLES_SORT_OPTIONS: {
@@ -41,8 +37,6 @@ export const ROLES_SORT_OPTIONS: {
   { value: 'oldest',     i18nKey: 'admin.roles.sortOldest',   label: 'Oldest first', sortBy: 'CREATED_AT', sortOrder: 'asc'  },
 ];
 
-// Users list keeps its own defaults so the sort keys don't leak into the Roles/Permissions
-// tabs, which share ADMIN_DEFAULT_FILTERS and have no sorting.
 export const USERS_DEFAULT_FILTERS: {
   page: number;
   limit: number;
@@ -55,22 +49,20 @@ export const USERS_DEFAULT_FILTERS: {
   search: '',
 };
 
-// Select sentinels for the Users "Role" / "Status" filters meaning "no filter". A Radix
-// SelectItem cannot have an empty-string value, hence a sentinel rather than ''.
 export const ALL_ROLES_VALUE: string = '__all__';
 export const ALL_STATUS_VALUE: string = '__all__';
 
-// Values must match USER_STATUS_FILTER in the backend's src/utils/enums.ts
 export const USER_STATUS_FILTER_OPTIONS: { value: string; i18nKey: string; label: string }[] = [
   { value: 'active',   i18nKey: 'admin.users.statusActive',   label: 'Active'   },
-  { value: 'inactive', i18nKey: 'admin.users.statusInactive', label: 'Inactive' },
+  { value: 'inactive', i18nKey: 'admin.users.statusLocked',   label: 'Locked'   },
 ];
 
-// Column ids the Users table exposes as sortable headers. A subset of the backend allowlist
-// (USERS_SORTABLE_COLUMNS in sbr-backend's src/utils/enums.ts, which also accepts EMAIL): the
-// User column renders name + email in one cell and sorts by NAME, so EMAIL has no header of its
-// own. ROLES sorts by the user's active role names A-Z (GET_USERS, NPC-275).
 export const USERS_SORTABLE_COLUMNS: string[] = ['NAME', 'ROLES', 'IS_ACTIVE', 'CREATED_AT'];
 
-// Backend sentinel stored for unscoped role assignments
 export const GLOBAL_SCOPE_VALUE: string = 'GLOBAL';
+
+export const NO_SCOPE_VALUE: string = '__none__';
+
+export const ROLE_NO_CATEGORY_VALUE: string = '__none__';
+
+export const REGULATOR_SCOPE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'GTA', 'KRMA'];

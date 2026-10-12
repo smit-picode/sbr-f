@@ -14,8 +14,6 @@ import { ESTABLISHMENTS_FIELD_LABELS } from '@/features/establishments/constants
 import { CONTACT_FIELD_LABELS } from '@/features/contacts/constants';
 import { ADDRESS_FIELD_LABELS } from '@/features/addresses/constants';
 
-// The id-column labels aren't in any feature's FIELD_LABELS map (that map is for editable
-// business fields, not the row key) — named here to match the reference's "Establishment ID".
 const ID_COLUMN_LABELS: Record<BulkChangeTableKey, Record<string, string>> = {
   Establishments: { SBR_ID: 'Establishment ID' },
   Contacts: { ID: 'Contact ID' },
@@ -28,9 +26,7 @@ const FIELD_LABELS_BY_TABLE: Record<BulkChangeTableKey, Record<string, string>> 
   Addresses: ADDRESS_FIELD_LABELS,
 };
 
-// Falls back to a humanized version of the raw column key (TRADE_NAME_ARA -> "Trade Name
-// (Arabic)") for any bulk-editable column that predates or otherwise isn't in a feature's
-// FIELD_LABELS map, so the Attribute column is never blank for a column the API does support.
+// Falls back to a humanized version of the raw column key
 function humanizeColumnKey(key: string): string {
   const words = key.split('_').filter(Boolean);
   const suffix = words[words.length - 1];
@@ -51,9 +47,6 @@ interface BulkChangeSetupStepProps {
 export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChangeSetupStepProps) {
   const { t } = useTranslation();
 
-  // A bulk submit still requires the target table's own Edit permission — enforced by the API
-  // and again by SBR_PORTAL_PKG. Offering a table the user cannot edit would let them build a
-  // whole upload only to be refused at the final step, so only editable tables are shown.
   const establishments = usePermission('establishments');
   const contacts = usePermission('contacts');
   const addresses = usePermission('addresses');
@@ -65,37 +58,24 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
 
   const availableTables = BULK_CHANGE_TABLES.filter((o) => canEditTable[o.key]);
 
-  // The wizard opens on Establishments by default; move off it if that is not one the user can
-  // edit, so the Setup step never starts on a table they are not allowed to submit.
   useEffect(() => {
     if (availableTables.length === 0) return;
     if (!canEditTable[selectedTable]) onSelectTable(availableTables[0].key);
-    // onSelectTable is a stable parent callback; re-running on it would fight the parent's state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTable, canEditTable]);
 
   const entityType = ENTITY_TYPE_BY_TABLE[selectedTable];
 
-  // The column dictionary comes from the API, which builds it from the same editable-column
-  // specs the server validates against — so the template can never offer a column the submit
-  // would reject.
   const { data, isLoading } = useGetBulkChangeTemplateQuery(entityType);
   const template = data?.data;
 
-  // Fetched only on click (lazy), never on mount — the export is a snapshot for this one
-  // download, not something the page needs to keep current in the background.
   const [fetchExport] = useLazyGetBulkChangeExportQuery();
-  // Covers both the export fetch and building the workbook, which can each take a moment.
   const [downloading, setDownloading] = useState(false);
 
   const handleDownloadTemplate = async () => {
     if (!template || downloading) return;
     setDownloading(true);
     try {
-      // Pre-fill with the operator's actual current records so nobody has to discover or type a
-      // row ID themselves (see buildTemplateWorkbook's own note). If the export call fails for
-      // any reason, fall back to the plain blank template rather than blocking the download
-      // entirely — pre-filling is a convenience on top of the template, not a requirement of it.
       let records: Record<string, string | number | null>[] | undefined;
       try {
         records = (await fetchExport(entityType).unwrap()).data?.records;
@@ -134,9 +114,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     return t('bulkChange.wizard.setup.anyText', { defaultValue: 'Any text' });
   };
 
-  // A conditionally-required column (e.g. EST_STATUS_CATEGORY, only mandatory when
-  // EST_STATUS is Inactive) isn't flagged `mandatory`, since it isn't always required — the
-  // condition is surfaced here instead, appended to whatever describeAllowed() already shows.
+  // A conditionally-required column (e.g. EST_STATUS_CATEGORY
   const describeAllowedWithNote = (column: NonNullable<typeof template>['columns'][number]): string => {
     const base = describeAllowed(column);
     return column.note ? `${base} — ${column.note}` : base;
@@ -147,9 +125,6 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     ?? FIELD_LABELS_BY_TABLE[selectedTable][column.key]
     ?? humanizeColumnKey(column.key);
 
-  // Mandatory business fields beyond the row key itself (e.g. Contacts requires CONTACT_NAME
-  // and PRIORITY) — the footer note below must call these out, not just claim the id column
-  // alone is required, or an operator following it hits a validation error on their first try.
   const otherMandatoryColumns = useMemo(
     () => (template?.columns ?? []).filter((c) => c.mandatory && c.key !== template?.idColumn).map((c) => c.key),
     [template],
@@ -262,10 +237,6 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
         <div className="flex items-start gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
           <Info className="h-4 w-4 shrink-0 text-slate-400" />
           <span>
-            {/* The identifier is ID for every table — the real, always-unique row key (SBR_ID
-                is not unique on Contacts/Addresses: one establishment can have several active
-                contacts or addresses). SBR_ID still appears as its own reference column so the
-                operator can see which establishment a row belongs to. */}
             {otherMandatoryColumns.length === 0
               ? t('bulkChange.wizard.setup.noteIdColumnOnly', {
                   defaultValue:

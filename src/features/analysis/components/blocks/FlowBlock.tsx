@@ -38,7 +38,6 @@ export function FlowBlock({ block, query, height, mode }: BlockViewProps) {
       return waterfallOption({ steps, animate });
     }
     if (!dim) return null;
-    // Keep the busiest categories on each side; fold the rest into "Other".
     const weight = new Map<string | null, number>();
     for (const l of data.links) {
       weight.set(l.from, (weight.get(l.from) ?? 0) + l.value);

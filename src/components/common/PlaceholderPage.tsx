@@ -9,10 +9,7 @@ interface PlaceholderPageProps {
   descKey: string;
 }
 
-/**
- * Localized "coming soon" placeholder for not-yet-built admin pages.
- * Title/description come from i18n keys so the page follows the UI language.
- */
+// Localized "coming soon" placeholder for not-yet-built admin pages.
 export function PlaceholderPage({ titleKey, descKey }: PlaceholderPageProps) {
   const { t } = useTranslation();
   return (

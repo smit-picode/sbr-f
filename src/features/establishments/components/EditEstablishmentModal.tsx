@@ -60,8 +60,6 @@ function SectionDivider({ title }: { title: string }) {
 
 type FormState = Omit<Partial<SbrEstablishment>, 'ID' | 'SBR_ID' | 'VALID_FROM' | 'VALID_TO'>;
 
-// Pseudo-field key for the "NAME_ENU or NAME_ARA is required" rule — one error covering two
-// inputs. Not a real column, so it is never part of the saved payload.
 const NAMES_FIELD = 'NAMES';
 const NAMES_PAIR = ['NAME_ENU', 'NAME_ARA'];
 
@@ -73,31 +71,18 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const [updateEstablishment, { isLoading }] = useUpdateEstablishmentMutation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Est. Status Category options. Fetched while the modal is open rather than only
-  // once the user picks Inactive, so the dropdown is already populated the moment it appears.
   const { data: statusCategoryRes, isFetching: isLoadingStatusCategories } =
     useGetEstStatusCategoriesQuery(undefined, { skip: !open });
   const statusCategoryOptions = statusCategoryRes?.data ?? [];
 
-  // Legal Type list, replacing the old free-text-with-suggestions field. Deliberately
-  // not enum-validated server-side (SBR_LEGAL_TYPE_LKP is a growing register snapshot, not a
-  // closed set — see the backend controller's own comment) — this dropdown is the enforcement.
   const { data: legalTypeRes, isFetching: isLoadingLegalTypes } =
     useGetLegalTypeValuesQuery(undefined, { skip: !open });
   const legalTypeOptions = legalTypeRes?.data ?? [];
 
-  // Sector list, replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of
-  // drift that caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded
-  // copy silently fell out of sync with the real values). validate() below checks against this
-  // same loaded list, so the dropdown and the validation rule can never disagree again.
   const { data: sectorTypeRes, isFetching: isLoadingSectorTypes } =
     useGetSectorTypeValuesQuery(undefined, { skip: !open });
   const sectorTypeOptions = sectorTypeRes?.data ?? [];
 
-  // Main branch establishment list. Same RTK Query cache MainBranchSelect reads —
-  // calling the hook again here does not re-fetch, it just lets validate() below check
-  // membership too, as a pre-submit safety net for a stored value the picker itself can no
-  // longer produce (e.g. set before this fix, or via a direct API call that bypassed the UI).
   const { data: mainBranchRes, isFetching: isLoadingMainBranches } =
     useGetMainBranchValuesQuery(undefined, { skip: !open });
   const mainBranchOptions = mainBranchRes?.data ?? [];
@@ -106,7 +91,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     if (frame) {
       setErrors({});
       setForm({
-        // Names
         NAME_ENU:                   frame.NAME_ENU ?? '',
         NAME_ARA:                   frame.NAME_ARA ?? '',
         NAME_ENU_SOURCE:            frame.NAME_ENU_SOURCE ?? '',
@@ -119,7 +103,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         NPC_NAME_ARA:               frame.NPC_NAME_ARA ?? '',
         NPC_NAME_ENU_SOURCE:        frame.NPC_NAME_ENU_SOURCE ?? '',
         NPC_NAME_ARA_SOURCE:        frame.NPC_NAME_ARA_SOURCE ?? '',
-        // Status & Classification
         EST_STATUS:                 frame.EST_STATUS ?? null,
         EST_STATUS_SOURCE:          frame.EST_STATUS_SOURCE ?? '',
         EST_STATUS_CATEGORY:        frame.EST_STATUS_CATEGORY ?? '',
@@ -139,7 +122,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         HOLDING_COMPANY_FLG:        frame.HOLDING_COMPANY_FLG ?? '',
         HOLDING_COMPANY_FLG_SOURCE: frame.HOLDING_COMPANY_FLG_SOURCE ?? '',
         SOURCE_CODE:                frame.SOURCE_CODE ?? '',
-        // Registration numbers
         MOCI_ORG_ID:                frame.MOCI_ORG_ID ?? '',
         MOCI_CR_NUM:                frame.MOCI_CR_NUM ?? '',
         MOCI_CP_NUM:                frame.MOCI_CP_NUM ?? '',
@@ -150,7 +132,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
         QSTP_PARENT_REG_NUM:        frame.QSTP_PARENT_REG_NUM ?? '',
         FARM_NO:                    frame.FARM_NO ?? '',
         EID:                        frame.EID ?? '',
-        // Dates
         CR_ISSUE_DATE:              frame.CR_ISSUE_DATE ?? '',
         CR_EXPIRY_DATE:             frame.CR_EXPIRY_DATE ?? '',
         CR_CANCEL_DATE:             frame.CR_CANCEL_DATE ?? '',
@@ -168,9 +149,8 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const ed = (field: string): boolean => isEstablishmentFieldEditable(field);
 
   const set = (field: keyof FormState, value: string | number | null) => {
-    if (!ed(field as string)) return; // locked field — ignore edits
+    if (!ed(field as string)) return;
     setForm((prev) => ({ ...prev, [field]: value }));
-    // Typing in either name input satisfies the shared NAMES rule, so clear that key too.
     const clearNames = NAMES_PAIR.includes(field as string) && !!errors[NAMES_FIELD];
     if (errors[field as string] || clearNames) {
       setErrors((e) => {
@@ -183,13 +163,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   };
 
 
-  // Est. Status drives whether a category is required, so it gets its own handler
-  // instead of the generic set() every other field uses. Switching to Active clears any category
-  // the record carried: SBR_EST_STATUS_CATEGORY_LKP holds Inactive-meaning values only, so
-  // leaving e.g. 'Cancelled' on a now-Active establishment would be contradictory, and the
-  // Active-meaning categories are pipeline-derived rather than something a validator picks.
-  // The clear travels as an empty value, which SBR_ESTABLISHMENTS_API.SUBMIT_UPDATE normalises
-  // to an explicit null in CHANGE_DATA (and drops entirely if the category was already empty).
+  // Est.
   const setEstStatus = (value: string) => {
     set('EST_STATUS', value);
     if (value === EST_STATUS_VALUES.ACTIVE) set('EST_STATUS_CATEGORY', '');
@@ -199,31 +173,22 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     const e: Record<string, string> = {};
     const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
-    // At least one of Name (English) / Name (Arabic) is required. It's one rule spanning two
-    // inputs, so it's stored under the single NAMES_FIELD key (not once per input) — that way it
-    // counts as one error, lists once in the summary, and renders once below the pair.
     if (!str(form.NAME_ENU).trim() && !str(form.NAME_ARA).trim()) {
       e[NAMES_FIELD] = 'Enter a name in English or Arabic';
     }
 
-    // String length validations
     Object.entries(ESTABLISHMENTS_MAX_LENGTHS).forEach(([field, max]) => {
       if (str(form[field as keyof FormState]).length > max) {
         e[field] = `Max ${max} character${max === 1 ? '' : 's'} allowed`;
       }
     });
 
-    // Numeric validations
     if (form.EMPLOYMENT_COUNT != null && Number(form.EMPLOYMENT_COUNT) < 0) {
       e.EMPLOYMENT_COUNT = 'Must be 0 or greater';
     }
     if (form.MAIN_BRANCH_SBR_ID != null && !Number.isInteger(Number(form.MAIN_BRANCH_SBR_ID))) {
       e.MAIN_BRANCH_SBR_ID = 'Must be an integer';
     }
-    // MainBranchSelect only ever offers active, main-branch SBR IDs, so this only
-    // fires for a value the picker itself could not have produced — set before this fix, or
-    // written by a direct API call that bypassed the UI. Skipped while the list is still
-    // loading so a slow network can't flag a value that simply hasn't been checked yet.
     if (
       form.MAIN_BRANCH_SBR_ID != null &&
       !isLoadingMainBranches &&
@@ -235,19 +200,14 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
       });
     }
 
-    // Enum validations for select fields
     if (form.EST_STATUS !== null && form.EST_STATUS !== undefined && !EST_STATUS_OPTIONS.includes(String(form.EST_STATUS))) {
       e.EST_STATUS = `Must be one of [${EST_STATUS_OPTIONS.filter(v => v !== null).join(', ')}, or empty]`;
     }
-    // An Inactive establishment must carry a status category. Mirrors the backend's
-    // conditional Joi rule so the editor sees it inline rather than as a 400 after confirming.
     if (str(form.EST_STATUS) === EST_STATUS_VALUES.INACTIVE && !str(form.EST_STATUS_CATEGORY).trim()) {
       e.EST_STATUS_CATEGORY = t('editEstablishment.estStatusCategoryRequired', {
         defaultValue: 'Est. Status Category is required when Est. Status is Inactive',
       });
     }
-    // Sector must always carry a value (confirmed with the team lead, 2026-08-31) — checked
-    // before the enum check so a blank Sector reports "required", not "must be one of [...]".
     if (!str(form.SECTOR_ID).trim()) {
       e.SECTOR_ID = t('editEstablishment.sectorRequired', { defaultValue: 'Sector is required' });
     } else if (
@@ -260,8 +220,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
       e.MAIN_BRANCH_FLG = `Must be one of [${MAIN_BRANCH_FLG_OPTIONS.join(', ')}, or empty]`;
     }
 
-    // Locked / read-only fields are never sent to the backend, so their values must not raise
-    // blocking validation errors.
     const editableErrors: Record<string, string> = {};
     for (const [field, msg] of Object.entries(e)) {
       if (ed(field)) editableErrors[field] = msg;
@@ -269,7 +227,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
     setErrors(editableErrors);
 
-    // Auto-scroll to first error field
     if (Object.keys(editableErrors).length > 0) {
       const firstErrorField = Object.keys(editableErrors)[0];
       setTimeout(() => {
@@ -299,8 +256,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     );
   };
 
-  // Both name inputs resolve to the shared NAMES error so each still gets the invalid border,
-  // even though the message itself is rendered once below the pair.
+  // Both name inputs resolve to the shared NAMES error so each still gets the invalid border
   const err = (f: string) => errors[f] ?? (NAMES_PAIR.includes(f) ? errors[NAMES_FIELD] : undefined);
   const inp = (f: string) => {
     if (!ed(f)) return 'bg-slate-50 text-slate-400 cursor-not-allowed pointer-events-none';
@@ -318,7 +274,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
   const handleConfirmWithComment = async (comment: string) => {
     if (!frame) return;
-    // Only send user-editable fields — locked fields are rejected by the backend.
     const editableData = Object.fromEntries(
       Object.entries(form).filter(([key]) => ed(key))
     );
@@ -352,22 +307,17 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <DialogTitle>{t('editEstablishment.title')}</DialogTitle>
           </DialogHeader>
 
-          {/* Error Summary - Outside scroll container to prevent layout shift */}
           {Object.keys(errors).length > 0 && (
             <ErrorSummary errors={errors} onErrorClick={scrollToField} fieldLabels={ESTABLISHMENTS_FIELD_LABELS} />
           )}
 
           <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
 
-          {/* Identifiers (read-only) */}
           <SectionDivider title={t('editEstablishment.sections.identifiers')} />
           <ReadOnlyField label={t('editEstablishment.fields.sbrId')} value={frame?.SBR_ID} />
           <ReadOnlyField label={t('editEstablishment.fields.recordId')} value={frame?.ID} />
 
-          {/* Names */}
           <SectionDivider title={t('editEstablishment.sections.names')} />
-          {/* NAME_ENU / NAME_ARA are one "either/or" rule: both inputs turn red but the message
-              prints once across the pair, so it isn't duplicated per column. */}
           <div className="space-y-1" data-field={NAMES_FIELD}>
             <Label>{t('editEstablishment.fields.nameEnu')}</Label>
             <Input className={inp('NAME_ENU')} value={sel('NAME_ENU')} onChange={(e) => set('NAME_ENU', e.target.value)} />
@@ -430,7 +380,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('NPC_NAME_ARA_SOURCE')} />
           </div>
 
-          {/* Status & Classification */}
           <SectionDivider title={t('editEstablishment.sections.statusClassification')} />
           <div className="space-y-1" data-field="EST_STATUS">
             <Label>{t('editEstablishment.fields.estStatus')}</Label>
@@ -439,10 +388,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                {/* Est. Status offers exactly Active and Inactive. The empty option is
-                    rendered only while the record genuinely has no status (nothing in the
-                    pipeline guarantees one), so it stays a valid Select value for those rows but
-                    disappears — and can't be re-picked to blank the field — once one is chosen. */}
                 {!sel('EST_STATUS') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
                 {EST_STATUS_SELECT_OPTIONS.map((opt) => (
                   <SelectItem key={opt} value={opt}>{opt}</SelectItem>
@@ -456,12 +401,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('EST_STATUS_SOURCE')} value={sel('EST_STATUS_SOURCE')} onChange={(e) => set('EST_STATUS_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_SOURCE')} />
           </div>
-          {/* Only meaningful for an Inactive establishment, so the field appears only
-              then — and is mandatory when it does. Options come from SBR_EST_STATUS_CATEGORY_LKP
-              via SBR_LOOKUPS_API rather than free text, so a validator can only pick a
-              configured value. The category and its provenance cell are hidden as a pair — a
-              whole row of the 2-column grid — so hiding them never shifts the fields below into
-              the wrong column. */}
           {sel('EST_STATUS') === EST_STATUS_VALUES.INACTIVE && (
             <>
               <div className="space-y-1" data-field="EST_STATUS_CATEGORY">
@@ -477,23 +416,15 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                     <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Same rule as Est. Status: the blank option exists only until a value is
-                        picked, so the field can't be emptied again once it is required. */}
                     {!sel('EST_STATUS_CATEGORY') && <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>}
                     {statusCategoryOptions.map((opt) => (
                       <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
                     ))}
-                    {/* The record's current category survives a lookup that no longer lists it
-                        (the non-MOCI values are flagged as provisional), so an edit to
-                        an unrelated field never silently drops it from the dropdown. */}
                     {sel('EST_STATUS_CATEGORY') && !statusCategoryOptions.some((o) => o.CODE === sel('EST_STATUS_CATEGORY')) && (
                       <SelectItem value={sel('EST_STATUS_CATEGORY')}>{sel('EST_STATUS_CATEGORY')}</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
-                {/* The list is required to save, so an empty one is a dead end the editor would
-                    otherwise have to guess at (the lookup is unreachable, or not yet deployed).
-                    Say so instead of leaving an empty dropdown next to a blocking error. */}
                 {!isLoadingStatusCategories && statusCategoryOptions.length === 0 && (
                   <p className="text-xs text-amber-600 mt-0.5">
                     {t('editEstablishment.estStatusCategoryUnavailable', {
@@ -512,9 +443,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           )}
           <div className="space-y-1" data-field="LEGAL_TYPE">
             <Label>{t('editEstablishment.fields.legalType')}</Label>
-            {/* A closed dropdown backed by SBR_LEGAL_TYPE_LKP via SBR_LOOKUPS_API,
-                replacing the old free-text-with-suggestions field so a value can only ever come
-                from the lookup. Same pattern as Est. Status Category above. */}
             <Select
               value={sel('LEGAL_TYPE') || '__none__'}
               onValueChange={(v) => set('LEGAL_TYPE', v === '__none__' ? '' : v)}
@@ -528,10 +456,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                 {legalTypeOptions.map((opt) => (
                   <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
                 ))}
-                {/* The record's current value survives a lookup that does not (yet) list it —
-                    the register is a growing snapshot, not a fixed set — so an edit to an
-                    unrelated field never silently blanks a legal type the lookup hasn't caught
-                    up to. */}
                 {sel('LEGAL_TYPE') && !legalTypeOptions.some((o) => o.CODE === sel('LEGAL_TYPE')) && (
                   <SelectItem value={sel('LEGAL_TYPE')}>{sel('LEGAL_TYPE')}</SelectItem>
                 )}
@@ -553,11 +477,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="SECTOR_ID">
             <Label>{t('editEstablishment.fields.sector')}</Label>
-            {/* A closed dropdown backed by SBR_SECTOR_TYPE_LKP via SBR_LOOKUPS_API,
-                replacing the hardcoded SECTOR_ID_OPTIONS constant — the same class of drift that
-                caused the earlier 'Mixed-Government' vs 'State Owned' rename bug (a hardcoded copy
-                silently fell out of sync with the real values). validate() above checks against
-                this same loaded list, so the dropdown and the validation rule can never disagree. */}
             <Select
               value={sel('SECTOR_ID') || '__none__'}
               onValueChange={(v) => set('SECTOR_ID', v === '__none__' ? '' : v)}
@@ -571,8 +490,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                 {sectorTypeOptions.map((opt) => (
                   <SelectItem key={opt.CODE} value={opt.CODE}>{opt.DESCRIPTION ?? opt.CODE}</SelectItem>
                 ))}
-                {/* The record's current value survives a lookup that does not (yet) list it,
-                    same reasoning as Legal Type above. */}
                 {sel('SECTOR_ID') && !sectorTypeOptions.some((o) => o.CODE === sel('SECTOR_ID')) && (
                   <SelectItem value={sel('SECTOR_ID')}>{sel('SECTOR_ID')}</SelectItem>
                 )}
@@ -585,9 +502,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <Input className={inp('SECTOR_ID_SOURCE')} value={sel('SECTOR_ID_SOURCE')} onChange={(e) => set('SECTOR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('SECTOR_ID_SOURCE')} />
           </div>
-          {/* Searchable single-select over SBR_ISIC_LKP instead of free text, so an
-              invalid classification can no longer be typed in. `ed()` still decides editability,
-              exactly as the Input it replaces did. */}
           <div className="space-y-1" data-field="ISIC_CODE">
             <Label>{t('editEstablishment.fields.isicCode')}</Label>
             <IsicCodeSelect
@@ -629,10 +543,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
             <Label>{t('editEstablishment.fields.mainBranchSbrId')}</Label>
-            {/* Picker over the active main-branch establishment list, rather than a
-                free-text ID or a general "any establishment" search — the value can only ever
-                be a real, active, main-branch SBR ID, so a branch or non-existent ID can never
-                be entered in the first place. */}
             <MainBranchSelect
               value={form.MAIN_BRANCH_SBR_ID ?? null}
               onChange={(sbrId) => set('MAIN_BRANCH_SBR_ID', sbrId)}
@@ -677,7 +587,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
 
-          {/* Registration Numbers */}
           <SectionDivider title={t('editEstablishment.sections.registrationNumbers')} />
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.mociOrgId')}</Label>
@@ -730,7 +639,6 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('EID')} />
           </div>
 
-          {/* Dates */}
           <SectionDivider title={t('editEstablishment.sections.dates')} />
           <div className="space-y-1">
             <Label>{t('editEstablishment.fields.crIssueDate')}</Label>

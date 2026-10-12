@@ -2,7 +2,6 @@ import type { Analysis, AnalysisBlock } from '@/types';
 import { ANALYSIS_TEMPLATES } from '../constants/templates';
 import { countMeasure, createBlock, uid } from '../utils/blocks';
 
-// Placeholder owner replaced by the signed-in user's email when the store hydrates.
 export const SEED_OWNER_ME = '__me__';
 
 function tpl(id: string): AnalysisBlock[] {
@@ -98,7 +97,6 @@ export function buildSeedAnalyses(): Analysis[] {
   ];
 }
 
-// Dummy directory for the share dialog until a users/roles lookup endpoint exists.
 export const SHARE_DIRECTORY: { kind: 'user' | 'role'; id: string; label: string; sub: string }[] = [
   { kind: 'role', id: 'statistician', label: 'Statisticians', sub: 'Role' },
   { kind: 'role', id: 'executive', label: 'Executives', sub: 'Role' },

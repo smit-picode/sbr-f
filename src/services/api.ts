@@ -3,14 +3,9 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import env from '@/config/env';
 import { toast } from '@/utils/toast';
 import { logout } from '@/features/auth/authSlice';
-// This file runs outside the React tree (RTK Query base query), so it calls the i18next
-// instance directly instead of the useTranslation() hook — same translation resources,
-// current language, and defaultValue fallback behaviour as everywhere else in the app.
 import i18n from '@/i18n/config';
 
-// Prevents multiple 403 errors from stacking duplicate toasts and redirects
 let permissionRedirectInProgress = false;
-// Prevents duplicate toasts when multiple concurrent requests all fail with 401
 let sessionExpiredInProgress = false;
 
 const rawBaseQuery = fetchBaseQuery({
@@ -31,19 +26,12 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 ) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // A superseded request (e.g. clicking a column sort repeatedly before the previous request
-  // for that same query finishes) is aborted by RTK Query itself, not a real failure — every
-  // caller of this shared base query would otherwise show "Something went wrong" for a request
-  // whose result nobody even needed, once per abort.
   if (api.signal.aborted) return result;
 
   if (result.error) {
     const status = result.error.status;
     const url = typeof args === 'string' ? args : args.url;
 
-    // Login failures are handled inline on the login page — a 401/400 here means
-    // wrong credentials, NOT an expired session. Skip all global handling so the
-    // session-expired toast and the delayed redirect/reload never fire.
     if (url === '/auth/login') {
       return result;
     }
@@ -65,8 +53,6 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
         permissionRedirectInProgress = true;
         const errData = result.error.data as { message?: string } | undefined;
         const msg = errData?.message ?? i18n.t('common.accessRevoked', { defaultValue: 'Your access to this section has been revoked.' });
-        // Show the toast BEFORE modifying Redux/localStorage — prevents AdminPage's
-        // permission useEffect from racing to navigate first.
         toast.error(msg);
         setTimeout(() => {
           api.dispatch(logout());
@@ -79,9 +65,6 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       return result;
     }
 
-    // 400 = validation error — handled per-component
-    // suppress generic toasts while a session-expiry or permission redirect is already in progress
-    // An endpoint that shows its own error panel opts out with extraOptions: { silentErrors: true }.
     const silentErrors = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
     if (status !== 400 && !silentErrors && !sessionExpiredInProgress && !permissionRedirectInProgress) {
       const data = result.error.data as { message?: string } | undefined;
@@ -97,13 +80,6 @@ export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
   tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots'],
-  // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
-  // multi-user portal: another user's edit turns a record PENDING in the DB without this
-  // session ever knowing, so cached list data goes stale the moment someone else saves.
-  // These three defaults re-fetch whenever the user could be looking at stale rows —
-  // remounting a page (sidebar navigation), returning to the tab, or coming back online.
-  // Cached data still paints immediately; the refetch runs in the background and swaps in,
-  // so navigation stays instant and no skeleton flashes.
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,

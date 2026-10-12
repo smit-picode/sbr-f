@@ -29,7 +29,7 @@ export function CreateAnalysisDialog({ request, onCancel, onConfirm }: Props) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  // Reset only when the dialog opens — callers may pass a fresh request object on every render.
+  // Reset only when the dialog opens
   const open = !!request;
   useEffect(() => {
     if (!open || !request) return;

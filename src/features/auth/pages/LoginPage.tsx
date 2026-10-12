@@ -29,7 +29,6 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
 import type { AuthRole } from '@/types';
 
-// Visual rotation for role cards — purely decorative
 const ROLE_CARD_ICONS: LucideIcon[] = [ShieldCheck, Building2, Eye, Landmark, UserCircle2];
 const ROLE_CARD_TINTS: { bg: string; color: string }[] = [
   { bg: 'bg-violet-50', color: 'text-violet-600' },
@@ -53,14 +52,10 @@ export function LoginPage() {
   const { isArabic, toggleLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-  // Set after successful credentials when the user holds more than one role
   const [pendingRoles, setPendingRoles] = useState<AuthRole[] | null>(null);
   const [switchingRoleId, setSwitchingRoleId] = useState<number | null>(null);
   const [loginMutation, { isLoading }] = useLoginMutation();
   const [switchRoleMutation] = useSwitchRoleMutation();
-  // Synchronous guard against a second submit landing before React re-renders the button as
-  // disabled (isLoading only flips after the mutation actually starts) — a fast double-click
-  // or double-tap can otherwise fire onSubmit twice in the same tick.
   const isSubmittingRef = useRef(false);
 
   const {
@@ -98,7 +93,6 @@ export function LoginPage() {
       try {
         localStorage.setItem(LOGIN_SELECTED_ROLE_KEY, String(role.ID));
       } catch {
-        // Ignore storage failures
       }
       router.push('/home');
     } catch {
@@ -116,9 +110,6 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-white p-4 gap-4">
-      {/* Left Side: skyline photo card (QInsights style) — one unified p-9 container with
-          justify-between (matching the reference exactly) so the brand chip and the bottom
-          text block share the same left inset instead of drifting apart (p-8 vs px-8/bottom-10). */}
       <div className="hidden md:flex md:w-[46%] relative overflow-hidden rounded-3xl text-white">
         <div
           className="absolute inset-0"
@@ -130,10 +121,6 @@ export function LoginPage() {
         />
 
         <div className="relative flex flex-col justify-between w-full p-9">
-          {/* Matches SBR-design's own login page exactly: the white-on-transparent primary
-              logo (its own PNG carries "National Planning Council" / "State of Qatar") sitting
-              directly on the photo, no card behind it — not the secondary/regular-color mark
-              used elsewhere, which needs a light background to read. */}
           <div className="flex flex-col items-start gap-3">
             <Image src="/assets/npc-logo-primary-white.png" alt="National Planning Council" width={257} height={90} className="h-16 w-auto object-contain -ms-2" priority />
             <span className="text-[15px] font-bold ps-0.5">SBR Portal</span>
@@ -147,10 +134,7 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side */}
       <div className="w-full md:w-[54%] flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
-        {/* Language Toggle — single word for the OTHER language, matching the reference
-            (not a bilingual "Arabic  عربي" pairing). */}
         <button
           type="button"
           onClick={toggleLanguage}
@@ -160,14 +144,12 @@ export function LoginPage() {
         </button>
 
         <div className={pendingRoles ? 'w-full max-w-md' : 'w-full max-w-sm'}>
-          {/* Mobile Header */}
           <div className="md:hidden flex flex-col items-center mb-8">
             <h1 className="text-2xl font-bold text-slate-900">SBR Portal</h1>
             <p className="text-sm text-slate-500 mt-1">Statistical Business Register</p>
             <p className="text-xs text-slate-400">NPC Qatar</p>
           </div>
 
-          {/* Step 1 — Credentials */}
           {!pendingRoles && (
             <>
           <div className="mt-20 mb-3">
@@ -236,7 +218,6 @@ export function LoginPage() {
                 boxShadow: '0 10px 24px -6px rgba(119,104,72,0.45)',
               }}
             >
-              {/* One-shot diagonal shine sweep on hover — purely decorative, disabled state skips it via CSS */}
               <span className="btn-sign-in-shine pointer-events-none absolute inset-0" />
               <span className="relative inline-flex items-center justify-center gap-2">
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -247,7 +228,6 @@ export function LoginPage() {
             </>
           )}
 
-          {/* Step 2 — Role selection (only when the user holds multiple roles) */}
           {pendingRoles && (
             <>
               <button

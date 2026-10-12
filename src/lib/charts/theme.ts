@@ -1,13 +1,5 @@
-// Full bundle rather than the modular echarts/core build — this is an internal dashboard, not a
-// bundle-size-sensitive public page, and the full build guarantees every chart type/component
-// used here (map, visualMap, pie, bar, line) is registered without hand-picking imports.
 import * as echarts from 'echarts';
 
-// Mirrors src/app/globals.css's @theme color tokens as plain hex — ECharts options are plain
-// JS objects evaluated well before any CSS custom property could be read, so these can't just
-// reference var(--color-adaam) the way className-based UI does. Keep in sync by hand; there are
-// few enough of these that a build-time sync step would be more machinery than the drift risk
-// deserves.
 export const CHART_COLOR = {
   adaam: '#A29374',
   adaamDeep: '#87795D',
@@ -27,7 +19,6 @@ export const CHART_COLOR = {
   night: '#0E1A2B',
 };
 
-// Ordered categorical palette, used when a series doesn't specify its own color.
 export const CHART_PALETTE = [
   CHART_COLOR.adaam,
   CHART_COLOR.dune,
@@ -38,7 +29,6 @@ export const CHART_PALETTE = [
   CHART_COLOR.night,
 ];
 
-// Neutral grays, matching Tailwind's slate scale at the shades the reference chart kit used.
 const G = { 200: '#E2E8F0', 300: '#CBD5E1', 400: '#94A3B8', 500: '#64748B', 700: '#334155', 900: '#0F172A', line: '#F1F5F9' };
 export { G as CHART_GRAY };
 
@@ -78,10 +68,7 @@ export function sharesTo100(values: number[]): number[] {
 }
 
 let themeRegistered = false;
-// Registers the 'sbr' ECharts theme once — safe to call from every chart-bearing component;
-// only the first call actually does anything (registerTheme itself isn't idempotent-safe to
-// call twice with intent, but calling it twice with the same object is harmless — this guard
-// just avoids the redundant work on every re-render).
+// Registers the 'sbr' ECharts theme once
 export function ensureChartTheme(): void {
   if (themeRegistered) return;
   themeRegistered = true;

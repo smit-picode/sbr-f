@@ -21,15 +21,12 @@ import { usePermission } from '@/hooks';
 
 const DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 10 };
 
-// Values stay as the real table names (sent to the backend); labels are display-only.
 const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
 const TABLE_OPTIONS = [
   { label: 'All Tables', value: '__all__' },
   ...TABLE_VALUES.map((v) => ({ label: prettyTableName(v), value: v })),
 ];
 
-// Columns exposed to the dynamic "Column filters" UI. Values match the backend
-// AUDIT_LOG_FILTER_COLUMNS allow-list (auditLog.controller); labels are display-only.
 const AUDIT_LOG_FILTER_COLUMNS: { value: string; label: string }[] = [
   { value: 'TABLE_NAME', label: 'Table' },
   { value: 'OPERATION', label: 'Operation' },
@@ -43,8 +40,7 @@ function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
 }
 
-// RTK Query sets status: 'FETCH_ERROR' when a request is aborted/cancelled (e.g. superseded by a
-// newer query while the user is still typing). These are not real errors — suppress the toast.
+// RTK Query sets status: 'FETCH_ERROR' when a request is aborted/cancelled
 function isFetchError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 'FETCH_ERROR';
 }
@@ -52,14 +48,11 @@ function isFetchError(error: unknown): boolean {
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
-  // Debounce column-filter changes so the API is only called 500 ms after the user stops typing,
-  // preventing a request (and cancelled-request error toast) on every keystroke.
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
   const [recordIdInput, setRecordIdInput] = useState<string>('');
   const debouncedRecordId = useDebounce(recordIdInput, 500);
   const { t } = useTranslation();
 
-  // Sync debounced recordId into filters
   useEffect(() => {
     const val = debouncedRecordId ? Number(debouncedRecordId) : undefined;
     setFilters((prev) => ({ ...prev, recordId: val && val > 0 ? val : undefined, page: 1 }));
@@ -67,7 +60,6 @@ export function AuditLogPage() {
 
   const { canSearch } = usePermission('audit_log');
 
-  // Use the debounced value for the API query — the immediate value drives the UI only.
   const activeColumnFilters = debouncedColumnFilters.filter((r) => r.column && r.value.trim());
 
   const queryParams = cleanParams({
@@ -86,7 +78,6 @@ export function AuditLogPage() {
   useEffect(() => {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
     const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
-    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
     if (isError && !is400(error) && !is401 && !is403 && !isFetchError(error)) {
       toast.error(t('pages.auditLog.loadError', { defaultValue: 'Failed to load audit log. Please try again.' }));
     }
@@ -104,7 +95,6 @@ export function AuditLogPage() {
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
 
-  // Active-filter chips
   const activeChips: FilterChip[] = [];
   if (filters.tableName) {
     activeChips.push({

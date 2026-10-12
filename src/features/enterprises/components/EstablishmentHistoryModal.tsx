@@ -30,8 +30,7 @@ interface EstablishmentHistoryPopoverProps {
   onClose: () => void;
 }
 
-// Anchored attribute-history popover — rendered inside a `relative` field wrapper, opens
-// just below the clicked clock icon (tooltip-style, not a full-screen dialog).
+// Anchored attribute-history popover
 export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose }: EstablishmentHistoryPopoverProps) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(sbrId);
@@ -39,8 +38,6 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
   const ref = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
 
-  // Flip the popover upward when it would spill past the viewport bottom and there's room above.
-  // useLayoutEffect runs before paint so it appears in its final position (no visible jump).
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -60,12 +57,10 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
   };
   const fmtReq = (x: unknown) => (x == null || x === '' ? '—' : typeof x === 'number' ? x.toLocaleString() : String(x));
 
-  // Open/closed change requests for this field (PENDING / REJECTED), shown above the applied history.
   const requestEntries = versions.filter((v) => v.request);
   const realVersions = versions.filter((v) => !v.request);
   const fieldRequests = requestEntries.filter((r) => r.changes && Object.prototype.hasOwnProperty.call(r.changes, field as string));
 
-  // Collapse versions where this attribute's value did not change (versions arrive newest-first).
   const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
   const isUserEdit = (v: Version) => !!(v.audit && v.audit.columns.includes(field as string));

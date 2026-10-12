@@ -30,7 +30,6 @@ export function HomePage() {
     : storedPermissions.map((p) => p.permissionName);
   const access = { isSuperAdmin, permissionNames };
 
-  // Right after login nothing is stored yet; deciding before the first load would bounce a dashboard user away.
   const awaitingPermissions = !isSuperAdmin && permissionsLoading && storedPermissions.length === 0;
   const hasAnyDashboard = hasAnyNavPermission(HOME_DASHBOARD_PERMISSIONS, access);
   const redirectHref = !awaitingPermissions && !hasAnyDashboard ? getFirstAccessibleHref(access, '/home') : null;

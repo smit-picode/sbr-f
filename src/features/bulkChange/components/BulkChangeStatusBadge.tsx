@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BULK_CHANGE_STATUS_CLASSES, BULK_CHANGE_STATUS_DEFAULTS } from '../constants';
 import type { BulkChangeStatus } from '../types';
 
-// A bulk batch's status is DERIVED from its member change requests, and the underlying
-// procedures are best-effort — so a batch can legitimately be part-approved. This renders all
-// six states, not just the three a single change request has.
+// A bulk batch's status is DERIVED from its member change requests
 export function BulkChangeStatusBadge({ status }: { status: BulkChangeStatus }) {
   const { t } = useTranslation();
   const cls = BULK_CHANGE_STATUS_CLASSES[status] ?? BULK_CHANGE_STATUS_CLASSES.FAILED;

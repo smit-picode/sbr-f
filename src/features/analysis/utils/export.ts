@@ -179,12 +179,10 @@ export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQu
   const table = await buildBlockTable(block, q, t, suppress);
   const esc = (v: Cell) => {
     let s = v == null ? '' : String(v);
-    // Text starting with = + - @ would run as a formula when the CSV is opened in Excel.
     if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [table.header, ...table.rows].map((r) => r.map(esc).join(','));
-  // BOM so Excel opens Arabic text correctly.
   download(new Blob([`﻿${lines.join('\r\n')}`], { type: 'text/csv;charset=utf-8' }), `${safeFilename(block.title)}.csv`);
 }
 

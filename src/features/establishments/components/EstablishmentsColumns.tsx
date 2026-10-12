@@ -31,7 +31,6 @@ function DateCell({ value }: { value: string | null | undefined }) {
 type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void, t: TFunc, canEdit = true): ColumnDef<SbrEstablishment>[] => [
-  // ── Core identifiers
   {
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
@@ -49,7 +48,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
 
-  // ── English names
   {
     accessorKey: 'NAME_ENU',
     header: t('columns.NAME_ENU'),
@@ -125,7 +123,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
-  // ── Status
   {
     accessorKey: 'EST_STATUS',
     header: t('columns.EST_STATUS'),
@@ -148,7 +145,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
-  // ── Classification
   {
     accessorKey: 'LEGAL_TYPE',
     header: t('columns.LEGAL_TYPE'),
@@ -183,7 +179,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
-  // ── Branch / Holding
   {
     accessorKey: 'MAIN_BRANCH_FLG',
     header: t('columns.MAIN_BRANCH_FLG'),
@@ -231,7 +226,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
-  // ── Employment
   {
     accessorKey: 'EMPLOYMENT_COUNT',
     header: t('columns.EMPLOYMENT_COUNT'),
@@ -251,7 +245,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
-  // ── Registration numbers
   {
     accessorKey: 'MOCI_ORG_ID',
     header: t('columns.MOCI_ORG_ID'),
@@ -303,7 +296,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
   },
 
-  // ── CR Dates
   {
     accessorKey: 'CR_ISSUE_DATE',
     header: t('columns.CR_ISSUE_DATE'),
@@ -320,7 +312,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
-  // ── CP Dates
   {
     accessorKey: 'CP_ISSUE_DATE',
     header: t('columns.CP_ISSUE_DATE'),
@@ -337,7 +328,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
-  // ── Registration Dates
   {
     accessorKey: 'REG_DATE',
     header: t('columns.REG_DATE'),
@@ -354,7 +344,6 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <DateCell value={getValue<string | null>()} />,
   },
 
-  // ── Actions
   ...(canEdit && env.showActionsColumn ? [{
     id: 'actions',
     header: t('columns.ACTIONS'),

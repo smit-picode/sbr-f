@@ -26,6 +26,5 @@ export interface AuthState {
   user: { email: string; role: string } | null;
   isAuthenticated: boolean;
   permissions: UserPermission[];
-  // All roles the user holds — powers the post-login role picker / role switching
   roles: AuthRole[];
 }

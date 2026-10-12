@@ -29,14 +29,11 @@ function is401(error: unknown): boolean {
 }
 
 export function ContactsListPage() {
-  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
-  // happens when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState<ContactFilters>('sbr:contacts:filters', CONTACT_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrContact | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
 
-  // Debounce search field
   const debouncedSearch = useDebounce(filters.search, 500);
 
   const queryParams = cleanParams({
@@ -44,7 +41,6 @@ export function ContactsListPage() {
     search: debouncedSearch,
   });
 
-  // A number typed in the search box is tried as an SBR ID first; with no hit it falls back to the name / email / phone search.
   const digitsOnly = /^\d+$/.test((debouncedSearch ?? '').trim()) ? (debouncedSearch ?? '').trim() : null;
   const bySbrId = useGetContactsListQuery(
     digitsOnly ? cleanParams({ ...filters, search: '', sbrId: Number(digitsOnly) }) : queryParams,
@@ -56,8 +52,6 @@ export function ContactsListPage() {
   const isValidationError = isError && is400(error);
 
   useEffect(() => {
-    // Skip 403 — global handler in services/api.ts already shows the permission toast
-    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
     if (isError && !is400(error) && !is401(error) && !is403(error)) toast.error(t('pages.contacts.loadError', { defaultValue: 'Failed to load contacts. Please try again.' }));
   }, [isError, error, t]);
 
@@ -66,7 +60,6 @@ export function ContactsListPage() {
   }, [setFilters]);
 
   const { canEdit: canEditContact, canSearch, canViewDetail } = usePermission('contacts');
-  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
   const canOpenDetail = canViewDetail || canEditContact;
   const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact);
   const records = isValidationError ? [] : (data?.data ?? []);

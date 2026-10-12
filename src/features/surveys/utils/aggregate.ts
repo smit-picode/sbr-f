@@ -114,7 +114,7 @@ function finish<T extends Tally>(t: T, minBase: number): T & { rate: number; rel
   return { ...t, rate: rateOf(t.answered, t.base), reliable: t.base >= minBase };
 }
 
-// ISIC section × size class over distinct establishments; units with no recorded headcount have no class and are left out.
+// ISIC section × size class over distinct establishments
 export function responseByActivityAndSize(distinct: SampleRow[], minBase = CROSS_TAB_MIN_BASE): ActivitySizeCrossTab {
   const cells = new Map<string, Tally & { section: string; band: SizeBand }>();
   const bySec = new Map<string, Tally & { section: string }>();

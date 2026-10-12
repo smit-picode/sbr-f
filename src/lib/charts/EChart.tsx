@@ -6,7 +6,6 @@ import { CHART_ANIMATION, ensureChartTheme } from './theme';
 
 export type EChartOption = Record<string, unknown>;
 // A function option is used when the layout genuinely needs the container's measured size
-// (e.g. a donut deciding whether its legend fits beside the ring or has to drop underneath).
 export type EChartOptionInput = EChartOption | ((width: number, height: number) => EChartOption);
 
 interface EChartProps {
@@ -14,25 +13,17 @@ interface EChartProps {
   height?: number | string;
   className?: string;
   onEvents?: Record<string, (params: unknown) => void>;
-  // SVG gives crisp vector output when a chart is printed to PDF.
   renderer?: 'canvas' | 'svg';
-  // Keeps the tooltip inside the chart's own box, so it never slides under the sidebar or a neighbouring card.
   confineTooltip?: boolean;
 }
 
-// Thin React wrapper around a raw ECharts instance — ECharts owns and mutates its canvas
-// directly, which is why this isn't just `<div>{...}</div>` with option as a prop rendered
-// declaratively: the instance must be created once, resized via ResizeObserver, and have
-// `setOption` called imperatively whenever the option changes.
+// Thin React wrapper around a raw ECharts instance
 export function EChart({ option, height = 240, className, onEvents, renderer = 'canvas', confineTooltip = false }: EChartProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
   const optionRef = useRef(option);
   optionRef.current = option;
 
-  // A function option carries its own key via optionKey (set by builders like donut() whose
-  // layout depends on measured width) — without it, JSON.stringify on a function is useless
-  // ("undefined") and the chart would never know to re-render on data changes.
   const key = typeof option === 'function'
     ? ((option as { optionKey?: string }).optionKey ?? String(option))
     : JSON.stringify(option);

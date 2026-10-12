@@ -74,7 +74,6 @@ export function AnalysisReportPage({ id }: { id: string }) {
     if (analysis) commit(fn(analysis), key);
   }, [analysis, commit]);
 
-  // Ctrl/Cmd+Z / Shift+Z / Y — ignored while typing in a field.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;

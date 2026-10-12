@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { AnalysisRequest, AnalysisResolvedQuery, AnalysisResult } from '@/types';
 import type { AnalysisWorkerMessage, AnalysisWorkerTask } from '../engine/analysis.worker';
 
-// Dummy-phase stand-in for `POST /analysis/query` — replace this file with the RTK Query endpoint.
-
 const CACHE_LIMIT = 300;
 const cache = new Map<string, AnalysisResult>();
 const inflight = new Map<string, Promise<AnalysisResult>>();

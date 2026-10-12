@@ -106,7 +106,6 @@ export function PivotBlock({ block, query, masked, height, mode, onPoint }: Bloc
   const scroll = mode === 'print' ? '' : 'max-h-[440px] overflow-auto';
   const thCls = 'px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 bg-white sticky top-0 z-[1] border-b border-slate-200 whitespace-nowrap';
 
-  // ---- one dimension: categories × measures (+ comparison) ----
   if (!d1) {
     const compare = !!data.compareTo;
     const total0 = data.total.values[0] ?? 0;
@@ -211,7 +210,6 @@ export function PivotBlock({ block, query, masked, height, mode, onPoint }: Bloc
                     value={r ? v : null}
                     masked={masked}
                     percent={pct}
-                    // Square-root scale: a few very large cells would otherwise wash every other cell out.
                     heat={heat && v != null && max ? Math.sqrt(v / max) : undefined}
                     onClick={clickable && r ? point([rk, ck], r.values[0]) : undefined}
                   />

@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { ArrowUpRight, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,16 +10,12 @@ interface ExecStatCardProps {
   value: string;
   label: string;
   sub: string;
-  // Route to open when the card is clicked. Omit (or pass undefined when the viewer lacks the
-  // permission for that page) to render a plain, non-interactive card — the reference gates its
-  // KPI cards the same way rather than linking somewhere the user would only be refused.
   href?: string;
+  valueNote?: ReactNode;
 }
 
-// Headline KPI card — icon, big value, label, and a small context line underneath. Kept local
-// to the Executive Home feature since nothing else in the app needs this exact shape yet; see
-// common-function-rule before promoting it to src/components/common if a second page wants it.
-export function ExecStatCard({ icon: Icon, value, label, sub, href }: ExecStatCardProps) {
+// Headline KPI card — icon, big value, label, and a small context line underneath.
+export function ExecStatCard({ icon: Icon, value, label, sub, href, valueNote }: ExecStatCardProps) {
   const router = useRouter();
 
   const body = (
@@ -30,13 +27,14 @@ export function ExecStatCard({ icon: Icon, value, label, sub, href }: ExecStatCa
           <ArrowUpRight className="ms-auto h-3.5 w-3.5 shrink-0 text-slate-300 transition-colors group-hover:text-adaam rtl:-scale-x-100" />
         )}
       </div>
-      <div className="mt-2 text-[26px] font-extrabold leading-none text-slate-900">{value}</div>
+      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="text-[26px] font-extrabold leading-none text-slate-900">{value}</span>
+        {valueNote}
+      </div>
       <div className="mt-1.5 text-[11.5px] text-slate-500">{sub}</div>
     </>
   );
 
-  // Rendered as a real <button> only when it navigates, so a non-clickable card stays out of the
-  // tab order instead of being a focusable control that does nothing.
   if (!href) {
     return <div className="rounded-lg bg-white p-4 shadow-card">{body}</div>;
   }

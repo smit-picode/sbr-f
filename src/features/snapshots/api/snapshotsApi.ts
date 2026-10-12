@@ -21,10 +21,8 @@ export const snapshotsApi = baseApi.injectEndpoints({
     }),
     getSnapshotTable: builder.query<ApiResponse<SnapshotRow[]>, SnapshotTableParams>({
       query: ({ id, entity, ...params }) => ({ url: `/snapshots/${id}/${entity}`, params }),
-      // Frozen rows never change, so there is nothing to invalidate.
       keepUnusedDataFor: 300,
     }),
-    // The request returns only after all five tables are copied — seconds on the full register.
     createSnapshot: builder.mutation<ApiResponse<{ SNAPSHOT_ID: number }>, CreateSnapshotBody>({
       query: (body) => ({ url: '/snapshots', method: 'POST', body }),
       invalidatesTags: ['Snapshots', 'AuditLog'],

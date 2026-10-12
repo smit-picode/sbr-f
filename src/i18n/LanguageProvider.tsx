@@ -6,7 +6,6 @@ import i18n from './config';
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Restore persisted language preference
     const saved = localStorage.getItem('sbr_language');
     if (saved === 'ar' || saved === 'en') {
       i18n.changeLanguage(saved);

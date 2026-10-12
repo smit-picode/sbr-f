@@ -20,13 +20,8 @@ import type { BulkChangeTaskSummary } from '../types';
 export function BulkChangeListPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
-  // when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState('sbr:bulkChange:filters', { ...BULK_CHANGE_DEFAULT_FILTERS });
 
-  // Submitting needs BOTH layers the API enforces: module access (bulk_change.create) AND an
-  // edit permission on at least one bulk-capable table. Hiding the button unless both hold
-  // keeps the UI from offering an action that would come back as a 403.
   const establishments = usePermission('establishments');
   const contacts = usePermission('contacts');
   const addresses = usePermission('addresses');
@@ -75,7 +70,6 @@ export function BulkChangeListPage() {
       header: t('bulkChange.cols.records', { defaultValue: 'Records' }),
       cell: ({ row }) => {
         const { RECORDS, PENDING_COUNT, APPROVED_COUNT, REJECTED_COUNT } = row.original;
-        // Some members were decided individually; show what is still left to review.
         const partlyDecided = PENDING_COUNT != null && (APPROVED_COUNT ?? 0) + (REJECTED_COUNT ?? 0) > 0;
         return (
           <div>

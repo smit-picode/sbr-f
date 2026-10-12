@@ -41,11 +41,9 @@ export function PrintReport({ analysis, cross, masked, onDone }: Props) {
         timer = setTimeout(tick, 150);
         return;
       }
-      // One more frame so the last charts finish laying out.
       timer = setTimeout(() => {
         window.addEventListener('afterprint', finish, { once: true });
         window.print();
-        // Some browsers don't fire afterprint when the dialog is cancelled quickly.
         setTimeout(() => { if (document.body.classList.contains('analysis-printing')) finish(); }, 1500);
       }, 350);
     };

@@ -7,7 +7,6 @@ export const establishmentsApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/establishments', params }),
       providesTags: ['Establishments'],
     }),
-    // Only establishments not already attached to an enterprise — for the Enterprise-edit picker.
     getAttachableEstablishments: builder.query<ApiResponse<AttachableEstablishment[]>, { search?: string; page?: number; limit?: number }>({
       query: (params) => ({ url: '/establishments/attachable', params }),
       providesTags: ['Establishments'],

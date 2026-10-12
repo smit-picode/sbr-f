@@ -5,24 +5,19 @@ const QUARTERS_PER_YEAR = 4;
 const MEASURES: GdpMeasure[] = ['valueAdded', 'production', 'intermediate'];
 
 export interface GdpView {
-  // Latest year with a complete AES return; null when the establishment never returned one.
   referenceYear: number | null;
   establishment: GdpAccounts | null;
-  // National totals for the reference year, only when all four quarters are in V_SVY_TOTAL_ECONOMY.
   economy: GdpAccounts | null;
-  // Year the economy totals are for: the reference year, else the latest year with all four quarters.
   economyYear: number | null;
   shareOfEconomy: Record<GdpMeasure, number | null>;
-  // The establishment's ISIC section with what its sampled units reported that year; null without an ISIC code or any full return.
   activity: { section: string; units: number; accounts: GdpAccounts } | null;
   shareOfActivity: Record<GdpMeasure, number | null>;
-  // What the activity's sampled units reported, as a share of the national total.
   activityShareOfEconomy: Record<GdpMeasure, number | null>;
   trendYears: number[];
   trend: Record<GdpMeasure, number[]>;
 }
 
-// Figures come straight from the views: production = AES turnover, and value added = production − intermediate consumption.
+// Figures come straight from the views
 export function buildGdpView(api: SurveyGdpApi): GdpView {
   const reported = new Map<number, GdpAccounts>();
   api.AES.forEach((r) => {
@@ -91,7 +86,7 @@ export function formatMoney(v: number | null): string {
   return String(Math.round(v));
 }
 
-// An establishment's share of the economy runs to millionths, so the decimals adapt instead of rounding to 0.00%.
+// An establishment's share of the economy runs to millionths
 export function formatShare(v: number | null): string {
   if (v == null) return '—';
   if (v >= 1) return `${v.toFixed(2)}%`;

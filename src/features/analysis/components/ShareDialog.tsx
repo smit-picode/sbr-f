@@ -24,7 +24,6 @@ export function ShareDialog({ open, analysis, readOnly, onClose, onSave }: Props
   const [shares, setShares] = useState<AnalysisShare[]>(analysis.shares);
   const [q, setQ] = useState('');
   const { myRoles } = useAnalysisAccess();
-  // Real roles from the session first; the dummy directory fills in the rest until a lookup endpoint exists.
   const directory = [
     ...myRoles.map((r) => ({ kind: 'role' as const, id: r.id, label: r.label, sub: t('analysis.share.roleSub', { defaultValue: 'Role' }) })),
     ...SHARE_DIRECTORY.filter((d) => !myRoles.some((r) => r.label.toLowerCase() === d.label.toLowerCase())),

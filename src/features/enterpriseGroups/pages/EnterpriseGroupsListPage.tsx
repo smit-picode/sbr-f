@@ -32,8 +32,6 @@ function is401(e: unknown): boolean { return typeof e === 'object' && e !== null
 function is403(e: unknown): boolean { return typeof e === 'object' && e !== null && 'status' in e && (e as { status: unknown }).status === 403; }
 
 export function EnterpriseGroupsListPage() {
-  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
-  // happens when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState<EnterpriseGroupFilters>('sbr:enterpriseGroups:filters', ENTERPRISE_GROUP_DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:enterpriseGroups:columnFilters', []);
   const [showCreate, setShowCreate] = useState(false);
@@ -48,8 +46,6 @@ export function EnterpriseGroupsListPage() {
 
   const queryParams = cleanParams({
     ...filters,
-    // The group code is displayed as "EGR-7001" but stored as the number 7001, so drop the
-    // display prefix and let either form match.
     search: stripGroupCodePrefix(debouncedSearch ?? ''),
     status: filters.status === '__all__' ? undefined : filters.status,
     type:   filters.type === '__all__' ? undefined : filters.type,

@@ -1,6 +1,6 @@
 import { parseWorkbook, type ParsedWorkbook } from './parseWorkbook';
 
-// Reading a large workbook freezes the tab for seconds, so it runs in a worker; any worker failure retries on the main thread.
+// Reading a large workbook freezes the tab for seconds, so it runs in a worker
 export const parseWorkbookInWorker = (
   file: File,
   idColumn: string,

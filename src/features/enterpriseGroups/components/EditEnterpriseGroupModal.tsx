@@ -56,9 +56,7 @@ interface MemberRow {
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
 
-// A group cannot start in the future — confirmed with the team lead. Recomputed per
-// render rather than module-load time, so the cap stays correct across a session left open
-// past midnight.
+// A group cannot start in the future — confirmed with the team lead.
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
 export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onClose }: EditEnterpriseGroupModalProps) {
@@ -97,12 +95,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     { skip: !open || !debouncedMemberSearch }
   );
 
-  // The `ungrouped: true` search only returns enterprises with no group at all — an enterprise
-  // removed from THIS group a moment ago is still grouped in the database until Save Changes is
-  // clicked, so the API correctly (from its point of view) excludes it too, and it becomes
-  // unsearchable until the edit is saved. Since the modal already has this group's full
-  // original membership via `currentMembers`, prepend any removed member whose name matches the
-  // query — no extra request, and no backend change needed.
   const removedMemberSearchMatches: MemberRow[] = useMemo(() => {
     const q = debouncedMemberSearch.trim().toUpperCase();
     if (!q) return [];
@@ -141,17 +133,11 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
 
   const set = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // NAMES is one rule across the EN/AR pair, so typing in either clears it.
     const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
     if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
   };
 
   const addMember = (enterprise: { ENTERPRISE_ID: number; NAME_ENU: string | null; STATUS: string | null }) => {
-    // Re-adding an enterprise removed earlier in this same (unsaved) session is a pure undo:
-    // clear the removal instead of ALSO queuing it as a fresh add, or the submit payload would
-    // send the same ID in both addMemberEnterpriseIds and removeMemberEnterpriseIds. Clearing
-    // removedIds also restores the original currentMembers row (with its real ESTABLISHMENT_COUNT)
-    // instead of re-adding it as a new member defaulted to 0.
     if (removedIds.has(enterprise.ENTERPRISE_ID)) {
       setRemovedIds((prev) => { const next = new Set(prev); next.delete(enterprise.ENTERPRISE_ID); return next; });
       setMemberSearch('');
@@ -170,9 +156,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     setHeadId((prev) => (prev === enterpriseId ? null : prev));
   };
 
-  // Shared by hasChanges() and the submit payload builder below, so both agree on what
-  // "changed" means field-by-field — never send a field to the backend that this same
-  // normalization says is unchanged (see changedFields()).
+  // Shared by hasChanges() and the submit payload builder below
   const normalize = (v: string | null | undefined) => (v == null ? '' : String(v).trim());
   const originalGroupStartDate = group.GROUP_START_DATE ? group.GROUP_START_DATE.slice(0, 10) : '';
 
@@ -194,15 +178,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     );
   };
 
-  // Only the fields the user actually touched — never the full form. SBR_ENTERPRISE_GROUPS_API.
-  // SUBMIT_UPDATE diffs whatever keys are PRESENT in the payload against the current stored row
-  // and reports any string mismatch as a change; sending every field unconditionally (the
-  // previous behaviour) made an untouched field appear as "changed" the moment its resubmitted
-  // value didn't byte-for-byte match the stored value — the fixed bug: Holding Co. was
-  // the only edit, but Group Start still showed up in the change request because the date value
-  // round-tripped through the API and back with a different string representation than what is
-  // stored. Now the field is simply never sent when unchanged, so no round-trip mismatch — of any
-  // field, not just dates — can ever surface as a false change again.
+  // Only the fields the user actually touched — never the full form.
   const changedFields = (): Partial<Record<keyof FormState, string | null>> => {
     const out: Partial<Record<keyof FormState, string | null>> = {};
     if (normalize(form.NAME_ENU) !== normalize(group.NAME_ENU)) out.NAME_ENU = form.NAME_ENU.trim() || null;
@@ -250,9 +226,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
         id: group.ID,
         data: {
           ...changedFields(),
-          // Same principle for the head: only send it when it actually changed. When omitted,
-          // SUBMIT_UPDATE falls back to the current stored head for its "head must remain a
-          // member" validation, so a membership-only edit is still validated correctly.
           ...(headId !== initialHeadId ? { GROUP_HEAD_ENTERPRISE_ID: headId } : {}),
           addMemberEnterpriseIds:     addedMembers.map((m) => m.ENTERPRISE_ID),
           removeMemberEnterpriseIds:  Array.from(removedIds),
@@ -285,7 +258,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-4">
-          {/* Names */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}</Label>
@@ -309,7 +281,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
           </div>
 
-          {/* UCI fields */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}</Label>
@@ -347,7 +318,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
           </div>
 
-          {/* Classification */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
@@ -387,7 +357,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
           </div>
 
-          {/* Member Enterprises */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold tracking-[0.1em] text-slate-400">{t('editEnterpriseGroup.memberEnterprises', { defaultValue: 'Member Enterprises' })}</span>
@@ -448,7 +417,6 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
               <p className="text-xs text-slate-400">{t('editEnterpriseGroup.addAtLeastOne', { defaultValue: 'Add at least one enterprise.' })}</p>
             )}
 
-            {/* Search box */}
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3 space-y-2">
               <p className="text-xs text-slate-500 font-medium">
                 {t('editEnterpriseGroup.addMember', { defaultValue: 'Add a member enterprise' })}

@@ -1,10 +1,3 @@
-// Dummy data for the two Executive Home sections that have NO backend data source at all yet
-// (confirmed by the database side — "survey samples and survey response rates will be removed as we
-// dont have this data yet") and for the register-growth chart's "By regulator" / "By sector"
-// breakdown views, which sbr-backend's temporary query only computes as a single Total series
-// (no per-regulator/per-sector monthly history exists to query). Kept clearly separate from the
-// real data in ../api/homeApi.ts so it is obvious what to delete once real sources exist.
-
 import { CHART_COLOR } from '@/lib/charts';
 
 export const SURVEY_KPIS = {
@@ -19,7 +12,6 @@ export const SURVEY_RESPONSE_BY_SURVEY = [
   { name: 'FDI Quarterly', ratePct: 81.7, sampledUnits: 410 },
 ];
 
-// A section with fewer sampled units than this has a rate too unstable to rank, so its bar is muted.
 export const SURVEY_RESPONSE_MIN_BASE = 10;
 
 const ACTIVITY_SECTIONS = [
@@ -36,12 +28,10 @@ const ACTIVITY_SECTIONS = [
   { code: 'Q', name: 'Health & social work', answered: 4, base: 4 },
 ];
 
-// Response rate by ISIC activity section, lowest first — flags where to direct survey follow-up.
 export const SURVEY_RESPONSE_BY_ACTIVITY = ACTIVITY_SECTIONS
   .map((s) => ({ ...s, ratePct: Math.round((s.answered / s.base) * 1000) / 10 }))
   .sort((x, y) => x.ratePct - y.ratePct);
 
-// One distinct theme hue per regulator so every growth-chart line can be told apart.
 export const SOURCE_COLOR: Record<string, string> = {
   MOCI: CHART_COLOR.dune,
   QFC: CHART_COLOR.info,
@@ -50,11 +40,6 @@ export const SOURCE_COLOR: Record<string, string> = {
   MOM_FARM: CHART_COLOR.pos,
 };
 
-// Illustrative register-size history by regulator / by sector — the real /home/executive-summary
-// endpoint only returns a single Total monthly series (see sbr-backend's
-// REGISTER_GROWTH_BY_MONTH_SQL), so these two breakdown views have no real source yet. Months
-// intentionally mirror the SBR-design reference (Dec 2025 → Live) rather than the real endpoint's
-// Aug/Sep 2026 window, since this is a wholly separate illustrative series, not a slice of it.
 export const REGISTER_GROWTH_BREAKDOWN = [
   { label: 'Dec 2025', bySource: { MOCI: 130, MOM_FARM: 22, QFC: 16, QFZ: 16, QSTP: 14 }, bySector: { Private: 174, 'Mixed-Government': 14, '—': 6, 'Mixed-Private': 4 } },
   { label: 'Mar 2026', bySource: { MOCI: 137, MOM_FARM: 23, QFC: 17, QFZ: 16, QSTP: 13 }, bySector: { Private: 181, 'Mixed-Government': 15, '—': 6, 'Mixed-Private': 4 } },

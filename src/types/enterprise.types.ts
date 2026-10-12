@@ -10,8 +10,8 @@ export interface SbrEnterprise {
   TRADE_NAME_ARA_SOURCE: string | null;
   TRADE_NAME_ENU: string | null;
   TRADE_NAME_ENU_SOURCE: string | null;
-  STATUS: string | null;            // 'Active' | 'Inactive'
-  SECTOR_ID: string | null;         // 'Private' | 'Mixed-Private' | 'State Owned'
+  STATUS: string | null;
+  SECTOR_ID: string | null;
   SECTOR_ID_SOURCE: string | null;
   HOLDING_COMPANY_FLG: string | null;
   HOLDING_COMPANY_FLG_SOURCE: string | null;
@@ -31,13 +31,9 @@ export interface SbrEnterprise {
   VALID_TO: string | null;
   CREATED_AT: string | null;
   UPDATED_AT: string | null;
-  // Derived in the API from the head establishment / member count
   MAIN_CR: string | null;
   LEGAL_TYPE: string | null;
   ESTABLISHMENT_COUNT: number;
-  // Oracle SQL has no BOOLEAN type, so SBR_ENTERPRISES_API returns this flag as 1/0 and the
-  // list endpoint passes it straight through. The detail endpoint and the ORM fallback still
-  // send a real boolean, so both shapes are accepted — always read it via `!!`.
   HAS_PENDING_REQUEST?: boolean | number;
 }
 
@@ -53,7 +49,6 @@ export interface EnterpriseFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-// ── Enterprise detail (Enterprise 360) ──────────────────────────────────────
 import type { SbrContact } from './contact.types';
 import type { SbrAddress } from './address.types';
 
@@ -80,8 +75,7 @@ export interface EnterpriseSecondaryActivity {
   FROM_SBR_ID: number;
 }
 
-// Shape as SBR_ENTERPRISES_API.GET_DETAIL returns it — the API passes these rows through
-// unmodified. Not currently rendered anywhere; kept so the payload stays typed.
+// Shape as SBR_ENTERPRISES_API.GET_DETAIL returns it — the API passes these rows through unmodified.
 export interface EnterpriseLifecycleEvent {
   TYPE: string;
   TITLE: string;
@@ -99,8 +93,6 @@ export interface EnterpriseChangeHistoryEntry {
   REASON: string;
   CREATED_AT: string;
   APPROVAL_DATE: string | null;
-  // Flat columns exactly as SBR_ENTERPRISES_API.GET_DETAIL returns them — the API no longer
-  // re-nests these into changedByUser / approvedByUser objects.
   CHANGED_BY_EMAIL?: string | null;
   APPROVED_BY_EMAIL?: string | null;
 }
@@ -113,8 +105,6 @@ export interface EnterpriseProfilingChange {
   CR: string | null;
   REASON: string;
   CREATED_AT: string;
-  // Flat columns exactly as SBR_ENTERPRISES_API.GET_DETAIL returns them — the API no longer
-  // re-nests these into changedByUser / approvedByUser objects.
   CHANGED_BY_EMAIL?: string | null;
   APPROVED_BY_EMAIL?: string | null;
 }

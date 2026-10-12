@@ -1,8 +1,6 @@
 import type { AnalysisEntity } from '@/types';
 import { ANALYSIS_FRAME_CHRONO, frameIndex } from './frames';
 
-// Deterministic full-scale dummy register, calibrated on real aggregates only — no real record is used.
-
 // `_p` is the parent establishment of a contact/address row (the curated join).
 export type AnalysisRow = Record<string, unknown> & { _b: number; _d: number; _hist?: HistoryEntry[]; _p?: AnalysisRow };
 interface HistoryEntry { until: number; values: Record<string, unknown> }
@@ -58,7 +56,6 @@ const SECTION_DIVISIONS: Record<string, [number, number]> = {
   Q: [86, 88], R: [90, 93], S: [94, 96], T: [97, 98], U: [99, 99],
 };
 
-// Larger units are more common in construction, admin/support and mining than in retail.
 const SECTION_SIZE_SHIFT: Record<string, number> = { B: 3, F: 2.2, N: 1.8, H: 1.5, C: 1.4, Q: 1.3, P: 1.2, G: 0.7, S: 0.6, M: 0.8 };
 
 const MUNICIPALITIES: Weighted<string> = [
@@ -92,7 +89,6 @@ const NAME_ACTIVITY: Record<string, string[]> = {
 };
 const NAME_SUFFIX: Record<string, string> = { 'W.L.L.': ' W.L.L.', 'Q.P.S.C.': ' Q.P.S.C.', 'Q.S.C.': ' Q.S.C.', 'QFC LLC': ' LLC', 'QFZ LLC': ' FZ LLC', 'QSTP LLC': ' LLC' };
 
-// [births, deaths] entering each later frame — net growth matches the real extracts exactly.
 const START_COUNT = 109682;
 const TRANSITIONS: [number, number][] = [[1900, 1275], [3400, 1323], [4100, 1298]];
 
@@ -172,7 +168,6 @@ function buildUniverse(): Universe {
     return `${root}${extra} ${act}${(legal && NAME_SUFFIX[legal]) || ''}`;
   }
 
-  // Exact birth-frame pool so every frame's size matches the real extract.
   const total = START_COUNT + TRANSITIONS.reduce((s, [b]) => s + b, 0);
   const births: number[] = new Array(total).fill(0);
   let cursor = START_COUNT;
@@ -229,7 +224,6 @@ function buildUniverse(): Universe {
         has_email: rng() < 0.55,
         has_website: rng() < 0.1,
         enterprise_id: entId,
-        // Filled from the enterprise/group once those exist; declared here so every row keeps one shape.
         turnover: null,
         foreign_controlled: false,
         parent_country: null,
@@ -302,7 +296,6 @@ function buildUniverse(): Universe {
         row.employment = next;
         row.size_class = sizeClassOf(next);
       } else if (r < 0.075 && row.isic_section == null) {
-        // Coding backlog clearing up: an uncoded unit receives an ISIC code.
         record(row, t, { isic_section: null, isic_division: null, isic_group: null, isic_class: null });
         Object.assign(row, pickIsic());
       } else if (r < 0.08 && row.employment == null) {
@@ -322,7 +315,6 @@ function buildUniverse(): Universe {
     ent._d = kids.every((k) => k._d !== NEVER) ? Math.max(...kids.map((k) => k._d)) : NEVER;
   });
 
-  // Enterprise groups: 14,163 groups over a shuffled set of enterprises.
   const order = enterprises.map((_, i) => i);
   for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
   const groups: AnalysisRow[] = [];
@@ -462,7 +454,6 @@ export function getFrameRows(entity: AnalysisEntity, frameId: string): AnalysisR
   const f = frameIndex(frameId);
   const latest = ANALYSIS_FRAME_CHRONO.length - 1;
   const child = entity === 'contacts' || entity === 'addresses';
-  // Child rows re-point `_p` at their establishment's historic view so joined fields match the frame.
   const estViews = child && f !== latest ? new Map(getFrameRows('establishments', frameId).map((e) => [e.sbr_id, e])) : null;
   const out: AnalysisRow[] = [];
   for (const row of baseRows(entity)) {

@@ -45,7 +45,6 @@ export function ChartBlock({ block, query, masked, height, mode, onPoint }: Bloc
     if (block.type === 'map') registerQatarMap().then(() => setMapReady(true)).catch(() => setMapReady(false));
   }, [block.type]);
 
-  // Label → key lookup for charts whose click params only carry the display name (donut, map).
   const nameToKey = useRef(new Map<string, string | null>());
   const onPointRef = useRef(onPoint);
   onPointRef.current = onPoint;
@@ -111,7 +110,6 @@ export function ChartBlock({ block, query, masked, height, mode, onPoint }: Bloc
           keys = nameToKey.current.has(p.name) ? [nameToKey.current.get(p.name) ?? null] : [p.name];
         }
         if (!keys) return;
-        // The point menu replaces the hover tooltip, which would otherwise sit on top of it.
         const el = wrapRef.current?.querySelector('[_echarts_instance_]') as HTMLElement | null;
         if (el) echarts.getInstanceByDom(el)?.dispatchAction({ type: 'hideTip' });
         const ev = p.event?.event;
@@ -139,7 +137,6 @@ export function ChartBlock({ block, query, masked, height, mode, onPoint }: Bloc
     <div ref={wrapRef} className={`relative transition-opacity ${isFetching ? 'opacity-60' : ''}`} data-block-chart={block.id}>
       <div className={scrolls ? 'overflow-y-auto' : undefined} style={scrolls ? { maxHeight: ANALYSIS_BAR_SCROLL_HEIGHT } : undefined}>
       <EChart
-        // Label formatters are closures the chart wrapper can't diff, so a language switch remounts.
         key={`${block.type}-${mode}-${isArabic ? 'ar' : 'en'}`}
         option={option}
         height={chartHeight}

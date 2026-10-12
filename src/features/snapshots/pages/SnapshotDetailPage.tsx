@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { Building2, CircleDot, Orbit, Users, MapPin, Network, Calendar, User } from 'lucide-react';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PageLoader } from '@/components/common/Loader';
@@ -17,7 +18,7 @@ import { useGetSnapshotsQuery, useGetSnapshotTableQuery } from '../api/snapshots
 import { getSnapshotColumns } from '../components/SnapshotColumns';
 import { SnapshotExportButton } from '../components/SnapshotExportButton';
 import { formatFrozenAt } from '../utils/formatFrozenAt';
-import { SNAPSHOT_DEFAULT_PAGE_SIZE, SNAPSHOT_ENTITIES, SNAPSHOT_LOOKUP_LIMIT } from '../constants';
+import { SNAPSHOT_ENTITIES, SNAPSHOT_LOOKUP_LIMIT } from '../constants';
 
 const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
   establishments: Building2,
@@ -27,7 +28,6 @@ const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
   addresses: MapPin,
 };
 
-// Pill-tab look (filled dune pill on the active tab inside a rounded strip), matching the client design.
 const TAB_TRIGGER_CLASS =
   'group h-9 gap-2 rounded-full border-0 bg-transparent px-4 text-[12.5px] font-semibold text-slate-500 shadow-none hover:text-slate-700 ' +
   'data-[state=active]:bg-dune data-[state=active]:text-white data-[state=active]:shadow-soft';
@@ -40,7 +40,7 @@ const TAB_COUNT_CLASS =
 function SnapshotEntityTable({ id, entity }: { id: number; entity: SnapshotEntity }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(SNAPSHOT_DEFAULT_PAGE_SIZE);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
   const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotTableQuery({ id, entity, page, limit });
   const columns = useMemo(() => getSnapshotColumns(entity, t), [entity, t]);
   const rows = data?.data ?? [];
@@ -66,7 +66,6 @@ export function SnapshotDetailPage({ id }: { id: number }) {
   const router = useRouter();
   const { canView } = usePermission('snapshots');
   const [activeEntity, setActiveEntity] = useState<SnapshotEntity>('establishments');
-  // No get-one endpoint: the header comes from the (cached) list row for this snapshot.
   const { data: listRes, isLoading } = useGetSnapshotsQuery({ page: 1, limit: SNAPSHOT_LOOKUP_LIMIT }, { skip: !canView });
   const snapshot = listRes?.data?.find((s) => s.SNAPSHOT_ID === id);
   const back = { label: t('snapshots.backToAll'), onClick: () => router.push('/snapshots/browse') };

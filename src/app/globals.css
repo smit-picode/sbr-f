@@ -1,14 +1,9 @@
 @import "tailwindcss";
-/* Provides the `animate-in`/`animate-out`, `fade-in-0`, `zoom-in-95`, `slide-in-from-*` utilities
-   already written throughout Dialog/Popover/Tooltip/DropdownMenu — those classes had no matching
-   CSS without this plugin, so every open/close transition on those components was silently
-   inert (an instant show/hide, no animation) until now. */
+
 @import "tw-animate-css";
 
-/* Tailwind v4 gates hover: behind @media (hover: hover), which some Windows touch/hybrid devices fail — hover effects never showed there. */
 @custom-variant hover (&:hover);
 
-/* Tailwind v4's preflight resets buttons to the default arrow cursor; restore the pointer on anything clickable. */
 @layer base {
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -85,21 +80,13 @@
 }
 
 body {
-  /* Matches the reference's stack verbatim. Lusail (Qatar's national typeface) is not
-     distributed with either app, so text actually resolves to Calibri — which is notably
-     narrower and shorter-x-height than Plus Jakarta Sans, and was the real cause of our
-     text rendering ~1.2x wider than the client's at identical px sizes. Jakarta stays on
-     as a late fallback for machines without Calibri; Cairo supplies Arabic glyphs. */
   font-family: 'Lusail', 'Lusail+', 'Calibri', var(--font-cairo), 'Segoe UI', Roboto, var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   background-color: #F7F8FA;
   color: #0f172a;
 }
 
-/* In Arabic (RTL) mode, Noto Sans Arabic becomes the PRIMARY font for ALL text
-   so Arabic + inline Latin render consistently — matches client website. LTR unaffected. */
+
 html[dir='rtl'] body {
-  /* Reference RTL stack, with Cairo kept ahead of Calibri because Calibri's Arabic coverage
-     is far weaker than Cairo's — Latin still resolves to Calibri via per-glyph fallback. */
   font-family: 'Lusail', 'Lusail+', var(--font-cairo), 'Calibri', 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
@@ -128,12 +115,7 @@ html[dir='rtl'] body {
   background: #94a3b8;
 }
 
-/* Skeleton shimmer — simple, plain light-gray placeholder used for all loading states. Kept
-   neutral on purpose (no warm/dune or dark-navy tint) — a colored skeleton read as jarring/"off"
-   next to the app's white cards, plain light gray + a soft white sweep is the safer, cleaner
-   default. `.shimmer-dark` used to swap in a dark-navy base for the banner placeholder; it's now
-   just an alias to the same neutral look so every skeleton in the app matches, including the
-   banner stand-in. */
+
 @keyframes sbr-shimmer {
   100% { transform: translateX(100%); }
 }

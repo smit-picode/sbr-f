@@ -1,6 +1,6 @@
 import { BULK_TRANSIENT_FAILURE_STATUSES } from '../constants';
 
-// RTK Query's failed-request shape; a proxy's HTML error page arrives as PARSING_ERROR carrying originalStatus.
+// RTK Query's failed-request shape
 export const requestFailureStatus = (error: unknown): string | number | null => {
   if (!error || typeof error !== 'object') return null;
   const obj = error as { status?: unknown; originalStatus?: unknown };

@@ -29,8 +29,7 @@ function is403(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
 }
 
-// Deep-link support for the home KPI's Active status filter takes priority over a restored
-// session, since it reflects the user's explicit intent from wherever they linked in.
+// Deep-link support for the home KPI's Active status filter takes priority over a restored session
 function readInitialFilters(): EnterpriseFilters | undefined {
   if (typeof window === 'undefined') return undefined;
   const initialStatus = new URLSearchParams(window.location.search).get('status');
@@ -39,14 +38,11 @@ function readInitialFilters(): EnterpriseFilters | undefined {
 }
 
 export function EnterprisesListPage() {
-  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
-  // happens when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState<EnterpriseFilters>('sbr:enterprises:filters', ENTERPRISE_DEFAULT_FILTERS, readInitialFilters);
   const [columnFilters, setColumnFilters] = usePersistedState<ColumnFilterRow[]>('sbr:enterprises:columnFilters', []);
   const { t } = useTranslation();
   const router = useRouter();
 
-  // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
   const { canSearch, canViewDetail } = usePermission('enterprises');
@@ -68,7 +64,6 @@ export function EnterprisesListPage() {
   const isValidationError = isError && is400(error);
 
   useEffect(() => {
-    // Skip 400/401/403 — handled inline / by the global handler in services/api.ts
     if (isError && !is400(error) && !is401(error) && !is403(error)) {
       toast.error(t('pages.enterprises.loadError', { defaultValue: 'Failed to load enterprises. Please try again.' }));
     }

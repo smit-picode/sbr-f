@@ -1,5 +1,4 @@
-// Legal Units is a derived, read-only ledger (no separate table) — each row is synthesised
-// backend-side from an establishment SCD2 version. See sbr-backend legalUnits.controller.ts.
+// Legal Units is a derived, read-only ledger (no separate table)
 export interface LegalUnit {
   LEGAL_UNIT_ID:        number;
   ESTABLISHMENT_SBR_ID: number;

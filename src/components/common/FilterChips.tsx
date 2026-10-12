@@ -14,10 +14,7 @@ interface FilterChipsProps {
   onClearAll: () => void;
 }
 
-/**
- * Row of removable chips for the currently-active filters.
- * Renders nothing when no filters are active.
- */
+// Row of removable chips for the currently-active filters.
 export function FilterChips({ chips, onClearAll }: FilterChipsProps) {
   const { t } = useTranslation();
   if (chips.length === 0) return null;

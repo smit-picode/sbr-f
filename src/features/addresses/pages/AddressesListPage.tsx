@@ -19,8 +19,6 @@ import { MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function AddressesListPage() {
-  // Restored from sessionStorage on mount so filters/search survive the unmount/remount that
-  // happens when a row navigates to its detail page and the user comes back.
   const [filters, setFilters] = usePersistedState<AddressFilters>('sbr:addresses:filters', ADDRESS_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrAddress | null>(null);
   const { t } = useTranslation();
@@ -34,7 +32,6 @@ export function AddressesListPage() {
     search: debouncedSearch,
   });
 
-  // A number typed in the search box is tried as an SBR ID first; with no hit it falls back to the zone / street / QARS search.
   const digitsOnly = /^\d+$/.test((debouncedSearch ?? '').trim()) ? (debouncedSearch ?? '').trim() : null;
   const bySbrId = useGetAddressesListQuery(
     digitsOnly ? cleanParams({ ...filters, search: '', sbrId: Number(digitsOnly) }) : queryParams,
@@ -46,7 +43,6 @@ export function AddressesListPage() {
   useEffect(() => {
     const is401 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
     const is403 = typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 403;
-    // Skip 401/403 — global handler in services/api.ts already shows the appropriate toast
     if (isError && !is401 && !is403) toast.error(t('pages.addresses.loadError', { defaultValue: 'Failed to load addresses. Please try again.' }));
   }, [isError, error, t]);
 
@@ -55,7 +51,6 @@ export function AddressesListPage() {
   }, [setFilters]);
 
   const { canEdit: canEditAddress, canSearch, canViewDetail } = usePermission('addresses');
-  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
   const canOpenDetail = canViewDetail || canEditAddress;
   const columns = getAddressColumns((row) => setEditTarget(row), t, canEditAddress);
   const records = data?.data ?? [];

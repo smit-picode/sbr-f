@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from './config';
 
 export function useLanguage() {
-  useTranslation(); // subscribes component to language changes
+  useTranslation();
   const isArabic = i18n.language === 'ar';
 
   return {

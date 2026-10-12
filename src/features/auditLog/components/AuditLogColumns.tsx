@@ -9,8 +9,7 @@ const TABLE_COLORS: Record<string, string> = {
   SBR_ADDRESSES:   'bg-purple-100 text-purple-700',
 };
 
-// Display-only: turn the raw table name (e.g. "SBR_CONTACTS") into a friendly
-// label ("Contacts"). The underlying value sent to the backend stays unchanged.
+// Display-only: turn the raw table name (e.g. "SBR_CONTACTS") into a friendly label ("Contacts").
 export function prettyTableName(raw: string): string {
   if (!raw) return raw;
   return raw
@@ -51,19 +50,6 @@ function RecordIdCell({ value }: { value: number | null }) {
 
 interface MemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }
 
-// CHANGE_DATA's per-key value shape differs by which layer wrote it: the ORM path
-// (Enterprises/Enterprise Groups, via audit.helper.ts buildChangeData) writes
-// {"EMAIL":{"old":"a@b.com","new":"b@b.com"}}, while the stored-procedure path
-// (Contacts/Addresses/Establishments, via SBR_PORTAL_PKG) writes flat {"EMAIL":"b@b.com"} —
-// a plain scalar, not an {old,new} object. Filtering on the {old,new} shape alone silently
-// dropped every flat-shape key, so Contacts/Addresses/Establishments audit rows always showed
-// "—" in COLUMN NAME regardless of which field actually changed. CHANGE_DATA only ever
-// contains keys that changed (comment/reason is stored separately as CHANGE_REASON), so any
-// key that isn't one of the structural membership keys below is itself a changed column name,
-// independent of its value's shape. Structural membership changes (Enterprise Groups member
-// add/remove) ride along as memberAdd/memberRemove (raw id arrays) plus
-// memberAddDetails/memberRemoveDetails (display-only name snapshots) — surfaced here as
-// "Name (Added)" / "Name (Removed)" instead of a blank column.
 const STRUCTURAL_CHANGE_DATA_KEYS = new Set(['memberAdd', 'memberRemove', 'memberAddDetails', 'memberRemoveDetails']);
 
 function formatColumnNames(value: string | null): string {
@@ -91,7 +77,6 @@ function formatColumnNames(value: string | null): string {
       return parts.length > 0 ? parts.join(', ') : '—';
     }
   } catch {
-    // legacy plain string — fall through
   }
   return value;
 }
@@ -139,8 +124,6 @@ export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {
     accessorKey: 'CHANGE_DATA',
     header: t('columns.COLUMN_NAME'),
-    // Large JSON diff blob — sorting by it is meaningless and it's deliberately left out
-    // of AUDIT_LOG_SORTABLE_COLUMNS, so disable it here rather than send an invalid sortBy.
     enableSorting: false,
     cell: ({ getValue }) => {
       const text = formatColumnNames(getValue<string | null>());

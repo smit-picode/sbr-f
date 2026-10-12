@@ -18,8 +18,6 @@ export interface ColumnFilterOption {
   label: string;
 }
 
-// Full 8-operator set SBR_QUERY_PKG accepts — snake_case values must match
-// the procedure's whitelist exactly, or it now raises ORA-20410 instead of silently ignoring it.
 const OPERATORS = [
   'contains', 'not_contains', 'starts_with', 'ends_with',
   'equals', 'is_not', 'is_empty', 'is_not_empty',
@@ -34,14 +32,9 @@ const OP_FALLBACK: Record<string, string> = {
   is_empty: 'is empty',
   is_not_empty: 'is not empty',
 };
-// These two operators test for null/blank and take no value — SBR_QUERY_PKG ignores whatever
-// is sent for them, so the value box is hidden rather than left as a dead, misleading input.
 export const NO_VALUE_OPERATORS = new Set(['is_empty', 'is_not_empty']);
 
-// A filter row is ready to send once its column is picked and either it has a typed value or its
-// operator doesn't need one. Every *ListPage that renders <ColumnFilters> derives its
-// `columnFilters` query param with this — without it, is_empty/is_not_empty rows (whose value is
-// always blank) get silently dropped by a `r.value.trim()` check before ever reaching the API.
+// A row is ready once it has a column and either a value or a no-value operator.
 export const isActiveColumnFilterRow = (r: ColumnFilterRow): boolean =>
   !!r.column && (NO_VALUE_OPERATORS.has(r.operator) || !!r.value.trim());
 
@@ -49,7 +42,6 @@ interface ColumnFiltersProps {
   columns: ColumnFilterOption[];
   value: ColumnFilterRow[];
   onChange: (rows: ColumnFilterRow[]) => void;
-  // i18n namespace holding one label per column value; each option's `label` is the fallback.
   labelPrefix?: string;
 }
 

@@ -53,11 +53,7 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
           </span>
         </button>
       </DropdownMenuTrigger>
-      {/* flex column + overflow-y-hidden so the menu itself never scrolls: the search box and
-          Show all / Hide all row stay pinned and only the column list below scrolls. The
-          primitive's max-height still caps the whole menu to the available viewport space. */}
       <DropdownMenuContent align="end" className="w-64 p-0 flex flex-col overflow-y-hidden">
-        {/* Search */}
         <div className="shrink-0 p-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
@@ -71,7 +67,6 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
           </div>
         </div>
 
-        {/* Show all / Hide all */}
         <div className="shrink-0 flex items-center justify-between px-3 pb-2 text-[11px]">
           <button onClick={showAll} className="font-semibold text-[#A29374] hover:underline">
             {t('columnsToggle.showAll')}
@@ -81,9 +76,6 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
           </button>
         </div>
 
-        {/* Column list */}
-        {/* min-h-0 lets this flex child shrink below its content height when the menu is capped;
-            max-h-72 keeps the old size when there is plenty of room. */}
         <div className="min-h-0 flex-1 max-h-72 overflow-y-auto py-1">
           {filtered.length === 0 ? (
             <p className="px-3 py-4 text-center text-xs text-slate-400">{t('columnsToggle.noColumns')}</p>

@@ -16,8 +16,6 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
     cell: ({ getValue, row }) => (
       <span className="flex items-center gap-1.5">
         <span className="font-mono text-xs font-medium text-[#77748B]">{formatGroupCode(getValue<number>())}</span>
-        {/* Coerce with !!: the procedure returns 1/0, and JSX renders a literal 0 for `0 && x`
-            (unlike `false && x`, which renders nothing). */}
         {!!row.original.HAS_PENDING_REQUEST && <PendingBadge />}
       </span>
     ),
@@ -37,8 +35,6 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'TYPE',
     header: t('columns.TYPE', { defaultValue: 'TYPE' }),
-    // Derived in JS from UCI_COUNTRY, but UCI_COUNTRY is a real column on the same table, so
-    // the backend sorts this on an equivalent CASE expression (EG_DERIVED_SORT_SQL.TYPE).
     cell: ({ getValue }) => {
       const type = getValue<string>();
       if (type === 'Domestic') {
@@ -85,8 +81,6 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ENTERPRISE_COUNT',
     header: t('columns.ENTERPRISES', { defaultValue: 'ENTERPRISES' }),
-    // Derived, but the list procedure now orders by the same roll-up subquery it projects,
-    // so server-side sort is exact over the full dataset.
     enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
@@ -101,8 +95,6 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'ESTABLISHMENT_COUNT',
     header: t('columns.ESTABLISHMENTS', { defaultValue: 'ESTABLISHMENTS' }),
-    // Derived, but the list procedure now orders by the same roll-up subquery it projects,
-    // so server-side sort is exact over the full dataset.
     enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);
@@ -116,10 +108,6 @@ export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGrou
   {
     accessorKey: 'EMPLOYEE_COUNT',
     header: t('columns.EMPLOYEES', { defaultValue: 'EMPLOYEES' }),
-    // EMPLOYEE_COUNT is the LIVE sum over current members, deliberately NOT the stored
-    // TOTAL_EMPLOYEES column — the two can disagree when the stored value is stale. The list
-    // procedure accepts EMPLOYEE_COUNT as its own sort key, so the header sorts by
-    // exactly the number the cell displays.
     enableSorting: true,
     cell: ({ getValue }) => {
       const count = Number(getValue<number>() ?? 0);

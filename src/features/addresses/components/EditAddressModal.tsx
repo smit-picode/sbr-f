@@ -22,8 +22,6 @@ interface Props {
   address: SbrAddress | null;
   open: boolean;
   onClose: () => void;
-  // Optional: fires with the newly-created (SCD2) record after a successful save.
-  // Used by the detail page to follow the new record id; the list page omits it.
   onSaved?: (updated: SbrAddress) => void;
 }
 
@@ -105,13 +103,10 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
       e.PRIORITY = 'Min value is 1';
     }
 
-    // Enum validation for select fields
     if (form.SOURCE_CODE !== null && form.SOURCE_CODE !== undefined && form.SOURCE_CODE !== '' && !ADDRESS_SOURCE_CODE_OPTIONS.includes(String(form.SOURCE_CODE))) {
       e.SOURCE_CODE = `Must be one of [${ADDRESS_SOURCE_CODE_OPTIONS.join(', ')}, or empty]`;
     }
 
-    // Locked / read-only fields (SOURCE_CODE, identifiers, metadata) are never sent to the
-    // backend, so their values must not raise blocking validation errors.
     const editableErrors: Record<string, string> = {};
     for (const [field, msg] of Object.entries(e)) {
       if (isAddressFieldEditable(field)) editableErrors[field] = msg;
@@ -119,7 +114,6 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
 
     setErrors(editableErrors);
 
-    // Auto-scroll to first error field
     if (Object.keys(editableErrors).length > 0) {
       const firstErrorField = Object.keys(editableErrors)[0];
       setTimeout(() => {
@@ -150,8 +144,6 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
 
   const handleConfirmWithComment = async (comment: string) => {
     if (!address) return;
-    // Only send user-editable fields — SOURCE_CODE is not editable and is rejected
-    // by the backend, so it must never be included in the payload.
     const editableData = Object.fromEntries(
       Object.entries(form).filter(([key]) => isAddressFieldEditable(key))
     );
@@ -160,7 +152,6 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
       toast.success(t('common.changeRequestSubmitted', { defaultValue: 'Change request submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
-      // Pending approval — only refresh if the API actually applied a record (not under approval flow).
       if (res?.data && typeof res.data === 'object' && 'SBR_ID' in (res.data as object)) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
@@ -190,7 +181,6 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
             <DialogTitle>{t('editAddress.title')}</DialogTitle>
           </DialogHeader>
 
-          {/* Error Summary - Outside scroll container to prevent layout shift */}
           {Object.keys(errors).length > 0 && (
             <ErrorSummary errors={errors} onErrorClick={scrollToField} fieldLabels={ADDRESS_FIELD_LABELS} />
           )}

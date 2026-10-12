@@ -1,9 +1,8 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrPermission, SbrRole, SbrRoleWithPermissions, SbrUser, UserRoleInput, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
+import type { ApiResponse, SbrPermission, SbrRole, RoleCategory, SbrRoleWithPermissions, SbrUser, UserRoleInput, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Permissions
     getPermissionsList: builder.query<ApiResponse<SbrPermission[]>, AdminPermissionFilters>({
       query: (params) => ({ url: '/admin/permissions', params }),
       providesTags: ['Admin'],
@@ -33,11 +32,15 @@ export const adminApi = baseApi.injectEndpoints({
       providesTags: ['Admin'],
       keepUnusedDataFor: 0,
     }),
-    createRole: builder.mutation<ApiResponse<SbrRole>, { ROLE_NAME: string; permissions?: number[] }>({
+    getRoleCategories: builder.query<ApiResponse<RoleCategory[]>, void>({
+      query: () => ({ url: '/admin/roles/categories' }),
+      keepUnusedDataFor: 0,
+    }),
+    createRole: builder.mutation<ApiResponse<SbrRole>, { ROLE_NAME: string; permissions?: number[]; CATEGORY_ID?: number }>({
       query: (data) => ({ url: '/admin/roles', method: 'POST', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
-    updateRole: builder.mutation<ApiResponse<SbrRole>, { id: number; data: { ROLE_NAME: string } }>({
+    updateRole: builder.mutation<ApiResponse<SbrRole>, { id: number; data: { ROLE_NAME?: string; CATEGORY_ID?: number } }>({
       query: ({ id, data }) => ({ url: `/admin/roles/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
@@ -68,6 +71,10 @@ export const adminApi = baseApi.injectEndpoints({
       providesTags: ['Admin'],
       keepUnusedDataFor: 0,
     }),
+    getRegulators: builder.query<ApiResponse<string[]>, void>({
+      query: () => ({ url: '/admin/users/regulators' }),
+      keepUnusedDataFor: 0,
+    }),
     createUser: builder.mutation<ApiResponse<SbrUser>, { NAME: string; EMAIL: string; PASSWORD: string; IS_ACTIVE?: boolean; roles?: UserRoleInput[] }>({
       query: (data) => ({ url: '/admin/users', method: 'POST', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
@@ -91,6 +98,7 @@ export const {
   useDeletePermissionMutation,
   useGetRolesListQuery,
   useGetRoleByIdQuery,
+  useGetRoleCategoriesQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
@@ -98,6 +106,8 @@ export const {
   useAssignRolePermissionsMutation,
   useGetUsersListQuery,
   useGetUserByIdQuery,
+  useLazyGetUserByIdQuery,
+  useGetRegulatorsQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,

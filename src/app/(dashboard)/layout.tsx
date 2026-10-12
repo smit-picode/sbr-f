@@ -36,10 +36,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, [dispatch, router]);
 
-  // Shown only for the instant it takes to read the token and hydrate auth, before the real
-  // Sidebar/PageHeader mount — mirrors that real shell (same sidebar gradient, dark banner
-  // in place of PageHeader, white cards) instead of generic gray bars, so this doesn't flash
-  // as an off-theme placeholder on every hard refresh/direct-link load.
   if (!ready) return (
     <div className="flex h-screen overflow-hidden" style={{ background: '#F7F8FA' }}>
       <div

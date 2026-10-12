@@ -27,7 +27,6 @@ export function resolveBlockQuery(
 ): AnalysisResolvedQuery {
   const frame = block.query.frame ?? analysis.frame;
   let compareTo = effectiveCompare(block, analysis);
-  // Comparison blocks are meaningless without a second frame: fall back to the oldest one.
   if (ANALYSIS_BLOCK_TYPE_MAP[block.type].needsCompare && (!compareTo || compareTo === frame)) {
     compareTo = ANALYSIS_FRAME_CHRONO.find((f) => f !== frame) ?? null;
   }

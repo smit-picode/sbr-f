@@ -2,14 +2,13 @@ import { baseApi } from '@/services/api';
 import type { ApiResponse } from '@/types';
 
 // Mirrors sbr-backend's TEMPORARY raw-SQL home controller (src/controllers/home/home.controller.ts)
-// — everything here goes away once a real SBR_HOME_API / SBR_ESTABLISHMENTS_API summary
-// procedure exists.
 export interface ExecutiveSummary {
   sizeClass: { category: string | null; count: number }[];
   registerGrowthByMonth: { year: number; month: number; count: number }[];
   registerGrowthBySource: { year: number; month: number; dimension: string | null; count: number }[];
   registerGrowthBySector: { year: number; month: number; dimension: string | null; count: number }[];
   growthPct: number | null;
+  frameGrowth: { startCount: number; endCount: number; net: number; pct: number | null } | null;
   activeEstablishmentCount: number;
   totalEstablishmentCount: number;
   enterpriseCount: number;

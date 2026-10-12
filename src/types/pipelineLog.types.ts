@@ -1,9 +1,9 @@
-// Pipeline Logs is read-only — SBR_PIPELINE_RUNS (list) and SBR_PIPELINE_STEP_LOG (per-run detail), both owned by the etl-sbr-repo pipeline. See sbr-backend pipeline.controller.ts.
+// Pipeline Logs is read-only
 export interface PipelineRun {
   RUN_ID:                   number;
   STARTED_AT:               string | null;
   FINISHED_AT:              string | null;
-  STATUS:                   string; // RUNNING | COMPLETED | FAILED
+  STATUS:                   string;
   FAILED_STEP:              string | null;
   ERROR_MESSAGE:            string | null;
   NOTES:                    string | null;
@@ -21,7 +21,7 @@ export interface PipelineRunFilters {
 export interface PipelineStepLog {
   RUN_ID:    number;
   STEP_NAME: string;
-  EVENT:     string; // START | END | INFO
+  EVENT:     string;
   EVENT_AT:  string;
   MESSAGE:   string | null;
 }

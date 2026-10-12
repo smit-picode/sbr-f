@@ -31,18 +31,11 @@ const TABLE_BADGE: Record<string, string> = {
   SBR_ENTERPRISE_GROUPS: 'bg-blue-50 text-blue-700',
 };
 
-// The backend (sbr-backend) has no i18n layer — approve/reject 400 responses always come back
-// as the fixed English strings in its src/utils/message.ts. Rather than teaching the backend to
-// localize (a much bigger, riskier change), map the handful of known fixed strings this one
-// action can return to a translated version here; anything not recognized (e.g. a dynamic Joi
-// validation message) is shown as-is, same as before this fix.
 const KNOWN_BACKEND_MESSAGE_KEYS: Record<string, string> = {
   'This request has already been actioned.': 'changeRequests.alreadyActioned',
   'Cannot approve: another pending request changes the same field(s) on this record. Resolve or reject it first.':
     'changeRequests.conflictingPendingChange',
 };
-// Matches message.ENTERPRISE_ALREADY_GROUPED(details) — the only templated message this action
-// can return; `details` is left untranslated since it's backend-composed dynamic text.
 const ENTERPRISE_ALREADY_GROUPED_PATTERN =
   /^Cannot approve this request: (.+)\. An enterprise can only belong to one group — please reject this request instead\.$/;
 
@@ -251,7 +244,6 @@ const fmt = (key: string, v: unknown): string => {
   return String(v);
 };
 
-// Maps a CONTEXT_SECTIONS section title to its changeRequests.sections.* i18n key.
 const SECTION_LABEL_KEYS: Record<string, string> = {
   'Contact': 'contact',
   'Channels': 'channels',
@@ -269,8 +261,7 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
   'Classification': 'classification',
 };
 
-// Resolves a raw field/section key to its translated label — falls back to the curated
-// English text (unknown fields still get a readable title-cased label).
+// Resolves a raw field/section key to its translated label
 const trField = (t: (k: string, o?: { defaultValue: string }) => string, key: string, fallback: string) =>
   t(`changeRequests.fields.${key}`, { defaultValue: fallback });
 const trSection = (t: (k: string, o?: { defaultValue: string }) => string, section: string) =>
@@ -297,22 +288,11 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
 
   const r = data.data;
   const pending = r.STATUS === 'PENDING';
-  // ROW_ID is the PREV_RECORD_ID — null only for a brand-new record being created (no prior
-  // row to diff against), never for an edit of an existing one.
   const isCreate = r.ROW_ID == null;
-  // addMembers/removeMembers is shared across tables: SBR_ENTERPRISES attaches establishments,
-  // SBR_ENTERPRISE_GROUPS attaches enterprises — the chip label must match what was actually
-  // added, or an approver reviewing an enterprise-group request sees "Establishment Added" for
-  // an enterprise.
   const memberLabel = r.TABLE_NAME === 'SBR_ENTERPRISE_GROUPS'
     ? { added: t('changeRequests.enterpriseAdded', { defaultValue: 'Enterprise Added' }), removed: t('changeRequests.enterpriseRemoved', { defaultValue: 'Enterprise Removed' }) }
     : { added: t('changeRequests.establishmentAdded', { defaultValue: 'Establishment Added' }), removed: t('changeRequests.establishmentRemoved', { defaultValue: 'Establishment Removed' }) };
   const changeCount = r.fields.length + r.addMembers.length + r.removeMembers.length;
-  // ENTITY is resolved by looking up the CURRENT row (via PREV_RECORD_ID) — for a brand-new
-  // record there is no current row yet, so ENTITY is legitimately null and the title used to
-  // fall back to a bare "—", which read as a stray line rather than a name. Prefer whatever
-  // name-like field the submitter actually typed (already in r.fields since CHANGE_DATA is
-  // flat for creates), and only fall back to a plain-language placeholder if none was set.
   const NAME_FIELD_CANDIDATES = ['NAME_ENU', 'NAME_ARA', 'UCI_NAME', 'CONTACT_NAME'];
   const newRecordName = isCreate
     ? r.fields.find((f) => NAME_FIELD_CANDIDATES.includes(f.field) && f.new != null && f.new !== '')?.new
@@ -325,14 +305,11 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
     .map((sec) => ({ ...sec, visible: sec.fields.filter((f) => r.record && r.record[f.key] != null && r.record[f.key] !== '') }))
     .filter((sec) => sec.visible.length > 0);
 
-  // Parent establishment: child records (addresses/contacts) belong to an establishment via SBR_ID.
   const PARENT_TABLES = ['SBR_ADDRESSES', 'SBR_CONTACTS'];
   const parentSbrRaw = PARENT_TABLES.includes(r.TABLE_NAME) ? r.record?.SBR_ID : null;
   const parentSbrNum = parentSbrRaw == null || parentSbrRaw === '' ? NaN : Number(parentSbrRaw);
   const parentSbrId = Number.isFinite(parentSbrNum) ? parentSbrNum : null;
 
-  // Related-records context (backend-resolved): establishments link to their enterprise + child counts;
-  // enterprises list their member establishments.
   const relEnterprise = r.TABLE_NAME === 'SBR_ESTABLISHMENTS' ? r.related?.enterprise ?? null : null;
   const showRelatedRecords = r.TABLE_NAME === 'SBR_ESTABLISHMENTS';
   const members = r.TABLE_NAME === 'SBR_ENTERPRISES' ? r.related?.members ?? [] : [];
@@ -348,8 +325,6 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
       toast.success(kind === 'approve' ? t('changeRequests.approved', { defaultValue: 'Request approved.' }) : t('changeRequests.rejected', { defaultValue: 'Request rejected.' }));
       router.push('/tasks/attribute-change-requests');
     } catch (err) {
-      // e.g. ALREADY_ACTIONED (400): another approver decided this first — surface the real
-      // reason and refetch so the now-decided state hides the action panel instead of re-trying.
       const apiErr = err as { status?: number; data?: { message?: string } };
       if (apiErr?.status === 400 && apiErr.data?.message) {
         toast.error(translateActionErrorMessage(t, apiErr.data.message));
@@ -398,7 +373,6 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Left: changes + reason + actions */}
         <div className="space-y-4 lg:col-span-2">
           <div className="rounded-lg bg-white shadow-card">
             <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
@@ -483,7 +457,6 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
           )}
         </div>
 
-        {/* Right: record context */}
         <div className="space-y-4">
           <div className="rounded-lg bg-white shadow-card overflow-hidden">
             <div className="border-b border-slate-200 px-4 py-3">
@@ -548,7 +521,6 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
             </div>
           )}
 
-          {/* Establishment request → related records (parent enterprise + child counts) */}
           {showRelatedRecords && (
             <div className="rounded-lg bg-white p-5 shadow-card">
               <p className="mb-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">{t('changeRequests.relatedRecords', { defaultValue: 'Related records' })}</p>
@@ -581,7 +553,6 @@ export function ChangeRequestDetailPage({ id }: { id: number }) {
             </div>
           )}
 
-          {/* Enterprise request → member establishments */}
           {r.TABLE_NAME === 'SBR_ENTERPRISES' && (
             <div className="rounded-lg bg-white p-5 shadow-card">
               <p className="mb-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">

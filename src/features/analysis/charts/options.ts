@@ -4,8 +4,6 @@ import { ANALYSIS_OTHER_KEY } from '../constants';
 import { ANALYSIS_OTHER_COLOR, ANALYSIS_PALETTE } from '../constants/palette';
 import { formatValue } from '../utils/labels';
 
-// Every data item carries `keys` so a click maps back to a cross-filter / drill / records action.
-
 export interface ChartCategory { key: string | null; label: string }
 export interface ChartSeries { key: string | null; name: string; data: (number | null)[]; color?: string }
 
@@ -29,7 +27,6 @@ interface BarOpts {
   percent: boolean;
   showValues: boolean;
   animate?: boolean;
-  // Two-series compare: series[0] = comparison frame (ghost), series[1] = current
   compare?: boolean;
 }
 
@@ -42,7 +39,6 @@ export function barOption(o: BarOpts): EChartOption {
     return {
       name: s.name,
       type: 'bar',
-      // Series-level colour keeps the legend swatch in sync with the bars.
       itemStyle: { color: isGhost ? hexA(CHART_COLOR.adaam, 0.28) : base },
       stack: o.stacked && !o.compare ? 'total' : undefined,
       barMaxWidth: o.horizontal ? 16 : 38,

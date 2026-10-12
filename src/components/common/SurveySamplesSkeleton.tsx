@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mirrors the Survey Samples overview below its filter bar: KPI cards, distribution panels, cross-tab, rate chart, table.
+// Mirrors the Survey Samples overview below its filter bar
 export function SurveySamplesSkeleton() {
   return (
     <div className="space-y-4">

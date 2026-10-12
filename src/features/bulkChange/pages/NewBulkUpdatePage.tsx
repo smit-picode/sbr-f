@@ -40,8 +40,7 @@ export function NewBulkUpdatePage() {
     (step === STEP_VALIDATE && !!validation && validation.validRows > 0) ||
     (step === STEP_CONFIRM && reason.trim().length > 0);
 
-  // Changing the table or the file invalidates any validation already computed — otherwise
-  // Next could carry a previous file's valid-row set into the confirm step.
+  // Changing the table or the file invalidates any validation already computed
   const handleSelectTable = useCallback((table: BulkChangeTableKey) => {
     setSelectedTable(table);
     setValidation(null);
@@ -61,14 +60,6 @@ export function NewBulkUpdatePage() {
 
   const handleSubmit = async () => {
     if (!validation || items.length === 0) return;
-    // Only the rows the operator actually reviewed on the Confirm step (validation.rows is
-    // positionally aligned with items — both come from the same /validate call, see
-    // BulkChangeValidateStep's onValidated). Posting the full, unfiltered items here let the
-    // API's own re-validation pass admit a row the Confirm screen had shown as an error — the
-    // operator confirms 8 records but gets a batch created with 9. The API still
-    // re-validates every row it receives (data can change between /validate and submit), so
-    // this is a ceiling on what gets submitted, never a guarantee — but it can only shrink the
-    // confirmed set from here on, not grow it.
     const validItems = items.filter((_, index) => validation.rows[index]?.status === 'VALID');
     if (validItems.length === 0) return;
     try {
@@ -82,13 +73,6 @@ export function NewBulkUpdatePage() {
       const result = response.data;
       const total = validation.totalRows;
       const submitted = result?.submitted ?? 0;
-      // Everything that didn't end up on the approval task, for whatever reason: rows the
-      // Validate step already excluded as errors (never even sent — see validItems above) AND
-      // any row that failed inside SUBMIT_BATCH itself despite passing validation (a genuine
-      // best-effort partial failure). result.failed alone only ever covers the second case — now
-      // that only pre-validated rows are submitted, it is almost always 0, which would otherwise
-      // hide the first case entirely and show a bare "submitted" toast for a 12-row upload that
-      // only actually created 10 records. total - submitted covers both in one number.
       const failed = total - submitted;
       if (failed > 0) {
         toast.warning(
@@ -104,7 +88,6 @@ export function NewBulkUpdatePage() {
       }
       router.push('/tasks/bulk-change');
     } catch {
-      // The base query already surfaced the server message as a toast.
     }
   };
 

@@ -9,7 +9,6 @@ function emit(next: boolean) {
   listeners.forEach((l) => l(next));
 }
 
-// App-wide "a page is on its way" signal, driven by useRouter (hooks/useAppRouter) and link clicks.
 export const navigationProgress = {
   start: () => emit(true),
   done: () => emit(false),

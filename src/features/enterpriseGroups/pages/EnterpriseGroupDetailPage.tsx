@@ -33,10 +33,8 @@ function DetailField({ recordId, fieldKey, label, value, canViewHistory, pending
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Lazily load the record's change history only while this attribute's popover is open
   const { data, isLoading, isError } = useGetEnterpriseGroupHistoryQuery(recordId, { skip: !open });
 
-  // Close the anchored popover on outside click (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -196,15 +194,14 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
 }) {
   const [tooltip, setTooltip] = useState<{ title: string; lines: string[] } | null>(null);
 
-  // Fixed node dimensions — generous to accommodate 2-line names
   const NODE_W = 260;
   const MEMBER_W = 160;
   const UCI_H   = 84;
   const GROUP_H = 73;
   const MEMBER_H = 88;
-  const V_GAP   = 44;   // vertical space between rows (curve travel distance)
-  const H_GAP   = 28;   // horizontal gap between sibling member nodes
-  const PAD_X   = 64;   // left/right padding so curves don't clip
+  const V_GAP   = 44;
+  const H_GAP   = 28;
+  const PAD_X   = 64;
 
   const n = members.length;
   const totalMemberW = n > 0 ? n * MEMBER_W + (n - 1) * H_GAP : 0;
@@ -226,7 +223,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
     return `M ${x1} ${y1} C ${x1} ${y1 + cp}, ${x2} ${y2 - cp}, ${x2} ${y2}`;
   };
 
-  // Tooltip content builders
   const uciResidency = uci.country === 'Qatar' ? 'Resident' : uci.country ? 'Non-resident' : null;
   const uciTooltip = {
     title: uci.name ?? '—',
@@ -257,7 +253,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
 
   return (
     <div className="relative select-none">
-      {/* ── Hover tooltip — top-right corner of section, outside scroll area ── */}
       {tooltip && (
         <div
           className="absolute top-0 end-0 z-20 rounded-xl bg-slate-800 px-3 py-2.5 shadow-xl pointer-events-none"
@@ -273,18 +268,15 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
       <div className="overflow-x-auto">
       <div className="relative" style={{ width: containerW, height: containerH }}>
 
-        {/* ── SVG curve layer ─────────────────────────────────── */}
         <svg
           className="absolute inset-0 pointer-events-none"
           width={containerW}
           height={containerH}
         >
-          {/* UCI bottom → GROUP top */}
           <path
             d={bezier(cx, UCI_Y + UCI_H, cx, GROUP_Y)}
             fill="none" stroke="#CBD5E1" strokeWidth="1.5"
           />
-          {/* GROUP bottom → each member top center */}
           {memberCenterXs.map((mx, i) => (
             <path
               key={i}
@@ -294,7 +286,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
           ))}
         </svg>
 
-        {/* ── UCI node ─────────────────────────────────────────── */}
         <div
           className="absolute rounded-2xl border border-[#A29374]/30 bg-dune-tint px-5 py-3 text-center"
           style={{ width: NODE_W, left: cx - NODE_W / 2, top: UCI_Y }}
@@ -308,7 +299,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
           {uci.country && <p className="text-xs text-slate-400 mt-1">{uci.country}</p>}
         </div>
 
-        {/* ── GROUP node (solid maroon) ─────────────────────────── */}
         <div
           className="absolute rounded-2xl px-5 py-4 text-center"
           style={{
@@ -324,7 +314,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
           <p className="text-sm font-bold text-white leading-snug">{nullableText(group.name)}</p>
         </div>
 
-        {/* ── Member enterprise nodes ───────────────────────────── */}
         {members.map((m, i) => (
           <div
             key={i}
@@ -347,7 +336,6 @@ function ControlTree({ uci, group, members, onMemberClick, hint }: {
           </div>
         ))}
 
-        {/* ── Hint text ─────────────────────────────────────────── */}
         {n > 0 && (
           <p
             className="absolute text-xs text-slate-400 text-center"
@@ -380,7 +368,6 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
       } ${member.IS_GROUP_HEAD ? 'border-[#A29374]/30 bg-[#A29374]/5' : 'border-slate-200 bg-white'}`}
       onClick={onClick}
     >
-      {/* Orbit icon — maroon bg for head enterprise, gray for others */}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
         member.IS_GROUP_HEAD ? 'bg-[#A29374]' : 'bg-slate-100'
       }`}>
@@ -388,7 +375,6 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
       </div>
 
       <div className="min-w-0 flex-1">
-        {/* Name + GROUP HEAD badge on same line */}
         <div className="flex items-center gap-2 flex-wrap">
           <p className="text-sm font-semibold text-slate-800 leading-snug">
             {nullableText(member.NAME_ENU)}
@@ -399,11 +385,9 @@ function MemberCard({ member, onClick, establishmentsLabel, groupHeadLabel }: {
             </span>
           )}
         </div>
-        {/* ENT-ID + Arabic name as subtitle */}
         <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
       </div>
 
-      {/* Right: diagonal arrow only */}
       {onClick && <ArrowUpRight className="h-4 w-4 text-slate-400 shrink-0" />}
     </div>
   );
@@ -425,7 +409,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
     return (
       <PageContainer>
         <div className="space-y-4">
-          {/* Stands in for PageHeader's dark hero banner below, not a plain white card. */}
           <Skeleton className="shimmer-dark min-h-[172px] w-full rounded-3xl" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 space-y-4">
@@ -453,7 +436,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
 
   const { group, memberEnterprises, controlStructure } = data.data;
 
-  // Derived values for Ownership & control section
   const headMember = memberEnterprises.find((m) => m.IS_GROUP_HEAD);
   const groupHeadId = headMember ? `ENT-${headMember.ENTERPRISE_ID}` : '—';
   const resident = group.UCI_COUNTRY === 'Qatar'
@@ -465,7 +447,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
     ? t('common.yes', { defaultValue: 'Yes' })
     : t('common.no', { defaultValue: 'No' });
 
-  // Lifecycle events derived from group dates
   const lifecycleEvents: { label: string; date: string }[] = [];
   if (group.GROUP_START_DATE) {
     lifecycleEvents.push({
@@ -537,7 +518,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         )}
       />
 
-      {/* Attribute strip — its own card, separate from the banner. */}
       <div className="rounded-lg bg-white shadow-card px-6 py-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3">
         <StatField
           recordId={group.ID}
@@ -587,7 +567,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         </p>
       )}
 
-      {/* Control structure graph — full width */}
       <SectionCard
         title={t('enterpriseGroupDetail.controlStructure', { defaultValue: 'Control Structure' })}
         icon={<GitFork className="h-4 w-4" />}
@@ -611,11 +590,8 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
         </div>
       </SectionCard>
 
-      {/* Body: left main (2/3) + right sidebar (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left — main column */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Member enterprises */}
           <SectionCard
             title={t('enterpriseGroupDetail.memberEnterprises', { defaultValue: 'Member enterprises' })}
             icon={<Orbit className="h-4 w-4" />}
@@ -644,7 +620,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
             )}
           </SectionCard>
 
-          {/* Ownership & control */}
           <SectionCard
             title={t('enterpriseGroupDetail.ownershipControl', { defaultValue: 'Ownership & control' })}
             icon={<ShieldCheck className="h-4 w-4" />}
@@ -687,9 +662,7 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
           </SectionCard>
         </div>
 
-        {/* Right sidebar */}
         <div className="space-y-4">
-          {/* Overview panel */}
           <div className="rounded-lg bg-white shadow-card">
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
               <Info className="h-4 w-4 shrink-0" style={{ color: MAROON }} />
@@ -750,7 +723,6 @@ export function EnterpriseGroupDetailPage({ groupId }: EnterpriseGroupDetailPage
             </div>
           </div>
 
-          {/* Lifecycle events */}
           <div className="rounded-lg bg-white shadow-card">
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
               <Activity className="h-4 w-4 shrink-0" style={{ color: MAROON }} />

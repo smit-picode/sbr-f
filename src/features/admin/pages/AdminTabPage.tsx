@@ -15,7 +15,6 @@ import { setPermissions, logout } from '@/features/auth/authSlice';
 
 export type AdminTab = 'permissions' | 'roles' | 'users';
 
-// permKey = the .view permission required to see the tab
 const TAB_DEFS: { id: AdminTab; href: string; labelKey: string; descKey: string; icon: React.ElementType; permKey: string }[] = [
   { id: 'users',       href: '/admin/users',       labelKey: 'admin.tabs.users',       descKey: 'admin.tabs.usersDesc',       icon: Users,  permKey: 'admin_panel.users.view'       },
   { id: 'roles',       href: '/admin/roles',       labelKey: 'admin.tabs.roles',       descKey: 'admin.tabs.rolesDesc',       icon: Shield, permKey: 'admin_panel.roles.view'       },
@@ -29,9 +28,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
   const user = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);
 
-  // Force a fresh permissions check every time an admin tab is opened.
-  // Track the first full fetch cycle using a ref so we only act on real network data,
-  // not the cached snapshot that RTK Query returns on the first render.
   const { data: freshPerms, isFetching: permsFetching } = useGetMyPermissionsQuery(
     undefined,
     { refetchOnMountOrArgChange: true }
@@ -42,7 +38,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
 
   useEffect(() => {
     if (permsFetching) { seenFetching.current = true; return; }
-    // Only act after we've seen at least one real network round-trip (not just cached read)
     if (!seenFetching.current || !freshPerms?.data) return;
     dispatch(setPermissions(freshPerms.data));
   }, [permsFetching, freshPerms, dispatch]);
@@ -52,7 +47,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
   ));
 
   const hasPermission = (key: string) => isSuperAdmin || permissions.some(p => p.permissionName === key);
-  // Access requires admin_panel.view (general access) OR at least one tab permission
   const hasAdminAccess = isSuperAdmin || hasPermission('admin_panel.view') || TAB_DEFS.some(tab => hasPermission(tab.permKey));
   const canViewTab = (key: string) => hasPermission(key);
 
@@ -60,8 +54,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
   const currentDef = TAB_DEFS.find(d => d.id === tab)!;
   const canSeeCurrent = visibleTabs.some(t => t.id === tab);
 
-  // If this tab is not permitted but another one is, fall back to the first visible tab
-  // (mirrors the old AdminPage behaviour where effectiveTab fell back to visibleTabs[0])
   useEffect(() => {
     if (!hasAdminAccess) return;
     if (visibleTabs.length > 0 && !canSeeCurrent) {
@@ -70,7 +62,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAdminAccess, canSeeCurrent, visibleTabs.length, router]);
 
-  // After the live permissions check completes, redirect to login if access was revoked.
   useEffect(() => {
     if (permsFetching || !seenFetching.current || isSuperAdmin) return;
     if (!hasAdminAccess) {
@@ -136,7 +127,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
         </div>
       ) : canSeeCurrent ? (
         <>
-          {/* Users tab manages its own two-card layout */}
           {tab === 'users' && (
             <UsersTab
               canEdit={canEditUsers}
@@ -145,7 +135,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
               onRegisterCreate={(fn) => { usersOpenCreate.current = fn; }}
             />
           )}
-          {/* Roles — own layout like Users, no card wrapper */}
           {tab === 'roles' && (
             <RolesTab
               canEdit={canEditRoles}
@@ -153,7 +142,6 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
               onRegisterCreate={(fn) => { rolesOpenCreate.current = fn; }}
             />
           )}
-          {/* Permissions stays inside a single card */}
           {tab === 'permissions' && (
             <div className="bg-white rounded-lg shadow-card">
               <div className="p-6">

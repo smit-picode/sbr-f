@@ -21,14 +21,11 @@ export function TableLoader({ rows = 10, cols = 6 }: LoaderProps) {
   );
 }
 
-// Shimmer skeleton mirroring a detail page (back link → header band → highlight strip →
-// two-column attribute cards). Rendered inside the page's PageContainer.
+// Shimmer skeleton mirroring a detail page
 export function PageLoader() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-4 w-32" />
-      {/* Stands in for PageHeader's dark hero banner, not a plain white card — shimmer-dark
-          matches its navy tone, and the exact size/radius avoid any layout shift on load. */}
       <Skeleton className="shimmer-dark min-h-[172px] w-full rounded-3xl" />
 
       {/* Highlight strip */}

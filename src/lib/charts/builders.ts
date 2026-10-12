@@ -1,13 +1,9 @@
-// Chart option builders — ports of SBR-design's app/charts.jsx trend/donut/columns/hbars/pareto/
-// qatarMap, trimmed to what the Executive Home dashboard actually uses. Pages describe data
-// shapes; these turn that into ECharts option objects (grid, tooltip, series, ...).
 import * as echarts from 'echarts';
 import type { EChartOption, EChartOptionInput } from './EChart';
 import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, sharesTo100, vGrad } from './theme';
 
 const C = CHART_COLOR;
 
-// A wrapping legend grows by one row per overflow; chart grids reserve that height so it never covers the plot.
 const LEGEND_ROW_HEIGHT = 24;
 function legendRows(names: string[], width: number): number {
   const available = Math.max(1, width - 8);
@@ -45,15 +41,10 @@ export interface TrendOptions {
 
 export function trend(o: TrendOptions): EChartOptionInput {
   const legend = o.series.length > 1;
-  // A single reading has nothing to connect a line/area to, so it rendered as a bare dot. A
-  // leading, blank-labeled category holding that same reading gives it a flat line/area instead
-  // — it never asserts an earlier reading actually existed, since the blank category carries no
-  // date and the segment stays perfectly flat.
   const singlePoint = o.categories.length === 1;
   const categories = singlePoint ? ['', ...o.categories] : o.categories;
   const seriesInput = singlePoint ? o.series.map((s) => ({ ...s, data: [s.data[0] ?? null, ...s.data] })) : o.series;
   const last = categories.length - 1;
-  // With several series every line gets its own end pill, stacked in a right-hand gutter.
   const sideLabels = legend;
 
   const series = seriesInput.map((s, si) => {
@@ -84,13 +75,8 @@ export function trend(o: TrendOptions): EChartOptionInput {
       lineStyle: { width: s.dashed ? 2 : 2.5, color: col, type: s.dashed ? 'dashed' : 'solid' },
       emphasis: { focus: 'series', scale: 1.6 },
       z: 3 - si,
-      // Matches SBR-design's reference trend() — nudges apart end labels that would overlap.
       labelLayout: { hideOverlap: false, moveOverlap: 'shiftY' },
     };
-    // Only the top (first, i.e. largest) series keeps a visible end-label pill — with several
-    // series the rest of the pills read as visual noise once the lines themselves are colour-coded
-    // by the legend, and every value (not just the top one) is already on the shared axis tooltip
-    // on hover, so nothing is actually lost by not drawing them at rest.
     if (sideLabels && si === 0 && s.endLabel !== false) {
       st.endLabel = { ...pill, show: true, distance: 16, formatter: (x: { value: number }) => (o.format || fmtNum)(x.value) };
       st.labelLine = { show: true, length2: 0, lineStyle: { color: col, width: 1 } };
@@ -101,11 +87,6 @@ export function trend(o: TrendOptions): EChartOptionInput {
   const build = ((width: number): EChartOption => {
     const legendExtra = legend ? (legendRows(o.series.map((s) => s.name), width) - 1) * LEGEND_ROW_HEIGHT : 0;
     return {
-      // Extra top clearance beyond the usual legend allowance — the last point always carries a
-      // pill-shaped end label placed above it, and when that point sits near the axis max (a
-      // single-point series is the extreme case) the pill had too little room and got clipped
-      // against the chart's own top edge.
-      // A wider right edge with several series leaves room for the side end-label column.
       grid: { left: 42, right: sideLabels ? 68 : 22, top: (legend ? 46 : 34) + legendExtra, bottom: 26 },
       legend: legend ? { top: 0, left: 0 } : undefined,
       tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: G[300], type: 'dashed' } }, valueFormatter: (v: unknown) => `${(o.format || fmtNum)(v as number)}${o.unit || ''}` },
@@ -124,7 +105,6 @@ export interface DonutOptions {
   items: DonutItem[];
   totalLabel?: string;
   legendWidth?: number;
-  // SBR-design's compact legend: name + count, no share, and the name column sized to the longest name.
   compact?: boolean;
 }
 
@@ -164,11 +144,9 @@ export function donut(o: DonutOptions): EChartOptionInput {
     if (center.value == null || center.value === '') return undefined;
     const text = String(center.value);
 
-    // ~0.62em is a safe average advance width for bold digits/commas at this font.
     const widthBudget = innerRadiusPx != null ? innerRadiusPx * 2 * 0.7 : 90;
     const widthCap = Math.floor(widthBudget / (text.length * 0.62));
 
-    // 0.42 of the radius keeps the number (and the caption below it) clear of the hole's edge.
     const radiusCap = innerRadiusPx != null ? Math.round(innerRadiusPx * 0.42) : 22;
 
     const size = Math.max(9, Math.min(22, widthCap, radiusCap));
@@ -178,14 +156,11 @@ export function donut(o: DonutOptions): EChartOptionInput {
     ];
     if (center.label) {
       const capY = typeof yNum === 'number' ? Math.round(yNum + size * 0.5 + 3) : yNum;
-      // The caption sits off-centre, where a circle is narrower, so it needs its own fit check.
       const label = String(center.label);
       let captionSize = 10.5;
       if (typeof cy === 'number' && typeof capY === 'number' && innerRadiusPx != null) {
-        // Offset of the caption LINE's own vertical centre (not just its top edge) from cy.
         const capCenterOffset = (capY - cy) + 10.5 * 0.6;
         const chordWidth = 2 * Math.sqrt(Math.max(0, innerRadiusPx ** 2 - capCenterOffset ** 2)) * 0.85;
-        // 0.55em/char matches this file's own legend-text convention (see legendCfg's maxChars).
         captionSize = Math.max(6, Math.min(10.5, Math.floor(chordWidth / (label.length * 0.55))));
       }
       els.push({ type: 'text', x: cx, y: capY, silent: true, z: 20, style: { text: label, align: 'center', verticalAlign: 'top', fontSize: captionSize, fill: G[400] } });
@@ -219,7 +194,6 @@ export function donut(o: DonutOptions): EChartOptionInput {
     let nameW = o.compact ? Math.min(longest * 6.4 + 4, 132) : o.legendWidth || 88;
     const entryExtra = o.compact ? 20 + 10 + valueW : 20 + 10 + 40 + 6 + 26;
     let ringSpace = w - (nameW + entryExtra + 12);
-    // Compact legends squeeze the name column before giving up and dropping the legend underneath.
     if (o.compact && ringSpace < 104) {
       nameW = Math.max(58, nameW - (104 - ringSpace));
       ringSpace = w - (nameW + entryExtra + 12);
@@ -228,7 +202,6 @@ export function donut(o: DonutOptions): EChartOptionInput {
       const entryW = nameW + entryExtra + 10;
       const perRow = Math.max(1, Math.floor(w / entryW));
       const rows = Math.ceil(o.items.length / perRow);
-      // A wrapped legend row renders ~25px tall (text + itemGap); budget that plus a fixed gap so the ring never touches it.
       const legendH = rows * 25;
       const ringLegendGap = 12;
       const avail = h - legendH - ringLegendGap;
@@ -317,7 +290,7 @@ export function spark(o: SparkOptions): EChartOption {
   };
 }
 
-// ---------- targetColumns: SBR-design's columns() with stacking, a target line, y max and unit ----------
+// targetColumns: stacked columns with a target line, y max and unit.
 export interface TargetColumnsOptions {
   categories: string[];
   series: ColumnsSeries[];
@@ -412,8 +385,6 @@ export function gauge(o: GaugeOptions): EChartOption {
   };
 }
 
-// ---------- bubbleGrid (two categorical axes; bubble area = base, colour = rate) ----------
-
 // Diameter for a bubble of a given base; exported so a legend drawn outside the chart uses the same maths.
 export function bubbleSizeFor(base: number, max: number, maxBubble = 34): number {
   return 8 + Math.sqrt((base || 0) / (max || 1)) * maxBubble;
@@ -450,7 +421,6 @@ export function bubbleGrid(o: BubbleGridOptions): EChartOption {
     .filter((c) => ci[c.col] != null && ri[c.row] != null)
     .map((c) => {
       const lbl = c.label || '';
-      // The fill is dark at both poles and pale mid-scale, so the printed rate flips to white near the poles.
       const t2 = Math.min(1, Math.abs((c.value ?? mid) - mid) / ((hi - lo) / 2));
       const fits = !!lbl && bubbleSize(c.size) >= 4 + lbl.length * 6.2;
       return { value: [ci[c.col], ri[c.row], c.size, c.value], tip: c.tip, lbl: fits ? lbl : '', label: { show: fits, color: t2 > 0.55 ? '#fff' : G[700] } };
@@ -501,7 +471,6 @@ export interface HBarsSingleOptions {
   labelWidth?: number;
   share?: boolean;
   refLines?: { value: number; label: string; color?: string }[];
-  // false hides the value axis (labels and ticks), as SBR-design's compact distribution panels do.
   axis?: boolean;
 }
 
@@ -632,21 +601,16 @@ export function pareto(o: ParetoOptions): EChartOption {
   };
 }
 
-// ---------- Qatar municipality map ----------
 let qatarGeoRegistered = false;
 export interface QatarMapOptions {
   byMunicipality: Record<string, number>;
   unitLabel?: string;
   unitLabelOne?: string;
   color?: string;
-  // GeoJSON shapeName -> localized display name. The join to the GeoJSON always stays on the raw
-  // shapeName (that data has no Arabic names), so this only swaps what's shown, never what's matched.
   nameMap?: Record<string, string>;
 }
 
-// Registers the 'qatar' map once the GeoJSON (fetched from /data/qatar-municipalities.geo.json)
-// is available. Callers await this before rendering — ECharts throws if you reference an
-// unregistered map name.
+// Registers the 'qatar' map once the GeoJSON
 export async function registerQatarMap(): Promise<void> {
   if (qatarGeoRegistered) return;
   const res = await fetch('/data/qatar-municipalities.geo.json');
@@ -657,11 +621,6 @@ export async function registerQatarMap(): Promise<void> {
 
 export function qatarMap(o: QatarMapOptions): EChartOption {
   const col = o.color || C.adaam;
-  // Every registered region gets an explicit entry (0 where the backend reported none) — a
-  // municipality left out of `data` entirely isn't colored by visualMap's own 0-value shade at
-  // all: it falls back to the chart's default series color, which is this same `col` at full
-  // opacity — identical to what visualMap paints at the MAXIMUM value. That made a
-  // 0-establishment municipality look indistinguishable from the single highest one.
   const registeredNames: string[] = echarts.getMap('qatar')?.geoJson?.features?.map((f: { properties?: { shapeName?: string } }) => f.properties?.shapeName) ?? [];
   const names: string[] = registeredNames.length ? registeredNames : Object.keys(o.byMunicipality);
   const data = names.map((n: string) => ({ name: n, value: o.byMunicipality[n] || 0 }));
@@ -675,7 +634,6 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
         return `<b>${o.nameMap?.[x.name] ?? x.name}</b><br/>${fmtNum(v)} ${noun}`;
       },
     },
-    // itemWidth=thickness, itemHeight=length pre-rotation (echarts rotates 90° for horizontal) — do not swap.
     visualMap: {
       min: 0,
       max,
@@ -690,7 +648,6 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
       inRange: { color: [hexA(col, 0.08), hexA(col, 0.45), col] },
       outOfRange: { color: hexA(col, 0.05) },
     },
-    // Shrunk + shifted up so the map's southern tip doesn't overlap the visualMap legend at bottom:0.
     geo: {
       map: 'qatar',
       nameProperty: 'shapeName',
@@ -707,7 +664,6 @@ export function qatarMap(o: QatarMapOptions): EChartOption {
         textBorderWidth: 2,
         formatter: (p: { name: string }) => o.nameMap?.[p.name] ?? p.name,
       },
-      // 'inherit' holds each region's own value shade on hover; without it ECharts paints its default highlight.
       emphasis: { label: { show: true, color: G[900], fontWeight: 700 }, itemStyle: { areaColor: 'inherit', borderColor: C.dune, borderWidth: 2.2 } },
       select: { disabled: true },
     },

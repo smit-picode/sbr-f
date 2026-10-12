@@ -8,38 +8,14 @@ import { useNearestDialogContainer } from '@/hooks';
 import { useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
 import { useTranslation } from 'react-i18next';
 
-/**
- * Pick an establishment's Main Branch SBR ID from the active main-branch establishment list
- * (SBR_LOOKUPS_API.GET_MAIN_BRANCH_VALUES).
- *
- * Replaces the general "search any establishment by name" picker so a non-existent, retired, or
- * branch-only SBR ID can never be selected — the value can only ever come from a candidate the
- * lookup already restricts to VALID_TO IS NULL AND MAIN_BRANCH_FLG = 'MAIN'. Built on Radix's
- * Popover (same family as Select/DropdownMenu, already used inside Dialogs in this app without
- * issue), portaled into the nearest Dialog via `useNearestDialogContainer` (see popover.tsx's own
- * note), rather than a hand-rolled `createPortal(..., document.body)` panel — that approach
- * rendered fine but its search input and scroll didn't respond inside a modal, because a
- * Dialog's FocusScope/scroll-lock only recognizes content portaled through Radix's own layer
- * stack as "inside" the modal. The list is loaded ONCE and filtered in memory, because the
- * procedure exposes no search or paging parameter either.
- *
- * A value already on the record is always displayed even when the lookup does not contain it
- * (e.g. the establishment it pointed to has since become a branch, or was deactivated) — same
- * rule as IsicCodeSelect, for the same reason: silently blanking it on open would turn an
- * unrelated field edit into an unintended Main Branch change.
- */
+// Pick an establishment's Main Branch SBR ID from the active main-branch establishment list
 interface MainBranchSelectProps {
-  /** Current Main Branch SBR ID, or null when unset. */
   value: number | null;
-  /** Called with the selected SBR ID, or null when cleared. */
   onChange: (sbrId: number | null) => void;
   disabled?: boolean;
-  /** Marks the trigger invalid, matching the modal's error styling. */
   invalid?: boolean;
 }
 
-// Same rationale as IsicCodeSelect's MAX_VISIBLE: cap rendered DOM, not what is reachable —
-// anything beyond this is reachable by typing, and the panel says so.
 const MAX_VISIBLE = 50;
 
 export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBranchSelectProps) {
@@ -108,8 +84,6 @@ export function MainBranchSelect({ value, onChange, disabled, invalid }: MainBra
           </button>
         </PopoverTrigger>
 
-        {/* Clearing is its own control rather than a list entry: MAIN_BRANCH_SBR_ID is nullable,
-            and an empty option inside the list would sit among the valid SBR IDs as if it were one. */}
         {value != null && !disabled && (
           <button
             type="button"

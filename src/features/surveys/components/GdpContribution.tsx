@@ -41,7 +41,7 @@ function Connector({ pct, label }: { pct: number | null; label: string }) {
   );
 }
 
-// The establishment's value added / production / intermediate consumption against the whole economy, from its AES returns.
+// The establishment's value added / production / intermediate consumption against the whole economy
 export function GdpContribution({ sbrId }: { sbrId: number }) {
   const { t } = useTranslation();
   const router = useRouter();

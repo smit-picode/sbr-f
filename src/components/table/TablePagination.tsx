@@ -55,7 +55,6 @@ export function TablePagination({
 
   return (
     <div className="flex items-center px-4 py-3 border-t border-slate-200 bg-white">
-      {/* Left: record count + rows per page */}
       <div className="flex items-center gap-4 flex-1">
         <p className="text-sm text-slate-500">
           {t('table.showing')}{' '}
@@ -82,7 +81,6 @@ export function TablePagination({
       </div>
 
 
-      {/* Right: page navigation */}
       <div className="flex items-center gap-1 flex-1 justify-end">
         <PaginationBtn onClick={() => onPageChange(1)} disabled={page <= 1}>
           <ChevronsLeft className="h-4 w-4" />

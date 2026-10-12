@@ -20,7 +20,8 @@ import { summarize, surveyById, toSampleRows } from '../utils/aggregate';
 import { SampleDistributionGrid } from '../components/SampleDistributionGrid';
 import { ResponseStatusBadge } from '../components/ResponseStatusBadge';
 import { RateGauge } from '../components/RateGauge';
-import { ALL_STATUSES, RESPONSE_STATUSES, RESPONSE_STATUS_KEY, SAMPLE_DETAIL_PAGE_SIZE } from '../constants';
+import { ALL_STATUSES, RESPONSE_STATUSES, RESPONSE_STATUS_KEY } from '../constants';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { parseSampleSlug, sampleSlug } from '../utils/classify';
 import type { ResponseStatus, SampleRow } from '../types';
 
@@ -48,13 +49,12 @@ function SampleDetailContent({ sampleKey }: { sampleKey: string }) {
   const survey = surveyById(surveyId);
   const samplesQuery = useGetSurveySamplesQuery();
   const responsesQuery = useGetSurveyResponsesQuery({ surveyId: survey?.id, period }, { skip: !survey || !period });
-  // A sample exists only if the database reports that survey period.
   const validSample = !!survey && !!samplesQuery.data?.data?.some((s) => s.SURVEY_ID === survey.id && s.PERIOD === period);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>(ALL_STATUSES);
   const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' } | null>(null);
-  const [paging, setPaging] = useState({ page: 1, limit: SAMPLE_DETAIL_PAGE_SIZE });
+  const [paging, setPaging] = useState({ page: 1, limit: DEFAULT_PAGE_SIZE });
 
   const apiRows = responsesQuery.data?.data;
   const rows = useMemo(() => (validSample ? toSampleRows(apiRows ?? []) : []), [validSample, apiRows]);
@@ -248,7 +248,6 @@ function SampleDetailContent({ sampleKey }: { sampleKey: string }) {
         sortableColumns={SORTABLE_COLUMNS}
         onRowClick={(r) => {
           const slug = sampleSlug(survey.id, period);
-          // Opens the establishment (its Back returns here); users who can't open establishments go straight to the response.
           router.push(canOpenEstablishment
             ? `/establishments/${r.frame.SBR_ID}?from=${encodeURIComponent(`/surveys/${slug}`)}`
             : `/surveys/${slug}/${r.frame.SBR_ID}`);

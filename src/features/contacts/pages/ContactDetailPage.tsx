@@ -29,10 +29,8 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Lazily load the record's change history only while this attribute's popover is open
   const { data, isLoading, isError } = useGetContactHistoryQuery(recordId, { skip: !open });
 
-  // Close the anchored popover on outside click (the clock button itself toggles)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -153,7 +151,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('contacts');
-  // Detail can be opened by anyone who can view the detail OR edit (mirrors the backend getById guard)
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetContactByIdQuery(contactId, { skip: !canOpenDetail });
 
@@ -199,9 +196,7 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   const pendingFields = c.PENDING_FIELDS ?? {};
   const title = c.CONTACT_NAME || c.EMAIL || `Contact #${c.ID}`;
 
-  // A history-enabled (= editable) field always stays on screen, rendering "—" when empty:
-  // hiding it would make its history popover unreachable, which is how an empty CONTACT_NAME
-  // lost its View History affordance. Locked fields keep the original hide-when-empty rule.
+  // A history-enabled (= editable) field always stays on screen, rendering "—" when empty
   const showField = (k: string, value: unknown): boolean =>
     isContactFieldHistoryEnabled(k) || !isEmpty(value);
 
@@ -281,11 +276,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
             ))}
           </DetailCard>
         )}
-        {/* Channels is the tallest card, so on a 2-column grid it alone sets row 1's height and
-            Metadata (which wraps to row 2) leaves a dead gap under Contact. Spanning both rows
-            lets Metadata sit directly beneath Contact instead. The wrapper carries the span so
-            DetailCard's signature stays untouched; DOM order is unchanged, so the single-column
-            stacking order below lg is exactly as before. */}
         {channelFields.length > 0 && (
           <div className="lg:row-span-2">
             <DetailCard title={t('contactDetail.sectionChannels')}>
@@ -309,7 +299,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
         open={editOpen}
         onClose={() => setEditOpen(false)}
         onSaved={(updated) => {
-          // Contacts are SCD2 — a save creates a new row id; follow it so the page stays current.
           if (updated.ID !== c.ID) router.replace(`/contacts/${updated.ID}`);
           else refetch();
         }}

@@ -1,5 +1,3 @@
-// Keys must match the GeoJSON's shapeName exactly (public/data/qatar-municipalities.geo.json) —
-// standard official names, one per Qatar municipality, not tied to any DB value.
 export const QATAR_MUNICIPALITY_NAME_AR: Record<string, string> = {
   'Al Khor and Al Thakhira': 'الخور والذخيرة',
   'Al Wakra': 'الوكرة',

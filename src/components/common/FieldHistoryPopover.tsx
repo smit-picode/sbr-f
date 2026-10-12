@@ -15,17 +15,12 @@ interface FieldHistoryPopoverProps {
   isLoading?: boolean;
   isError?: boolean;
   onClose: () => void;
-  /** The clickable field wrapper the popover anchors to — used to compute its portaled position. */
   anchorRef: React.RefObject<HTMLElement | null>;
 }
 
 const PANEL_WIDTH = 290;
 
-// Anchored attribute-history popover (tooltip-style) — replaces the full-screen drawer. Portaled
-// to <body> with fixed/viewport positioning computed from `anchorRef` (rather than `absolute`
-// inside the field's own `relative` wrapper), because several callers sit inside an
-// `overflow-hidden` ancestor (e.g. the banner behind a detail page's title) that would otherwise
-// clip most of the panel.
+// Anchored attribute-history popover (tooltip-style) — replaces the full-screen drawer.
 export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, onClose, anchorRef }: FieldHistoryPopoverProps) {
   const { t } = useTranslation();
   const { isArabic } = useLanguage();
@@ -38,7 +33,6 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Close on outside click — the panel lives in a portal, outside the anchor's own DOM subtree.
   useEffect(() => {
     const onPointerDown = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -50,9 +44,6 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     return () => document.removeEventListener('mousedown', onPointerDown);
   }, [anchorRef, onClose]);
 
-  // Track the anchor's viewport position, flipping above it when there's more room there, and
-  // capping height to whatever space is actually available so the timeline scrolls inside the
-  // panel instead of running past the screen edge. Runs before paint so there's no visible jump.
   useLayoutEffect(() => {
     const update = () => {
       const anchorRect = anchorRef.current?.getBoundingClientRect();
@@ -62,10 +53,6 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
       const spaceAbove = anchorRect.top - margin;
       const openUp = spaceBelow < 220 && spaceAbove > spaceBelow;
       const maxHeight = Math.max(160, Math.min(420, openUp ? spaceAbove : spaceBelow));
-      // The reference right-aligns the panel to the trigger in both reading directions (its
-      // left edge lands PANEL_WIDTH back from the trigger's right edge), rather than
-      // left-aligning in LTR — so the panel sits back under the attribute instead of hanging
-      // off to its right. Clamped to the viewport with the same 8px margin it uses.
       const left = Math.min(
         Math.max(margin, anchorRect.right - PANEL_WIDTH),
         window.innerWidth - PANEL_WIDTH - margin
@@ -97,22 +84,15 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
   };
   const fmtReq = (x: unknown) => (x == null || x === '' ? '—' : typeof x === 'number' ? x.toLocaleString() : String(x));
 
-  // Open/closed change requests for this field (PENDING / REJECTED), shown above the applied history.
   const requestEntries = versions.filter((v) => v.request);
   const realVersions = versions.filter((v) => !v.request);
   const fieldRequests = requestEntries.filter((r) => r.changes && Object.prototype.hasOwnProperty.call(r.changes, fieldKey));
 
-  // Collapse versions where this attribute's value did not change (versions arrive newest-first).
   const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
   const isUserEdit = (v: HistoryVersion) => !!(v.audit && v.audit.columns.includes(fieldKey));
 
-  // Single chronological timeline (newest first). Previously requests were always rendered
-  // above applied versions regardless of date — correct when the request is the newest event,
-  // but wrong whenever an older PENDING/REJECTED request still sits above newer APPROVED
-  // edits (e.g. a rejected attempt followed later by a separate, approved one): the older
-  // item appeared first, making the history look out of order / incomplete. Merging both into
-  // one array and sorting by date fixes this without changing how any individual entry renders.
+  // Single chronological timeline (newest first).
   type TimelineItem =
     | { kind: 'request'; date: number; data: HistoryVersion }
     | { kind: 'version'; date: number; data: HistoryVersion; prev?: HistoryVersion };
@@ -124,10 +104,6 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
     ...changes.map((v, i): TimelineItem => ({ kind: 'version', date: timeOf(v.VALID_FROM), data: v, prev: changes[i + 1] })),
   ].sort((a, b) => b.date - a.date);
 
-  // Whether any timeline entry is an actual edit (a user change, applied or pending/rejected)
-  // rather than just the original regulator-provided value. The reference shows a single note
-  // above the timeline in that case — "this is exactly what the regulator sent" — and shows
-  // nothing at all once edits exist, letting the entries speak for themselves.
   const hasUserEdits = timeline.some((item) => item.kind === 'request' || isUserEdit(item.data));
 
   if (!rect) return null;

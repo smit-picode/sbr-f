@@ -13,7 +13,6 @@ interface SidePanelProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   width?: string;
-  // Non-modal panels keep the canvas usable (live preview while editing).
   modal?: boolean;
 }
 

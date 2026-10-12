@@ -46,10 +46,8 @@ function SurveySamplesContent() {
 
   const samplesQuery = useGetSurveySamplesQuery();
   const responsesQuery = useGetSurveyResponsesQuery(surveyFilter === ALL_SURVEYS ? {} : { surveyId: surveyFilter as SurveyId });
-  // currentData, not data: while a new filter loads, data still holds the previous survey's rows.
   const responseRows = responsesQuery.currentData?.data;
 
-  // Everything below the filter row answers to it: counts, distributions, cross-tab, rate chart and table.
   const samples = useMemo(
     () => toSamples(samplesQuery.data?.data ?? []).filter((s) => surveyFilter === ALL_SURVEYS || s.surveyId === surveyFilter),
     [samplesQuery.data, surveyFilter]
@@ -57,7 +55,6 @@ function SurveySamplesContent() {
   const rows = useMemo(() => distinctRows(toSampleRows(responseRows ?? [])), [responseRows]);
   const totalSize = samples.reduce((a, s) => a + s.size, 0);
   const totalResponded = samples.reduce((a, s) => a + s.responded, 0);
-  // Headline rate counts full responses only, exactly as the reference does.
   const overallRate = shareOf(totalResponded, totalSize);
 
   const isLoading = samplesQuery.isLoading || (!responseRows && responsesQuery.isFetching);
@@ -93,7 +90,6 @@ function SurveySamplesContent() {
     });
   }, [samples, surveyFilter, t]);
 
-  // A period column opens that sample; the all-surveys view has one column per survey, not per sample.
   const rateEvents = useMemo(() => ({
     click: (e: unknown) => {
       const sample = samples[(e as { dataIndex: number }).dataIndex];

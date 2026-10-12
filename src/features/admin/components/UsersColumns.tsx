@@ -1,10 +1,11 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Eye } from 'lucide-react';
+import { Pencil, Eye, Lock, LockOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/utils/format';
+import { cn } from '@/lib/utils';
 import type { SbrUser } from '@/types';
 
 // distinct role names a user holds (for chips + super-admin guard)
@@ -13,29 +14,39 @@ export function userRoleNames(user: SbrUser): string[] {
   return [...new Set(names)];
 }
 
+// Earliest role expiry the user has (null when no assignment expires) — shown in the Expires column
+export function userNextExpiry(user: SbrUser): string | null {
+  const dates = (user.roleAssignments ?? []).map((a) => a.EXPIRES_AT).filter((d): d is string => !!d);
+  if (dates.length === 0) return null;
+  return dates.reduce((min, d) => (new Date(d) < new Date(min) ? d : min));
+}
+
+export function UserStatusBadge({ active, deleted = false }: { active: boolean; deleted?: boolean }) {
+  return (
+    <Badge variant={active ? 'success' : 'destructive'} className="inline-flex items-center gap-1.5">
+      <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', active ? 'bg-pos' : 'bg-neg')} />
+      {active ? 'Active' : deleted ? 'Deleted' : 'Locked'}
+    </Badge>
+  );
+}
+
 export const isSuperAdminUser = (user: SbrUser) => userRoleNames(user).includes('SUPER_ADMIN');
 
-// Soft tint pills (light fill, dark text, dot) matching the reference's role-chip pattern —
-// stays inside the design-system palette (slate, blue, emerald, amber) plus the maroon theme
-// accent, dropping the off-palette purple/orange/rose.
 const ROLE_BADGE_PALETTE: { badge: string; dot: string }[] = [
-  { badge: 'bg-[#A29374]/10 text-[#A29374]', dot: 'bg-[#A29374]' }, // maroon (theme accent)
-  { badge: 'bg-slate-100 text-slate-700', dot: 'bg-slate-500' },    // slate
-  { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' }, // emerald
-  { badge: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },        // blue
-  { badge: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },     // amber
+  { badge: 'bg-[#A29374]/10 text-[#A29374]', dot: 'bg-[#A29374]' },
+  { badge: 'bg-slate-100 text-slate-700', dot: 'bg-slate-500' },
+  { badge: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
+  { badge: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },
+  { badge: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
 ];
 
 function getRoleBadgeColors(roleName: string): { badge: string; dot: string } {
-  // Same light-red tint as the Status column's INACTIVE badge, so SUPER_ADMIN reads as the
-  // one role that stands out from every other role's soft tint.
   if (roleName === 'SUPER_ADMIN') return { badge: 'bg-red-100 text-red-700', dot: 'bg-red-500' };
   const hash = roleName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return ROLE_BADGE_PALETTE[hash % ROLE_BADGE_PALETTE.length];
 }
 
-// Reference-matching role chip: rounded-full pill with a small color-matched dot, rather than a
-// plain rectangular badge — used both in the table's Roles column and the view-user dialog.
+// Reference-matching role chip
 export function RoleBadge({ name, label }: { name: string; label: string }) {
   const { badge, dot } = getRoleBadgeColors(name);
   return (
@@ -53,6 +64,8 @@ interface UsersColumnsOptions {
   isUpdating: boolean;
   onView: (user: SbrUser) => void;
   onEdit: (user: SbrUser) => void;
+  onToggleLock: (user: SbrUser) => void;
+  isSelf: (user: SbrUser) => boolean;
 }
 
 export const getUsersColumns = ({
@@ -62,11 +75,11 @@ export const getUsersColumns = ({
   isUpdating,
   onView,
   onEdit,
+  onToggleLock,
+  isSelf,
 }: UsersColumnsOptions): ColumnDef<SbrUser>[] => {
   const columns: ColumnDef<SbrUser>[] = [
     {
-      // id is NAME so the server sorts on the user's name — the cell also shows the email,
-      // which the backend can sort on but has no header of its own here.
       id: 'NAME',
       accessorKey: 'NAME',
       header: t('admin.users.colUser'),
@@ -79,7 +92,6 @@ export const getUsersColumns = ({
     },
     {
       id: 'ROLES',
-      // TanStack only lets a column sort when it has an accessor; the real sort is server-side (GET_USERS).
       accessorFn: (user) => userRoleNames(user).join(', '),
       header: t('admin.users.colRoles'),
       cell: ({ row }) => {
@@ -98,15 +110,22 @@ export const getUsersColumns = ({
       id: 'IS_ACTIVE',
       accessorKey: 'IS_ACTIVE',
       header: t('admin.users.colStatus'),
-      // StatusBadge matches the design system's other status columns (EST_STATUS, etc.), which
-      // key their color off the raw English enum value and never localize it — same here.
-      cell: ({ row }) => <StatusBadge status={row.original.IS_ACTIVE ? 'Active' : 'Inactive'} />,
+      cell: ({ row }) => <UserStatusBadge active={row.original.IS_ACTIVE} deleted={!!row.original.DELETED_AT} />,
     },
     {
       id: 'CREATED_AT',
       accessorKey: 'CREATED_AT',
       header: t('admin.users.colCreatedAt'),
       cell: ({ getValue }) => <span className="text-[12px] text-slate-500">{formatDate(getValue<string>())}</span>,
+    },
+    {
+      id: 'EXPIRES',
+      enableSorting: false,
+      header: t('admin.users.colExpires'),
+      cell: ({ row }) => {
+        const expiry = userNextExpiry(row.original);
+        return <span className="text-[12px] text-slate-500">{expiry ? formatDate(expiry) : '—'}</span>;
+      },
     },
   ];
 
@@ -141,6 +160,24 @@ export const getUsersColumns = ({
               <Pencil className="h-3.5 w-3.5" />
             </Button>
           )}
+          {canEdit && (() => {
+            const user = row.original;
+            const protectedUser = isSuperAdminUser(user) || isSelf(user) || !!user.DELETED_AT;
+            const label = user.IS_ACTIVE ? t('admin.users.lockAccount') : t('admin.users.unlockAccount');
+            return (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onToggleLock(user)}
+                disabled={isUpdating || protectedUser}
+                title={isSelf(user) ? t('admin.users.cannotLockSelf') : isSuperAdminUser(user) ? t('admin.users.superAdminCannotEdit') : label}
+                aria-label={label}
+                className="h-8 w-8 p-0"
+              >
+                {user.IS_ACTIVE ? <Lock className="h-3.5 w-3.5" /> : <LockOpen className="h-3.5 w-3.5" />}
+              </Button>
+            );
+          })()}
         </div>
       ),
     });

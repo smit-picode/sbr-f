@@ -10,29 +10,11 @@ import { useGetEstablishmentsListQuery } from '@/features/establishments/api/est
 import { nullableText } from '@/utils/format';
 import { useTranslation } from 'react-i18next';
 
-/**
- * Pick an establishment by searching, and store its SBR ID.
- *
- * Replaces free-text SBR ID entry so a non-existent ID cannot be typed — the value can only
- * ever come from a record that exists (2026-08-11 requirements call). Mirrors the enterprise
- * search already used in the Enterprise Group modals: debounced query, small result list,
- * click to select. Built on Radix's Popover (same family as Select/DropdownMenu, already used
- * inside Dialogs in this app without issue), portaled into the nearest Dialog via
- * `useNearestDialogContainer` (see popover.tsx's own note), rather than a hand-rolled
- * `createPortal(..., document.body)` panel — that approach rendered fine but its scroll didn't
- * respond inside a modal, because a Dialog's FocusScope/scroll-lock only recognizes content
- * portaled through Radix's own layer stack as "inside" the modal.
- *
- * Search matches on NAME_ENU / NAME_ARA / NPC_NAME_* only — that is what the list procedure's
- * p_search covers. Searching by typing the SBR ID itself needs the procedure's column filter,
- * which is currently broken upstream (the filter loop drops every row), so it is deliberately
- * not wired here; each result shows its SBR ID so the user can still confirm the right record.
- */
+// Pick an establishment by searching, and store its SBR ID.
 interface SbrIdSearchInputProps {
   value: number | null;
   onChange: (sbrId: number | null) => void;
   disabled?: boolean;
-  /** Extra classes for the trigger input, e.g. the modal's locked/error styling. */
   className?: string;
   placeholder?: string;
 }
@@ -63,8 +45,6 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
     setOpen(false);
   };
 
-  // A chosen value is shown as a read-only chip: re-selecting means searching again, which
-  // keeps "the value always came from a real record" true for the lifetime of the form.
   if (value !== null && value !== undefined && !open) {
     return (
       <div className="flex items-center gap-2">
@@ -103,8 +83,6 @@ export function SbrIdSearchInput({ value, onChange, disabled, className, placeho
         </PopoverTrigger>
       </div>
 
-      {/* The input is the trigger and must keep focus while typing, so the popover's own
-          auto-focus (which would otherwise jump to the first result) is suppressed. */}
       <PopoverContent
         container={container}
         onOpenAutoFocus={(e) => e.preventDefault()}

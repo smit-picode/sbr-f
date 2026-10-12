@@ -1,11 +1,3 @@
-// Bulk Change feature types — the wire contract of /api/v1/bulk-change, which fronts the
-// SBR_PORTAL_PKG.SUBMIT_BULK / DECIDE_BULK database procedures.
-//
-// Those procedures are BEST-EFFORT, not atomic: every row commits independently, so a batch
-// can be partly submitted or partly decided. That is why STATUS has PARTIALLY_* members and
-// why both submit and decide return a per-item outcome — the UI has to be able to say
-// "6 of 8 applied" rather than pretending a batch is all-or-nothing.
-
 // Friendly entity type the procedure dispatches on (SBR_PORTAL_PKG.SUBMIT_CHANGE).
 export type BulkChangeEntityType = 'ESTABLISHMENT' | 'CONTACT' | 'ADDRESS';
 
@@ -20,9 +12,7 @@ export type BulkChangeStatus =
 export type BulkChangeDecision = 'APPROVED' | 'REJECTED';
 
 export interface BulkChangeTaskSummary {
-  // Human-facing task code (BLK-3012).
   ID: string;
-  // Numeric batch id — what every /bulk-change/:id route is keyed by.
   BATCH_ID: number;
   ENTITY_TYPE: BulkChangeEntityType;
   TABLE_NAME: string;
@@ -33,8 +23,6 @@ export interface BulkChangeTaskSummary {
   STATUS: BulkChangeStatus;
   DECIDED_BY: string | null;
   DECIDED_AT: string | null;
-  // Per-member tally; a PENDING batch can already have some members decided individually.
-  // Optional because older deployments of the batch view don't return it.
   PENDING_COUNT?: number;
   APPROVED_COUNT?: number;
   REJECTED_COUNT?: number;
@@ -53,15 +41,13 @@ export interface BulkChangeFieldDiff {
 }
 
 export interface BulkChangeRecordRow {
-  // 0 on the pre-submit preview — no audit-log row exists until the batch is submitted.
   auditLogId: number;
   id: number;
   status: string;
   fields: BulkChangeFieldDiff[];
 }
 
-// A row SUBMIT_BULK could not create at all. No audit-log row exists for these, so they are
-// kept on the batch itself and surfaced on the review screen.
+// A row SUBMIT_BULK could not create at all.
 export interface BulkChangeFailedItem {
   index: number;
   status: 'FAILED';
@@ -77,16 +63,14 @@ export interface BulkChangeTaskDetail extends BulkChangeTaskSummary {
   FAILED_ITEMS: BulkChangeFailedItem[];
 }
 
-// ── Upload wizard ───────────────────────────────────────────────────────────
-// One parsed spreadsheet row, mapped to Oracle column names, as POSTed to the API.
+// Upload wizard ─────────────────────────────────────────────────────────── One parsed spreadsheet row
 export interface BulkChangeItemInput {
   rowNumber: number;
   id: number;
   changeData: Record<string, string | number | null>;
 }
 
-// Machine-readable problem codes from the server-side validation pass, so the UI can translate
-// them rather than render a server-built English sentence.
+// Machine-readable problem codes from the server-side validation pass
 export type BulkChangeValidationCode =
   | 'ID_MISSING'
   | 'ID_NOT_NUMERIC'
@@ -149,23 +133,12 @@ export interface BulkChangeDecideResponse {
   }>;
 }
 
-// Column dictionary served by GET /bulk-change/template/:entityType — the single source of
-// truth for which columns a bulk upload may touch (it comes from the backend's own editable
-// column specs, the same ones validation uses).
+// Column dictionary served by GET /bulk-change/template/:entityType
 export interface BulkChangeTemplateColumn {
   key: string;
   type: 'string' | 'integer' | 'enum';
-  // "This is the row identifier column" — drives the Setup step's "must match an existing
-  // record" text and the Validate step's allowedColumns filter. NOT the same thing as
-  // "must have a non-blank value"; see `mandatory` below for that.
   required: boolean;
-  // Whether this column must carry a non-blank value for the upload to succeed (app-layer
-  // required-field rules — Name, Sector, Contact Name, Municipality ID). Independent
-  // of `required` above: the ID column is both required and mandatory, but a mandatory business
-  // field like NAME_ENU is never the identifier column.
   mandatory: boolean;
-  // Explains a conditional requirement (e.g. "Required when EST_STATUS = Inactive") that doesn't
-  // fit a flat mandatory/optional badge. Null when there's no such condition.
   note: string | null;
   allowed: string[] | null;
   maxLength?: number | null;

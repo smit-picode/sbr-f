@@ -5,7 +5,6 @@ export interface SnapshotEntityDef {
   countKey: keyof SnapshotLiveCounts;
   i18nKey: string;
   label: string;
-  // Same per-entity hue the Create page has always used for its stat tiles.
   tone: string;
 }
 
@@ -17,11 +16,8 @@ export const SNAPSHOT_ENTITIES: SnapshotEntityDef[] = [
   { entity: 'addresses', countKey: 'ADDRESS_COUNT', i18nKey: 'nav.addresses', label: 'Addresses', tone: 'bg-blue-50 text-blue-600' },
 ];
 
-export const SNAPSHOT_DEFAULT_PAGE_SIZE = 20;
-// The backend caps `limit` at 100 and the detail header needs the clicked snapshot's row.
 export const SNAPSHOT_LOOKUP_LIMIT = 100;
 
-// Excel export: pages are fetched at the backend's cap, a few at a time, up to this many rows per table.
 export const SNAPSHOT_EXPORT_PAGE_SIZE = 100;
 export const SNAPSHOT_EXPORT_FETCH_BATCH = 5;
 export const SNAPSHOT_EXPORT_ROW_LIMIT = 20000;

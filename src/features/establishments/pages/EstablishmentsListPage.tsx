@@ -30,8 +30,7 @@ function is401(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 401;
 }
 
-// Deep-link support for search and the home KPI's Active status filter takes priority over a
-// restored session, since it reflects the user's explicit intent from wherever they linked in.
+// Deep-link filters take priority over the restored session.
 function readInitialFilters(): EstablishmentFilters | undefined {
   if (typeof window === 'undefined') return undefined;
   const params = new URLSearchParams(window.location.search);
@@ -57,7 +56,6 @@ export function EstablishmentsListPage() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  // Debounce only the text search — dropdowns and pagination fire immediately
   const debouncedSearch = useDebounce(filters.search, 500);
 
   const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
@@ -74,9 +72,6 @@ export function EstablishmentsListPage() {
   });
 
   const { data, currentData, isLoading, isFetching, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
-  // isLoading is false once this exact args combo has cached data (e.g. paging/sorting back over
-  // an already-searched term) — isFetching still fires then, so the search box gets its own
-  // spinner for that revalidation instead of leaving the table looking idle mid-request.
   const searchLoading = isFetching && !isLoading;
 
   const isValidationError = isError && is400(error);
@@ -84,7 +79,6 @@ export function EstablishmentsListPage() {
   const isSessionError    = isError && is401(error);
 
   useEffect(() => {
-    // Skip 400/401/403 — each has its own handler (validation inline, session/permission via global handler)
     if (isError && !isValidationError && !isPermissionError && !isSessionError) {
       toast.error(t('pages.establishments.loadError', { defaultValue: 'Failed to load establishments. Please try again.' }));
     }
@@ -104,7 +98,6 @@ export function EstablishmentsListPage() {
     setFilters((prev) => ({ ...prev, page: 1 }));
   }, [setFilters, setColumnFilters]);
 
-  // Active-filter chips — value is "active" when it isn't empty or the "__all__" sentinel
   const activeChips: FilterChip[] = [];
   if (filters.search) {
     activeChips.push({
@@ -136,10 +129,8 @@ export function EstablishmentsListPage() {
   }
 
   const { canEdit: canEditEstablishment, canSearch, canViewDetail } = usePermission('establishments');
-  // A row opens the detail screen for users who can view the detail or edit (mirrors backend guard)
   const canOpenDetail = canViewDetail || canEditEstablishment;
   const columns = getEstablishmentsColumns((row) => setEditTarget(row), t, canEditEstablishment);
-  // On 403: clear data so stale cached records don't appear alongside the error state
   const records = (isValidationError || isPermissionError || isSessionError) ? [] : (data?.data ?? []);
   const total   = (isValidationError || isPermissionError || isSessionError) ? 0 : (data?.total ?? 0);
 

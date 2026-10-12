@@ -18,7 +18,7 @@ import type { SampleRow } from '../types';
 const MAX_BUBBLE = 32;
 const LEGEND_RAMP_WIDTH = 190;
 
-// Bubbles, not a heatmap: area carries the uneven cell bases so a two-unit rate can't shout like a seventy-unit one.
+// Bubble grid: area carries the cell base so small samples don't look as strong as large ones.
 export function ResponseCrossTab({ surveyId, rows }: { surveyId: string; rows: SampleRow[] }) {
   const { t } = useTranslation();
   const x = useMemo(() => responseByActivityAndSize(rows), [rows]);
@@ -37,7 +37,6 @@ export function ResponseCrossTab({ surveyId, rows }: { surveyId: string; rows: S
       col: c.band,
       size: c.base,
       value: c.rate,
-      // Only a dependable base earns a printed rate; a thin one still shows as a (small) bubble.
       label: c.reliable ? `${Math.round(c.rate)}%` : '',
       tip:
         `<b>${secFull(c.section)}</b> · ${bandLabel(c.band)}` +
@@ -86,7 +85,6 @@ export function ResponseCrossTab({ surveyId, rows }: { surveyId: string; rows: S
       <div className="text-[12px] font-bold text-slate-700">{title}</div>
       <p className="mb-3 text-[11.5px] text-slate-500">{t('surveySamples.crossLead')}</p>
 
-      {/* Legend: the size encoding drawn with the chart's own sizing maths, and the colour ramp with the target marked. */}
       <div dir="ltr" className="mb-3 flex flex-wrap items-end gap-x-7 gap-y-3">
         <div className="flex items-end gap-2.5">
           <span className="pb-1 text-[11px] font-semibold text-slate-600">{t('surveySamples.legSize')}</span>
