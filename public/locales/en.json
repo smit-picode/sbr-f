@@ -2057,7 +2057,17 @@
     "tablesIn": "Source tables",
     "empty": "No source tables are registered yet.",
     "notFound": "This regulator is not in the source catalog.",
-    "loadError": "Failed to load the source catalog. Please try again."
+    "loadError": "Failed to load the source catalog. Please try again.",
+    "records": "records",
+    "rows": "rows",
+    "columns": "columns",
+    "browse": "Browse",
+    "countsAsOf": "Counts as of {{date}}",
+    "backToRegulator": "Back to {{code}}",
+    "loadTableError": "Failed to load this table. Please try again.",
+    "noDataPermission": "You do not have permission to view source table data.",
+    "tableNotBrowsable": "This table cannot be browsed.",
+    "tableNotFound": "This table is not in the source catalog."
   },
   "surveys": {
     "noViewPermission": "You do not have permission to view surveys."

@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Pencil, ShieldCheck, Info, Check } from 'lucide-react';
-import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector, useAppDispatch } from '@/hooks';
@@ -602,7 +601,6 @@ export function RolesTab({
                       ? t('admin.roles.scopedRole', { defaultValue: 'Scoped Role' })
                       : t('admin.roles.globalRole', { defaultValue: 'Global Role' })}
                   </span>
-                  <InfoTooltip content="This feature will be implemented in the next phase." iconClassName="h-3 w-3" contentClassName="max-w-[220px]" />
                 </div>
               </div>
               <div className="ms-auto flex items-center gap-3">

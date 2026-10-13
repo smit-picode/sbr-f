@@ -40,6 +40,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     children: [
       { key: 'enterprise_groups.view',        label: 'View Enterprise Groups' },
       { key: 'enterprise_groups.view_detail', label: 'View Group Detail' },
+      { key: 'enterprise_groups.view_history', label: 'View Update History' },
       { key: 'enterprise_groups.create',      label: 'Create Enterprise Group' },
       { key: 'enterprise_groups.edit',        label: 'Edit Enterprise Groups' },
       { key: 'enterprise_groups.search',      label: 'Search & Filter' },
@@ -52,7 +53,10 @@ export const PERMISSION_TREE: PermissionNode[] = [
       { key: 'contacts.view',         label: 'View Contacts' },
       { key: 'contacts.view_detail',  label: 'View Contact Detail' },
       { key: 'contacts.view_history', label: 'View Update History' },
+      { key: 'contacts.create',       label: 'Create Contact' },
       { key: 'contacts.edit',         label: 'Edit Contacts' },
+      { key: 'contacts.tag',          label: 'Tag Contacts' },
+      { key: 'contact_tags.manage',   label: 'Manage Contact Tags' },
       { key: 'contacts.search',       label: 'Search & Filter' },
     ],
   },
@@ -95,6 +99,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
           { key: 'admin_panel.roles.view',         label: 'View Roles' },
           { key: 'admin_panel.roles.edit',         label: 'Edit Roles' },
           { key: 'admin_panel.roles.create',       label: 'Add Role' },
+          { key: 'admin_panel.roles.delete',       label: 'Delete Role' },
           { key: 'admin_panel.permissions.view',   label: 'View Permissions' },
           { key: 'admin_panel.permissions.edit',   label: 'Edit Permissions' },
           { key: 'admin_panel.permissions.search', label: 'Search Permissions' },
@@ -106,7 +111,9 @@ export const PERMISSION_TREE: PermissionNode[] = [
         children: [
           { key: 'admin_panel.users.view',        label: 'View Users' },
           { key: 'admin_panel.users.view_detail', label: 'View User Detail' },
+          { key: 'admin_panel.users.create',      label: 'Add User' },
           { key: 'admin_panel.users.edit',        label: 'Edit Users' },
+          { key: 'admin_panel.users.delete',      label: 'Delete User' },
           { key: 'admin_panel.users.search',      label: 'Search Users' },
         ],
       },
@@ -124,6 +131,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     label: 'Source Catalog',
     children: [
       { key: 'source_catalog.view', label: 'View Source Catalog' },
+      { key: 'source_catalog.view_data', label: 'View Source Table Data' },
     ],
   },
   {
@@ -148,6 +156,30 @@ export const PERMISSION_TREE: PermissionNode[] = [
       { key: 'bulk_change.view',    label: 'View Bulk Changes' },
       { key: 'bulk_change.create',  label: 'Create Bulk Update' },
       { key: 'bulk_change.approve', label: 'Approve / Reject Bulk Changes' },
+    ],
+  },
+  {
+    key: 'analysis',
+    label: 'Analysis',
+    children: [
+      { key: 'analysis.view',                 label: 'View Analysis' },
+      { key: 'analysis.edit',                 label: 'Create / Edit Analyses' },
+      { key: 'analysis.export_unsuppressed',  label: 'Export Unsuppressed Results' },
+    ],
+  },
+  // {
+  //   key: 'data_quality',
+  //   label: 'Data Quality',
+  //   children: [
+  //     { key: 'data_quality.view', label: 'View Data Quality' },
+  //   ],
+  // },
+  {
+    key: 'snapshots',
+    label: 'Snapshots',
+    children: [
+      { key: 'snapshots.create', label: 'Create Snapshot' },
+      { key: 'snapshots.view',   label: 'Browse Snapshots' },
     ],
   },
 ];

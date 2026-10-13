@@ -10,3 +10,8 @@ export const SOURCE_REGULATOR_COLOR: Record<string, string> = {
 };
 
 export const SOURCE_REGULATOR_FALLBACK_COLOR = '#64748B';
+
+export const SOURCE_TABLE_BROWSABLE_PREFIX = 'SRC_';
+export const SOURCE_TABLE_DEFAULT_LIMIT = 10;
+export const SOURCE_TABLE_CELL_MAX_CHARS = 80;
+export const SOURCE_VIEW_DATA_PERMISSION = 'source_catalog.view_data';
