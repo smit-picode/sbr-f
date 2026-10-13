@@ -23,12 +23,23 @@ export interface AuditLog {
   approvedByUser?: AuditUserRef | null;
 }
 
+// One entry of the Audit Log "All users" / "All approvers" dropdowns
+export interface AuditLogActorOption {
+  USER_ID: number;
+  NAME: string | null;
+  EMAIL: string | null;
+  CNT: number;
+}
+
 export interface AuditLogFilters {
   page?: number;
   limit?: number;
   tableName?: string;
   recordId?: number;
   changedBy?: number;
+  approvedBy?: number;
+  dateFrom?: string;
+  dateTo?: string;
   columnFilters?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
