@@ -12,6 +12,7 @@ import { useAppDispatch } from '@/hooks';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { AnalysisReportSkeleton } from '@/components/common/AnalysisReportSkeleton';
+import { NoData } from '@/components/common/NoData';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_LIST_HREF, ANALYSIS_QUICK_ADD } from '../constants';
@@ -97,6 +98,17 @@ export function AnalysisReportPage({ id }: { id: string }) {
     const withData = analysis?.blocks.filter((b) => b.type !== 'text') ?? [];
     return withData[withData.length - 1]?.query.entity ?? 'establishments';
   }, [analysis]);
+
+  if (!access.canViewSection) {
+    return (
+      <PageContainer>
+        <PageHeader title={t('pages.analysis.title', { defaultValue: 'Analysis' })} />
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
+          <NoData message={t('analysis.noViewPermission', { defaultValue: 'You do not have permission to view analyses.' })} />
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (!hydrated) return <PageContainer><AnalysisReportSkeleton /></PageContainer>;
   if (!analysis) {

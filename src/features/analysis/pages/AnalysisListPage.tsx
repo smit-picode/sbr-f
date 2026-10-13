@@ -12,6 +12,7 @@ import { useAppDispatch, useDebounce } from '@/hooks';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SearchInput } from '@/components/common/SearchInput';
+import { NoData } from '@/components/common/NoData';
 import { AnalysisListSkeleton } from '@/components/common/AnalysisListSkeleton';
 import { Button } from '@/components/ui/button';
 import { ANALYSIS_LIST_HREF } from '../constants';
@@ -92,6 +93,20 @@ export function AnalysisListPage() {
     dispatch(upsertAnalysis(a));
     router.push(`${ANALYSIS_LIST_HREF}/${a.id}`);
   };
+
+  if (!access.canViewSection) {
+    return (
+      <PageContainer>
+        <PageHeader
+          title={t('pages.analysis.title', { defaultValue: 'Analysis' })}
+          description={t('pages.analysis.description', { defaultValue: 'Build custom analyses and visualisations on any frame table.' })}
+        />
+        <div className="rounded-lg bg-white shadow-card overflow-hidden">
+          <NoData message={t('analysis.noViewPermission', { defaultValue: 'You do not have permission to view analyses.' })} />
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (!hydrated) return <PageContainer><AnalysisListSkeleton /></PageContainer>;
 

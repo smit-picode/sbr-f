@@ -59,7 +59,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: 'Create Snapshot',  href: '/snapshots/create',   icon: 'Camera',      permKey: 'snapshots.create', i18nKey: 'nav.createSnapshot'  },
       { title: 'Browse Snapshots', href: '/snapshots/browse',   icon: 'Database',    permKey: 'snapshots.view', i18nKey: 'nav.browseSnapshots' },
-      { title: 'Analysis',         href: '/snapshots/analysis', icon: 'ChartColumn', permKey: '', i18nKey: 'nav.analysis'         },
+      { title: 'Analysis',         href: '/snapshots/analysis', icon: 'ChartColumn', permKey: 'analysis.view', i18nKey: 'nav.analysis'         },
     ],
   },
   {

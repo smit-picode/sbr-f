@@ -1594,6 +1594,7 @@
     "gdpLeadEconomy": "Where this establishment sits inside the total economy, from its Annual Economic Survey returns."
   },
   "analysis": {
+    "noViewPermission": "You do not have permission to view analyses.",
     "add": {
       "title": "Add a block",
       "description": "Pick what to analyse and how to show it — you can change both afterwards.",

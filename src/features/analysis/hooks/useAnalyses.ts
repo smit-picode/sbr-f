@@ -51,6 +51,7 @@ export function nameFromEmail(email: string): string {
 
 export interface AnalysisAccess {
   email: string;
+  canViewSection: boolean;
   canCreate: boolean;
   canExportUnsuppressed: boolean;
   canEditAnalysis: (a: Analysis) => boolean;
@@ -82,6 +83,7 @@ export function useAnalysisAccess(): AnalysisAccess {
 
   return {
     email,
+    canViewSection: has(ANALYSIS_PERMISSIONS.view),
     canCreate: has(ANALYSIS_PERMISSIONS.edit),
     canExportUnsuppressed: has(ANALYSIS_PERMISSIONS.exportUnsuppressed),
     isOwner,
