@@ -174,7 +174,7 @@ export function AuditLogPage() {
           aria-pressed={!!filters.mine}
           title={t('pages.auditLog.onlyMineHint', { defaultValue: 'Changes you submitted, approved or rejected' })}
           onClick={() => handleFilterChange({ mine: filters.mine ? undefined : true, page: 1 })}
-          className={`h-8 gap-1.5 text-xs shadow-none ${filters.mine ? 'border-[#A29374] bg-[#F4F0E8] text-[#87795D] hover:bg-[#F4F0E8]' : ''}`}
+          className={`h-10 gap-1.5 px-4 text-sm font-normal shadow-none ${filters.mine ? 'border-[#A29374] bg-[#F4F0E8] text-[#87795D] hover:bg-[#F4F0E8]' : 'text-slate-800'}`}
         >
           <UserRound className="h-3.5 w-3.5" />
           {t('pages.auditLog.onlyMine', { defaultValue: 'Only my changes' })}
