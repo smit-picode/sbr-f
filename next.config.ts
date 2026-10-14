@@ -8,10 +8,12 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   reactStrictMode: true,
   poweredByHeader: false,
-  // Local dev only: the bare host has no page, so send it to the app.
+  // Bare-host URLs (old bookmarks, hosts that serve at the root) have no page; send them under the base path.
   async redirects() {
-    if (process.env.NODE_ENV !== "development") return [];
-    return [{ source: "/", destination: basePath, basePath: false, permanent: false }];
+    return [
+      { source: "/", destination: basePath, basePath: false, permanent: false },
+      { source: "/:path((?!sbr(?:/|$)|_next/|api/).+)", destination: `${basePath}/:path`, basePath: false, permanent: false },
+    ];
   },
 };
 
