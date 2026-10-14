@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getAuditLogColumns, prettyTableName } from '../components/AuditLogColumns';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
-import { useGetAuditLogListQuery } from '../api/auditLogApi';
-import type { AuditLogFilters } from '@/types';
+import { useGetAuditLogListQuery, useGetAuditLogUsersQuery, useGetAuditLogApproversQuery } from '../api/auditLogApi';
+import type { AuditLogActorOption, AuditLogFilters } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw, UserRound } from 'lucide-react';
@@ -25,6 +25,11 @@ const TABLE_OPTIONS = [
   { label: 'All Tables', value: '__all__' },
   ...AUDIT_LOG_TABLE_VALUES.map((v) => ({ label: prettyTableName(v), value: v })),
 ];
+const ALL_OPTION = '__all__';
+
+function actorLabel(option: AuditLogActorOption): string {
+  return option.NAME || option.EMAIL || String(option.USER_ID);
+}
 
 function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
@@ -53,6 +58,12 @@ export function AuditLogPage() {
   }, [debouncedRecordId]);
 
   const { canSearch } = usePermission('audit_log');
+
+  // The actor lookups need the search permission; a 403 here would sign the user out.
+  const { data: usersData } = useGetAuditLogUsersQuery(undefined, { skip: !canSearch });
+  const { data: approversData } = useGetAuditLogApproversQuery(undefined, { skip: !canSearch });
+  const userOptions = usersData?.data ?? [];
+  const approverOptions = approversData?.data ?? [];
 
   // Use the debounced value for the API query — the immediate value drives the UI only.
 
@@ -111,6 +122,36 @@ export function AuditLogPage() {
       onRemove: () => { setRecordIdInput(''); handleFilterChange({ recordId: undefined, page: 1 }); },
     });
   }
+  const changedByOption = userOptions.find((u) => u.USER_ID === filters.changedBy);
+  if (filters.changedBy) {
+    activeChips.push({
+      key: 'changedBy',
+      label: `${t('filters.changedBy', { defaultValue: 'Changed by' })}: ${changedByOption ? actorLabel(changedByOption) : filters.changedBy}`,
+      onRemove: () => handleFilterChange({ changedBy: undefined, page: 1 }),
+    });
+  }
+  const approvedByOption = approverOptions.find((u) => u.USER_ID === filters.approvedBy);
+  if (filters.approvedBy) {
+    activeChips.push({
+      key: 'approvedBy',
+      label: `${t('filters.approvedBy', { defaultValue: 'Approved by' })}: ${approvedByOption ? actorLabel(approvedByOption) : filters.approvedBy}`,
+      onRemove: () => handleFilterChange({ approvedBy: undefined, page: 1 }),
+    });
+  }
+  if (filters.dateFrom) {
+    activeChips.push({
+      key: 'dateFrom',
+      label: `${t('filters.dateFrom', { defaultValue: 'From' })} ${filters.dateFrom}`,
+      onRemove: () => handleFilterChange({ dateFrom: undefined, page: 1 }),
+    });
+  }
+  if (filters.dateTo) {
+    activeChips.push({
+      key: 'dateTo',
+      label: `${t('filters.dateTo', { defaultValue: 'To' })} ${filters.dateTo}`,
+      onRemove: () => handleFilterChange({ dateTo: undefined, page: 1 }),
+    });
+  }
   const clearAllAudit = () => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); setColumnFilters([]); };
 
   return (
@@ -156,6 +197,64 @@ export function AuditLogPage() {
             </SelectContent>
           </Select>
         )}
+
+        {canSearch && (
+          <>
+            <Select
+              value={filters.changedBy ? String(filters.changedBy) : ALL_OPTION}
+              onValueChange={(v) => handleFilterChange({ changedBy: v === ALL_OPTION ? undefined : Number(v), page: 1 })}
+            >
+              <SelectTrigger className="w-48 shadow-none">
+                <SelectValue placeholder={t('filters.allUsers', { defaultValue: 'All users' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_OPTION}>{t('filters.allUsers', { defaultValue: 'All users' })}</SelectItem>
+                {userOptions.map((u) => (
+                  <SelectItem key={u.USER_ID} value={String(u.USER_ID)}>
+                    {actorLabel(u)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.approvedBy ? String(filters.approvedBy) : ALL_OPTION}
+              onValueChange={(v) => handleFilterChange({ approvedBy: v === ALL_OPTION ? undefined : Number(v), page: 1 })}
+            >
+              <SelectTrigger className="w-48 shadow-none">
+                <SelectValue placeholder={t('filters.allApprovers', { defaultValue: 'All approvers' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_OPTION}>{t('filters.allApprovers', { defaultValue: 'All approvers' })}</SelectItem>
+                {approverOptions.map((u) => (
+                  <SelectItem key={u.USER_ID} value={String(u.USER_ID)}>
+                    {actorLabel(u)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-slate-400">{t('filters.dateFrom', { defaultValue: 'From' })}</span>
+          <Input
+            type="date"
+            className="w-[150px] h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            value={filters.dateFrom ?? ''}
+            onChange={(e) => handleFilterChange({ dateFrom: e.target.value || undefined, page: 1 })}
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-slate-400">{t('filters.dateTo', { defaultValue: 'To' })}</span>
+          <Input
+            type="date"
+            className="w-[150px] h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            value={filters.dateTo ?? ''}
+            onChange={(e) => handleFilterChange({ dateTo: e.target.value || undefined, page: 1 })}
+          />
+        </div>
 
         {canSearch && (
           <Input
