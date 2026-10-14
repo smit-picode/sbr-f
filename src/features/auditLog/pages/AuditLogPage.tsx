@@ -237,20 +237,20 @@ export function AuditLogPage() {
         )}
 
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-slate-400">{t('filters.dateFrom', { defaultValue: 'From' })}</span>
+          <span className="text-sm font-normal text-slate-500">{t('filters.dateFrom', { defaultValue: 'From' })}</span>
           <Input
             type="date"
-            className="w-[150px] h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className="w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             value={filters.dateFrom ?? ''}
             onChange={(e) => handleFilterChange({ dateFrom: e.target.value || undefined, page: 1 })}
           />
         </div>
 
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-slate-400">{t('filters.dateTo', { defaultValue: 'To' })}</span>
+          <span className="text-sm font-normal text-slate-500">{t('filters.dateTo', { defaultValue: 'To' })}</span>
           <Input
             type="date"
-            className="w-[150px] h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className="w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             value={filters.dateTo ?? ''}
             onChange={(e) => handleFilterChange({ dateTo: e.target.value || undefined, page: 1 })}
           />
@@ -261,7 +261,7 @@ export function AuditLogPage() {
             type="number"
             placeholder={t('filters.filterByRecordId')}
             autoComplete="off"
-            className="w-48 h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className="w-48 h-10 text-sm font-normal text-slate-800 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
             min="1"
             value={recordIdInput}
             onKeyDown={(e) => {
@@ -287,7 +287,7 @@ export function AuditLogPage() {
                 size="sm"
                 onClick={clearAllAudit}
                 disabled={isDefault}
-                className={`gap-1.5 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
+                className={`h-10 gap-1.5 px-4 text-sm font-normal text-slate-800 ${isDefault ? 'pointer-events-none opacity-40' : ''}`}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 {t('filters.reset')}
