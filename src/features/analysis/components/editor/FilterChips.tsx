@@ -64,6 +64,13 @@ function FilterBody({ filter, entity, onChange }: { filter: AnalysisFilter; enti
     else next.add(k);
     onChange({ ...filter, values: [...next] });
   };
+  // Select all acts on the listed options (the search's matches when searching).
+  const allShown = options.length > 0 && options.every((o) => selected.has(o.key));
+  const toggleAll = () => {
+    const next = new Set(selected);
+    options.forEach((o) => (allShown ? next.delete(o.key) : next.add(o.key)));
+    onChange({ ...filter, values: [...next] });
+  };
 
   return (
     <div className="w-[300px]">
@@ -94,6 +101,15 @@ function FilterBody({ filter, entity, onChange }: { filter: AnalysisFilter; enti
           )}
           <div className="max-h-[260px] overflow-y-auto">
             {isLoading && <p className="px-2 py-4 text-center text-[12px] text-slate-400">{t('analysis.loading', { defaultValue: 'Loading…' })}</p>}
+            {options.length > 1 && (
+              <button type="button" onClick={toggleAll} className="mb-1 w-full flex items-center gap-2 rounded-lg border-b border-slate-100 px-2 py-1.5 text-[12.5px] font-semibold text-slate-700 hover:bg-slate-100">
+                <span className={cn('h-4 w-4 shrink-0 rounded border flex items-center justify-center', allShown ? 'bg-adaam border-adaam text-white' : 'border-slate-300')}>
+                  {allShown && <Check className="h-3 w-3" />}
+                </span>
+                <span className="flex-1 text-start">{q ? t('valuePicker.selectAllMatching', { defaultValue: 'Select all matching' }) : t('valuePicker.selectAll', { defaultValue: 'Select all' })}</span>
+                <span className="text-[11px] text-slate-400 tabular-nums">{options.length}</span>
+              </button>
+            )}
             {options.map((o) => (
               <button key={String(o.key)} type="button" onClick={() => toggle(o.key)} className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] text-slate-700 hover:bg-slate-100">
                 <span className={cn('h-4 w-4 shrink-0 rounded border flex items-center justify-center', selected.has(o.key) ? 'bg-adaam border-adaam text-white' : 'border-slate-300')}>

@@ -8,7 +8,7 @@ import { useAnalysisResult } from '../../api/analysisService';
 import { isAdditive } from '../../charts/transform';
 import { ANALYSIS_DISCLOSURE, ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../../constants';
 import { requestForBlock } from '../../engine/resolve';
-import { ANALYSIS_FRAME_CHRONO } from '../../mock/frames';
+import { frameOrder } from '../../utils/frames';
 import { fieldLabel, formatDelta, formatValue, frameName, measureLabel, valueLabel } from '../../utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { AnalysisPointEvent, BlockViewProps } from './types';
@@ -27,7 +27,7 @@ function orderKeys(rows: AnalysisResultRow[], axis: number, field: string): (str
   return seen.sort((a, b) => {
     if (a === ANALYSIS_OTHER_KEY || a == null) return 1;
     if (b === ANALYSIS_OTHER_KEY || b == null) return -1;
-    if (field === ANALYSIS_FRAME_DIMENSION) return ANALYSIS_FRAME_CHRONO.indexOf(a) - ANALYSIS_FRAME_CHRONO.indexOf(b);
+    if (field === ANALYSIS_FRAME_DIMENSION) return frameOrder(a, b);
     if (order) return order.indexOf(a) - order.indexOf(b);
     if (field === 'reg_year') return a.localeCompare(b);
     return (totals.get(b) ?? 0) - (totals.get(a) ?? 0);

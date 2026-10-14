@@ -1,15 +1,27 @@
+import type { TFunction } from 'i18next';
+
+// Labels live under admin.permLabels, keyed by the permission with dots as underscores; the tree label is the fallback.
+export function permissionLabel(key: string, fallback: string, t: TFunction): string {
+  return t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fallback });
+}
+
 export interface PermissionNode {
   key: string;
   label: string;
   children?: PermissionNode[];
 }
 
+// Parent keys (establishments, contacts, etc.) are UI-only group labels.
+// Only leaf nodes (with dots) exist in the DB.
+// The frontend uses this tree to render grouped permission sections.
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'home',
     label: 'Home',
     children: [
       { key: 'home_executive.view', label: 'Executive Dashboard' },
+      { key: 'home_reviewer.view', label: 'Data Reviewer Dashboard' },
+      { key: 'home_steward.view', label: 'Data Steward Dashboard' },
     ],
   },
   {
@@ -53,11 +65,10 @@ export const PERMISSION_TREE: PermissionNode[] = [
       { key: 'contacts.view',         label: 'View Contacts' },
       { key: 'contacts.view_detail',  label: 'View Contact Detail' },
       { key: 'contacts.view_history', label: 'View Update History' },
-      { key: 'contacts.create',       label: 'Create Contact' },
       { key: 'contacts.edit',         label: 'Edit Contacts' },
-      { key: 'contacts.tag',          label: 'Tag Contacts' },
-      { key: 'contact_tags.manage',   label: 'Manage Contact Tags' },
       { key: 'contacts.search',       label: 'Search & Filter' },
+      { key: 'contacts.create',       label: 'Add Contacts' },
+      { key: 'contacts.tag',          label: 'Tag Contacts (incl. tag upload)' },
     ],
   },
   {
@@ -93,6 +104,9 @@ export const PERMISSION_TREE: PermissionNode[] = [
     children: [
       { key: 'admin_panel.view', label: 'View Admin Panel' },
       {
+        // UI-only group node: combines the Roles and Permissions sections into one
+        // "Roles & Permissions Tab" group, mirroring the merged admin tab.
+        // Leaf keys below are unchanged — all RBAC gating still works.
         key: 'admin_panel.roles_permissions',
         label: 'Roles & Permissions Tab',
         children: [
@@ -111,9 +125,9 @@ export const PERMISSION_TREE: PermissionNode[] = [
         children: [
           { key: 'admin_panel.users.view',        label: 'View Users' },
           { key: 'admin_panel.users.view_detail', label: 'View User Detail' },
-          { key: 'admin_panel.users.create',      label: 'Add User' },
           { key: 'admin_panel.users.edit',        label: 'Edit Users' },
-          { key: 'admin_panel.users.delete',      label: 'Delete User' },
+          { key: 'admin_panel.users.create',      label: 'Add Users' },
+          { key: 'admin_panel.users.delete',      label: 'Delete Users' },
           { key: 'admin_panel.users.search',      label: 'Search Users' },
         ],
       },
@@ -127,11 +141,44 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    key: 'data_quality',
+    label: 'Data Quality',
+    children: [
+      { key: 'data_quality.view', label: 'View Data Quality Scores' },
+    ],
+  },
+  {
     key: 'source_catalog',
     label: 'Source Catalog',
     children: [
       { key: 'source_catalog.view', label: 'View Source Catalog' },
       { key: 'source_catalog.view_data', label: 'View Source Table Data' },
+    ],
+  },
+  {
+    key: 'snapshots',
+    label: 'Snapshots',
+    children: [
+      { key: 'snapshots.view',   label: 'Browse Snapshots' },
+      { key: 'snapshots.create', label: 'Create Snapshot' },
+    ],
+  },
+  {
+    // Saved analyses are private unless shared; sharing and deleting stay with the owner (or a super admin).
+    key: 'analysis',
+    label: 'Analysis',
+    children: [
+      { key: 'analysis.view',               label: 'View Analyses' },
+      { key: 'analysis.edit',               label: 'Create & Edit Analyses' },
+      { key: 'analysis.export_unsuppressed', label: 'Export Unsuppressed Figures' },
+    ],
+  },
+  {
+    // Draws read the whole register (or a frozen frame), contacts included, so it is its own grant.
+    key: 'sampling',
+    label: 'Sample Builder',
+    children: [
+      { key: 'sampling.view', label: 'Build & Draw Samples' },
     ],
   },
   {
@@ -150,6 +197,18 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
+    // NPC-330. Applying a tag needs contacts.tag (Contacts above); this is the registry itself.
+    key: 'contact_tags',
+    label: 'Contact Tags',
+    children: [
+      { key: 'contact_tags.manage', label: 'Manage Tag Registry' },
+    ],
+  },
+  {
+    // Module-level access to Bulk Change. These sit ON TOP of the per-entity permissions —
+    // granting them does not by itself allow editing any data. A bulk submit still requires
+    // the target table's Edit permission, and a bulk decision still requires
+    // "Approve / Reject Change Requests", both enforced by the API and the database.
     key: 'bulk_change',
     label: 'Bulk Change',
     children: [
@@ -158,32 +217,9 @@ export const PERMISSION_TREE: PermissionNode[] = [
       { key: 'bulk_change.approve', label: 'Approve / Reject Bulk Changes' },
     ],
   },
-  {
-    key: 'analysis',
-    label: 'Analysis',
-    children: [
-      { key: 'analysis.view',                 label: 'View Analysis' },
-      { key: 'analysis.edit',                 label: 'Create / Edit Analyses' },
-      { key: 'analysis.export_unsuppressed',  label: 'Export Unsuppressed Results' },
-    ],
-  },
-  // {
-  //   key: 'data_quality',
-  //   label: 'Data Quality',
-  //   children: [
-  //     { key: 'data_quality.view', label: 'View Data Quality' },
-  //   ],
-  // },
-  {
-    key: 'snapshots',
-    label: 'Snapshots',
-    children: [
-      { key: 'snapshots.create', label: 'Create Snapshot' },
-      { key: 'snapshots.view',   label: 'Browse Snapshots' },
-    ],
-  },
 ];
 
+// Flat set of all leaf permission keys
 export const CHILD_PERMISSION_KEYS = new Set(
   PERMISSION_TREE.flatMap(n => (n.children ?? []).map(c => c.key))
 );

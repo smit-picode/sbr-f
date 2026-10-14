@@ -76,6 +76,8 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       section: 'Metadata',
       fields: [
         { key: 'PO_BOX', label: 'PO Box' },
+        // Contacts have no PRIORITY since NPC-330 release 3. Kept here so a request made before
+        // that (still pending, or in history) still shows the change it asked for.
         { key: 'PRIORITY', label: 'Priority' },
         { key: 'VALID_FROM', label: 'Valid From' },
         { key: 'VALID_TO', label: 'Valid To' },

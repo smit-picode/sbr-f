@@ -1,3 +1,6 @@
+import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
+// Field labels for the create/edit modals' validation summary. NAMES is the shared
+// "group name in EN or AR" rule that spans both name inputs.
 export const ENTERPRISE_GROUP_FIELD_LABELS: Record<string, string> = {
   NAMES: 'Group Name',
   NAME_ENU: 'Group Name (EN)',
@@ -16,13 +19,18 @@ export const ENTERPRISE_GROUP_DEFAULT_FILTERS = {
   type:   '',
 } as const;
 
-export const ENTERPRISE_GROUP_FILTER_COLUMNS: { value: string; label: string }[] = [
-  { value: 'ENTERPRISE_GROUP_ID',  label: 'Group ID' },
+export const ENTERPRISE_GROUP_FILTER_COLUMNS: ColumnFilterOption[] = [
+  { value: 'ENTERPRISE_GROUP_ID',  label: 'Group ID', type: 'number' },
   { value: 'NAME_ENU',             label: 'Name (EN)' },
   { value: 'NAME_ARA',             label: 'Name (AR)' },
   { value: 'UCI_NAME',             label: 'UCI Name' },
-  { value: 'STATUS',               label: 'Status' },
-  { value: 'PRINCIPAL_ISIC_2DIGIT', label: 'ISIC Code' },
+  { value: 'STATUS',               label: 'Status', pick: true },
+  { value: 'TYPE',                 label: 'Type', pick: true },
+  { value: 'UCI_COUNTRY',          label: 'UCI country', pick: true },
+  { value: 'UCI_TYPE',             label: 'UCI type', pick: true },
+  { value: 'PRINCIPAL_ISIC_2DIGIT', label: 'ISIC Code', pick: true },
+  { value: 'TOTAL_EMPLOYEES',      label: 'Total employees', type: 'number' },
+  { value: 'GROUP_START_DATE',     label: 'Group start date', type: 'date' },
 ];
 
 export const ENTERPRISE_GROUP_STATUS_OPTIONS: { value: string; label: string }[] = [

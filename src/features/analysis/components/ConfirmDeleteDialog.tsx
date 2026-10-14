@@ -10,9 +10,10 @@ interface Props {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  busy?: boolean;
 }
 
-export function ConfirmDeleteDialog({ open, title, message, onConfirm, onCancel }: Props) {
+export function ConfirmDeleteDialog({ open, title, message, onConfirm, onCancel, busy = false }: Props) {
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
@@ -22,8 +23,8 @@ export function ConfirmDeleteDialog({ open, title, message, onConfirm, onCancel 
           <DialogDescription className="pt-1">{message}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onCancel}>{t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
-          <Button variant="destructive" onClick={onConfirm}>{t('analysis.delete', { defaultValue: 'Delete' })}</Button>
+          <Button variant="outline" onClick={onCancel} disabled={busy}>{t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button variant="destructive" onClick={onConfirm} loading={busy}>{t('analysis.delete', { defaultValue: 'Delete' })}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

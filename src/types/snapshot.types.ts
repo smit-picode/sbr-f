@@ -30,6 +30,10 @@ export interface SnapshotListParams {
 export interface SnapshotTableParams extends SnapshotListParams {
   id: number;
   entity: SnapshotEntity;
+  // SBR_QUERY_PKG contract: a JSON array of {column, operator, value}; any frozen column.
+  columnFilters?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface CreateSnapshotBody {

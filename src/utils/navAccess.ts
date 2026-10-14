@@ -12,6 +12,7 @@ export const hasAnyNavPermission = (keys: string[], access: NavAccess): boolean 
   access.isSuperAdmin || keys.some((key) => hasNavPermission(key, access));
 
 export const isNavItemVisible = (item: NavItem, access: NavAccess): boolean => {
+  if (item.hidden) return false;
   if (access.isSuperAdmin || item.permKey === '') return true;
   const keys = Array.isArray(item.permKey) ? item.permKey : [item.permKey];
   return keys.some((key) => hasNavPermission(key, access));

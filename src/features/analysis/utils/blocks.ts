@@ -17,8 +17,8 @@ const DEFAULT_DIM: Record<AnalysisEntity, string> = {
 
 const DEFAULT_COMPLETENESS: Record<AnalysisEntity, string[]> = {
   establishments: ['isic_section', 'sector', 'employment', 'municipality', 'has_coordinates', 'has_phone', 'has_email'],
-  enterprises: ['isic_section', 'sector', 'employment', 'turnover', 'municipality', 'parent_country'],
-  enterpriseGroups: ['isic_section', 'employment', 'turnover', 'uci_country'],
+  enterprises: ['isic_section', 'sector', 'employment', 'municipality', 'parent_country'],
+  enterpriseGroups: ['isic_section', 'employment', 'uci_country'],
   contacts: ['role', 'has_phone', 'has_mobile', 'has_email', 'has_website'],
   addresses: ['zone', 'has_street', 'has_building', 'has_coordinates'],
 };
@@ -177,4 +177,9 @@ export function duplicateBlock(a: Analysis, id: string): Analysis {
   copy.id = uid('b');
   copy.query.measures = copy.query.measures.map((m) => ({ ...m, id: uid('m') }));
   return insertBlock(a, copy, id);
+}
+
+// A saved analysis without the fields the portal no longer offers, so it never queries or shows them.
+export function withKnownFields(a: Analysis): Analysis {
+  return { ...a, filters: a.filters.filter((f) => f.field in ANALYSIS_FIELDS), blocks: a.blocks.map((b) => changeEntity(b, b.query.entity)) };
 }

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ANALYSIS_ENTITIES, ANALYSIS_ENTITY_ORDER } from '../constants';
-import { ANALYSIS_FRAMES } from '../mock/frames';
+import { useAnalysisFrames } from '../hooks/useAnalysisFrames';
 import { fieldLabel, frameName, valueLabel } from '../utils/labels';
 import { FilterChips } from './editor/FilterChips';
 
@@ -38,6 +38,8 @@ function Label({ children }: { children: React.ReactNode }) {
 export function ReportToolbar(p: Props) {
   const { t } = useTranslation();
   const { analysis, canEdit } = p;
+  const { frames } = useAnalysisFrames();
+  // Report filters can use any field; each block applies those its unit has.
   const allFields = useMemo(() => [...new Set(ANALYSIS_ENTITY_ORDER.flatMap((e) => ANALYSIS_ENTITIES[e].fields))].filter((f) => !['sbr_id', 'enterprise_id', 'group_id', 'contact_id', 'address_id', 'name'].includes(f)), []);
 
   return (
@@ -48,7 +50,7 @@ export function ReportToolbar(p: Props) {
           <Select value={analysis.frame} onValueChange={p.onFrame} disabled={!canEdit}>
             <SelectTrigger className="h-8 w-[136px] text-xs shadow-none"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {ANALYSIS_FRAMES.map((f) => (
+              {frames.map((f) => (
                 <SelectItem key={f.id} value={f.id} className="text-xs">
                   <span className="inline-flex items-center gap-1.5">
                     <span className={cn('h-1.5 w-1.5 rounded-full', f.kind === 'live' ? 'bg-pos' : 'bg-info')} />
@@ -65,7 +67,7 @@ export function ReportToolbar(p: Props) {
             <SelectTrigger className="h-8 w-[144px] text-xs shadow-none"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value={NONE} className="text-xs">{t('analysis.editor.noCompare', { defaultValue: 'No comparison' })}</SelectItem>
-              {ANALYSIS_FRAMES.filter((f) => f.id !== analysis.frame).map((f) => <SelectItem key={f.id} value={f.id} className="text-xs">{frameName(t, f.id)}</SelectItem>)}
+              {frames.filter((f) => f.id !== analysis.frame).map((f) => <SelectItem key={f.id} value={f.id} className="text-xs">{frameName(t, f.id)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

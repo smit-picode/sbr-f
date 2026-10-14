@@ -66,3 +66,11 @@ export const NO_SCOPE_VALUE: string = '__none__';
 export const ROLE_NO_CATEGORY_VALUE: string = '__none__';
 
 export const REGULATOR_SCOPE_OPTIONS: string[] = ['MOCI', 'QFC', 'QFZ', 'QSTP', 'GTA', 'KRMA'];
+// System accounts (integration API). Token lifetime bounds mirror SBR_SYSTEM_ACCOUNT_API.
+export const SYSTEM_ACCOUNTS_PERMISSION: string = 'admin_panel.system_accounts.manage';
+export const SYSTEM_ACCOUNT_DEFAULT_TTL_MINUTES: number = 30;
+export const SYSTEM_ACCOUNT_MIN_TTL_MINUTES: number = 5;
+export const SYSTEM_ACCOUNT_MAX_TTL_MINUTES: number = 240;
+export const SYSTEM_ACCOUNT_SECRET_DEFAULT_MONTHS: number = 12;
+export const SYSTEM_ACCOUNT_MAX_LIVE_SECRETS: number = 2;
+export const SYSTEM_ACCOUNT_STATUS_VALUES = { active: 'Y', inactive: 'N' } as const;

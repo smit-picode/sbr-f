@@ -40,7 +40,9 @@ function Sparkline({ values, big }: { values: number[]; big: boolean }) {
 export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps) {
   const { t } = useTranslation();
   const req = useMemo(() => requestForBlock(block, query), [block, query]);
-  const trendReq = useMemo(() => (block.display.sparkline ? trendRequestFor(query) : null), [block.display.sparkline, query]);
+  // A half-width box has no room for the trend line beside the number: it overflowed the box, worst with the editor open.
+  const showSparkline = !!block.display.sparkline && block.width !== 'half';
+  const trendReq = useMemo(() => (showSparkline ? trendRequestFor(query) : null), [showSparkline, query]);
   const { data, isLoading, isError } = useAnalysisResult<AnalysisAggregateResult>(req);
   const trend = useAnalysisResult<AnalysisAggregateResult>(trendReq);
   const big = mode === 'present';
@@ -68,7 +70,7 @@ export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps)
               <div className={cn('font-extrabold leading-none text-ink tabular-nums', big ? 'text-6xl' : 'text-[34px]')}>
                 {confidential ? 'x' : formatValue(v, { compact: (v ?? 0) >= 1e7 })}
               </div>
-              {block.display.sparkline && series.length > 1 && <Sparkline values={series} big={big} />}
+              {showSparkline && series.length > 1 && <Sparkline values={series} big={big} />}
             </div>
             {data.compareTo && delta.abs != null && (
               <div className="mt-2 flex items-center gap-1.5 text-[11.5px]">

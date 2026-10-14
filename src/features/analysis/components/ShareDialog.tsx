@@ -8,28 +8,27 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAnalysisAccess } from '../hooks/useAnalyses';
-import { SHARE_DIRECTORY } from '../mock/seedAnalyses';
+import { useDebounce } from '@/hooks';
+import { useGetAnalysisShareDirectoryQuery } from '../api/analysisApi';
 
 interface Props {
   open: boolean;
   analysis: Analysis;
   readOnly: boolean;
   onClose: () => void;
+  saving: boolean;
   onSave: (shares: AnalysisShare[]) => void;
 }
 
-export function ShareDialog({ open, analysis, readOnly, onClose, onSave }: Props) {
+export function ShareDialog({ open, analysis, readOnly, saving, onClose, onSave }: Props) {
   const { t } = useTranslation();
   const [shares, setShares] = useState<AnalysisShare[]>(analysis.shares);
   const [q, setQ] = useState('');
-  const { myRoles } = useAnalysisAccess();
-  const directory = [
-    ...myRoles.map((r) => ({ kind: 'role' as const, id: r.id, label: r.label, sub: t('analysis.share.roleSub', { defaultValue: 'Role' }) })),
-    ...SHARE_DIRECTORY.filter((d) => !myRoles.some((r) => r.label.toLowerCase() === d.label.toLowerCase())),
-  ];
-  const matches = q.trim()
-    ? directory.filter((d) => !shares.some((s) => s.id === d.id) && d.id !== analysis.ownerEmail && `${d.label} ${d.sub}`.toLowerCase().includes(q.toLowerCase()))
+  const search = useDebounce(q.trim(), 400);
+  const { data: directory } = useGetAnalysisShareDirectoryQuery(search, { skip: readOnly || !search });
+  // The owner needs no share, and a principal already on the list is not offered again.
+  const matches = search
+    ? (directory?.data ?? []).filter((d) => !shares.some((s) => s.kind === d.kind && s.id === d.id) && !(d.kind === 'user' && d.sub && d.sub === analysis.ownerEmail))
     : [];
 
   const access = (a: AnalysisShare['access']) => (a === 'edit' ? t('analysis.share.canEdit', { defaultValue: 'Can edit' }) : t('analysis.share.canView', { defaultValue: 'Can view' }));
@@ -65,7 +64,7 @@ export function ShareDialog({ open, analysis, readOnly, onClose, onSave }: Props
                     <span className="h-7 w-7 rounded-full bg-dune-tint text-dune-deep flex items-center justify-center">{d.kind === 'role' ? <Users className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}</span>
                     <span className="min-w-0">
                       <span className="block text-[13px] font-semibold text-slate-800">{d.label}</span>
-                      <span className="block text-[11px] text-slate-400">{d.sub}</span>
+                      <span className="block text-[11px] text-slate-400">{d.kind === 'role' ? t('analysis.share.roleSub', { defaultValue: 'Role' }) : d.sub}</span>
                     </span>
                   </button>
                 ))}
@@ -84,24 +83,24 @@ export function ShareDialog({ open, analysis, readOnly, onClose, onSave }: Props
             <span className="text-[12px] font-semibold text-slate-500">{t('analysis.share.owner', { defaultValue: 'Owner' })}</span>
           </div>
           {shares.map((s) => (
-            <div key={s.id} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-slate-50">
+            <div key={`${s.kind}:${s.id}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-slate-50">
               <span className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">{s.kind === 'role' ? <Users className="h-4 w-4" /> : <User className="h-4 w-4" />}</span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13px] font-semibold text-slate-800 truncate">{s.label}</span>
-                <span className="block text-[11px] text-slate-400">{s.kind === 'role' ? t('analysis.share.role', { defaultValue: 'Everyone with this role' }) : s.id}</span>
+                <span className="block text-[11px] text-slate-400">{s.kind === 'role' ? t('analysis.share.role', { defaultValue: 'Everyone with this role' }) : t('analysis.share.userSub', { defaultValue: 'User' })}</span>
               </span>
               {readOnly ? (
                 <span className="text-[12px] text-slate-500">{access(s.access)}</span>
               ) : (
                 <>
-                  <Select value={s.access} onValueChange={(v) => setShares(shares.map((x) => (x.id === s.id ? { ...x, access: v as AnalysisShare['access'] } : x)))}>
+                  <Select value={s.access} onValueChange={(v) => setShares(shares.map((x) => (x.kind === s.kind && x.id === s.id ? { ...x, access: v as AnalysisShare['access'] } : x)))}>
                     <SelectTrigger className="h-8 w-[112px] text-xs shadow-none"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="view" className="text-xs">{access('view')}</SelectItem>
                       <SelectItem value="edit" className="text-xs">{access('edit')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <button type="button" onClick={() => setShares(shares.filter((x) => x.id !== s.id))} className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-neg-text" aria-label={t('analysis.share.remove', { defaultValue: 'Remove access' })}>
+                  <button type="button" onClick={() => setShares(shares.filter((x) => !(x.kind === s.kind && x.id === s.id)))} className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-neg-text" aria-label={t('analysis.share.remove', { defaultValue: 'Remove access' })}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </>
@@ -117,8 +116,8 @@ export function ShareDialog({ open, analysis, readOnly, onClose, onSave }: Props
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>{readOnly ? t('analysis.close', { defaultValue: 'Close' }) : t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
-          {!readOnly && <Button onClick={() => { onSave(shares); onClose(); }}>{t('analysis.share.save', { defaultValue: 'Save access' })}</Button>}
+          <Button variant="outline" onClick={onClose} disabled={saving}>{readOnly ? t('analysis.close', { defaultValue: 'Close' }) : t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
+          {!readOnly && <Button loading={saving} onClick={() => onSave(shares)}>{t('analysis.share.save', { defaultValue: 'Save access' })}</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

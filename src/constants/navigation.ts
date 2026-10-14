@@ -4,12 +4,13 @@ export type NavItem = {
   title: string;
   href: string;
   icon: string;
-  permKey: string | string[];
-  i18nKey: string;
-  sidebarLabel?: string;
-  breadcrumbLabel?: string;
-  divider?: boolean;
-  showCount?: boolean;
+  permKey: string | string[]; // The .view permission required to show this nav link ('' = always visible; array = visible if ANY key is held)
+  i18nKey: string;       // Translation key for the link label (page header)
+  sidebarLabel?: string; // Override label shown only in the sidebar
+  breadcrumbLabel?: string; // Override label shown only in the breadcrumb
+  divider?: boolean;  // Render a thin separator above this item (reference design)
+  showCount?: boolean; // Show live pending-count badge next to this item in the sidebar
+  hidden?: boolean;    // Left out of the sidebar; the page stays reachable by URL and keeps its title and breadcrumb
   children?: NavItem[];
 };
 
@@ -44,10 +45,18 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: 'Inbox',
     items: [
       { title: 'Attribute Change Requests', href: '/tasks/attribute-change-requests', icon: 'Inbox', permKey: ['approvals.view', 'approvals.approve'], i18nKey: 'nav.attributeChangeRequests', showCount: true },
-      { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns'           },
+      { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns', hidden: true },
+      // Module-level gate. The per-entity permissions are still enforced by the API and by
+      // SBR_PORTAL_PKG on every bulk call — this key only decides whether the module is
+      // offered at all. Existing roles received it automatically via the seeder backfill,
+      // so nobody who could reach Bulk Change before lost it.
       { title: 'Bulk Change',                href: '/tasks/bulk-change',                icon: 'Layers',           permKey: 'bulk_change.view', i18nKey: 'nav.bulkChange' },
-      { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory'            },
-      { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory'        },
+      // NPC-330 contact tags: the registry is readable by anyone who can see contacts (editing
+      // needs contact_tags.manage); the upload needs contacts.tag.
+      { title: 'Contact Tags',              href: '/tasks/contact-tags',               icon: 'Tag',              permKey: 'contacts.view', i18nKey: 'nav.contactTags' },
+      { title: 'Tag Upload',                href: '/tasks/tag-upload',                 icon: 'Tags',             permKey: 'contacts.tag', i18nKey: 'nav.tagUpload' },
+      { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory', hidden: true },
+      { title: 'Profiling History',         href: '/tasks/profiling-history',          icon: 'History',          permKey: '', i18nKey: 'nav.profilingHistory', hidden: true },
       { title: 'Audit Log',                 href: '/audit-log',                        icon: 'ClipboardList',    permKey: 'audit_log.view', i18nKey: 'nav.auditLog'     },
     ],
   },
@@ -68,7 +77,9 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.surveys',
     icon: 'ClipboardList',
     items: [
+      // Dummy-data screens (no survey source yet), so ungated like the other placeholder modules.
       { title: 'Survey Samples', href: '/surveys', icon: 'ClipboardList', permKey: 'surveys.view', i18nKey: 'nav.surveySamples' },
+      { title: 'Sample Builder', href: '/sampling', icon: 'Dices', permKey: 'sampling.view', i18nKey: 'nav.sampleBuilder' },
     ],
   },
   {
@@ -77,9 +88,10 @@ export const NAV_GROUPS: NavGroup[] = [
     i18nKey: 'nav.dataQuality',
     icon: 'Gauge',
     items: [
-      { title: 'Quality Dashboard',    href: '/quality/dashboard',  icon: 'Gauge',    permKey: '', i18nKey: 'nav.qualityDashboard'    },
-      { title: 'Quality Findings',     href: '/quality/findings',   icon: 'Flag',     permKey: '', i18nKey: 'nav.qualityFindings'     },
-      { title: 'Regulator Escalation', href: '/quality/escalation', icon: 'Landmark', permKey: '', i18nKey: 'nav.regulatorEscalation' },
+      { title: 'Quality Dashboard',    href: '/quality/dashboard',  icon: 'Gauge',    permKey: 'data_quality.view', i18nKey: 'nav.qualityDashboard' },
+      { title: 'NPC Corrections',      href: '/quality/corrections', icon: 'PenLine', permKey: 'data_quality.view', i18nKey: 'nav.npcCorrections' },
+      { title: 'Quality Findings',     href: '/quality/findings',   icon: 'Flag',     permKey: '', i18nKey: 'nav.qualityFindings', hidden: true },
+      { title: 'Regulator Escalation', href: '/quality/escalation', icon: 'Landmark', permKey: '', i18nKey: 'nav.regulatorEscalation', hidden: true },
     ],
   },
   {
@@ -99,10 +111,11 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: 'User Management',  href: '/admin/users',          icon: 'Users',       permKey: 'admin_panel.users.view', i18nKey: 'admin.tabs.users',         sidebarLabel: 'Users', breadcrumbLabel: 'Users' },
       { title: 'Roles',            href: '/admin/roles',          icon: 'ShieldCheck', permKey: 'admin_panel.roles.view', i18nKey: 'admin.tabs.roles'                                                              },
-      { title: 'Rule Registry',    href: '/admin/rule-registry',  icon: 'SlidersVertical',  permKey: '',                       i18nKey: 'admin.tabs.ruleRegistry'                                                       },
-      { title: 'Column Access',    href: '/admin/column-access',  icon: 'Columns2',    permKey: '',                       i18nKey: 'admin.tabs.columnAccess'                                                       },
+      { title: 'Rule Registry',    href: '/admin/rule-registry',  icon: 'SlidersVertical',  permKey: '',                       i18nKey: 'admin.tabs.ruleRegistry', hidden: true },
+      { title: 'Column Access',    href: '/admin/column-access',  icon: 'Columns2',    permKey: '',                       i18nKey: 'admin.tabs.columnAccess', hidden: true },
+      { title: 'System Accounts',  href: '/admin/system-accounts', icon: 'KeyRound',   permKey: 'admin_panel.system_accounts.manage', i18nKey: 'admin.tabs.systemAccounts' },
       { title: 'Pipeline Logs',    href: '/admin/pipeline-logs',  icon: 'DatabaseZap', permKey: 'admin_panel.pipeline_logs.view', i18nKey: 'admin.tabs.pipelineLogs'                                                 },
-      { title: 'Activity Logs',    href: '/admin/activity-logs',  icon: 'History',     permKey: '',                       i18nKey: 'admin.tabs.activityLogs'                                                       },
+      { title: 'Activity Logs',    href: '/admin/activity-logs',  icon: 'History',     permKey: '',                       i18nKey: 'admin.tabs.activityLogs', hidden: true },
     ],
   },
 ];

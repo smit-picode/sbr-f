@@ -1,7 +1,7 @@
 import { baseApi } from '@/services/api';
 import type { ApiResponse } from '@/types';
 import type {
-  SurveyGdpApi,
+  SurveyGvaApi,
   SurveyId,
   SurveyParticipationApiRow,
   SurveyResponseApiRow,
@@ -28,8 +28,9 @@ export const surveysApi = baseApi.injectEndpoints({
       query: (sbrId) => ({ url: `/surveys/establishments/${sbrId}/participation` }),
       providesTags: ['Surveys'],
     }),
-    getSurveyGdp: builder.query<ApiResponse<SurveyGdpApi>, number>({
-      query: (sbrId) => ({ url: `/surveys/establishments/${sbrId}/gdp` }),
+    // Establishment detail: its AES accounts and the national totals behind its GVA contribution.
+    getSurveyGva: builder.query<ApiResponse<SurveyGvaApi>, number>({
+      query: (sbrId) => ({ url: `/surveys/establishments/${sbrId}/gva` }),
       providesTags: ['Surveys'],
     }),
   }),
@@ -41,5 +42,5 @@ export const {
   useGetSurveyResponsesQuery,
   useGetSurveyResponseDetailQuery,
   useGetSurveyParticipationQuery,
-  useGetSurveyGdpQuery,
+  useGetSurveyGvaQuery,
 } = surveysApi;

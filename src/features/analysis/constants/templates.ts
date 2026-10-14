@@ -6,7 +6,8 @@ export interface AnalysisTemplate {
   name: string;
   description: string;
   icon: string;
-  compareTo: string | null;
+  // 'oldest' = the oldest snapshot when the analysis is created (none if no snapshot exists yet)
+  compareTo: 'oldest' | null;
   filters: AnalysisFilter[];
   build: () => AnalysisBlock[];
 }
@@ -62,8 +63,8 @@ function statisticalTables(): AnalysisBlock[] {
 }
 
 export const ANALYSIS_TEMPLATES: AnalysisTemplate[] = [
-  { id: 'overview', name: 'Register overview', description: 'Headline KPIs, activity, geography, size and growth', icon: 'LayoutDashboard', compareTo: 'f-2026-04', filters: [], build: registerOverview },
-  { id: 'comparison', name: 'Frame vs frame', description: 'Births, deaths and migrations between two frames', icon: 'ArrowRightLeft', compareTo: 'f-2026-04', filters: [], build: frameComparison },
+  { id: 'overview', name: 'Register overview', description: 'Headline KPIs, activity, geography, size and growth', icon: 'LayoutDashboard', compareTo: 'oldest', filters: [], build: registerOverview },
+  { id: 'comparison', name: 'Frame vs frame', description: 'Births, deaths and migrations between two frames', icon: 'ArrowRightLeft', compareTo: 'oldest', filters: [], build: frameComparison },
   { id: 'quality', name: 'Data quality check', description: 'Completeness grid and lists of units to fix', icon: 'ShieldCheck', compareTo: null, filters: [], build: qualityCheck },
   { id: 'tables', name: 'Statistical tables', description: 'Publication-style cross-tabs with disclosure control', icon: 'Table2', compareTo: null, filters: [], build: statisticalTables },
   { id: 'groups', name: 'Enterprise groups', description: 'Group types, foreign control and employment', icon: 'Network', compareTo: null, filters: [], build: groupsLandscape },

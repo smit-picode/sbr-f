@@ -45,6 +45,9 @@ export interface BulkChangeRecordRow {
   id: number;
   status: string;
   fields: BulkChangeFieldDiff[];
+  // UPDATE for an edit; INSERT / DELETE for the new contacts and tag changes an integration batch carries.
+  operation?: string | null;
+  memberTable?: string | null;
 }
 
 // A row SUBMIT_BULK could not create at all.
@@ -108,12 +111,20 @@ export interface BulkChangeSubmitResponse {
   submitted: number;
   failed: number;
   items: Array<{
-    index: number;
+    index?: number;
+    rowNumber?: number;
+    id?: number;
     audit_log_id?: number;
     status: 'PENDING' | 'FAILED';
     error_code?: number;
     error?: string;
   }>;
+}
+
+// One row a submit could not create a change request for.
+export interface BulkChangeSubmitFailure {
+  rowNumber?: number;
+  error: string;
 }
 
 // Result of DECIDE_BULK, as returned by POST /bulk-change/:id/decide.

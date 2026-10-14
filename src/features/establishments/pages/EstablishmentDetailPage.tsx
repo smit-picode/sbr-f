@@ -18,10 +18,13 @@ import { useGetEstablishmentByIdQuery, useGetEstablishmentHistoryQuery } from '.
 import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { formatDate } from '@/utils/format';
 import { usePermission } from '@/hooks';
+import { useHasPermission } from '@/hooks/usePermission';
 import { useLanguage } from '@/i18n';
 import { SurveyParticipation } from '@/features/surveys/components/SurveyParticipation';
-import { GdpContribution } from '@/features/surveys/components/GdpContribution';
-import { SHOW_ESTABLISHMENT_SURVEY_SECTIONS } from '../constants';
+import { EstablishmentContacts } from '@/features/contactTags/components/EstablishmentContacts';
+import { GvaContribution } from '@/features/surveys/components/GvaContribution';
+import { EMPLOYMENT_SIZE_BANDS, SHOW_ESTABLISHMENT_SURVEY_SECTIONS } from '../constants';
+import { useGetIsicValuesQuery } from '@/features/lookups/api/lookupsApi';
 import type { SbrEstablishment } from '@/types';
 import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight, Activity } from 'lucide-react';
 
@@ -235,7 +238,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const searchParams = useSearchParams();
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
-  const { canView: canViewSurveys } = usePermission('surveys');
+  const { canView: canViewContacts } = usePermission('contacts');
+  // The survey widgets read /surveys/*, which needs surveys.view: without it they are left out rather than refused.
+  const canViewSurveys = useHasPermission('surveys.view');
+  // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
   const fromParam = searchParams.get('from');
   const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
   const back = fromSample
@@ -243,6 +249,9 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     : { label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') };
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
+  // The ISIC list is loaded once and shared with the ISIC picker; it names the code shown on this record.
+  const isicLookup = useGetIsicValuesQuery(undefined, { skip: !canOpenDetail });
+  // The current row's VALID_FROM is when its latest version started, so entry into the register comes from the oldest version.
   const { data: historyData } = useGetEstablishmentHistoryQuery(sbrId, { skip: !canOpenDetail || !canViewHistory });
 
   const BackLink = (
@@ -282,6 +291,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   }
 
   const e = data.data;
+  const isicDescription = e.ISIC_CODE ? isicLookup.data?.data?.find((x) => x.CODE === e.ISIC_CODE)?.DESCRIPTION ?? null : null;
   const pendingFields = e.PENDING_FIELDS ?? {};
   const title = e.NAME_ENU || e.NPC_NAME_ENU || `Establishment #${e.SBR_ID}`;
 
@@ -348,8 +358,28 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     F('EST_STATUS_CATEGORY', fl('EST_STATUS_CATEGORY', 'Status Category'), { source: 'EST_STATUS_CATEGORY_SOURCE' }),
     F('LEGAL_TYPE', fl('LEGAL_TYPE', 'Legal Type'), { source: 'LEGAL_TYPE_SOURCE' }),
     F('SECTOR_ID', fl('SECTOR_ID', 'Sector'), { source: 'SECTOR_ID_SOURCE' }),
-    F('ISIC_CODE', fl('ISIC_CODE', 'ISIC Code'), { source: 'ISIC_CODE_SOURCE', mono: true }),
+    F('ISIC_CODE', fl('ISIC_CODE', 'ISIC Code'), {
+      source: 'ISIC_CODE_SOURCE',
+      node: (
+        <span>
+          <span className="font-mono">{e.ISIC_CODE}</span>
+          {isicDescription && <span className="ms-2 text-slate-500">{isicDescription}</span>}
+        </span>
+      ),
+    }),
     F('EMPLOYMENT_COUNT', fl('EMPLOYMENT_COUNT', 'Employees'), { source: 'EMPLOYMENT_COUNT_SOURCE' }),
+    F('EMPLOYMENT_SIZE_CATEGORY', fl('EMPLOYMENT_SIZE_CATEGORY', 'Size class'), {
+      node: e.EMPLOYMENT_SIZE_CATEGORY ? (
+        <span>
+          {t(`filters.size.${e.EMPLOYMENT_SIZE_CATEGORY.toLowerCase()}`, { defaultValue: e.EMPLOYMENT_SIZE_CATEGORY })}
+          {EMPLOYMENT_SIZE_BANDS[e.EMPLOYMENT_SIZE_CATEGORY] && (
+            <span className="ms-1.5 text-slate-500">
+              ({t('establishmentDetail.sizeBand', { defaultValue: '{{band}} employees', band: EMPLOYMENT_SIZE_BANDS[e.EMPLOYMENT_SIZE_CATEGORY] })})
+            </span>
+          )}
+        </span>
+      ) : undefined,
+    }),
     F('MAIN_BRANCH_FLG', fl('MAIN_BRANCH_FLG', 'Main / Branch'), { source: 'MAIN_BRANCH_FLG_SOURCE' }),
     F('HOLDING_COMPANY_FLG', fl('HOLDING_COMPANY_FLG', 'Holding Co.'), { source: 'HOLDING_COMPANY_FLG_SOURCE' }),
   ].filter((f) => f.show);
@@ -493,10 +523,12 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         </div>
       )}
 
-      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && canViewSurveys && (
+      {canViewContacts && <EstablishmentContacts sbrId={e.SBR_ID} />}
+
+      {SHOW_ESTABLISHMENT_SURVEY_SECTIONS && (
         <>
-          <SurveyParticipation sbrId={e.SBR_ID} />
-          <GdpContribution sbrId={e.SBR_ID} />
+          {canViewSurveys && <SurveyParticipation sbrId={e.SBR_ID} />}
+          {canViewSurveys && <GvaContribution sbrId={e.SBR_ID} />}
         </>
       )}
 

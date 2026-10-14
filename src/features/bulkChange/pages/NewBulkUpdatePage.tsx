@@ -14,7 +14,7 @@ import { BulkChangeValidateStep } from '../components/BulkChangeValidateStep';
 import { BulkChangeConfirmStep } from '../components/BulkChangeConfirmStep';
 import { useSubmitBulkChangeMutation } from '../api/bulkChangeApi';
 import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
-import type { BulkChangeItemInput, BulkChangeValidationResult } from '../types';
+import type { BulkChangeItemInput, BulkChangeSubmitFailure, BulkChangeSubmitResponse, BulkChangeValidationResult } from '../types';
 
 const STEP_SETUP = 0;
 const STEP_UPLOAD = 1;
@@ -31,6 +31,7 @@ export function NewBulkUpdatePage() {
   const [validating, setValidating] = useState(false);
   const [items, setItems] = useState<BulkChangeItemInput[]>([]);
   const [reason, setReason] = useState('');
+  const [submitFailures, setSubmitFailures] = useState<BulkChangeSubmitFailure[]>([]);
 
   const [submitBulkChange, { isLoading: submitting }] = useSubmitBulkChangeMutation();
 
@@ -62,6 +63,7 @@ export function NewBulkUpdatePage() {
     if (!validation || items.length === 0) return;
     const validItems = items.filter((_, index) => validation.rows[index]?.status === 'VALID');
     if (validItems.length === 0) return;
+    setSubmitFailures([]);
     try {
       const response = await submitBulkChange({
         entityType: ENTITY_TYPE_BY_TABLE[selectedTable],
@@ -87,7 +89,16 @@ export function NewBulkUpdatePage() {
         toast.success(t('bulkChange.wizard.submitSuccess', { defaultValue: 'Bulk update submitted for approval.' }));
       }
       router.push('/tasks/bulk-change');
-    } catch {
+    } catch (error) {
+      const body = (error as { data?: { message?: string; data?: Partial<BulkChangeSubmitResponse> } })?.data;
+      const failures = (body?.data?.items ?? []).filter((item) => item.status === 'FAILED');
+      setSubmitFailures(failures.map((item) => ({
+        rowNumber: item.rowNumber,
+        error: item.error ?? t('bulkChange.wizard.confirm.unknownFailure', { defaultValue: 'This row could not be submitted.' }),
+      })));
+      if ((error as { status?: number })?.status === 400) {
+        toast.error(body?.message ?? t('common.somethingWentWrong', { defaultValue: 'Something went wrong. Please try again.' }));
+      }
     }
   };
 
@@ -135,6 +146,7 @@ export function NewBulkUpdatePage() {
           validation={validation}
           reason={reason}
           onReasonChange={setReason}
+          submitFailures={submitFailures}
         />
       )}
 

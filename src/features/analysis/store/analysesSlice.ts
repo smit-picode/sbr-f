@@ -1,26 +1,28 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Analysis } from '@/types';
 
-// Frontend-only store for saved analyses (dummy phase) — replaced by the analyses CRUD API later.
+// Working copies of opened analyses: edits and undo apply here instantly, autosave persists them.
 interface AnalysesState {
   items: Analysis[];
-  hydrated: boolean;
 }
 
-const initialState: AnalysesState = { items: [], hydrated: false };
+const initialState: AnalysesState = { items: [] };
 
 const analysesSlice = createSlice({
   name: 'analyses',
   initialState,
   reducers: {
-    hydrateAnalyses: (state, action: PayloadAction<Analysis[]>) => {
-      state.items = action.payload;
-      state.hydrated = true;
-    },
     upsertAnalysis: (state, action: PayloadAction<Analysis>) => {
       const i = state.items.findIndex((a) => a.id === action.payload.id);
       if (i === -1) state.items.unshift(action.payload);
       else state.items[i] = action.payload;
+    },
+    // After a save only the server-owned fields move, so edits typed during the request are kept.
+    markAnalysisSaved: (state, action: PayloadAction<Pick<Analysis, 'id' | 'rowVersion' | 'updatedAt'>>) => {
+      const a = state.items.find((x) => x.id === action.payload.id);
+      if (!a) return;
+      a.rowVersion = action.payload.rowVersion;
+      a.updatedAt = action.payload.updatedAt;
     },
     removeAnalysis: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((a) => a.id !== action.payload);
@@ -28,5 +30,5 @@ const analysesSlice = createSlice({
   },
 });
 
-export const { hydrateAnalyses, upsertAnalysis, removeAnalysis } = analysesSlice.actions;
+export const { upsertAnalysis, markAnalysisSaved, removeAnalysis } = analysesSlice.actions;
 export default analysesSlice.reducer;

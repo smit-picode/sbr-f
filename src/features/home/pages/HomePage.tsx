@@ -8,12 +8,15 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { NoData } from '@/components/common/NoData';
 import { RouteSkeleton } from '@/components/common/RouteSkeleton';
 import { useRouter } from '@/hooks/useAppRouter';
-import { useAppSelector } from '@/hooks';
+import { useAppSelector, usePersistedState } from '@/hooks';
 import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
 import { getFirstAccessibleHref, hasAnyNavPermission, hasNavPermission } from '@/utils/navAccess';
 import type { UserPermission } from '@/types';
 import { ExecutiveHomePage } from './ExecutiveHomePage';
-import { HOME_DASHBOARD_PERMISSIONS, HOME_EXECUTIVE_PERMISSION } from '../constants';
+import { ReviewerHomePage } from './ReviewerHomePage';
+import { StewardHomePage } from './StewardHomePage';
+import { HomeScreenSwitcher } from '../components/HomeScreenSwitcher';
+import { HOME_DASHBOARD_PERMISSIONS, HOME_SCREENS, type HomeScreen } from '../constants';
 
 const toName = (p: UserPermission | string): string => (typeof p === 'string' ? p : p.permissionName);
 
@@ -23,6 +26,7 @@ export function HomePage() {
   const user = useAppSelector((s) => s.auth.user);
   const storedPermissions = useAppSelector((s) => s.auth.permissions);
   const { data: freshPermissions, isLoading: permissionsLoading } = useGetMyPermissionsQuery();
+  const [chosenScreen, setChosenScreen] = usePersistedState<HomeScreen | null>('sbr:home:screen', null);
 
   const isSuperAdmin = user?.role?.toUpperCase() === 'SUPER_ADMIN';
   const permissionNames = freshPermissions?.data
@@ -40,7 +44,15 @@ export function HomePage() {
 
   if (awaitingPermissions || redirectHref) return <RouteSkeleton />;
 
-  if (isSuperAdmin || hasNavPermission(HOME_EXECUTIVE_PERMISSION, access)) return <ExecutiveHomePage />;
+  const screens = HOME_SCREENS.filter((s) => isSuperAdmin || hasNavPermission(s.permission, access));
+  const screen = screens.find((s) => s.key === chosenScreen)?.key ?? screens[0]?.key;
+  const switcher = screen && screens.length > 1
+    ? <HomeScreenSwitcher value={screen} options={screens} onChange={setChosenScreen} />
+    : undefined;
+
+  if (screen === 'executive') return <ExecutiveHomePage switcher={switcher} />;
+  if (screen === 'reviewer') return <ReviewerHomePage switcher={switcher} />;
+  if (screen === 'steward') return <StewardHomePage switcher={switcher} />;
 
   return (
     <PageContainer>

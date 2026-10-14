@@ -85,6 +85,9 @@ export interface AnalysisShare {
   access: 'view' | 'edit';
 }
 
+// The caller's access to a saved analysis, as resolved by the server.
+export type AnalysisAccessLevel = 'owner' | 'edit' | 'view';
+
 export interface Analysis {
   id: string;
   name: string;
@@ -93,11 +96,40 @@ export interface Analysis {
   ownerName: string;
   createdAt: string;
   updatedAt: string;
+  // Optimistic-lock token: an update with a stale value is rejected with 409.
+  rowVersion: number;
+  access: AnalysisAccessLevel;
   frame: string;
   compareTo: string | null;
   filters: AnalysisFilter[];
   blocks: AnalysisBlock[];
   shares: AnalysisShare[];
+}
+
+// The part of an analysis the server stores as its definition.
+export type AnalysisDefinition = Pick<Analysis, 'frame' | 'compareTo' | 'filters' | 'blocks'>;
+
+export interface AnalysisShareDirectoryEntry {
+  kind: 'user' | 'role';
+  id: string;
+  label: string;
+  sub: string;
+}
+
+export type AnalysisListScope = 'all' | 'mine' | 'shared';
+
+export interface AnalysisListParams {
+  scope?: AnalysisListScope;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AnalysisExportLog {
+  analysisId: number | null;
+  unsuppressed: boolean;
+  rowCount: number;
+  detail?: Record<string, unknown>;
 }
 
 export interface AnalysisFrame {
@@ -113,6 +145,8 @@ export interface AnalysisCrossFilter {
   value: string | null;
   sourceBlockId: string;
 }
+
+// ---- Query results: the shapes POST /analysis/query returns (built by SBR_ANALYSIS_API) ----
 
 export type AnalysisDisclosureFlag = 'min' | 'dominance' | 'secondary';
 
@@ -163,7 +197,8 @@ export interface AnalysisFlowResult {
   movedOut: number;
   end: number;
   unchanged: number;
-  links: { from: string | null; to: string | null; value: number }[];
+  // value is null when the link is below the disclosure threshold and the caller cannot see unsuppressed figures
+  links: { from: string | null; to: string | null; value: number | null }[];
 }
 
 export type AnalysisResult = AnalysisAggregateResult | AnalysisRecordsResult | AnalysisCompletenessResult | AnalysisFlowResult;

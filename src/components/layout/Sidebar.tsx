@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { withBasePath } from '@/utils/basePath';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from '@/hooks/useAppRouter';
@@ -15,6 +16,7 @@ import {
   MapPin,
   Table,
   ClipboardList,
+  Dices,
   GitBranch,
   Shield,
   ShieldCheck,
@@ -24,6 +26,7 @@ import {
   Camera,
   Database,
   Gauge,
+  PenLine,
   Flag,
   Landmark,
   Orbit,
@@ -33,6 +36,8 @@ import {
   DatabaseZap,
   History,
   ChartColumn,
+  Tag,
+  Tags,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
@@ -50,6 +55,7 @@ import { isNavGroupVisible, isNavItemVisible } from '@/utils/navAccess';
 import { useGetChangeRequestCountQuery } from '@/features/tasks/api/changeRequestsApi';
 
 const ICON_MAP: Record<string, LucideIcon> = {
+  Dices,
   Home,
   Building2,
   Layers,
@@ -67,6 +73,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Camera,
   Database,
   Gauge,
+  PenLine,
   Flag,
   Landmark,
   Orbit,
@@ -76,6 +83,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   DatabaseZap,
   History,
   ChartColumn,
+  Tag,
+  Tags,
 };
 
 const RAIL_GRADIENT = '#FFFFFF';
@@ -129,6 +138,7 @@ export function Sidebar() {
   const { t, i18n } = useTranslation();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [flyout, setFlyout] = useState<{ groupId: string; style: React.CSSProperties } | null>(null);
 
@@ -214,9 +224,12 @@ export function Sidebar() {
     });
   };
 
+  // Cover the page first: clearing auth re-renders it as a guest until the login page arrives.
   function handleLogout() {
+    if (signingOut) return;
+    setSigningOut(true);
+    router.replace('/login');
     dispatch(logout());
-    router.push('/login');
   }
 
   const initials = effectiveUser?.email?.slice(0, 2).toUpperCase() ?? 'U';
@@ -242,7 +255,7 @@ export function Sidebar() {
       >
         {!collapsed && (
           <Image
-            src="/assets/npc-logo-primary.png"
+            src={withBasePath('/assets/npc-logo-primary.png')}
             alt="National Planning Council"
             width={257}
             height={90}
@@ -394,6 +407,13 @@ export function Sidebar() {
           </>
         )}
       </div>
+      {signingOut && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center gap-2 bg-white text-sm text-slate-500">
+          <LogOut className="h-4 w-4 rtl:rotate-180" />
+          {t('actions.signingOut')}
+        </div>,
+        document.body,
+      )}
     </aside>
   );
 }

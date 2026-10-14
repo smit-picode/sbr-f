@@ -52,16 +52,16 @@ export interface SurveyParticipationApiRow {
   RESPONDED_ON: string | null;
 }
 
-// GET /surveys/establishments/:sbrId/gdp: its AES accounts per year and the national totals per quarter.
-export interface SurveyGdpApi {
+// GET /surveys/establishments/:sbrId/gva: its AES accounts per year and the national totals per quarter.
+export interface SurveyGvaApi {
   ISIC_CODE: string | null;
   ACTIVITY: { SURVEY_YEAR: number; DIVISION: string; TOTAL_TURNOVER: number; INTERMEDIATE_CONSUMPTION: number; UNITS: number }[];
   AES: { SURVEY_YEAR: number; RESPONSE_STATUS: ResponseStatus; TOTAL_TURNOVER: number | null; INTERMEDIATE_CONSUMPTION: number | null }[];
   ECONOMY: { SURVEY_YEAR: number; QUARTER_NUM: number; VALUE_ADDED: number; PRODUCTION: number; INTERMEDIATE_CONSUMPTION: number }[];
 }
 
-export type GdpMeasure = 'valueAdded' | 'production' | 'intermediate';
-export type GdpAccounts = Record<GdpMeasure, number>;
+export type GvaMeasure = 'valueAdded' | 'production' | 'intermediate';
+export type GvaAccounts = Record<GvaMeasure, number>;
 
 export interface SurveyResponsesFilter {
   surveyId?: SurveyId;

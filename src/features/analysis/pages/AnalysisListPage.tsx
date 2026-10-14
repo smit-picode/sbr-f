@@ -8,18 +8,21 @@ import type { Analysis } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
-import { useAppDispatch, useDebounce } from '@/hooks';
+import { useDebounce } from '@/hooks';
+import { cleanParams } from '@/utils/query';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
-import { SearchInput } from '@/components/common/SearchInput';
 import { NoData } from '@/components/common/NoData';
+import { SearchInput } from '@/components/common/SearchInput';
 import { AnalysisListSkeleton } from '@/components/common/AnalysisListSkeleton';
+import { ErrorState } from '@/components/common/ErrorState';
 import { Button } from '@/components/ui/button';
-import { ANALYSIS_LIST_HREF } from '../constants';
+import { ANALYSIS_LIST_HREF, ANALYSIS_LIST_LIMIT } from '../constants';
+import { toDefinition, useCreateAnalysisMutation, useDeleteAnalysisMutation, useDuplicateAnalysisMutation, useGetAnalysesQuery, useUpdateAnalysisMutation } from '../api/analysisApi';
 import { ANALYSIS_TEMPLATES, type AnalysisTemplate } from '../constants/templates';
-import { useAnalysesStore, useAnalysisAccess, nameFromEmail } from '../hooks/useAnalyses';
-import { removeAnalysis, upsertAnalysis } from '../store/analysesSlice';
-import { uid } from '../utils/blocks';
+import { useAnalysisAccess } from '../hooks/useAnalyses';
+import { useAnalysisFrames } from '../hooks/useAnalysisFrames';
+import { oldestFrozenFrame } from '../utils/frames';
 import { frameName } from '../utils/labels';
 import { AnalysisIcon } from '../components/AnalysisIcon';
 import { AnalysisThumbnail } from '../components/AnalysisThumbnail';
@@ -31,23 +34,25 @@ type Scope = 'all' | 'mine' | 'shared';
 export function AnalysisListPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { items, hydrated } = useAnalysesStore();
   const access = useAnalysisAccess();
+  useAnalysisFrames({ skip: !access.canViewSection });
   const [scope, setScope] = useState<Scope>('all');
   const [search, setSearch] = useState('');
   const debounced = useDebounce(search, 400);
   const [toDelete, setToDelete] = useState<Analysis | null>(null);
   const [pending, setPending] = useState<{ req: CreateAnalysisRequest; tpl?: AnalysisTemplate; source?: Analysis } | null>(null);
+  const { data, isLoading, isError, refetch } = useGetAnalysesQuery(cleanParams({ scope: 'all' as const, search: debounced.trim(), limit: ANALYSIS_LIST_LIMIT }), { skip: !access.canViewSection });
+  const [createAnalysis, { isLoading: creating }] = useCreateAnalysisMutation();
+  const [duplicateAnalysis, { isLoading: duplicating }] = useDuplicateAnalysisMutation();
+  const [updateAnalysis, { isLoading: describing }] = useUpdateAnalysisMutation();
+  const [deleteAnalysis, { isLoading: deleting }] = useDeleteAnalysisMutation();
 
-  const visible = useMemo(() => items.filter((a) => access.canView(a)), [items, access]);
-  const filtered = useMemo(() => {
-    const needle = debounced.trim().toLowerCase();
-    return visible
-      .filter((a) => (scope === 'mine' ? access.isOwner(a) : scope === 'shared' ? access.isSharedWithMe(a) : true))
-      .filter((a) => !needle || `${a.name} ${a.description} ${a.ownerName}`.toLowerCase().includes(needle))
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  }, [visible, scope, debounced, access]);
+  // The server returns only analyses this user may see, newest first; scope tabs split them by access.
+  const visible = useMemo(() => data?.data ?? [], [data]);
+  const filtered = useMemo(
+    () => visible.filter((a) => (scope === 'mine' ? access.isOwner(a) : scope === 'shared' ? access.isSharedWithMe(a) : true)),
+    [visible, scope, access]
+  );
 
   const create = (tpl?: AnalysisTemplate) => {
     setPending({
@@ -66,32 +71,46 @@ export function AnalysisListPage() {
     setPending({ source: src, req: { kind: 'duplicate', name: t('analysis.copyOf', { defaultValue: 'Copy of {{name}}', name: src.name }), description: src.description, blockCount: src.blocks.length } });
   };
 
-  const confirmCreate = (name: string, description: string) => {
+  const confirmCreate = async (name: string, description: string) => {
     if (!pending) return;
     const { tpl, source } = pending;
-    setPending(null);
-    const now = new Date().toISOString();
-    if (source) {
-      dispatch(upsertAnalysis({ ...JSON.parse(JSON.stringify(source)), id: uid('a'), name, description, ownerEmail: access.email, ownerName: nameFromEmail(access.email), shares: [], createdAt: now, updatedAt: now }));
-      toast.success(t('analysis.duplicated', { defaultValue: 'Analysis duplicated.' }));
-      return;
+    try {
+      if (source) {
+        const copy = (await duplicateAnalysis({ id: source.id, name }).unwrap()).data;
+        // Duplicating copies the description; only a changed one needs a follow-up save.
+        if (copy && description !== copy.description) {
+          await updateAnalysis({ id: copy.id, body: { name: copy.name, description, definition: toDefinition(copy), rowVersion: copy.rowVersion } }).unwrap();
+        }
+        setPending(null);
+        toast.success(t('analysis.duplicated', { defaultValue: 'Analysis duplicated.' }));
+        return;
+      }
+      const res = await createAnalysis({
+        name,
+        description,
+        definition: {
+          frame: 'live',
+          compareTo: tpl?.compareTo === 'oldest' ? oldestFrozenFrame() : null,
+          filters: tpl?.filters ?? [],
+          blocks: tpl ? tpl.build() : [],
+        },
+      }).unwrap();
+      setPending(null);
+      if (res.data) router.push(`${ANALYSIS_LIST_HREF}/${res.data.id}`);
+    } catch {
+      toast.error(t('analysis.saveFailed', { defaultValue: 'Could not save the analysis. Please try again.' }));
     }
-    const a: Analysis = {
-      id: uid('a'),
-      name,
-      description,
-      ownerEmail: access.email,
-      ownerName: nameFromEmail(access.email),
-      createdAt: now,
-      updatedAt: now,
-      frame: 'live',
-      compareTo: tpl?.compareTo ?? null,
-      filters: tpl?.filters ?? [],
-      blocks: tpl ? tpl.build() : [],
-      shares: [],
-    };
-    dispatch(upsertAnalysis(a));
-    router.push(`${ANALYSIS_LIST_HREF}/${a.id}`);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    try {
+      await deleteAnalysis(toDelete.id).unwrap();
+      setToDelete(null);
+      toast.success(t('analysis.deleted', { defaultValue: 'Analysis deleted.' }));
+    } catch {
+      toast.error(t('analysis.deleteFailed', { defaultValue: 'Could not delete the analysis. Please try again.' }));
+    }
   };
 
   if (!access.canViewSection) {
@@ -108,7 +127,8 @@ export function AnalysisListPage() {
     );
   }
 
-  if (!hydrated) return <PageContainer><AnalysisListSkeleton /></PageContainer>;
+  if (isLoading) return <PageContainer><AnalysisListSkeleton /></PageContainer>;
+  if (isError) return <PageContainer><div className="rounded-2xl bg-white shadow-card"><ErrorState onRetry={refetch} /></div></PageContainer>;
 
   const counts = { all: visible.length, mine: visible.filter(access.isOwner).length, shared: visible.filter(access.isSharedWithMe).length };
 
@@ -171,6 +191,7 @@ export function AnalysisListPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((a) => {
             const mine = access.isOwner(a);
+            const manage = access.canManage(a);
             return (
               <div
                 key={a.id}
@@ -182,10 +203,12 @@ export function AnalysisListPage() {
               >
                 <AnalysisThumbnail analysis={a} className="h-[150px]" />
                 <div className="absolute top-2.5 end-2.5 flex gap-1">
+                  {access.canCreate && (
                   <button type="button" onClick={(e) => { e.stopPropagation(); duplicate(a); }} className="h-8 w-8 rounded-full bg-white/95 shadow-soft flex items-center justify-center text-slate-500 hover:text-adaam-deep" aria-label={t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })} title={t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })}>
                     <Copy className="h-3.5 w-3.5" />
                   </button>
-                  {mine && (
+                  )}
+                  {manage && (
                     <button type="button" onClick={(e) => { e.stopPropagation(); setToDelete(a); }} className="h-8 w-8 rounded-full bg-white/95 shadow-soft flex items-center justify-center text-slate-500 hover:text-neg-text" aria-label={t('analysis.deleteAnalysis', { defaultValue: 'Delete analysis' })} title={t('analysis.deleteAnalysis', { defaultValue: 'Delete analysis' })}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -216,17 +239,14 @@ export function AnalysisListPage() {
         </div>
       )}
 
-      <CreateAnalysisDialog request={pending?.req ?? null} onCancel={() => setPending(null)} onConfirm={confirmCreate} />
+      <CreateAnalysisDialog request={pending?.req ?? null} busy={creating || duplicating || describing} onCancel={() => setPending(null)} onConfirm={confirmCreate} />
       <ConfirmDeleteDialog
         open={!!toDelete}
         title={t('analysis.deleteAnalysis', { defaultValue: 'Delete analysis' })}
         message={t('analysis.confirmDelete', { defaultValue: 'Delete “{{name}}”? People you shared it with lose access too. This cannot be undone.', name: toDelete?.name ?? '' })}
+        busy={deleting}
         onCancel={() => setToDelete(null)}
-        onConfirm={() => {
-          if (toDelete) dispatch(removeAnalysis(toDelete.id));
-          setToDelete(null);
-          toast.success(t('analysis.deleted', { defaultValue: 'Analysis deleted.' }));
-        }}
+        onConfirm={confirmDelete}
       />
     </PageContainer>
   );

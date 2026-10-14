@@ -1,3 +1,5 @@
+import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
+// Field labels for the edit modal's validation summary.
 export const ENTERPRISE_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Enterprise Name',
   SECTOR_ID: 'Sector',
@@ -12,13 +14,22 @@ export const ENTERPRISE_DEFAULT_FILTERS = {
   sectorId: '',
 } as const;
 
-export const ENTERPRISE_FILTER_COLUMNS: { value: string; label: string }[] = [
-  { value: 'ENTERPRISE_ID', label: 'Enterprise ID' },
+// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
+// the backend ENTERPRISE_FILTER_COLUMNS allow-list (enterprises.controller).
+export const ENTERPRISE_FILTER_COLUMNS: ColumnFilterOption[] = [
+  { value: 'ENTERPRISE_ID', label: 'Enterprise ID', type: 'number' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
   { value: 'NAME_ARA', label: 'Name (AR)' },
-  { value: 'STATUS', label: 'Status' },
-  { value: 'SECTOR_ID', label: 'Sector' },
+  { value: 'STATUS', label: 'Status', pick: true },
+  { value: 'SECTOR_ID', label: 'Sector', pick: true },
+  { value: 'ISIC_CODE', label: 'ISIC code', pick: true },
+  { value: 'LEGAL_TYPE', label: 'Legal type', pick: true },
+  { value: 'PARENT_ENTITY_COUNTRY', label: 'Parent country', pick: true },
+  { value: 'FOREIGN_CONTROLLED_FLG', label: 'Foreign controlled', pick: true },
   { value: 'MOCI_CR_NUM', label: 'Main CR' },
+  { value: 'EMPLOYMENT_COUNT', label: 'Employment count', type: 'number' },
+  { value: 'ESTABLISHMENT_COUNT', label: 'Number of establishments', type: 'number' },
+  { value: 'ECON_ACTIVITY_START_DATE', label: 'Activity start date', type: 'date' },
 ];
 
 export const ISIC_LABELS: Record<string, string> = {

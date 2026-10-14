@@ -10,6 +10,9 @@ import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
 import { getContactColumns } from '../components/ContactColumns';
 import { EditContactModal } from '../components/EditContactModal';
 import { useGetContactsListQuery } from '../api/contactsApi';
+import { useGetContactTagsQuery } from '@/features/contactTags/api/contactTagsApi';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLanguage } from '@/i18n';
 import { CONTACT_DEFAULT_FILTERS } from '../constants';
 import type { ContactFilters, SbrContact } from '@/types';
 import { cleanParams } from '@/utils/query';
@@ -32,7 +35,10 @@ export function ContactsListPage() {
   const [filters, setFilters] = usePersistedState<ContactFilters>('sbr:contacts:filters', CONTACT_DEFAULT_FILTERS);
   const [editTarget, setEditTarget] = useState<SbrContact | null>(null);
   const { t } = useTranslation();
+  const { isArabic } = useLanguage();
   const router = useRouter();
+  const { data: tagRegistry } = useGetContactTagsQuery();
+  const tagOptions = tagRegistry?.data ?? [];
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -61,7 +67,8 @@ export function ContactsListPage() {
 
   const { canEdit: canEditContact, canSearch, canViewDetail } = usePermission('contacts');
   const canOpenDetail = canViewDetail || canEditContact;
-  const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact);
+  const tagNames = new Map(tagOptions.map((tag) => [tag.CODE, (isArabic ? tag.NAME_AR || tag.NAME_EN : tag.NAME_EN || tag.NAME_AR) || tag.CODE]));
+  const columns = getContactColumns((row) => setEditTarget(row), t, canEditContact, (code) => tagNames.get(code) ?? code);
   const records = isValidationError ? [] : (data?.data ?? []);
   const total = isValidationError ? 0 : (data?.total ?? 0);
 
@@ -86,17 +93,42 @@ export function ContactsListPage() {
             onChange={(v) => handleFilterChange({ search: v, page: 1 })}
             placeholder={t('filters.searchByContact')}
           />
+          {tagOptions.length > 0 && (
+            <Select
+              value={filters.tagCode || '__all__'}
+              onValueChange={(v) => handleFilterChange({ tagCode: v === '__all__' ? '' : v, page: 1 })}
+            >
+              <SelectTrigger className="w-[220px] shadow-none">
+                <SelectValue placeholder={t('filters.tag')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">{t('filters.allTags')}</SelectItem>
+                {tagOptions.map((tag) => (
+                  <SelectItem key={tag.CODE} value={tag.CODE}>
+                    {(isArabic ? tag.NAME_AR || tag.NAME_EN : tag.NAME_EN || tag.NAME_AR) || tag.CODE}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       )}
 
       {canSearch && (
         <FilterChips
-          chips={filters.search ? [{
-            key: 'search',
-            label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
-            onRemove: () => handleFilterChange({ search: '', page: 1 }),
-          } as FilterChip] : []}
-          onClearAll={() => handleFilterChange({ search: '', page: 1 })}
+          chips={[
+            ...(filters.search ? [{
+              key: 'search',
+              label: `${t('filters.search', { defaultValue: 'Search' })}: ${filters.search}`,
+              onRemove: () => handleFilterChange({ search: '', page: 1 }),
+            } as FilterChip] : []),
+            ...(filters.tagCode ? [{
+              key: 'tagCode',
+              label: `${t('filters.tag')}: ${filters.tagCode}`,
+              onRemove: () => handleFilterChange({ tagCode: '', page: 1 }),
+            } as FilterChip] : []),
+          ]}
+          onClearAll={() => handleFilterChange({ search: '', tagCode: '', page: 1 })}
         />
       )}
 
@@ -114,7 +146,7 @@ export function ContactsListPage() {
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
         stickyFirstColumn
-        onRowClick={canOpenDetail ? (row) => router.push(`/contacts/${row.ID}`) : undefined}
+        onRowClick={(row) => (canOpenDetail ? router.push(`/contacts/${row.ID}`) : toast.warning(t('common.noDetailAccess', { defaultValue: "You do not have permission to open this record's details." })))}
         getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]' : undefined)}
       />
 

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useRouter as useNextRouter } from 'next/navigation';
 import { isNavigationTo, navigationProgress } from '@/utils/navigationProgress';
+import { withBasePath } from '@/utils/basePath';
 
 // Drop-in for next/navigation's useRouter that also starts the global navigation progress bar.
 export function useRouter(): ReturnType<typeof useNextRouter> {
@@ -10,11 +11,11 @@ export function useRouter(): ReturnType<typeof useNextRouter> {
   return useMemo(() => ({
     ...router,
     push: (href, options) => {
-      if (isNavigationTo(href)) navigationProgress.start();
+      if (isNavigationTo(withBasePath(href))) navigationProgress.start();
       router.push(href, options);
     },
     replace: (href, options) => {
-      if (isNavigationTo(href)) navigationProgress.start();
+      if (isNavigationTo(withBasePath(href))) navigationProgress.start();
       router.replace(href, options);
     },
     back: () => {

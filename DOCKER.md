@@ -14,7 +14,7 @@ code, the VPN, or DB credentials.
 docker compose up
 ```
 
-- Frontend → http://localhost:7000 (hot reload)
+- Frontend → http://localhost:7000/sbr (hot reload; the app is served under the `/sbr` base path)
 - API calls go to `NEXT_PUBLIC_API_URL`
 - Stop with `Ctrl+C`. Rebuild after dependency changes: `docker compose up --build`.
 

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateContactMutation } from '../api/contactsApi';
+import { ContactTagEditor } from '@/features/contactTags/components/TagControls';
 import { toast } from '@/utils/toast';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
@@ -63,7 +64,6 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
         WEBSITE:      contact.WEBSITE ?? '',
         ROLE:         contact.ROLE ?? '',
         SOURCE_CODE:  contact.SOURCE_CODE ?? '',
-        PRIORITY:     contact.PRIORITY,
       });
     }
   }, [contact]);
@@ -100,11 +100,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     if (str(form.PO_BOX).length > 20) e.PO_BOX = 'Max 20 characters allowed';
     if (str(form.WEBSITE).length > 500) e.WEBSITE = 'Max 500 characters allowed';
 
-    const priority = form.PRIORITY;
-    if (priority !== undefined && priority !== null && Number(priority) < 1) {
-      e.PRIORITY = 'Min value is 1';
-    }
-
+    // Enum validations for select fields
     if (form.ROLE !== null && form.ROLE !== undefined && form.ROLE !== '' && !CONTACT_ROLE_OPTIONS.includes(String(form.ROLE))) {
       e.ROLE = `Must be one of [${CONTACT_ROLE_OPTIONS.join(', ')}, or empty]`;
     }
@@ -268,19 +264,14 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
             </Select>
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
-          <div className="space-y-1" data-field="PRIORITY">
-            <Label>{t('editContact.fields.priority')}</Label>
-            <Input
-              type="number"
-              className={inp('PRIORITY')}
-              value={form.PRIORITY ?? ''}
-              onChange={(e) => {
-                setForm((p) => ({ ...p, PRIORITY: Number(e.target.value) }));
-                if (errors.PRIORITY) setErrors((er) => { const n = { ...er }; delete n.PRIORITY; return n; });
-              }}
-            />
-            <FieldErr msg={err('PRIORITY')} />
-          </div>
+
+          {contact?.CONTACT_ID != null && (
+            <div className="col-span-2 space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 p-3" data-field="TAGS">
+              <Label>{t('contactTags.panelTitle', { defaultValue: 'Tags' })}</Label>
+              <p className="text-[11.5px] text-slate-500">{t('contactTags.editModalNote', { defaultValue: 'Saved as soon as you change them, without approval. They are not part of this change request.' })}</p>
+              <ContactTagEditor sbrId={contact.SBR_ID} contactId={contact.CONTACT_ID} />
+            </div>
+          )}
 
           <div className="col-span-2 pt-2">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-slate-400 border-b border-slate-100 pb-1">{t('editContact.sections.metadata')}</p>

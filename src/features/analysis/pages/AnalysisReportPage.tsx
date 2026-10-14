@@ -4,24 +4,28 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { ChartColumn, Copy, Ellipsis, FileDown, FileSpreadsheet, Plus, Presentation, Share2, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AnalysisBlock, AnalysisBlockType, AnalysisCrossFilter, AnalysisEntity, AnalysisFilter, AnalysisResolvedQuery } from '@/types';
+import type { AnalysisBlock, AnalysisBlockType, AnalysisCrossFilter, AnalysisEntity, AnalysisFilter, AnalysisResolvedQuery, AnalysisShare } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
-import { useAppDispatch } from '@/hooks';
+import { useAppDispatch, useAppSelector } from '@/hooks';
+import { ErrorState } from '@/components/common/ErrorState';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
-import { AnalysisReportSkeleton } from '@/components/common/AnalysisReportSkeleton';
 import { NoData } from '@/components/common/NoData';
+import { AnalysisReportSkeleton } from '@/components/common/AnalysisReportSkeleton';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_LIST_HREF, ANALYSIS_QUICK_ADD } from '../constants';
 import { resolveBlockQuery } from '../engine/resolve';
-import { useAnalysesStore, useAnalysisAccess, nameFromEmail } from '../hooks/useAnalyses';
+import { toDefinition, useDeleteAnalysisMutation, useDuplicateAnalysisMutation, useGetAnalysisQuery, useLogAnalysisExportMutation, useSetAnalysisSharesMutation, useUpdateAnalysisMutation } from '../api/analysisApi';
+import { useAnalysisAccess } from '../hooks/useAnalyses';
+import { useAnalysisAutosave } from '../hooks/useAnalysisAutosave';
+import { useAnalysisFrames } from '../hooks/useAnalysisFrames';
 import { useAnalysisHistory } from '../hooks/useAnalysisHistory';
 import { useBlockDrag } from '../hooks/useBlockDrag';
 import { removeAnalysis, upsertAnalysis } from '../store/analysesSlice';
-import { createBlock, duplicateBlock, insertBlock, moveBlock, removeBlock, uid, updateBlockIn } from '../utils/blocks';
+import { createBlock, duplicateBlock, insertBlock, moveBlock, removeBlock, updateBlockIn } from '../utils/blocks';
 import { exportBlockCsv, exportBlockPng, exportBlockXlsx, exportReportXlsx } from '../utils/export';
 import { blockTypeLabel } from '../utils/labels';
 import { AddBlockDialog } from '../components/AddBlockDialog';
@@ -35,17 +39,43 @@ import { PrintReport } from '../components/PrintReport';
 import { RecordsDrawer, type RecordsTarget } from '../components/RecordsDrawer';
 import { ReportToolbar } from '../components/ReportToolbar';
 import { ShareDialog } from '../components/ShareDialog';
+import { SaveStatus } from '../components/SaveStatus';
 
 
 export function AnalysisReportPage({ id }: { id: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { items, hydrated } = useAnalysesStore();
   const access = useAnalysisAccess();
-  const found = items.find((a) => a.id === id);
-  const analysis = found && access.canView(found) ? found : undefined;
-  const { commit, undo, redo, canUndo, canRedo } = useAnalysisHistory(analysis);
+  useAnalysisFrames({ skip: !access.canViewSection });
+  const { data: loaded, error: loadError, isFetching: loadFetching, refetch } = useGetAnalysisQuery(id, { refetchOnFocus: false, skip: !access.canViewSection });
+  const analysis = useAppSelector((st) => st.analyses.items.find((a) => a.id === id));
+  // The server copy becomes the working copy once per visit (and again after a conflict), never on a background refetch.
+  const [ready, setReady] = useState(false);
+  const reloadRequested = useRef(true);
+  const canEdit = !!analysis && access.canEditAnalysis(analysis);
+  const onConflict = useCallback(() => {
+    toast.error(t('analysis.conflict', { defaultValue: 'This analysis was changed elsewhere. The latest version has been loaded.' }));
+    reloadRequested.current = true;
+    void refetch();
+  }, [refetch, t]);
+  const autosave = useAnalysisAutosave(ready ? analysis : undefined, canEdit, onConflict);
+  const { resetBaseline } = autosave;
+  const { commit, undo, redo, canUndo, canRedo } = useAnalysisHistory(ready ? analysis : undefined);
+  const [setAnalysisShares, { isLoading: savingShares }] = useSetAnalysisSharesMutation();
+  const [duplicateAnalysisApi, { isLoading: duplicatingApi }] = useDuplicateAnalysisMutation();
+  const [updateAnalysisApi, { isLoading: describing }] = useUpdateAnalysisMutation();
+  const [deleteAnalysisApi, { isLoading: deleting }] = useDeleteAnalysisMutation();
+  const [logExport] = useLogAnalysisExportMutation();
+
+  useEffect(() => {
+    const server = loaded?.data;
+    if (!server || loadFetching || !reloadRequested.current) return;
+    reloadRequested.current = false;
+    dispatch(upsertAnalysis(server));
+    resetBaseline(server);
+    setReady(true);
+  }, [loaded, loadFetching, dispatch, resetBaseline]);
 
   const [cross, setCross] = useState<AnalysisCrossFilter[]>([]);
   const [maskedPref, setMaskedPref] = useState(false);
@@ -60,7 +90,6 @@ export function AnalysisReportPage({ id }: { id: string }) {
   const [exporting, setExporting] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const canEdit = !!analysis && access.canEditAnalysis(analysis);
   const maskLocked = !access.canExportUnsuppressed;
   const masked = maskLocked || maskedPref;
   const editing = analysis?.blocks.find((b) => b.id === editingId) ?? null;
@@ -110,8 +139,13 @@ export function AnalysisReportPage({ id }: { id: string }) {
     );
   }
 
-  if (!hydrated) return <PageContainer><AnalysisReportSkeleton /></PageContainer>;
-  if (!analysis) {
+  const loadStatus = (loadError as { status?: number } | undefined)?.status;
+  const notFound = loadStatus === 404 || loadStatus === 403;
+  if (loadError && !notFound && !ready) {
+    return <PageContainer><div className="rounded-2xl bg-white shadow-card"><ErrorState onRetry={refetch} /></div></PageContainer>;
+  }
+  if (!notFound && (!ready || !analysis)) return <PageContainer><AnalysisReportSkeleton /></PageContainer>;
+  if (notFound || !analysis) {
     return (
       <PageContainer>
         <PageHeader title={t('analysis.notFound', { defaultValue: 'Analysis not found' })} back={{ label: t('analysis.back', { defaultValue: 'All analyses' }), onClick: () => router.push(ANALYSIS_LIST_HREF) }} />
@@ -136,11 +170,12 @@ export function AnalysisReportPage({ id }: { id: string }) {
     try {
       if (kind === 'png') {
         if (!exportBlockPng(block)) toast.error(t('analysis.export.pngFailed', { defaultValue: 'This block has no chart to download.' }));
+        else logged('png', 0, block.id);
         return;
       }
       toast.info(t('analysis.export.preparingBlock', { defaultValue: 'Preparing the export…' }));
-      if (kind === 'csv') await exportBlockCsv(block, q, t, masked);
-      else await exportBlockXlsx(block, q, t, masked);
+      const rows = kind === 'csv' ? await exportBlockCsv(block, q, t, masked) : await exportBlockXlsx(block, q, t, masked);
+      logged(kind, rows, block.id);
       toast.success(t('analysis.export.done', { defaultValue: 'Export ready.' }));
     } catch {
       toast.error(t('analysis.export.failed', { defaultValue: 'Export failed. Please try again.' }));
@@ -149,7 +184,8 @@ export function AnalysisReportPage({ id }: { id: string }) {
 
   const exportRecordsBlock = async (block: AnalysisBlock, q: AnalysisResolvedQuery) => {
     try {
-      await exportBlockXlsx(block, q, t, masked);
+      toast.info(t('analysis.export.preparingBlock', { defaultValue: 'Preparing the export…' }));
+      logged('xlsx', await exportBlockXlsx(block, q, t, masked), block.id);
       toast.success(t('analysis.export.done', { defaultValue: 'Export ready.' }));
     } catch {
       toast.error(t('analysis.export.failed', { defaultValue: 'Export failed. Please try again.' }));
@@ -159,7 +195,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
   const exportWorkbook = async () => {
     setExporting(true);
     try {
-      await exportReportXlsx(analysis, cross, t, masked);
+      logged('workbook', await exportReportXlsx(analysis, cross, t, masked));
       toast.success(t('analysis.export.done', { defaultValue: 'Export ready.' }));
     } catch {
       toast.error(t('analysis.export.failed', { defaultValue: 'Export failed. Please try again.' }));
@@ -170,23 +206,49 @@ export function AnalysisReportPage({ id }: { id: string }) {
 
   const duplicateAnalysis = () => setDuplicating(true);
 
-  const confirmDuplicate = (name: string, description: string) => {
-    setDuplicating(false);
-    const copy = {
-      ...JSON.parse(JSON.stringify(analysis)),
-      id: uid('a'),
-      name,
-      description,
-      ownerEmail: access.email,
-      ownerName: nameFromEmail(access.email),
-      shares: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    dispatch(upsertAnalysis(copy));
-    toast.success(t('analysis.duplicated', { defaultValue: 'Analysis duplicated.' }));
-    router.push(`${ANALYSIS_LIST_HREF}/${copy.id}`);
+  const confirmDuplicate = async (name: string, description: string) => {
+    try {
+      // The server copies the stored version, so pending edits are saved first.
+      if (canEdit) await autosave.saveNow();
+      const copy = (await duplicateAnalysisApi({ id: analysis.id, name }).unwrap()).data;
+      if (copy && description !== copy.description) {
+        await updateAnalysisApi({ id: copy.id, body: { name: copy.name, description, definition: toDefinition(copy), rowVersion: copy.rowVersion } }).unwrap();
+      }
+      setDuplicating(false);
+      toast.success(t('analysis.duplicated', { defaultValue: 'Analysis duplicated.' }));
+      if (copy) router.push(`${ANALYSIS_LIST_HREF}/${copy.id}`);
+    } catch {
+      toast.error(t('analysis.saveFailed', { defaultValue: 'Could not save the analysis. Please try again.' }));
+    }
   };
+
+  const saveShares = async (shares: AnalysisShare[]) => {
+    try {
+      const res = await setAnalysisShares({ id: analysis.id, shares }).unwrap();
+      if (res.data) dispatch(upsertAnalysis({ ...analysis, shares: res.data.shares }));
+      setSharing(false);
+      toast.success(t('analysis.share.saved', { defaultValue: 'Access updated.' }));
+    } catch {
+      toast.error(t('analysis.share.failed', { defaultValue: 'Could not update access. Please try again.' }));
+    }
+  };
+
+  const confirmDeleteAnalysis = async () => {
+    try {
+      await deleteAnalysisApi(analysis.id).unwrap();
+      dispatch(removeAnalysis(analysis.id));
+      toast.success(t('analysis.deleted', { defaultValue: 'Analysis deleted.' }));
+      router.push(ANALYSIS_LIST_HREF);
+    } catch {
+      toast.error(t('analysis.deleteFailed', { defaultValue: 'Could not delete the analysis. Please try again.' }));
+    }
+  };
+
+  // Every export leaves an audit line; unsuppressed is only possible with the permission (masking is locked otherwise).
+  function logged(format: string, rowCount: number, blockId?: string) {
+    if (!analysis) return;
+    void logExport({ analysisId: Number(analysis.id), unsuppressed: !masked, rowCount, detail: { format, ...(blockId ? { blockId } : {}) } });
+  }
 
 
   const shared = analysis.shares.length > 0;
@@ -213,10 +275,13 @@ export function AnalysisReportPage({ id }: { id: string }) {
           ) : analysis.description}
           back={{ label: t('analysis.back', { defaultValue: 'All analyses' }), onClick: () => router.push(ANALYSIS_LIST_HREF) }}
           chips={
+            <>
             <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[11px] text-white/85">
               {shared && <Users className="h-3 w-3" />}
               {analysis.ownerName || analysis.ownerEmail} · {formatDate(analysis.updatedAt)}
             </span>
+            {canEdit && <SaveStatus status={autosave.status} />}
+            </>
           }
           actions={
             <>
@@ -247,8 +312,8 @@ export function AnalysisReportPage({ id }: { id: string }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52 text-[12.5px]">
-                  <DropdownMenuItem onClick={duplicateAnalysis}><Copy className="h-3.5 w-3.5 me-2" />{t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })}</DropdownMenuItem>
-                  {access.isOwner(analysis) && (
+                  {access.canCreate && <DropdownMenuItem onClick={duplicateAnalysis}><Copy className="h-3.5 w-3.5 me-2" />{t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })}</DropdownMenuItem>}
+                  {access.canManage(analysis) && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setConfirmDelete(true)} className="text-neg-text focus:text-neg-text"><Trash2 className="h-3.5 w-3.5 me-2" />{t('analysis.deleteAnalysis', { defaultValue: 'Delete analysis' })}</DropdownMenuItem>
@@ -281,7 +346,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-[12px] text-slate-600 flex items-center gap-2">
             <Users className="h-3.5 w-3.5 text-slate-400" />
             {t('analysis.viewOnly', { defaultValue: 'You can view and explore this analysis. Duplicate it to make your own changes.' })}
-            <button type="button" onClick={duplicateAnalysis} className="ms-auto font-semibold text-adaam-deep hover:underline">{t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })}</button>
+            {access.canCreate && <button type="button" onClick={duplicateAnalysis} className="ms-auto font-semibold text-adaam-deep hover:underline">{t('analysis.duplicate', { defaultValue: 'Duplicate analysis' })}</button>}
           </div>
         )}
 
@@ -379,13 +444,15 @@ export function AnalysisReportPage({ id }: { id: string }) {
         <ShareDialog
           open
           analysis={analysis}
-          readOnly={!access.isOwner(analysis)}
+          readOnly={!access.canManage(analysis)}
+          saving={savingShares}
           onClose={() => setSharing(false)}
-          onSave={(shares) => { change((a) => ({ ...a, shares })); toast.success(t('analysis.share.saved', { defaultValue: 'Access updated.' })); }}
+          onSave={saveShares}
         />
       )}
       <CreateAnalysisDialog
         request={duplicating ? { kind: 'duplicate', name: t('analysis.copyOf', { defaultValue: 'Copy of {{name}}', name: analysis.name }), description: analysis.description, blockCount: analysis.blocks.length } : null}
+        busy={duplicatingApi || describing}
         onCancel={() => setDuplicating(false)}
         onConfirm={confirmDuplicate}
       />
@@ -393,12 +460,9 @@ export function AnalysisReportPage({ id }: { id: string }) {
         open={confirmDelete}
         title={t('analysis.deleteAnalysis', { defaultValue: 'Delete analysis' })}
         message={t('analysis.confirmDelete', { defaultValue: 'Delete “{{name}}”? People you shared it with lose access too. This cannot be undone.', name: analysis.name })}
+        busy={deleting}
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => {
-          dispatch(removeAnalysis(analysis.id));
-          toast.success(t('analysis.deleted', { defaultValue: 'Analysis deleted.' }));
-          router.push(ANALYSIS_LIST_HREF);
-        }}
+        onConfirm={confirmDeleteAnalysis}
       />
       {drag && (
         <div className="pointer-events-none fixed z-[90] max-w-[260px] truncate rounded-full bg-ink px-3.5 py-1.5 text-[12px] font-semibold text-white shadow-float" style={{ left: drag.x + 14, top: drag.y + 14 }}>
@@ -406,7 +470,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
         </div>
       )}
       {presenting && <PresentationMode analysis={analysis} cross={cross} masked={masked} onClose={() => setPresenting(false)} />}
-      {printing && <PrintReport analysis={analysis} cross={cross} masked={masked} onDone={() => setPrinting(false)} />}
+      {printing && <PrintReport analysis={analysis} cross={cross} masked={masked} onDone={() => { setPrinting(false); logged('pdf', 0); }} />}
     </div>
   );
 }

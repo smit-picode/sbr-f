@@ -7,7 +7,7 @@ import type {
   AnalysisResolvedQuery,
 } from '@/types';
 import { ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_DRILL_PATHS, ANALYSIS_ENTITIES, ANALYSIS_FRAME_DIMENSION } from '../constants';
-import { ANALYSIS_FRAME_CHRONO } from '../mock/frames';
+import { frameChrono } from '../utils/frames';
 
 export interface AnalysisDrillStep {
   field: string;
@@ -28,7 +28,7 @@ export function resolveBlockQuery(
   const frame = block.query.frame ?? analysis.frame;
   let compareTo = effectiveCompare(block, analysis);
   if (ANALYSIS_BLOCK_TYPE_MAP[block.type].needsCompare && (!compareTo || compareTo === frame)) {
-    compareTo = ANALYSIS_FRAME_CHRONO.find((f) => f !== frame) ?? null;
+    compareTo = frameChrono().find((f) => f !== frame) ?? null;
   }
 
   const fields = new Set(ANALYSIS_ENTITIES[block.query.entity].fields);

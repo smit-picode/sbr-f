@@ -5,7 +5,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -42,16 +42,13 @@ export function EnterpriseGroupsListPage() {
 
   const { canSearch, canViewDetail, canEdit, canCreate } = usePermission('enterprise_groups');
 
-  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,
     search: stripGroupCodePrefix(debouncedSearch ?? ''),
     status: filters.status === '__all__' ? undefined : filters.status,
     type:   filters.type === '__all__' ? undefined : filters.type,
-    columnFilters: activeColumnFilters.length
-      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
-      : undefined,
+    columnFilters: columnFiltersParam(columnFilters),
   });
 
   const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetEnterpriseGroupsListQuery(queryParams);
@@ -174,7 +171,7 @@ export function EnterpriseGroupsListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={ENTERPRISE_GROUP_FILTER_COLUMNS} labelPrefix="columnFilters.columns.enterpriseGroups" value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={ENTERPRISE_GROUP_FILTER_COLUMNS} labelPrefix="columnFilters.columns.enterpriseGroups" value={columnFilters} onChange={handleColumnFiltersChange} valuesUrl="/enterprise-groups/filter-values" />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}
@@ -192,7 +189,7 @@ export function EnterpriseGroupsListPage() {
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
-        onRowClick={canViewDetail || canEdit ? (row) => router.push(`/enterprise-groups/${row.ID}`) : undefined}
+        onRowClick={(row) => (canViewDetail || canEdit ? router.push(`/enterprise-groups/${row.ID}`) : toast.warning(t('common.noDetailAccess', { defaultValue: "You do not have permission to open this record's details." })))}
         stickyFirstColumn
         getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]' : undefined)}
       />

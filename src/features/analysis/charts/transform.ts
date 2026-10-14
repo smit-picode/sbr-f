@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 import type { AnalysisAggregateResult, AnalysisBlock, AnalysisResultRow } from '@/types';
 import { ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../constants';
-import { ANALYSIS_FRAME_CHRONO } from '../mock/frames';
+import { frameOrder } from '../utils/frames';
 import { frameName, measureLabel, valueLabel } from '../utils/labels';
 import type { ChartCategory, ChartSeries, TreeNode } from './options';
 
@@ -24,7 +24,7 @@ function uniqueOrdered(rows: AnalysisResultRow[], axis: number, field: string): 
   return keys.sort((a, b) => {
     if (a === ANALYSIS_OTHER_KEY || a == null) return 1;
     if (b === ANALYSIS_OTHER_KEY || b == null) return -1;
-    if (field === ANALYSIS_FRAME_DIMENSION) return ANALYSIS_FRAME_CHRONO.indexOf(a) - ANALYSIS_FRAME_CHRONO.indexOf(b);
+    if (field === ANALYSIS_FRAME_DIMENSION) return frameOrder(a, b);
     if (order) return order.indexOf(a) - order.indexOf(b);
     if (field === 'reg_year') return a.localeCompare(b);
     return (totals.get(b) ?? 0) - (totals.get(a) ?? 0);

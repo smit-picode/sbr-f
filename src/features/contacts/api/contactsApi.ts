@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrContact, ContactFilters } from '@/types';
+import type { ApiResponse, SbrContact, ContactFilters, CreateContactInput, CreateContactResult } from '@/types';
 
 const validFromTime = (c: SbrContact): number => (c.VALID_FROM ? new Date(c.VALID_FROM).getTime() : 0);
 
@@ -25,8 +25,16 @@ export const contactsApi = baseApi.injectEndpoints({
       query: ({ id, data }) => ({ url: `/contacts/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Contacts', 'AuditLog', 'ChangeRequests'],
     }),
+    // NPC-330: created immediately (no approval), so every contact view refreshes at once.
+    createContact: builder.mutation<ApiResponse<CreateContactResult>, CreateContactInput>({
+      query: (body) => ({ url: '/contacts', method: 'POST', body }),
+      invalidatesTags: ['Contacts', 'ContactTags', 'AuditLog'],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetContactsListQuery, useGetContactByIdQuery, useGetContactHistoryQuery, useUpdateContactMutation } = contactsApi;
+export const {
+  useGetContactsListQuery, useGetContactByIdQuery, useGetContactHistoryQuery, useUpdateContactMutation,
+  useCreateContactMutation,
+} = contactsApi;

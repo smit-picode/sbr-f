@@ -178,6 +178,14 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     header: t('columns.ISIC_CODE_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
+  {
+    accessorKey: 'ISIC_CODE_CONFIDENCE',
+    header: t('columns.ISIC_CODE_CONFIDENCE'),
+    cell: ({ getValue }) => {
+      const val = getValue<number | null>();
+      return val != null ? <span className="text-sm tabular-nums text-slate-700">{val}</span> : <span className="text-slate-400">—</span>;
+    },
+  },
 
   {
     accessorKey: 'MAIN_BRANCH_FLG',
@@ -216,6 +224,16 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
   {
+    accessorKey: 'ASSOCIATED_ENTERPRISE_ID',
+    header: t('columns.ASSOCIATED_ENTERPRISE_ID'),
+    cell: ({ getValue }) => <MonoCell value={getValue<number | null>() != null ? String(getValue<number>()) : null} />,
+  },
+  {
+    accessorKey: 'ASSOCIATED_ENTERPRISE_ID_SOURCE',
+    header: t('columns.ASSOCIATED_ENTERPRISE_ID_SOURCE'),
+    cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
+  },
+  {
     accessorKey: 'HOLDING_COMPANY_FLG',
     header: t('columns.HOLDING_COMPANY_FLG'),
     cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
@@ -243,6 +261,11 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     accessorKey: 'EMPLOYMENT_COUNT_SOURCE',
     header: t('columns.EMPLOYMENT_COUNT_SOURCE'),
     cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
+  },
+  {
+    accessorKey: 'EMPLOYMENT_SIZE_CATEGORY',
+    header: t('columns.EMPLOYMENT_SIZE_CATEGORY'),
+    cell: ({ getValue }) => <TextCell value={getValue<string | null>()} />,
   },
 
   {
@@ -294,6 +317,11 @@ export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void
     accessorKey: 'EID',
     header: t('columns.EID'),
     cell: ({ getValue }) => <MonoCell value={getValue<string | null>()} />,
+  },
+  {
+    accessorKey: 'EID_SOURCE',
+    header: t('columns.EID_SOURCE'),
+    cell: ({ getValue }) => <SourceCell value={getValue<string | null>()} />,
   },
 
   {

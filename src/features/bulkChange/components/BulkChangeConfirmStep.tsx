@@ -3,7 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2 } from 'lucide-react';
 import { BULK_CHANGE_TABLES, type BulkChangeTableKey } from '../constants';
-import type { BulkChangeValidationResult } from '../types';
+import type { BulkChangeSubmitFailure, BulkChangeValidationResult } from '../types';
 
 interface BulkChangeConfirmStepProps {
   selectedTable: BulkChangeTableKey;
@@ -11,11 +11,12 @@ interface BulkChangeConfirmStepProps {
   validation: BulkChangeValidationResult;
   reason: string;
   onReasonChange: (value: string) => void;
+  submitFailures?: BulkChangeSubmitFailure[];
 }
 
 const fmt = (v: string | number | null | undefined): string => (v == null || v === '' ? '—' : String(v));
 
-export function BulkChangeConfirmStep({ selectedTable, fileName, validation, reason, onReasonChange }: BulkChangeConfirmStepProps) {
+export function BulkChangeConfirmStep({ selectedTable, fileName, validation, reason, onReasonChange, submitFailures = [] }: BulkChangeConfirmStepProps) {
   const { t } = useTranslation();
   const tableOption = BULK_CHANGE_TABLES.find((o) => o.key === selectedTable);
   const tableLabel = tableOption ? t(tableOption.navKey, { defaultValue: tableOption.label }) : selectedTable;
@@ -25,6 +26,24 @@ export function BulkChangeConfirmStep({ selectedTable, fileName, validation, rea
 
   return (
     <div className="flex flex-col gap-4">
+      {submitFailures.length > 0 && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-700">
+            {t('bulkChange.wizard.confirm.submitFailedTitle', { defaultValue: 'These rows could not be submitted' })}
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-red-700">
+            {submitFailures.map((failure, index) => (
+              <li key={`${failure.rowNumber ?? 'row'}-${index}`}>
+                {failure.rowNumber != null && (
+                  <span className="font-medium">{t('bulkChange.wizard.confirm.rowLabel', { defaultValue: 'Row {{row}}', row: failure.rowNumber })}: </span>
+                )}
+                {failure.error}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="rounded-lg bg-white p-5 shadow-card">
         <h2 className="text-base font-semibold text-slate-800">
           {t('bulkChange.wizard.confirm.title', { defaultValue: 'Confirm bulk update' })}

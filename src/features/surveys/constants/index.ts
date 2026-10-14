@@ -1,5 +1,5 @@
 import { CHART_COLOR } from '@/lib/charts';
-import type { GdpMeasure, ResponseStatus, SizeBand, Survey, SurveyId, SurveyQuestion } from '../types';
+import type { GvaMeasure, ResponseStatus, SizeBand, Survey, SurveyId, SurveyQuestion } from '../types';
 
 export const ALL_SURVEYS = '__all__';
 export const ALL_STATUSES = '__all__';
@@ -95,10 +95,11 @@ export const ISIC_SECTIONS: [string, number, number][] = [
   ['S', 94, 96], ['T', 97, 98], ['U', 99, 99],
 ];
 
-export const GDP_MEASURES: { key: GdpMeasure; labelKey: string }[] = [
-  { key: 'valueAdded', labelKey: 'gdpVa' },
-  { key: 'production', labelKey: 'gdpProd' },
-  { key: 'intermediate', labelKey: 'gdpIc' },
+// Contribution-to-GVA measure toggle, in display order, with each option's i18n key suffix.
+export const GVA_MEASURES: { key: GvaMeasure; labelKey: string }[] = [
+  { key: 'valueAdded', labelKey: 'gvaVa' },
+  { key: 'production', labelKey: 'gvaProd' },
+  { key: 'intermediate', labelKey: 'gvaIc' },
 ];
 
 export const RESPONSE_FROM_ESTABLISHMENT = 'establishment';

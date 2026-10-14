@@ -16,6 +16,8 @@ import { useGetExecutiveSummaryQuery } from '../api/homeApi';
 import { ExecStatCard } from '../components/ExecStatCard';
 import { SegmentedToggle } from '../components/SegmentedToggle';
 import { SECTOR_COLOR } from '../data/chartColors';
+import { HOME_SIZE_CLASS_ORDER } from '../constants';
+import { firstNameOf } from '../utils/greeting';
 import { QATAR_MUNICIPALITY_NAME_AR } from '../data/qatarMunicipalities';
 import {
   SOURCE_COLOR,
@@ -30,13 +32,6 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 type GrowthMode = 'total' | 'source' | 'sector';
 type ResponseMode = 'survey' | 'activity';
 
-function firstNameOf(email: string | undefined): string {
-  if (!email) return 'Executive';
-  const local = email.split('@')[0] ?? '';
-  const first = local.split(/[._-]/)[0] || local;
-  return first.charAt(0).toUpperCase() + first.slice(1);
-}
-
 function SectionHead({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-3">
@@ -46,7 +41,7 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
   );
 }
 
-export function ExecutiveHomePage() {
+export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) {
   const { t, i18n } = useTranslation();
 
   const { canView: canViewEstablishments } = usePermission('establishments');
@@ -67,7 +62,7 @@ export function ExecutiveHomePage() {
   const { data: summaryRes, isLoading: summaryLoading } = useGetExecutiveSummaryQuery();
   const summary = summaryRes?.data;
 
-  const firstName = firstNameOf(user?.email);
+  const firstName = firstNameOf(user?.email, 'Executive');
   const asOf = useMemo(() => formatDate(new Date().toISOString()), []);
 
   const registerGrowthByMonth = summary?.registerGrowthByMonth ?? [];
@@ -118,7 +113,14 @@ export function ExecutiveHomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [growthMode, registerGrowthByMonth, registerGrowthBySource, registerGrowthBySector, t]);
 
-  const sizeClass = summary?.sizeClass ?? [];
+  const sizeClass = useMemo(() => {
+    const rank = (c: string | null) => {
+      if (c == null) return HOME_SIZE_CLASS_ORDER.length + 1;
+      const i = HOME_SIZE_CLASS_ORDER.indexOf(c.trim().toLowerCase());
+      return i < 0 ? HOME_SIZE_CLASS_ORDER.length : i;
+    };
+    return [...(summary?.sizeClass ?? [])].sort((a, b) => rank(a.category) - rank(b.category));
+  }, [summary?.sizeClass]);
   const sizeClassOption = useMemo(
     () =>
       columns({
@@ -164,8 +166,15 @@ export function ExecutiveHomePage() {
 
   const sourceSectorBreakdown = summary?.sourceSectorBreakdown ?? [];
   const contributionOption = useMemo(() => {
-    const sources = [...new Set(sourceSectorBreakdown.map((s) => s.source ?? '—'))];
-    const sectors = [...new Set(sourceSectorBreakdown.filter((s) => s.count > 0).map((s) => s.sector))];
+    // Sources by their total, biggest on top; sectors likewise, so the stack and legend lead with the biggest.
+    const sourceTotal = new Map<string, number>();
+    const sectorTotal = new Map<string | null, number>();
+    sourceSectorBreakdown.forEach((s) => {
+      sourceTotal.set(s.source ?? '—', (sourceTotal.get(s.source ?? '—') ?? 0) + s.count);
+      sectorTotal.set(s.sector, (sectorTotal.get(s.sector) ?? 0) + s.count);
+    });
+    const sources = [...sourceTotal.keys()].sort((a, b) => (sourceTotal.get(b) ?? 0) - (sourceTotal.get(a) ?? 0));
+    const sectors = [...sectorTotal.keys()].sort((a, b) => (sectorTotal.get(b) ?? 0) - (sectorTotal.get(a) ?? 0));
     return hbarsStacked({
       categories: sources,
       series: sectors.map((sec) => ({
@@ -261,20 +270,25 @@ export function ExecutiveHomePage() {
               : t('home.exec.badge', { defaultValue: 'Executive' })}
           </span>
         }
-        actions={isSuperAdmin ? (
-          <Button
-            onClick={() => router.push('/admin/users')}
-            style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
-            className="text-white hover:opacity-90"
-          >
-            <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
-          </Button>
-        ) : (
-          <div className="text-end">
-            <div className="text-[11px] text-white/70">{t('home.exec.asOf', { defaultValue: 'As of' })}</div>
-            <div className="text-[13px] font-semibold text-white">{asOf}</div>
+        actions={
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {switcher}
+            {isSuperAdmin ? (
+              <Button
+                onClick={() => router.push('/admin/users')}
+                style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
+                className="text-white hover:opacity-90"
+              >
+                <Plus className="h-4 w-4 mr-2" /> {t('admin.users.addUser')}
+              </Button>
+            ) : (
+              <div className="text-end">
+                <div className="text-[11px] text-white/70">{t('home.exec.asOf', { defaultValue: 'As of' })}</div>
+                <div className="text-[13px] font-semibold text-white">{asOf}</div>
+              </div>
+            )}
           </div>
-        )}
+        }
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

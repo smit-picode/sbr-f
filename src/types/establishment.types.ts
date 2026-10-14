@@ -35,6 +35,8 @@ export interface SbrEstablishment {
   SECTOR_ID_SOURCE: string | null;
   ISIC_CODE: string | null;
   ISIC_CODE_SOURCE: string | null;
+  ISIC_CODE_CONFIDENCE?: number | null;
+  // Branch / holding
   MAIN_BRANCH_FLG: string | null;
   MAIN_BRANCH_FLG_SOURCE: string | null;
   MAIN_BRANCH_SBR_ID: number | null;
@@ -43,6 +45,9 @@ export interface SbrEstablishment {
   HOLDING_COMPANY_FLG_SOURCE: string | null;
   EMPLOYMENT_COUNT: number | null;
   EMPLOYMENT_COUNT_SOURCE: string | null;
+  // micro / small / medium / large, the register's own size band
+  EMPLOYMENT_SIZE_CATEGORY?: string | null;
+  // CR dates
   CR_ISSUE_DATE: string | null;
   CR_EXPIRY_DATE: string | null;
   CR_CANCEL_DATE: string | null;
@@ -55,6 +60,8 @@ export interface SbrEstablishment {
   VALID_FROM: string | null;
   VALID_TO: string | null;
   ASSOCIATED_ENTERPRISE_ID?: number | null;
+  ASSOCIATED_ENTERPRISE_ID_SOURCE?: string | null;
+  // True when an open change request targets this record (list endpoint only)
   HAS_PENDING_REQUEST?: boolean;
   PENDING_FIELDS?: Record<string, number>;
 }
@@ -80,6 +87,7 @@ export interface EstablishmentFilters {
   isicCode?: string;
   sourceCode?: string;
   mainBranchFLG?: string;
+  employmentSizeCategory?: string;
   columnFilters?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

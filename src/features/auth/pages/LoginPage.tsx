@@ -28,6 +28,7 @@ import { useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
 import type { AuthRole } from '@/types';
+import { withBasePath } from '@/utils/basePath';
 
 const ROLE_CARD_ICONS: LucideIcon[] = [ShieldCheck, Building2, Eye, Landmark, UserCircle2];
 const ROLE_CARD_TINTS: { bg: string; color: string }[] = [
@@ -113,7 +114,7 @@ export function LoginPage() {
       <div className="hidden md:flex md:w-[46%] relative overflow-hidden rounded-3xl text-white">
         <div
           className="absolute inset-0"
-          style={{ background: "#0E1A2B url('/assets/login-skyline.jpg') center / cover no-repeat" }}
+          style={{ background: `#0E1A2B url('${withBasePath('/assets/login-skyline.jpg')}') center / cover no-repeat` }}
         />
         <div
           className="absolute inset-0"
@@ -122,7 +123,7 @@ export function LoginPage() {
 
         <div className="relative flex flex-col justify-between w-full p-9">
           <div className="flex flex-col items-start gap-3">
-            <Image src="/assets/npc-logo-primary-white.png" alt="National Planning Council" width={257} height={90} className="h-16 w-auto object-contain -ms-2" priority />
+            <Image src={withBasePath('/assets/npc-logo-primary-white.png')} alt="National Planning Council" width={257} height={90} className="h-16 w-auto object-contain -ms-2" priority />
             <span className="text-[15px] font-bold ps-0.5">SBR Portal</span>
           </div>
 

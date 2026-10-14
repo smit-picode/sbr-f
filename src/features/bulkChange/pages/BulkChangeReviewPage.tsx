@@ -16,7 +16,9 @@ import { formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { useDecideBulkChangeMutation, useGetBulkChangeByIdQuery } from '../api/bulkChangeApi';
 import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
-import { BULK_CHANGE_STATUS_DEFAULTS, TABLE_BY_ENTITY_TYPE } from '../constants';
+import {
+  BULK_CHANGE_API_FILE_PREFIX, BULK_CHANGE_MEMBER_KIND, BULK_CHANGE_STATUS_DEFAULTS, BULK_CHANGE_TAG_CODE_KEY, TABLE_BY_ENTITY_TYPE,
+} from '../constants';
 import type { BulkChangeDecision } from '../types';
 
 const STATUS_KEYS = new Set(['EST_STATUS']);
@@ -112,6 +114,13 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
             <Clock className="h-3 w-3 text-slate-400" />
             <BulkChangeStatusBadge status={task.STATUS} />
           </span>
+          {task.FILE_NAME?.startsWith(BULK_CHANGE_API_FILE_PREFIX) && (
+            <span className="inline-flex items-center rounded-full bg-[#F4F0E8] px-2 py-0.5 text-[11px] font-semibold text-[#87795D]">
+              {t('bulkChange.apiSource', { defaultValue: 'Sent through the integration API' })}
+              {': '}
+              {task.FILE_NAME.slice(BULK_CHANGE_API_FILE_PREFIX.length)}
+            </span>
+          )}
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
@@ -214,6 +223,20 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
                     </td>
                     {task.COLUMNS.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);
+                      const kind = BULK_CHANGE_MEMBER_KIND[`${row.memberTable}:${row.operation}`];
+                      // A new contact or tag change has no record id yet: the first cell says what it is, with the tag code.
+                      if (kind && col.key === task.COLUMNS[0].key) {
+                        const tagCode = row.fields.find((f) => f.key === BULK_CHANGE_TAG_CODE_KEY)?.value;
+                        return (
+                          <td key={col.key} className="px-3 py-3 align-top">
+                            <span className="inline-flex whitespace-nowrap rounded-full bg-[#F4F0E8] px-2 py-0.5 text-[11px] font-semibold text-[#87795D]">
+                              {t(`bulkChange.memberKind.${kind.key}`, { defaultValue: kind.label })}
+                              {tagCode ? ` ${tagCode}` : ''}
+                            </span>
+                          </td>
+                        );
+                      }
+                      // The identifier column isn't part of CHANGE_DATA — show the record id.
                       if (!field) {
                         return (
                           <td key={col.key} className="px-3 py-3 align-top">

@@ -7,12 +7,12 @@ export const CONTACT_FIELD_LABELS: Record<string, string> = {
   PO_BOX: 'PO Box',
   WEBSITE: 'Website',
   ROLE: 'Role',
-  PRIORITY: 'Priority',
   SOURCE_CODE: 'Source Code',
 };
 
 export const CONTACT_ROLE_OPTIONS: string[] = ['Owner', 'Manager'];
-export const CONTACT_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'MOCI_CP', 'QFZ', 'QSTP', 'LEGACY_SBR', 'NORAH_AES', 'NORAH_QES', 'CALL_CENTER'];
+// NPC-330: the sources SBR_CONTACTS actually carries. MANUAL = typed in on the portal or by a tag file.
+export const CONTACT_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'MOCI_CP', 'QFZ', 'QSTP', 'MANUAL'];
 
 export const CONTACT_ROLE_FILTER_OPTIONS = [
   { label: 'All', value: '' },
@@ -21,7 +21,7 @@ export const CONTACT_ROLE_FILTER_OPTIONS = [
 ];
 
 export const CONTACT_EDITABLE_FIELDS: string[] = [
-  'CONTACT_NAME', 'PHONE', 'MOBILE', 'EMAIL', 'WEBSITE', 'FAX', 'PO_BOX', 'PRIORITY',
+  'CONTACT_NAME', 'PHONE', 'MOBILE', 'EMAIL', 'WEBSITE', 'FAX', 'PO_BOX',
 ];
 export const isContactFieldEditable = (field: string): boolean => CONTACT_EDITABLE_FIELDS.includes(field);
 
@@ -34,4 +34,5 @@ export const CONTACT_DEFAULT_FILTERS = {
   search: '',
   role: '',
   sourceCode: '',
+  tagCode: '',
 } as const;

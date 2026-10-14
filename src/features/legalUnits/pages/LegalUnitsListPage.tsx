@@ -11,7 +11,7 @@ import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { getLegalUnitColumns } from '../components/LegalUnitColumns';
 import { useGetLegalUnitsListQuery } from '../api/legalUnitsApi';
 import { LEGAL_UNITS_DEFAULT_FILTERS, LEGAL_UNIT_RECORD_FILTER_OPTIONS, LEGAL_UNIT_FILTER_COLUMNS } from '../constants';
@@ -45,16 +45,13 @@ export function LegalUnitsListPage() {
 
   const { canSearch } = usePermission('legal_units');
 
-  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,
     search: debouncedSearch,
     source: filters.source === '__all__' ? undefined : filters.source,
     recordFilter: filters.recordFilter === '__all__' ? undefined : filters.recordFilter,
-    columnFilters: activeColumnFilters.length
-      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
-      : undefined,
+    columnFilters: columnFiltersParam(columnFilters),
   });
 
   const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetLegalUnitsListQuery(queryParams);
@@ -167,7 +164,7 @@ export function LegalUnitsListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={LEGAL_UNIT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.legalUnits" value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={LEGAL_UNIT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.legalUnits" value={columnFilters} onChange={handleColumnFiltersChange} valuesUrl="/legal-units/filter-values" />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}

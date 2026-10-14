@@ -73,6 +73,6 @@ Every page shows a **shimmer skeleton** (the `Skeleton` primitive / shared `Page
 ```bash
 npm install
 cp .env.example .env   # set NEXT_PUBLIC_API_URL to the running backend
-npm run dev   # http://localhost:3000
+npm run dev   # http://localhost:7000/sbr  (basePath /sbr, see next.config.ts)
 ```
 Type-check: `npx tsc --noEmit`.

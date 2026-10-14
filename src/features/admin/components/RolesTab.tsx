@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -23,7 +24,11 @@ import type { SbrRole, SbrPermission, RoleCategory } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
-import { PERMISSION_TREE, type PermissionNode } from '@/constants/permissionTree';
+import { PERMISSION_TREE, permissionLabel, type PermissionNode } from '@/constants/permissionTree';
+import { HOME_DASHBOARD_PERMISSIONS, HOME_SCREENS } from '@/features/home/constants';
+
+// Select value for a role created without a home screen (Radix Select rejects an empty value).
+const NO_HOME_SCREEN = '__none__';
 
 function getApiError(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'data' in err) {
@@ -46,9 +51,19 @@ function buildTreeNode(node: PermissionNode, byName: Record<string, SbrPermissio
   };
 }
 
-function buildTree(allPerms: SbrPermission[]): TreeNode[] {
+const treeKeys = (nodes: PermissionNode[]): string[] => nodes.flatMap((n) => [n.key, ...treeKeys(n.children ?? [])]);
+const LISTED_KEYS = new Set(treeKeys(PERMISSION_TREE));
+
+// A permission the tree does not know yet goes in a trailing group, so every DB permission stays assignable.
+function buildTree(allPerms: SbrPermission[], otherLabel: string): TreeNode[] {
   const byName = Object.fromEntries(allPerms.map(p => [p.PERMISSION_NAME, p]));
-  return PERMISSION_TREE.map(node => buildTreeNode(node, byName));
+  const tree = PERMISSION_TREE.map(node => buildTreeNode(node, byName));
+  const unlisted = allPerms.filter((p) => !LISTED_KEYS.has(p.PERMISSION_NAME));
+  if (unlisted.length) {
+    const other: PermissionNode = { key: '__other', label: otherLabel, children: unlisted.map((p) => ({ key: p.PERMISSION_NAME, label: p.PERMISSION_NAME })) };
+    tree.push(buildTreeNode(other, byName));
+  }
+  return tree;
 }
 
 function flatLeafEntries(items: TreeNode[]): LeafEntry[] {
@@ -63,14 +78,6 @@ function flatLeafEntries(items: TreeNode[]): LeafEntry[] {
 // ─── Role display name — replaces _ with space for human-readable labels ─────
 function displayRoleName(name: string): string {
   return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\B\w/g, (c) => c.toLowerCase());
-}
-
-// ─── Permission label helper ─────────────────────────────────────────────────
-
-// Permission and section labels are always shown in English regardless of UI language
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function pLabel(_key: string, fallback: string, _t: any): string {
-  return fallback;
 }
 
 // ─── Permission grid (2-column card grid) ────────────────────────────────────
@@ -89,6 +96,7 @@ function PermissionGrid({
     <div className="grid sm:grid-cols-2 gap-2">
       {entries.map(({ perm, label, nodeKey }) => {
         const granted = grantedIds.has(perm.ID);
+        const isRadio = HOME_DASHBOARD_PERMISSIONS.includes(nodeKey);
         return (
           <div
             key={perm.ID}
@@ -106,21 +114,27 @@ function PermissionGrid({
                 canEdit ? 'cursor-pointer' : 'cursor-default'
               }`}
             >
-              <span
-                className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 ${
-                  granted ? 'border-[#A29374] bg-[#A29374] text-white' : 'border-slate-300'
-                }`}
-              >
-                {granted && <Check className="h-3 w-3" strokeWidth={3} />}
-              </span>
+              {isRadio ? (
+                <span className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 ${granted ? 'border-[#A29374]' : 'border-slate-300'}`}>
+                  {granted && <span className="h-2 w-2 rounded-full bg-[#A29374]" />}
+                </span>
+              ) : (
+                <span
+                  className={`flex h-4 w-4 items-center justify-center rounded border shrink-0 ${
+                    granted ? 'border-[#A29374] bg-[#A29374] text-white' : 'border-slate-300'
+                  }`}
+                >
+                  {granted && <Check className="h-3 w-3" strokeWidth={3} />}
+                </span>
+              )}
               <span className="text-[12.5px] text-slate-700 truncate">
-                {pLabel(nodeKey, label, t)}
+                {permissionLabel(nodeKey, label, t)}
               </span>
             </button>
             <span className="relative group shrink-0">
               <Info className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#A29374] cursor-help" />
               <span className="pointer-events-none absolute z-50 end-0 top-6 w-56 rounded-lg bg-slate-900 text-white text-[11px] leading-snug px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
-                <span className="block font-semibold mb-0.5">{pLabel(nodeKey, label, t)}</span>
+                <span className="block font-semibold mb-0.5">{permissionLabel(nodeKey, label, t)}</span>
                 <span className="block font-mono text-[10px] text-slate-300">{perm.PERMISSION_NAME}</span>
               </span>
             </span>
@@ -143,7 +157,7 @@ function PermSection({
 }) {
   const { t } = useTranslation();
   const { node, children } = treeNode;
-  const sectionLabel  = pLabel(node.key, node.label, t);
+  const sectionLabel  = permissionLabel(node.key, node.label, t);
   const hasSubGroups  = children.some(c => c.children.length > 0);
 
   return (
@@ -151,6 +165,11 @@ function PermSection({
       {/* Section label — inside the card */}
       <h3 className="text-[11px] font-bold text-slate-400 mb-2.5">
         {sectionLabel}
+        {node.key === 'home' && (
+          <span className="ms-2 font-medium text-slate-400">
+            {t('admin.roles.homeScreenHint', { defaultValue: 'Pick one: the home screen this role\u2019s users see. Click it again to clear.' })}
+          </span>
+        )}
       </h3>
 
       {hasSubGroups ? (
@@ -160,7 +179,7 @@ function PermSection({
               return (
                 <div key={child.node.key}>
                   <p className="text-[10px] font-bold text-slate-400 mb-2">
-                    {pLabel(child.node.key, child.node.label, t)}
+                    {permissionLabel(child.node.key, child.node.label, t)}
                   </p>
                   <PermissionGrid
                     entries={flatLeafEntries(child.children)}
@@ -265,6 +284,7 @@ export function RolesTab({
   const [isCreateOpen, setIsCreateOpen]   = useState(false);
   const [editTarget, setEditTarget]       = useState<SbrRole | null>(null);
   const [form, setForm]                   = useState({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE });
+  const [createHomeScreen, setCreateHomeScreen] = useState(NO_HOME_SCREEN);
   const [permSearch, setPermSearch]       = useState('');
   const [roleSort, setRoleSort]           = useState<string>(ROLES_SORT_DEFAULT);
 
@@ -314,13 +334,14 @@ export function RolesTab({
 
   const roles          = rolesData?.data ?? [];
   const allPermissions = permData?.data  ?? [];
-  const permTree       = buildTree(allPermissions);
+  const permTree       = buildTree(allPermissions, t('admin.permissionsOther', { defaultValue: 'Other permissions' }));
 
   // Search filter for the permission list (matches by label or permission key)
   const permSearchQuery   = permSearch.trim().toLowerCase();
   const filteredPermEntries = permSearchQuery
     ? flatLeafEntries(permTree).filter(e =>
         e.label.toLowerCase().includes(permSearchQuery) ||
+        permissionLabel(e.nodeKey, e.label, t).toLowerCase().includes(permSearchQuery) ||
         e.perm.PERMISSION_NAME.toLowerCase().includes(permSearchQuery))
     : [];
 
@@ -349,7 +370,7 @@ export function RolesTab({
   // Register the "open create dialog" callback with the parent page header (gated by the create permission)
   useEffect(() => {
     if (canCreate && onRegisterCreate) {
-      onRegisterCreate(() => { setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE }); setIsCreateOpen(true); });
+      onRegisterCreate(() => { setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE }); setCreateHomeScreen(NO_HOME_SCREEN); setIsCreateOpen(true); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canCreate, onRegisterCreate]);
@@ -393,7 +414,11 @@ export function RolesTab({
           return;
         }
       }
-      setGrantedIds(prev => { const next = new Set(prev); next.add(id); return next; });
+      // A role has at most one home screen, so choosing one clears the others.
+      const otherHomeIds = HOME_DASHBOARD_PERMISSIONS.includes(toggled?.PERMISSION_NAME ?? '')
+        ? allPermissions.filter(p => HOME_DASHBOARD_PERMISSIONS.includes(p.PERMISSION_NAME) && p.ID !== id).map(p => p.ID)
+        : [];
+      setGrantedIds(prev => { const next = new Set(prev); otherHomeIds.forEach(o => next.delete(o)); next.add(id); return next; });
     } else {
       setGrantedIds(prev => {
         const next = new Set(prev);
@@ -441,9 +466,10 @@ export function RolesTab({
   const handleCreate = async () => {
     if (!form.ROLE_NAME.trim()) { toast.error(t('admin.roles.nameRequired', { defaultValue: 'Role name is required.' })); return; }
     try {
+      const homePermission = allPermissions.find(p => p.PERMISSION_NAME === createHomeScreen);
       await createRole({
         ROLE_NAME: form.ROLE_NAME,
-        permissions: [],
+        permissions: homePermission ? [homePermission.ID] : [],
         ...(form.CATEGORY === ROLE_NO_CATEGORY_VALUE ? {} : { CATEGORY_ID: Number(form.CATEGORY) }),
       }).unwrap();
       toast.success(t('admin.roles.createdSuccess', { defaultValue: 'Role created successfully!' }));
@@ -662,7 +688,7 @@ export function RolesTab({
                 )}
               </div>
             ) : (
-              permTree.map(treeNode => (
+              permTree.filter((n) => flatLeafEntries([n]).length > 0).map(treeNode => (
                 <PermSection
                   key={treeNode.node.key}
                   treeNode={treeNode}
@@ -698,6 +724,23 @@ export function RolesTab({
               />
             </div>
             {categoryField('role-category', true)}
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="role-home-screen">{t('admin.roles.homeScreen', { defaultValue: 'Home screen' })}</Label>
+                <InfoTooltip content={t('admin.roles.homeScreenTip', { defaultValue: 'What this role\u2019s users see on Home. It can be changed later in the role\u2019s permissions.' })} contentClassName="max-w-[240px]" />
+              </div>
+              <Select value={createHomeScreen} onValueChange={setCreateHomeScreen}>
+                <SelectTrigger id="role-home-screen">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_HOME_SCREEN}>{t('admin.roles.noHomeScreen', { defaultValue: 'None' })}</SelectItem>
+                  {HOME_SCREENS.filter((s) => allPermissions.some((p) => p.PERMISSION_NAME === s.permission)).map((s) => (
+                    <SelectItem key={s.key} value={s.permission}>{t(`home.switcher.${s.key}`, { defaultValue: s.label })}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>

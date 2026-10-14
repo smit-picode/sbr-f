@@ -12,6 +12,7 @@ import { barOption, colorFor, deltaOption, lineOption, sunburstOption, treemapOp
 import { cellValue, isAdditive, toCategorySeries, toTree } from '../../charts/transform';
 import { ANALYSIS_BAR_ROW_HEIGHT, ANALYSIS_BAR_SCROLL_HEIGHT } from '../../constants';
 import { requestForBlock } from '../../engine/resolve';
+import { oldestFrozenFrame } from '../../utils/frames';
 import { frameName, measureLabel, valueLabel } from '../../utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
@@ -127,7 +128,10 @@ export function ChartBlock({ block, query, masked, height, mode, onPoint }: Bloc
     return <BlockEmpty height={height} message={t('analysis.empty.mapNeedsMunicipality', { defaultValue: 'The map groups by municipality — pick Municipality as the dimension.' })} />;
   }
   if (block.type === 'delta' && !data.compareTo) {
-    return <BlockEmpty height={height} message={t('analysis.empty.needsCompare', { defaultValue: 'Choose a frame to compare with.' })} />;
+    const message = oldestFrozenFrame()
+      ? t('analysis.empty.needsCompare', { defaultValue: 'Choose a frame to compare with.' })
+      : t('analysis.empty.needsSnapshot', { defaultValue: 'Comparing frames needs at least one snapshot. Create one under Frozen Frames.' });
+    return <BlockEmpty height={height} message={message} />;
   }
   const hasPercentNote = block.display.percent !== 'none' && !isAdditive(data) && block.type !== 'delta';
   const chartHeight = rankedChartHeight(block, data) ?? height;

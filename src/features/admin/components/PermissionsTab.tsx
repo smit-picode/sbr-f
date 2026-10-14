@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { ShieldCheck, ChevronRight, ChevronDown, Layers, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { PERMISSION_TREE, type PermissionNode } from '@/constants/permissionTree';
+import { PERMISSION_TREE, permissionLabel, type PermissionNode } from '@/constants/permissionTree';
 import { useGetPermissionsListQuery } from '@/features/admin/api/adminApi';
 
 function countLeafPerms(node: PermissionNode): number {
@@ -56,13 +56,13 @@ export function PermissionsTab() {
     if (!q) return null;
     const keys = new Set<string>();
     allItems.forEach(item => {
-      if (item.key.includes(q) || item.label.toLowerCase().includes(q)) {
+      if (item.key.includes(q) || item.label.toLowerCase().includes(q) || permissionLabel(item.key, item.label, t).toLowerCase().includes(q)) {
         keys.add(item.key);
         if (item.parentKey) keys.add(item.parentKey);
       }
     });
     return keys;
-  }, [q, allItems]);
+  }, [q, allItems, t]);
 
   const totalCount = permissionsData?.data?.length ?? 0;
 
@@ -134,7 +134,7 @@ export function PermissionsTab() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800">
-                    {node.label}
+                    {permissionLabel(node.key, node.label, t)}
                   </p>
                   {hasChildren && (
                     <p className="text-xs text-slate-400 mt-0.5">
@@ -182,7 +182,7 @@ export function PermissionsTab() {
                           >
                             <ChevronRight className="h-3 w-3 text-slate-300 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[12px] font-semibold text-slate-600">{child.label}</p>
+                              <p className="text-[12px] font-semibold text-slate-600">{permissionLabel(child.key, child.label, t)}</p>
                               <p className="text-xs text-slate-400 mt-0.5">{child.children!.length} child permissions</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
@@ -207,7 +207,7 @@ export function PermissionsTab() {
                                 <div key={grandchild.key} className="flex items-center gap-4 pl-20 pr-5 py-2.5 bg-white hover:bg-slate-50 transition-colors">
                                   <ChevronRight className="h-3 w-3 text-slate-200 shrink-0" />
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-slate-600">{grandchild.label}</p>
+                                    <p className="text-sm text-slate-600">{permissionLabel(grandchild.key, grandchild.label, t)}</p>
                                   </div>
                                   <div className="shrink-0">
                                     {badge(grandchild.key)}
@@ -225,7 +225,7 @@ export function PermissionsTab() {
                       <div key={child.key} className="flex items-center gap-4 pl-16 pr-5 py-3 hover:bg-slate-50 transition-colors">
                         <ChevronRight className="h-3 w-3 text-slate-300 shrink-0 ltr:-ml-5" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-600 font-medium">{child.label}</p>
+                          <p className="text-sm text-slate-600 font-medium">{permissionLabel(child.key, child.label, t)}</p>
                         </div>
                         <div className="shrink-0">
                           {badge(child.key)}

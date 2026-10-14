@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
-import { Shield, Users, Key, ArrowLeft, Plus } from 'lucide-react';
+import { Shield, Users, Key, KeyRound, ArrowLeft, Plus } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '@/components/common/PageContainer';
@@ -10,15 +10,18 @@ import { Button } from '@/components/ui/button';
 import { PermissionsTab } from '../components/PermissionsTab';
 import { RolesTab } from '../components/RolesTab';
 import { UsersTab } from '../components/UsersTab';
+import { SystemAccountsTab } from '../components/SystemAccountsTab';
+import { SYSTEM_ACCOUNTS_PERMISSION } from '../constants';
 import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
 import { setPermissions, logout } from '@/features/auth/authSlice';
 
-export type AdminTab = 'permissions' | 'roles' | 'users';
+export type AdminTab = 'permissions' | 'roles' | 'users' | 'system-accounts';
 
 const TAB_DEFS: { id: AdminTab; href: string; labelKey: string; descKey: string; icon: React.ElementType; permKey: string }[] = [
   { id: 'users',       href: '/admin/users',       labelKey: 'admin.tabs.users',       descKey: 'admin.tabs.usersDesc',       icon: Users,  permKey: 'admin_panel.users.view'       },
   { id: 'roles',       href: '/admin/roles',       labelKey: 'admin.tabs.roles',       descKey: 'admin.tabs.rolesDesc',       icon: Shield, permKey: 'admin_panel.roles.view'       },
   { id: 'permissions', href: '/admin/permissions', labelKey: 'admin.tabs.permissions', descKey: 'admin.tabs.permissionsDesc', icon: Key,    permKey: 'admin_panel.permissions.view' },
+  { id: 'system-accounts', href: '/admin/system-accounts', labelKey: 'admin.tabs.systemAccounts', descKey: 'admin.tabs.systemAccountsDesc', icon: KeyRound, permKey: SYSTEM_ACCOUNTS_PERMISSION },
 ];
 
 export function AdminTabPage({ tab }: { tab: AdminTab }) {
@@ -35,6 +38,7 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
   const seenFetching = useRef(false);
   const usersOpenCreate = useRef<(() => void) | null>(null);
   const rolesOpenCreate = useRef<(() => void) | null>(null);
+  const systemAccountsOpenCreate = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (permsFetching) { seenFetching.current = true; return; }
@@ -117,6 +121,14 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
             >
               <Plus className="h-4 w-4 mr-2" /> {t('admin.roles.addRole')}
             </Button>
+          ) : tab === 'system-accounts' ? (
+            <Button
+              onClick={() => systemAccountsOpenCreate.current?.()}
+              style={{ background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' }}
+              className="text-white hover:opacity-90"
+            >
+              <Plus className="h-4 w-4 mr-2" /> {t('admin.systemAccounts.add', { defaultValue: 'Add system account' })}
+            </Button>
           ) : undefined
         }
       />
@@ -142,6 +154,10 @@ export function AdminTabPage({ tab }: { tab: AdminTab }) {
               onRegisterCreate={(fn) => { rolesOpenCreate.current = fn; }}
             />
           )}
+          {tab === 'system-accounts' && (
+            <SystemAccountsTab onRegisterCreate={(fn) => { systemAccountsOpenCreate.current = fn; }} />
+          )}
+          {/* Permissions stays inside a single card */}
           {tab === 'permissions' && (
             <div className="bg-white rounded-lg shadow-card">
               <div className="p-6">

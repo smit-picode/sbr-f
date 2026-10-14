@@ -32,10 +32,10 @@ export const ANALYSIS_FIELD_GROUP_LABELS: Record<AnalysisFieldGroup, string> = {
 export const ANALYSIS_SIZE_CLASS_VALUES: string[] = ['micro', 'small', 'medium', 'large'];
 
 export const ANALYSIS_SIZE_CLASS_LABELS: Record<string, string> = {
-  micro: 'Micro (1–9)',
-  small: 'Small (10–49)',
-  medium: 'Medium (50–249)',
-  large: 'Large (250+)',
+  micro: 'Micro (1–10)',
+  small: 'Small (11–50)',
+  medium: 'Medium (51–250)',
+  large: 'Large (251+)',
 };
 
 export const ANALYSIS_FIELDS: Record<string, AnalysisFieldDef> = {
@@ -55,7 +55,6 @@ export const ANALYSIS_FIELDS: Record<string, AnalysisFieldDef> = {
 
   employment: { id: 'employment', label: 'Employment', type: 'number', group: 'size' },
   size_class: { id: 'size_class', label: 'Size class', type: 'category', group: 'size', order: ANALYSIS_SIZE_CLASS_VALUES },
-  turnover: { id: 'turnover', label: 'Annual turnover (QAR)', type: 'number', group: 'size' },
 
   municipality: { id: 'municipality', label: 'Municipality', type: 'category', group: 'location' },
   zone: { id: 'zone', label: 'Zone', type: 'category', group: 'location' },
@@ -113,7 +112,7 @@ export const ANALYSIS_ENTITIES: Record<AnalysisEntity, AnalysisEntityDef> = {
       ...EST_CORE,
       'municipality', 'zone', 'has_address', 'has_coordinates',
       'has_phone', 'has_email', 'has_website',
-      'enterprise_id', 'turnover', 'foreign_controlled', 'parent_country',
+      'enterprise_id', 'foreign_controlled', 'parent_country',
       'group_id', 'in_group', 'group_type', 'uci_country', 'multinational',
     ],
     defaultColumns: ['sbr_id', 'name', 'status', 'isic_section', 'municipality', 'employment'],
@@ -127,11 +126,11 @@ export const ANALYSIS_ENTITIES: Record<AnalysisEntity, AnalysisEntityDef> = {
     fields: [
       'enterprise_id', 'name', 'status', 'sector', 'legal_type', 'reg_year',
       'isic_section', 'isic_division', 'isic_group', 'isic_class',
-      'employment', 'size_class', 'turnover', 'establishment_count',
+      'employment', 'size_class', 'establishment_count',
       'foreign_ownership_pct', 'foreign_controlled', 'parent_country', 'municipality',
       'group_id', 'in_group', 'group_type', 'uci_country', 'multinational',
     ],
-    defaultColumns: ['enterprise_id', 'name', 'isic_section', 'employment', 'establishment_count', 'turnover'],
+    defaultColumns: ['enterprise_id', 'name', 'isic_section', 'employment', 'establishment_count', 'size_class'],
   },
   enterpriseGroups: {
     id: 'enterpriseGroups',
@@ -141,7 +140,7 @@ export const ANALYSIS_ENTITIES: Record<AnalysisEntity, AnalysisEntityDef> = {
     idField: 'group_id',
     fields: [
       'group_id', 'name', 'status', 'group_type', 'uci_country', 'multinational', 'foreign_controlled',
-      'reg_year', 'isic_section', 'isic_division', 'employment', 'size_class', 'turnover',
+      'reg_year', 'isic_section', 'isic_division', 'employment', 'size_class',
       'enterprise_count', 'establishment_count',
     ],
     defaultColumns: ['group_id', 'name', 'group_type', 'uci_country', 'enterprise_count', 'employment'],
@@ -288,9 +287,15 @@ export const ANALYSIS_QUICK_ADD: AnalysisBlockType[] = ['kpi', 'bar', 'map', 'pi
 export const ANALYSIS_RECORDS_PAGE_SIZE = 25;
 export const ANALYSIS_BAR_ROW_HEIGHT = 26;
 export const ANALYSIS_BAR_SCROLL_HEIGHT = 560;
-export const ANALYSIS_EXPORT_ROW_LIMIT = 200000;
+// Record exports page the API 100 rows at a time, so the cap keeps an extract to about half a minute.
+export const ANALYSIS_EXPORT_ROW_LIMIT = 10000;
+export const ANALYSIS_RECORDS_MAX_PAGE_SIZE = 100;
+export const ANALYSIS_EXPORT_CONCURRENCY = 6;
+// Pause after the last edit before an analysis is saved.
+export const ANALYSIS_AUTOSAVE_MS = 800;
+// The list loads in one page; the API allows at most 100 per request.
+export const ANALYSIS_LIST_LIMIT = 100;
 export const ANALYSIS_OTHER_KEY = '__other__';
-export const ANALYSIS_STORAGE_KEY = 'sbr_analyses_v2';
 export const ANALYSIS_MAX_MEASURES = 4;
 
 export const ANALYSIS_PERMISSIONS = {
@@ -347,11 +352,12 @@ export const ISIC_SECTION_LABELS_AR: Record<string, string> = {
   U: 'الهيئات الخارجية',
 };
 
+// Same bands as ANALYSIS_SIZE_CLASS_LABELS and the register's EMPLOYMENT_SIZE_CATEGORY.
 export const ANALYSIS_SIZE_CLASS_LABELS_AR: Record<string, string> = {
-  micro: 'متناهية الصغر (1–9)',
-  small: 'صغيرة (10–49)',
-  medium: 'متوسطة (50–249)',
-  large: 'كبيرة (250+)',
+  micro: 'متناهية الصغر (1–10)',
+  small: 'صغيرة (11–50)',
+  medium: 'متوسطة (51–250)',
+  large: 'كبيرة (251+)',
 };
 
 export const FLOW_NEW = '__new__';

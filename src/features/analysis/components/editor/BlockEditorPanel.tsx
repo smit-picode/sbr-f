@@ -21,7 +21,7 @@ import {
   ANALYSIS_SORT_OPTIONS,
   type AnalysisBlockCategory,
 } from '../../constants';
-import { ANALYSIS_FRAMES } from '../../mock/frames';
+import { useAnalysisFrames } from '../../hooks/useAnalysisFrames';
 import { changeEntity, convertBlock, firstNumericField, supportsType, uid } from '../../utils/blocks';
 import { aggLabel, blockCategoryLabel, blockTypeLabel, entityLabel, fieldLabel, frameName } from '../../utils/labels';
 import { AnalysisIcon } from '../AnalysisIcon';
@@ -102,6 +102,7 @@ interface Props {
 
 export function BlockEditorPanel({ block, analysis, onChange, onClose }: Props) {
   const { t } = useTranslation();
+  const { frames } = useAnalysisFrames();
   const [tab, setTab] = useState<'data' | 'visual'>('data');
   if (!block) return null;
 
@@ -308,7 +309,7 @@ export function BlockEditorPanel({ block, analysis, onChange, onClose }: Props) 
                   <SelectTrigger className="h-9 text-[12.5px] shadow-none"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value={INHERIT} className="text-[12.5px]">{t('analysis.editor.reportFrame', { defaultValue: 'Report frame ({{frame}})', frame: frameName(t, analysis.frame) })}</SelectItem>
-                    {ANALYSIS_FRAMES.map((f) => <SelectItem key={f.id} value={f.id} className="text-[12.5px]">{frameName(t, f.id)}</SelectItem>)}
+                    {frames.map((f) => <SelectItem key={f.id} value={f.id} className="text-[12.5px]">{frameName(t, f.id)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </label>
@@ -321,7 +322,7 @@ export function BlockEditorPanel({ block, analysis, onChange, onClose }: Props) 
                       {analysis.compareTo ? t('analysis.editor.reportCompare', { defaultValue: 'Report setting ({{frame}})', frame: frameName(t, analysis.compareTo) }) : t('analysis.editor.reportNoCompare', { defaultValue: 'Report setting (none)' })}
                     </SelectItem>
                     {!def.needsCompare && <SelectItem value="none" className="text-[12.5px]">{t('analysis.editor.noCompare', { defaultValue: 'No comparison' })}</SelectItem>}
-                    {ANALYSIS_FRAMES.map((f) => <SelectItem key={f.id} value={f.id} className="text-[12.5px]">{frameName(t, f.id)}</SelectItem>)}
+                    {frames.map((f) => <SelectItem key={f.id} value={f.id} className="text-[12.5px]">{frameName(t, f.id)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </label>
@@ -416,7 +417,7 @@ export function BlockEditorPanel({ block, analysis, onChange, onClose }: Props) 
             {['bar', 'column', 'line'].includes(block.type) && <Toggle checked={block.display.showValues} onChange={(v) => setDisplay({ showValues: v })} label={t('analysis.editor.showValues', { defaultValue: 'Show value labels' })} />}
             {(block.type === 'column' || block.type === 'bar') && q.dimensions.length > 1 && <Toggle checked={block.display.stacked} onChange={(v) => setDisplay({ stacked: v })} label={t('analysis.editor.stacked', { defaultValue: 'Stack series' })} />}
             {(block.type === 'pivot' || block.type === 'heatmap') && <Toggle checked={block.display.showTotals} onChange={(v) => setDisplay({ showTotals: v })} label={t('analysis.editor.totals', { defaultValue: 'Show totals' })} />}
-            {block.type === 'kpi' && <Toggle checked={block.display.sparkline} onChange={(v) => setDisplay({ sparkline: v })} label={t('analysis.editor.sparkline', { defaultValue: 'Trend across frames' })} hint={t('analysis.editor.sparklineHint', { defaultValue: 'A sparkline of each measure over every frozen frame' })} />}
+            {block.type === 'kpi' && <Toggle checked={block.display.sparkline} onChange={(v) => setDisplay({ sparkline: v })} label={t('analysis.editor.sparkline', { defaultValue: 'Trend across frames' })} hint={block.width === 'half' ? t('analysis.editor.sparklineFullOnly', { defaultValue: 'Shown on full-width boxes only' }) : t('analysis.editor.sparklineHint', { defaultValue: 'A sparkline of each measure over every frozen frame' })} />}
             <Toggle
               checked={block.crossFilter}
               onChange={(v) => onChange({ ...block, crossFilter: v })}

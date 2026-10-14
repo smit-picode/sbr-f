@@ -1,6 +1,7 @@
 import * as echarts from 'echarts';
 import type { EChartOption, EChartOptionInput } from './EChart';
 import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, sharesTo100, vGrad } from './theme';
+import { withBasePath } from '@/utils/basePath';
 
 const C = CHART_COLOR;
 
@@ -613,7 +614,7 @@ export interface QatarMapOptions {
 // Registers the 'qatar' map once the GeoJSON
 export async function registerQatarMap(): Promise<void> {
   if (qatarGeoRegistered) return;
-  const res = await fetch('/data/qatar-municipalities.geo.json');
+  const res = await fetch(withBasePath('/data/qatar-municipalities.geo.json'));
   const geo = await res.json();
   echarts.registerMap('qatar', geo);
   qatarGeoRegistered = true;

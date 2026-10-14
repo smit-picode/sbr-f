@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -38,7 +39,14 @@ export function AttributeChangeRequestsPage() {
   const router = useRouter();
   const { canView, canApprove } = usePermission('approvals');
   const canAccess = canView || canApprove;
-  const [filters, setFilters] = usePersistedState<ChangeRequestFilters>('sbr:attributeChangeRequests:filters', DEFAULT_FILTERS);
+  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
+  // when a row navigates to its detail page and the user comes back.
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = usePersistedState<ChangeRequestFilters>('sbr:attributeChangeRequests:filters', DEFAULT_FILTERS, () => {
+    // A link from the reviewer home opens the list on one table, over whatever was saved.
+    const tableName = searchParams.get('tableName');
+    return tableName && TABLE_VALUES.includes(tableName) ? { ...DEFAULT_FILTERS, tableName } : undefined;
+  });
 
   const queryParams = cleanParams({
     ...filters,

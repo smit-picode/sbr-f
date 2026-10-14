@@ -1,3 +1,6 @@
+import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
+import { QATAR_MUNICIPALITY_NAME_AR } from '@/features/home/data/qatarMunicipalities';
+// Field Labels for error messages and form display
 export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Regulatory Name (English)',
   NAME_ARA: 'Regulatory Name (Arabic)',
@@ -68,25 +71,61 @@ export const ESTABLISHMENTS_DEFAULT_FILTERS = {
   isicCode: '',
   sourceCode: '',
   mainBranchFLG: '',
+  employmentSizeCategory: '',
 } as const;
 
-export const ESTABLISHMENT_FILTER_COLUMNS: { value: string; label: string }[] = [
-  { value: 'SBR_ID', label: 'SBR ID' },
+// Values the pipeline writes to EMPLOYMENT_SIZE_CATEGORY (checked by the size DQ rule).
+export const EMPLOYMENT_SIZE_CATEGORY_OPTIONS: string[] = ['Micro', 'Small', 'Medium', 'Large'];
+
+// SBR_ADDRESSES.MUNICIPALITY_ID codes, as the backend's MUNICIPALITY_CODE_NAME names them.
+export const MUNICIPALITY_NAME_BY_CODE: Record<string, string> = {
+  '1': 'Doha',
+  '2': 'Al Rayyan',
+  '3': 'Al Wakra',
+  '4': 'Umm Slal',
+  '5': 'Al Daayen',
+  '6': 'Al Khor and Al Thakhira',
+  '7': 'Al Shamal',
+  '8': 'Al Sheehaniya',
+};
+
+export function municipalityLabel(code: string, language: string): string {
+  const name = MUNICIPALITY_NAME_BY_CODE[code.trim()];
+  if (!name) return code;
+  return language === 'ar' ? QATAR_MUNICIPALITY_NAME_AR[name] ?? name : name;
+}
+
+// Employee bands behind each size class, as the pipeline assigns them.
+export const EMPLOYMENT_SIZE_BANDS: Record<string, string> = {
+  Micro: '1–10',
+  Small: '11–50',
+  Medium: '51–250',
+  Large: '251+',
+};
+
+// Columns offered in the "Column filters" builder; each `value` must be in filter_expr of SBR_ESTABLISHMENTS_API (NPC_SBR).
+export const ESTABLISHMENT_FILTER_COLUMNS: ColumnFilterOption[] = [
+  { value: 'SBR_ID', label: 'SBR ID', type: 'number' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
   { value: 'NAME_ARA', label: 'Name (AR)' },
   { value: 'TRADE_NAME_ENU', label: 'Trade name (EN)' },
   { value: 'TRADE_NAME_ARA', label: 'Trade name (AR)' },
   { value: 'NPC_NAME_ENU', label: 'NPC name (EN)' },
   { value: 'NPC_NAME_ARA', label: 'NPC name (AR)' },
-  { value: 'EST_STATUS', label: 'Status' },
-  { value: 'EST_STATUS_CATEGORY', label: 'Status category' },
-  { value: 'SECTOR_ID', label: 'Sector' },
-  { value: 'LEGAL_TYPE', label: 'Legal type' },
-  { value: 'ISIC_CODE', label: 'ISIC code' },
-  { value: 'EMPLOYMENT_COUNT', label: 'Employment count' },
-  { value: 'MAIN_BRANCH_FLG', label: 'Branch flag' },
-  { value: 'MAIN_BRANCH_SBR_ID', label: 'Main branch SBR ID' },
-  { value: 'SOURCE_CODE', label: 'Source' },
+  { value: 'EST_STATUS', label: 'Status', pick: true },
+  { value: 'EST_STATUS_CATEGORY', label: 'Status category', pick: true },
+  { value: 'SECTOR_ID', label: 'Sector', pick: true },
+  { value: 'LEGAL_TYPE', label: 'Legal type', pick: true },
+  { value: 'ISIC_CODE', label: 'ISIC code', pick: true },
+  { value: 'EMPLOYMENT_COUNT', label: 'Employment count', type: 'number' },
+  { value: 'MAIN_BRANCH_FLG', label: 'Branch flag', pick: true },
+  // Matched on any of the establishment's open addresses (SBR_ESTABLISHMENTS_API address_filter_expr).
+  { value: 'MUNICIPALITY_ID', label: 'Municipality', pick: true, valueLabel: municipalityLabel },
+  { value: 'QARS', label: 'QARS' },
+  { value: 'MAIN_BRANCH_SBR_ID', label: 'Main branch SBR ID', type: 'number' },
+  { value: 'ASSOCIATED_ENTERPRISE_ID', label: 'Associated enterprise ID', type: 'number' },
+  { value: 'ISIC_CODE_CONFIDENCE', label: 'ISIC code confidence', type: 'number' },
+  { value: 'SOURCE_CODE', label: 'Source', pick: true },
   { value: 'MOCI_CR_NUM', label: 'MOCI CR' },
 ];
 
@@ -112,4 +151,5 @@ export const ESTABLISHMENTS_SORTABLE_COLUMNS: string[] = [
   'SOURCE_CODE', 'MOCI_CR_NUM',
 ];
 
+// Survey participation / Contribution to GVA cards on the establishment detail page.
 export const SHOW_ESTABLISHMENT_SURVEY_SECTIONS: boolean = true;

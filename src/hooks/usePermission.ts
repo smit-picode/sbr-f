@@ -21,3 +21,12 @@ export function usePermission(baseKey: string) {
     canApprove:     has(`${baseKey}.approve`),
   };
 }
+
+// A single named permission, for the ones that do not fit the <section>.<verb> pattern above
+// (contacts.tag, contact_tags.manage). SUPER_ADMIN holds everything, as in usePermission.
+export function useHasPermission(name: string): boolean {
+  const user = useAppSelector((s) => s.auth.user);
+  const permissions = useAppSelector((s) => s.auth.permissions);
+  if (user?.role?.toUpperCase() === 'SUPER_ADMIN') return true;
+  return permissions.some((p) => p.permissionName?.toLowerCase() === name.toLowerCase());
+}

@@ -8,7 +8,7 @@ import { DataTable } from '@/components/table/DataTable';
 import { getEstablishmentsColumns } from '../components/EstablishmentsColumns';
 import { EstablishmentsFiltersBar } from '../components/EstablishmentsFilters';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, columnFilterItems } from '@/components/common/ColumnFilters';
 import { EditEstablishmentModal } from '../components/EditEstablishmentModal';
 import { useGetEstablishmentsListQuery } from '../api/establishmentsApi';
 import { ESTABLISHMENTS_DEFAULT_FILTERS, ESTABLISHMENT_FILTER_COLUMNS, ESTABLISHMENTS_SORTABLE_COLUMNS, EST_STATUS_VALUES } from '../constants';
@@ -58,17 +58,21 @@ export function EstablishmentsListPage() {
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
+  // The size dropdown has no API param of its own; it travels as one more column filter.
+  const sizeCategory = filters.employmentSizeCategory && filters.employmentSizeCategory !== '__all__' ? filters.employmentSizeCategory : '';
+  const activeColumnFilters = [
+    ...columnFilterItems(columnFilters),
+    ...(sizeCategory ? [{ column: 'EMPLOYMENT_SIZE_CATEGORY', operator: 'equals', value: sizeCategory }] : []),
+  ];
 
   const queryParams = cleanParams({
     ...filters,
+    employmentSizeCategory: undefined,
     search: debouncedSearch,
     estStatus: filters.estStatus === '__all__' ? undefined : filters.estStatus,
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
     sourceCode: filters.sourceCode === '__all__' ? undefined : filters.sourceCode,
-    columnFilters: activeColumnFilters.length
-      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
-      : undefined,
+    columnFilters: activeColumnFilters.length ? JSON.stringify(activeColumnFilters) : undefined,
   });
 
   const { data, currentData, isLoading, isFetching, isError, error, refetch } = useGetEstablishmentsListQuery(queryParams);
@@ -128,6 +132,14 @@ export function EstablishmentsListPage() {
     });
   }
 
+  if (sizeCategory) {
+    activeChips.push({
+      key: 'employmentSizeCategory',
+      label: `${t('filters.employmentSize', { defaultValue: 'Employment size' })}: ${t(`filters.size.${sizeCategory.toLowerCase()}`, { defaultValue: sizeCategory })}`,
+      onRemove: () => handleFilterChange({ employmentSizeCategory: '', page: 1 }),
+    });
+  }
+
   const { canEdit: canEditEstablishment, canSearch, canViewDetail } = usePermission('establishments');
   const canOpenDetail = canViewDetail || canEditEstablishment;
   const columns = getEstablishmentsColumns((row) => setEditTarget(row), t, canEditEstablishment);
@@ -158,7 +170,7 @@ export function EstablishmentsListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={ESTABLISHMENT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.establishments" value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={ESTABLISHMENT_FILTER_COLUMNS} labelPrefix="columnFilters.columns.establishments" value={columnFilters} onChange={handleColumnFiltersChange} valuesUrl="/establishments/filter-values" />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}
@@ -178,7 +190,7 @@ export function EstablishmentsListPage() {
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
         sortableColumns={ESTABLISHMENTS_SORTABLE_COLUMNS}
         stickyFirstColumn
-        onRowClick={canOpenDetail ? (row) => router.push(`/establishments/${row.SBR_ID}`) : undefined}
+        onRowClick={(row) => (canOpenDetail ? router.push(`/establishments/${row.SBR_ID}`) : toast.warning(t('common.noDetailAccess', { defaultValue: "You do not have permission to open this record's details." })))}
         getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]' : undefined)}
       />
 

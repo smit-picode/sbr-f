@@ -1,70 +1,53 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import type { AnalysisRequest, AnalysisResolvedQuery, AnalysisResult } from '@/types';
-import type { AnalysisWorkerMessage, AnalysisWorkerTask } from '../engine/analysis.worker';
+import { skipToken } from '@reduxjs/toolkit/query';
+import type { AnalysisRequest, AnalysisResolvedQuery, AnalysisResult, AnalysisRecordsResult } from '@/types';
+import { store } from '@/store';
+import { ANALYSIS_EXPORT_CONCURRENCY, ANALYSIS_RECORDS_MAX_PAGE_SIZE } from '../constants';
+import { analysisApi, useRunAnalysisQueryQuery } from './analysisApi';
 
-const CACHE_LIMIT = 300;
-const cache = new Map<string, AnalysisResult>();
-const inflight = new Map<string, Promise<AnalysisResult>>();
+// Imperative query (exports); shares RTK Query's cache with the blocks, so a block already on screen costs nothing.
+export async function runAnalysis(req: AnalysisRequest): Promise<AnalysisResult> {
+  const sub = store.dispatch(analysisApi.endpoints.runAnalysisQuery.initiate(req));
+  try {
+    const res = await sub.unwrap();
+    if (!res.data) throw new Error('Empty analysis result');
+    return res.data;
+  } finally {
+    sub.unsubscribe();
+  }
+}
 
-let worker: Worker | null = null;
-let seq = 0;
-const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+// The API pages records at most 100 at a time, so an extract fetches pages a few at a time up to the cap.
+export async function fetchRecordExtract(
+  query: AnalysisResolvedQuery,
+  columns: string[],
+  cap: number,
+  onProgress?: (loaded: number, total: number) => void,
+): Promise<{ rows: Record<string, unknown>[]; total: number }> {
+  const pageSize = ANALYSIS_RECORDS_MAX_PAGE_SIZE;
+  const page = (n: number) =>
+    runAnalysis({ kind: 'records', query: { ...query, columns }, page: n, pageSize, sortBy: null, sortDir: 'asc' }) as Promise<AnalysisRecordsResult>;
 
-function getWorker(): Worker {
-  if (worker) return worker;
-  worker = new Worker(new URL('../engine/analysis.worker.ts', import.meta.url));
-  worker.onmessage = (e: MessageEvent<{ id: number; result?: unknown; error?: string }>) => {
-    const p = pending.get(e.data.id);
-    if (!p) return;
-    pending.delete(e.data.id);
-    if (e.data.error) p.reject(new Error(e.data.error));
-    else p.resolve(e.data.result);
+  const first = await page(1);
+  const wanted = Math.min(first.total, cap);
+  const pages = Math.ceil(wanted / pageSize);
+  const byPage: Record<string, unknown>[][] = [first.rows];
+  onProgress?.(first.rows.length, wanted);
+
+  let next = 2;
+  let loaded = first.rows.length;
+  const worker = async () => {
+    while (next <= pages) {
+      const n = next++;
+      const r = await page(n);
+      byPage[n - 1] = r.rows;
+      loaded += r.rows.length;
+      onProgress?.(Math.min(loaded, wanted), wanted);
+    }
   };
-  worker.onerror = (e) => {
-    for (const p of pending.values()) p.reject(new Error(e.message || 'Analysis worker failed'));
-    pending.clear();
-    worker?.terminate();
-    worker = null;
-  };
-  return worker;
-}
-
-function post<T>(task: AnalysisWorkerTask): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const id = ++seq;
-    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
-    const message: AnalysisWorkerMessage = { id, task };
-    getWorker().postMessage(message);
-  });
-}
-
-export function requestKey(req: AnalysisRequest): string {
-  return JSON.stringify(req);
-}
-
-// Identical requests share one computation (several blocks often ask for the same data).
-export function runAnalysis(req: AnalysisRequest): Promise<AnalysisResult> {
-  const key = requestKey(req);
-  const hit = cache.get(key);
-  if (hit) return Promise.resolve(hit);
-  const running = inflight.get(key);
-  if (running) return running;
-  const p = post<AnalysisResult>({ kind: 'query', request: req })
-    .then((result) => {
-      cache.set(key, result);
-      if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value as string);
-      return result;
-    })
-    .finally(() => inflight.delete(key));
-  inflight.set(key, p);
-  return p;
-}
-
-// Full, unpaged record extract for exports (capped) — the backend will stream this instead.
-export function fetchRecordExtract(query: AnalysisResolvedQuery, columns: string[], cap: number) {
-  return post<{ rows: Record<string, unknown>[]; total: number }>({ kind: 'export', query, columns, cap });
+  await Promise.all(Array.from({ length: Math.min(ANALYSIS_EXPORT_CONCURRENCY, Math.max(0, pages - 1)) }, worker));
+  return { rows: byPage.flat().slice(0, wanted), total: first.total };
 }
 
 interface ResultState<T> {
@@ -74,29 +57,12 @@ interface ResultState<T> {
   isError: boolean;
 }
 
-// RTK-Query-shaped hook that keeps previous data while refetching, so blocks never flash to a skeleton.
+// Keeps the previous result while a changed request loads, so blocks never flash back to a skeleton.
 export function useAnalysisResult<T extends AnalysisResult>(req: AnalysisRequest | null): ResultState<T> {
-  const key = req ? requestKey(req) : null;
-  const [state, setState] = useState<ResultState<T>>(() => {
-    const hit = key ? (cache.get(key) as T | undefined) : undefined;
-    return { data: hit, isLoading: !!key && !hit, isFetching: !!key && !hit, isError: false };
+  const { data, isLoading, isFetching, isError } = useRunAnalysisQueryQuery(req ?? skipToken, {
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
   });
-  const current = useRef(key);
-
-  useEffect(() => {
-    current.current = key;
-    if (!req || !key) return;
-    const hit = cache.get(key) as T | undefined;
-    if (hit) {
-      setState({ data: hit, isLoading: false, isFetching: false, isError: false });
-      return;
-    }
-    setState((s) => ({ ...s, isLoading: !s.data, isFetching: true, isError: false }));
-    runAnalysis(req)
-      .then((r) => { if (current.current === key) setState({ data: r as T, isLoading: false, isFetching: false, isError: false }); })
-      .catch(() => { if (current.current === key) setState((s) => ({ ...s, isLoading: false, isFetching: false, isError: true })); });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-
-  return state;
+  return { data: (req ? data?.data : undefined) as T | undefined, isLoading, isFetching, isError };
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { withBasePath } from '@/utils/basePath';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -39,7 +40,7 @@ export function Logo({ size = 'md', className, showText = false, variant = 'dark
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <Image
-        src={src}
+        src={withBasePath(src)}
         alt="SBR Logo"
         width={size === 'sm' ? 28 : size === 'md' ? 40 : 256}
         height={size === 'sm' ? 28 : size === 'md' ? 40 : 256}

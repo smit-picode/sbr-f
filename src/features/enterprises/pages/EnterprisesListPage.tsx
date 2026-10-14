@@ -5,7 +5,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, isActiveColumnFilterRow } from '@/components/common/ColumnFilters';
+import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { getEnterpriseColumns } from '../components/EnterpriseColumns';
 import { EnterprisesFiltersBar } from '../components/EnterprisesFilters';
 import { useGetEnterprisesListQuery } from '../api/enterprisesApi';
@@ -47,16 +47,13 @@ export function EnterprisesListPage() {
 
   const { canSearch, canViewDetail } = usePermission('enterprises');
 
-  const activeColumnFilters = columnFilters.filter(isActiveColumnFilterRow);
 
   const queryParams = cleanParams({
     ...filters,
     search: debouncedSearch,
     status: filters.status === '__all__' ? undefined : filters.status,
     sectorId: filters.sectorId === '__all__' ? undefined : filters.sectorId,
-    columnFilters: activeColumnFilters.length
-      ? JSON.stringify(activeColumnFilters.map((r) => ({ column: r.column, operator: r.operator, value: r.value.trim() })))
-      : undefined,
+    columnFilters: columnFiltersParam(columnFilters),
   });
 
   const { data, currentData, isLoading, isError, error, refetch, isFetching } = useGetEnterprisesListQuery(queryParams);
@@ -133,7 +130,7 @@ export function EnterprisesListPage() {
       )}
 
       {canSearch && (
-        <ColumnFilters columns={ENTERPRISE_FILTER_COLUMNS} labelPrefix="columnFilters.columns.enterprises" value={columnFilters} onChange={handleColumnFiltersChange} />
+        <ColumnFilters columns={ENTERPRISE_FILTER_COLUMNS} labelPrefix="columnFilters.columns.enterprises" value={columnFilters} onChange={handleColumnFiltersChange} valuesUrl="/enterprises/filter-values" />
       )}
 
       {canSearch && <FilterChips chips={activeChips} onClearAll={handleReset} />}
@@ -151,7 +148,7 @@ export function EnterprisesListPage() {
         onPageChange={(p) => handleFilterChange({ page: p })}
         onLimitChange={(l) => handleFilterChange({ limit: l, page: 1 })}
         onSortChange={(field, order) => handleFilterChange({ sortBy: field ?? undefined, sortOrder: order ?? undefined, page: 1 })}
-        onRowClick={canViewDetail ? (row) => router.push(`/enterprises/${row.ENTERPRISE_ID}`) : undefined}
+        onRowClick={(row) => (canViewDetail ? router.push(`/enterprises/${row.ENTERPRISE_ID}`) : toast.warning(t('common.noDetailAccess', { defaultValue: "You do not have permission to open this record's details." })))}
         stickyFirstColumn
         getRowClassName={(row) => (row.HAS_PENDING_REQUEST ? 'hover:bg-[#FDF7E3] shadow-[inset_3px_0_0_0_#BF9F5F]' : undefined)}
       />

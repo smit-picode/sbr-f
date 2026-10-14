@@ -65,6 +65,18 @@ export const BULK_CHANGE_STATUS_CLASSES: Record<string, string> = {
   FAILED: 'bg-slate-100 text-slate-600',
 };
 
+// Batches a system account submits through the integration API are labelled "API: <account> / <reference>".
+export const BULK_CHANGE_API_FILE_PREFIX: string = 'API: ';
+
+// Members that are not edits of an existing record, keyed "<MEMBER_TABLE>:<OPERATION>".
+export const BULK_CHANGE_MEMBER_KIND: Record<string, { key: string; label: string }> = {
+  'SBR_CONTACTS:INSERT': { key: 'newContact', label: 'New contact' },
+  'SBR_CONTACT_TAGS:INSERT': { key: 'tag', label: 'Tag' },
+  'SBR_CONTACT_TAGS:DELETE': { key: 'untag', label: 'Untag' },
+};
+
+export const BULK_CHANGE_TAG_CODE_KEY: string = 'TAG_CODE';
+
 export const BULK_CHANGE_STATUS_DEFAULTS: Record<string, string> = {
   PENDING: 'Pending',
   APPROVED: 'Approved',

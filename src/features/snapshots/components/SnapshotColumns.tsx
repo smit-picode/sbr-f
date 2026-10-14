@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
+import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
 import type { SnapshotEntity, SnapshotRow } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { nullableText, formatDate, formatNumber } from '@/utils/format';
@@ -20,14 +21,6 @@ function TextCell({ value }: { value: unknown }) {
   return <span className="text-sm text-slate-700">{nullableText(value == null ? null : String(value))}</span>;
 }
 
-function ArabicCell({ value }: { value: unknown }) {
-  return <span className="text-sm text-slate-700" lang="ar">{nullableText(value == null ? null : String(value))}</span>;
-}
-
-function SourceCell({ value }: { value: unknown }) {
-  return <span className="text-xs text-slate-400">{nullableText(value == null ? null : String(value))}</span>;
-}
-
 function NumberCell({ value }: { value: unknown }) {
   return <span className="text-sm text-slate-700 tabular-nums">{formatNumber(typeof value === 'number' ? value : value == null ? null : Number(value))}</span>;
 }
@@ -36,7 +29,7 @@ function DateCell({ value }: { value: unknown }) {
   return <span className="text-sm text-slate-600 whitespace-nowrap">{formatDate(value == null ? null : String(value))}</span>;
 }
 
-type Kind = 'id' | 'entId' | 'grpId' | 'mono' | 'text' | 'arabic' | 'source' | 'number' | 'date' | 'status';
+type Kind = 'id' | 'mono' | 'text' | 'number' | 'date' | 'status';
 
 // [row key, column label key, English fallback, cell kind] — rows are raw frozen base-table rows.
 type Spec = [string, string, string, Kind];
@@ -44,72 +37,40 @@ type Spec = [string, string, string, Kind];
 const SPECS: Record<SnapshotEntity, Spec[]> = {
   establishments: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
-    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source code', 'mono'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
     ['NAME_ENU', 'columns.NAME_ENU', 'Name (EN)', 'text'],
-    ['NAME_ENU_SOURCE', 'columns.NAME_ENU_SOURCE', 'Name (EN) source', 'source'],
-    ['NAME_ARA', 'columns.NAME_ARA', 'Name (AR)', 'arabic'],
-    ['NAME_ARA_SOURCE', 'columns.NAME_ARA_SOURCE', 'Name (AR) source', 'source'],
     ['TRADE_NAME_ENU', 'columns.TRADE_NAME_ENU', 'Trade name (EN)', 'text'],
-    ['TRADE_NAME_ENU_SOURCE', 'columns.TRADE_NAME_ENU_SOURCE', 'Trade name (EN) source', 'source'],
-    ['TRADE_NAME_ARA', 'columns.TRADE_NAME_ARA', 'Trade name (AR)', 'arabic'],
-    ['TRADE_NAME_ARA_SOURCE', 'columns.TRADE_NAME_ARA_SOURCE', 'Trade name (AR) source', 'source'],
-    ['NPC_NAME_ENU', 'columns.NPC_NAME_ENU', 'NPC name (EN)', 'text'],
-    ['NPC_NAME_ENU_SOURCE', 'columns.NPC_NAME_ENU_SOURCE', 'NPC name (EN) source', 'source'],
-    ['NPC_NAME_ARA', 'columns.NPC_NAME_ARA', 'NPC name (AR)', 'arabic'],
-    ['NPC_NAME_ARA_SOURCE', 'columns.NPC_NAME_ARA_SOURCE', 'NPC name (AR) source', 'source'],
-    ['EST_STATUS', 'columns.EST_STATUS', 'EST status', 'status'],
-    ['EST_STATUS_SOURCE', 'columns.EST_STATUS_SOURCE', 'EST status source', 'source'],
-    ['EST_STATUS_CATEGORY', 'columns.EST_STATUS_CATEGORY', 'EST status category', 'text'],
-    ['EST_STATUS_CATEGORY_SOURCE', 'columns.EST_STATUS_CATEGORY_SOURCE', 'EST status category source', 'source'],
+    ['EST_STATUS', 'columns.EST_STATUS', 'Status', 'status'],
     ['LEGAL_TYPE', 'columns.LEGAL_TYPE', 'Legal type', 'text'],
-    ['LEGAL_TYPE_SOURCE', 'columns.LEGAL_TYPE_SOURCE', 'Legal type source', 'source'],
-    ['SECTOR_ID', 'columns.SECTOR_ID', 'Sector ID', 'text'],
-    ['SECTOR_ID_SOURCE', 'columns.SECTOR_ID_SOURCE', 'Sector ID source', 'source'],
+    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
     ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
-    ['ISIC_CODE_SOURCE', 'columns.ISIC_CODE_SOURCE', 'ISIC code source', 'source'],
-    ['MAIN_BRANCH_FLG', 'columns.MAIN_BRANCH_FLG', 'Main branch flag', 'text'],
-    ['MAIN_BRANCH_FLG_SOURCE', 'columns.MAIN_BRANCH_FLG_SOURCE', 'Main branch flag source', 'source'],
-    ['MAIN_BRANCH_SBR_ID', 'columns.MAIN_BRANCH_SBR_ID', 'Main branch SBR ID', 'id'],
-    ['MAIN_BRANCH_SBR_ID_SOURCE', 'columns.MAIN_BRANCH_SBR_ID_SOURCE', 'Main branch SBR ID source', 'source'],
-    ['HOLDING_COMPANY_FLG', 'columns.HOLDING_COMPANY_FLG', 'Holding company flag', 'text'],
-    ['HOLDING_COMPANY_FLG_SOURCE', 'columns.HOLDING_COMPANY_FLG_SOURCE', 'Holding company flag source', 'source'],
     ['EMPLOYMENT_COUNT', 'columns.EMPLOYMENT_COUNT', 'Employment count', 'number'],
-    ['EMPLOYMENT_COUNT_SOURCE', 'columns.EMPLOYMENT_COUNT_SOURCE', 'Employment count source', 'source'],
-    ['MOCI_ORG_ID', 'columns.MOCI_ORG_ID', 'MOCI org ID', 'mono'],
-    ['MOCI_CR_NUM', 'columns.MOCI_CR_NUM', 'MOCI CR no.', 'mono'],
-    ['MOCI_CP_NUM', 'columns.MOCI_CP_NUM', 'MOCI CP no.', 'mono'],
-    ['QFC_NUMBER', 'columns.QFC_NUMBER', 'QFC number', 'mono'],
-    ['QFZ_SOURCE_ID', 'columns.QFZ_SOURCE_ID', 'QFZ source ID', 'mono'],
-    ['QSTP_REG_NUM', 'columns.QSTP_REG_NUM', 'QSTP reg no.', 'mono'],
-    ['QSTP_TAX_REG_NUM', 'columns.QSTP_TAX_REG_NUM', 'QSTP tax reg no.', 'mono'],
-    ['QSTP_PARENT_REG_NUM', 'columns.QSTP_PARENT_REG_NUM', 'QSTP parent reg no.', 'mono'],
-    ['FARM_NO', 'columns.FARM_NO', 'Farm no.', 'mono'],
-    ['EID', 'columns.EID', 'EID', 'mono'],
-    ['CR_ISSUE_DATE', 'columns.CR_ISSUE_DATE', 'CR issue date', 'date'],
-    ['CR_EXPIRY_DATE', 'columns.CR_EXPIRY_DATE', 'CR expiry date', 'date'],
-    ['CR_CANCEL_DATE', 'columns.CR_CANCEL_DATE', 'CR cancel date', 'date'],
-    ['CP_ISSUE_DATE', 'columns.CP_ISSUE_DATE', 'CP issue date', 'date'],
-    ['CP_END_DATE', 'columns.CP_END_DATE', 'CP end date', 'date'],
-    ['CP_CANCEL_DATE', 'columns.CP_CANCEL_DATE', 'CP cancel date', 'date'],
-    ['REG_DATE', 'columns.REG_DATE', 'Reg date', 'date'],
-    ['REG_EXPIRY_DATE', 'columns.REG_EXPIRY_DATE', 'Reg expiry date', 'date'],
-    ['REG_CANCEL_DATE', 'columns.REG_CANCEL_DATE', 'Reg cancel date', 'date'],
+    ['MAIN_BRANCH_FLG', 'columns.MAIN_BRANCH_FLG', 'Main / branch', 'text'],
+    ['ASSOCIATED_ENTERPRISE_ID', 'columns.ASSOCIATED_ENTERPRISE_ID', 'Enterprise', 'id'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
   ],
   enterprises: [
-    ['ENTERPRISE_ID', 'columns.ENTERPRISE_ID', 'Enterprise', 'entId'],
+    ['ENTERPRISE_ID', 'columns.ENTERPRISE_ID', 'Enterprise', 'id'],
     ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
-    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
     ['STATUS', 'columns.STATUS', 'Status', 'status'],
+    ['SECTOR_ID', 'columns.SECTOR', 'Sector', 'text'],
+    ['ISIC_CODE', 'columns.ISIC_CODE', 'ISIC code', 'mono'],
+    ['EMPLOYMENT_COUNT', 'columns.EMPLOYMENT_COUNT', 'Employment count', 'number'],
+    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
     ['MAIN_ESTABLISHMENT_SBR_ID', 'columns.MAIN_UNIT', 'Main unit', 'id'],
     ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
   ],
   enterprise_groups: [
-    ['ENTERPRISE_GROUP_ID', 'columns.GROUP', 'Group', 'grpId'],
-    ['NAME_ENU', 'columns.GROUP_NAME', 'Group name', 'text'],
-    ['UCI_NAME', 'columns.UCI', 'Controlling institution (UCI)', 'text'],
-    ['PRINCIPAL_ISIC_2DIGIT', 'columns.PRINCIPAL_ACTIVITY', 'Principal activity', 'mono'],
-    ['TOTAL_EMPLOYEES', 'columns.EMPLOYEES', 'Employees', 'number'],
+    ['ENTERPRISE_GROUP_ID', 'columns.ENTERPRISE_GROUP_ID', 'Enterprise group', 'id'],
+    ['NAME_ENU', 'columns.NAME', 'Name', 'text'],
     ['STATUS', 'columns.STATUS', 'Status', 'status'],
+    ['UCI_NAME', 'columns.UCI_NAME', 'UCI name', 'text'],
+    ['UCI_COUNTRY', 'columns.UCI_COUNTRY', 'UCI country', 'text'],
+    ['MULTINATIONAL_GROUP_FLG', 'columns.MULTINATIONAL_GROUP_FLG', 'Multinational', 'text'],
+    ['FOREIGN_CONTROLLED_GROUP_FLG', 'columns.FOREIGN_CONTROLLED_GROUP_FLG', 'Foreign controlled', 'text'],
+    ['PRINCIPAL_ISIC_2DIGIT', 'columns.PRINCIPAL_ISIC_2DIGIT', 'Principal ISIC', 'mono'],
+    ['TOTAL_EMPLOYEES', 'columns.TOTAL_EMPLOYEES', 'Total employees', 'number'],
+    ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
   ],
   contacts: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
@@ -117,14 +78,11 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
     ['ROLE', 'columns.ROLE', 'Role', 'text'],
     ['PHONE', 'columns.PHONE', 'Phone', 'text'],
     ['MOBILE', 'columns.MOBILE', 'Mobile', 'text'],
-    ['FAX', 'columns.FAX', 'Fax', 'text'],
     ['EMAIL', 'columns.EMAIL', 'Email', 'text'],
-    ['PO_BOX', 'columns.PO_BOX', 'PO box', 'text'],
+    ['PO_BOX', 'columns.PO_BOX', 'P.O. Box', 'text'],
     ['WEBSITE', 'columns.WEBSITE', 'Website', 'text'],
-    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source code', 'mono'],
-    ['PRIORITY', 'columns.PRIORITY', 'Priority', 'number'],
+    ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source', 'mono'],
     ['VALID_FROM', 'columns.VALID_FROM', 'Valid from', 'date'],
-    ['VALID_TO', 'columns.VALID_TO', 'Valid to', 'date'],
   ],
   addresses: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
@@ -147,11 +105,7 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
 function renderCell(kind: Kind, value: unknown) {
   switch (kind) {
     case 'id': return <IdCell value={value} />;
-    case 'grpId': return <IdCell value={value} prefix="EGR-" />;
-    case 'entId': return <IdCell value={value} prefix="ENT-" />;
     case 'mono': return <MonoCell value={value} />;
-    case 'arabic': return <ArabicCell value={value} />;
-    case 'source': return <SourceCell value={value} />;
     case 'number': return <NumberCell value={value} />;
     case 'date': return <DateCell value={value} />;
     case 'status': return <StatusBadge status={value == null ? null : String(value)} className="rounded-md" />;
@@ -159,19 +113,46 @@ function renderCell(kind: Kind, value: unknown) {
   }
 }
 
-export interface SnapshotExportColumn { key: string; label: string; kind: Kind }
+// Every column a frozen row has: the known ones first, in their usual order and format, then the rest in table order.
+const HIDDEN = new Set(['SNAPSHOT_ID', 'ID', 'SCD2_NOTE', 'CREATED_AT', 'UPDATED_AT', 'PIPELINE_ID', 'SRC_HASH', 'ROW_HASH', 'ANNUAL_TURNOVER', 'TOTAL_TURNOVER']);
+const DATE_KEY = /(_DATE|_AT|^VALID_FROM|^VALID_TO)$/;
+const MONO_KEY = /(_SOURCE|_CODE|_NUM|_ID)$/;
+// Columns of a few repeating values, whose filter rows start as "is any of" with the value list.
+const PICK_KEY = /(_SOURCE|_FLG|_FLAG|STATUS|STATUS_CATEGORY|SECTOR_ID|LEGAL_TYPE|ISIC_CODE|_TYPE|_COUNTRY|CATEGORY|ROLE|MUNICIPALITY_ID|ZONE)$/;
 
-// The same columns as the table, as plain labels and kinds, for the Excel export.
-export function getSnapshotExportColumns(entity: SnapshotEntity, t: TFunction): SnapshotExportColumn[] {
-  return SPECS[entity].map(([key, labelKey, fallback, kind]) => ({ key, label: t(labelKey, { defaultValue: fallback }), kind }));
+function inferKind(key: string, sample: unknown): Kind {
+  if (DATE_KEY.test(key)) return 'date';
+  if (typeof sample === 'number') return MONO_KEY.test(key) ? 'mono' : 'number';
+  return MONO_KEY.test(key) ? 'mono' : 'text';
+}
+
+const humanize = (key: string) => key.toLowerCase().split('_').map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
+
+function snapshotSpecs(entity: SnapshotEntity, rows: SnapshotRow[]): Spec[] {
+  const known = SPECS[entity];
+  const knownKeys = new Set(known.map(([key]) => key));
+  const extra: Spec[] = Object.keys(rows[0] ?? {})
+    .filter((key) => !knownKeys.has(key) && !HIDDEN.has(key))
+    .map((key) => [key, `columns.${key}`, humanize(key), inferKind(key, rows.find((r) => r[key] != null)?.[key])]);
+  return [...known, ...extra];
 }
 
 // Read-only columns for a frozen frame's tabs — no edit action, no pending-request badges.
-export function getSnapshotColumns(entity: SnapshotEntity, t: TFunction): ColumnDef<SnapshotRow>[] {
-  return SPECS[entity].map(([key, labelKey, fallback, kind]) => ({
+export function getSnapshotColumns(entity: SnapshotEntity, t: TFunction, rows: SnapshotRow[] = []): ColumnDef<SnapshotRow>[] {
+  return snapshotSpecs(entity, rows).map(([key, labelKey, fallback, kind]) => ({
     id: key,
     accessorFn: (row) => row[key],
     header: t(labelKey, { defaultValue: fallback }),
     cell: ({ getValue }) => renderCell(kind, getValue()),
+  }));
+}
+
+// Filter options for the same columns; numeric values come back as JSON numbers, so the sample decides number vs text.
+export function getSnapshotFilterColumns(entity: SnapshotEntity, t: TFunction, rows: SnapshotRow[] = []): ColumnFilterOption[] {
+  return snapshotSpecs(entity, rows).map(([key, labelKey, fallback, kind]) => ({
+    value: key,
+    label: t(labelKey, { defaultValue: fallback }),
+    type: kind === 'date' ? 'date' : typeof rows.find((r) => r[key] != null)?.[key] === 'number' ? 'number' : 'text',
+    pick: PICK_KEY.test(key),
   }));
 }

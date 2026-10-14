@@ -7,6 +7,7 @@ import { RotateCcw } from 'lucide-react';
 import type { EstablishmentFilters } from '@/types';
 import { EST_STATUS_OPTIONS, SECTOR_OPTIONS, SOURCE_CODE_OPTIONS } from '@/constants';
 import { useTranslation } from 'react-i18next';
+import { EMPLOYMENT_SIZE_CATEGORY_OPTIONS } from '../constants';
 
 interface EstablishmentFiltersProps {
   filters: EstablishmentFilters;
@@ -63,6 +64,20 @@ export function EstablishmentsFiltersBar({ filters, onFilterChange, onReset, isD
           {SOURCE_CODE_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value || '__all__'}>
               {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={filters.employmentSizeCategory ?? ''} onValueChange={(v) => onFilterChange({ employmentSizeCategory: v, page: 1 })}>
+        <SelectTrigger className="w-44 shadow-none">
+          <SelectValue placeholder={t('filters.employmentSize', { defaultValue: 'Employment size' })} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">{t('filters.allSizes', { defaultValue: 'All sizes' })}</SelectItem>
+          {EMPLOYMENT_SIZE_CATEGORY_OPTIONS.map((size) => (
+            <SelectItem key={size} value={size}>
+              {t(`filters.size.${size.toLowerCase()}`, { defaultValue: size })}
             </SelectItem>
           ))}
         </SelectContent>

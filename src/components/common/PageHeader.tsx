@@ -7,6 +7,7 @@ import { NAV_GROUPS } from '@/constants/navigation';
 import { useLanguage } from '@/i18n';
 import { useAppSelector } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { withBasePath } from '@/utils/basePath';
 
 interface PageHeaderProps {
   title: React.ReactNode;
@@ -49,7 +50,7 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
   return (
     <div
       className="relative overflow-hidden rounded-3xl text-white shrink-0 min-h-[172px]"
-      style={{ background: "#0E1A2B url('/assets/banner-skyline.jpg') center 42% / cover no-repeat" }}
+      style={{ background: `#0E1A2B url('${withBasePath('/assets/banner-skyline.jpg')}') center 42% / cover no-repeat` }}
     >
       <div
         className="absolute inset-0"

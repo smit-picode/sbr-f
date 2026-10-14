@@ -1,0 +1,5 @@
+import { AdminTabPage } from '@/features/admin/pages/AdminTabPage';
+
+export default function Page() {
+  return <AdminTabPage tab="system-accounts" />;
+}

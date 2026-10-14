@@ -17,6 +17,8 @@ import { entityLabel, fieldLabel, frameName, measureLabel, recordValue, valueLab
 
 type Cell = string | number | null;
 
+export type ExportProgress = (loaded: number, total: number) => void;
+
 interface BlockTable {
   title: string;
   notes: string[];
@@ -56,14 +58,14 @@ function describeQuery(t: TFunction, q: AnalysisResolvedQuery): string[] {
   return notes;
 }
 
-export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean): Promise<BlockTable> {
+export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<BlockTable> {
   const title = block.title || block.type;
   const notes = describeQuery(t, q);
   const req = requestForBlock(block, q);
 
   if (block.type === 'records' || !req) {
     const columns = q.columns.length ? q.columns : ANALYSIS_ENTITIES[q.entity].defaultColumns;
-    const { rows, total } = await fetchRecordExtract(q, columns, ANALYSIS_EXPORT_ROW_LIMIT);
+    const { rows, total } = await fetchRecordExtract(q, columns, ANALYSIS_EXPORT_ROW_LIMIT, onProgress);
     if (total > rows.length) notes.push(t('analysis.export.truncated', { defaultValue: 'First {{n}} of {{total}} units', n: rows.length.toLocaleString(), total: total.toLocaleString() }));
     return {
       title,
@@ -99,13 +101,14 @@ export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQ
     ];
     if (dim && r.links.length) {
       rows.push([], [t('analysis.export.from', { defaultValue: 'From' }), t('analysis.export.to', { defaultValue: 'To' }), t('analysis.export.units', { defaultValue: 'Units' })]);
-      for (const l of r.links) rows.push([valueLabel(t, dim, l.from), valueLabel(t, dim, l.to), suppress && l.value < ANALYSIS_DISCLOSURE.minCell ? 'x' : l.value]);
+      for (const l of r.links) rows.push([valueLabel(t, dim, l.from), valueLabel(t, dim, l.to), l.value == null || (suppress && l.value < ANALYSIS_DISCLOSURE.minCell) ? 'x' : l.value]);
     }
     return { title, notes, header: [t('analysis.export.step', { defaultValue: 'Step' }), t('analysis.export.units', { defaultValue: 'Units' })], rows };
   }
 
   const r = result as AnalysisAggregateResult;
-  const show = (row: { flag?: string }, v: number | null): Cell => (suppress && row.flag ? 'x' : v);
+  // A flagged cell the server already blanked (no unsuppressed access) exports as x too.
+  const show = (row: { flag?: string }, v: number | null): Cell => (row.flag && (suppress || v == null) ? 'x' : v);
   const mLabels = r.measures.map((m) => measureLabel(t, m, q.entity));
   if (suppress && r.rows.some((x) => x.flag)) {
     notes.push(t('analysis.export.suppressionNote', { defaultValue: 'x = suppressed for confidentiality (fewer than {{min}} units, a dominant unit, or to protect such a cell).', min: ANALYSIS_DISCLOSURE.minCell }));
@@ -167,16 +170,18 @@ function uniqueSheetName(used: Set<string>, raw: string): string {
   return name;
 }
 
-export async function exportBlockXlsx(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean) {
+export async function exportBlockXlsx(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<number> {
   const ExcelJs = await loadExcelJs();
   const wb = new ExcelJs.Workbook();
-  addSheet(wb, uniqueSheetName(new Set(), block.title || 'Block'), await buildBlockTable(block, q, t, suppress));
+  const table = await buildBlockTable(block, q, t, suppress, onProgress);
+  addSheet(wb, uniqueSheetName(new Set(), block.title || 'Block'), table);
   const buf = await wb.xlsx.writeBuffer();
   download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${safeFilename(block.title)}.xlsx`);
+  return table.rows.length;
 }
 
-export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean) {
-  const table = await buildBlockTable(block, q, t, suppress);
+export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<number> {
+  const table = await buildBlockTable(block, q, t, suppress, onProgress);
   const esc = (v: Cell) => {
     let s = v == null ? '' : String(v);
     if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
@@ -184,13 +189,15 @@ export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQu
   };
   const lines = [table.header, ...table.rows].map((r) => r.map(esc).join(','));
   download(new Blob([`﻿${lines.join('\r\n')}`], { type: 'text/csv;charset=utf-8' }), `${safeFilename(block.title)}.csv`);
+  return table.rows.length;
 }
 
-export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossFilter[], t: TFunction, suppress: boolean) {
+export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossFilter[], t: TFunction, suppress: boolean): Promise<number> {
   const ExcelJs = await loadExcelJs();
   const wb = new ExcelJs.Workbook();
   wb.creator = analysis.ownerName || analysis.ownerEmail;
   const used = new Set<string>();
+  let rowCount = 0;
   const summary = wb.addWorksheet(uniqueSheetName(used, t('analysis.export.summary', { defaultValue: 'Summary' })));
   summary.addRow([analysis.name]).font = { bold: true, size: 15 };
   if (analysis.description) summary.addRow([analysis.description]);
@@ -204,10 +211,13 @@ export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossF
     const q = resolveBlockQuery(block, analysis, cross);
     const name = uniqueSheetName(used, block.title || block.type);
     summary.addRow([`• ${name}`]);
-    addSheet(wb, name, await buildBlockTable(block, q, t, suppress));
+    const table = await buildBlockTable(block, q, t, suppress);
+    rowCount += table.rows.length;
+    addSheet(wb, name, table);
   }
   const buf = await wb.xlsx.writeBuffer();
   download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${safeFilename(analysis.name)}.xlsx`);
+  return rowCount;
 }
 
 export function exportBlockPng(block: AnalysisBlock): boolean {

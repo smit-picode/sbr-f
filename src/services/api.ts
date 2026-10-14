@@ -4,12 +4,19 @@ import env from '@/config/env';
 import { toast } from '@/utils/toast';
 import { logout } from '@/features/auth/authSlice';
 import i18n from '@/i18n/config';
+import { withBasePath } from '@/utils/basePath';
 
-let permissionRedirectInProgress = false;
+// Prevents duplicate toasts when multiple concurrent requests all fail with 401
 let sessionExpiredInProgress = false;
+// When each refusal message was last shown, so a refetch (tab focus, remount) does not repeat it.
+const refusalShownAt = new Map<string, number>();
+const REFUSAL_QUIET_MS = 10_000;
+
+// With no configured URL the API is same-origin, behind the same /sbr base path as the app.
+export const API_BASE_URL = env.apiUrl ? `${env.apiUrl}/api/v1` : withBasePath('/api/v1');
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: `${env.apiUrl}/api/v1`,
+  baseUrl: API_BASE_URL,
   prepareHeaders: (headers) => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('sbr_token');
@@ -42,31 +49,29 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
         api.dispatch(logout());
         toast.warning(i18n.t('common.sessionExpired', { defaultValue: 'Your session has expired. Please log in again.' }));
         if (typeof window !== 'undefined') {
-          setTimeout(() => { window.location.href = '/login'; }, 2000);
+          setTimeout(() => { window.location.href = withBasePath('/login'); }, 2000);
         }
       }
       return result;
     }
 
+    // A 403 refuses one request, it does not end the session: one small notification, the user stays where they are,
+    // and their permissions are refreshed so menus and buttons catch up if an administrator changed them.
     if (status === 403) {
-      if (!permissionRedirectInProgress && typeof window !== 'undefined') {
-        permissionRedirectInProgress = true;
-        const errData = result.error.data as { message?: string } | undefined;
-        const msg = errData?.message ?? i18n.t('common.accessRevoked', { defaultValue: 'Your access to this section has been revoked.' });
-        toast.error(msg);
-        setTimeout(() => {
-          api.dispatch(logout());
-          localStorage.removeItem('sbr_token');
-          localStorage.removeItem('sbr_user');
-          localStorage.removeItem('sbr_permissions');
-          window.location.href = '/login';
-        }, 3000);
+      const silent403 = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
+      const errData = result.error.data as { message?: string } | undefined;
+      const msg = errData?.message ?? i18n.t('common.accessDenied', { defaultValue: 'You do not have permission to see this.' });
+      const now = Date.now();
+      if (!silent403 && now - (refusalShownAt.get(msg) ?? 0) > REFUSAL_QUIET_MS) {
+        refusalShownAt.set(msg, now);
+        toast.warning(msg);
       }
+      if (url !== '/auth/my-permissions') api.dispatch(baseApi.util.invalidateTags(['Auth']));
       return result;
     }
 
     const silentErrors = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
-    if (status !== 400 && !silentErrors && !sessionExpiredInProgress && !permissionRedirectInProgress) {
+    if (status !== 400 && !silentErrors && !sessionExpiredInProgress) {
       const data = result.error.data as { message?: string } | undefined;
       const msg = data?.message ?? i18n.t('common.somethingWentWrong', { defaultValue: 'Something went wrong. Please try again.' });
       toast.error(msg);
@@ -79,7 +84,14 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots'],
+  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots', 'ContactTags', 'Analyses', 'PublishedSamples'],
+  // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
+  // multi-user portal: another user's edit turns a record PENDING in the DB without this
+  // session ever knowing, so cached list data goes stale the moment someone else saves.
+  // These three defaults re-fetch whenever the user could be looking at stale rows —
+  // remounting a page (sidebar navigation), returning to the tab, or coming back online.
+  // Cached data still paints immediately; the refetch runs in the background and swaps in,
+  // so navigation stays instant and no skeleton flashes.
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,

@@ -3,13 +3,14 @@ import type { SbrContact } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, Globe, Pencil } from 'lucide-react';
+import { Mail, Phone, Globe, Pencil, Tag } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import env from '@/config/env';
 
 type TFunc = (key: string, options?: { lng?: string }) => string;
 
-export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, canEdit = true): ColumnDef<SbrContact>[] => [
+// tagName turns a tag code into its display name; without it the code is shown.
+export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, canEdit = true, tagName: (code: string) => string = (code) => code): ColumnDef<SbrContact>[] => [
   {
     accessorKey: 'SBR_ID',
     header: t('columns.SBR_ID'),
@@ -25,6 +26,16 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     accessorKey: 'ID',
     header: t('columns.ID'),
     cell: ({ getValue }) => <span className="font-mono text-xs text-slate-500">{String(getValue())}</span>,
+    enableSorting: true,
+  },
+  {
+    // NPC-330: the contact's permanent identity (ID changes with every version).
+    accessorKey: 'CONTACT_ID',
+    header: t('columns.CONTACT_ID'),
+    cell: ({ getValue }) => {
+      const val = getValue<number | null>();
+      return val != null ? <span className="font-mono text-xs text-slate-500">{String(val)}</span> : <span className="text-slate-400">{nullableText(null)}</span>;
+    },
     enableSorting: true,
   },
   {
@@ -118,17 +129,21 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     },
   },
   {
-    accessorKey: 'PRIORITY',
-    header: t('columns.PRIORITY'),
+    accessorKey: 'TAGS',
+    header: t('columns.TAGS'),
     cell: ({ getValue }) => {
-      const val = getValue<number | null>();
-      return val != null ? (
-        <span className="text-sm font-medium text-slate-700">{val}</span>
-      ) : (
-        <span className="text-slate-400">—</span>
+      const val = getValue<string | null>();
+      if (!val) return <span className="text-slate-400">{nullableText(null)}</span>;
+      return (
+        <div className="flex flex-wrap gap-1">
+          {val.split(',').map((code) => (
+            <span key={code} className="inline-flex items-center gap-1 rounded-full bg-[#F4F0E8] px-2 py-0.5 text-[10.5px] font-semibold text-[#87795D]">
+              <Tag className="h-2.5 w-2.5" />{tagName(code.trim())}
+            </span>
+          ))}
+        </div>
       );
     },
-    enableSorting: true,
   },
   {
     accessorKey: 'VALID_FROM',

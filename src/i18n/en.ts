@@ -44,6 +44,7 @@ export interface Translations {
     confirmSave: string;
     saving: string;
     signOut: string;
+    signingOut: string;
     profile: string;
   };
   comment: {
@@ -129,6 +130,7 @@ export const en: Translations = {
     confirmSave: 'Confirm & Save',
     saving: 'Saving...',
     signOut: 'Sign Out',
+    signingOut: 'Signing out…',
     profile: 'Profile',
   },
   comment: {

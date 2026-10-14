@@ -22,14 +22,8 @@ import {
   type AnalysisFieldGroup,
 } from '../constants';
 import { ISIC_DIVISION_LABELS, ISIC_DIVISION_LABELS_AR } from '../constants/isicDivisions';
-import { ANALYSIS_FRAMES } from '../mock/frames';
+import { frameLabelOf } from './frames';
 
-const FRAME_LABELS_AR: Record<string, string> = {
-  live: 'الإطار الحي',
-  'f-2026-07': 'يوليو 2026',
-  'f-2026-05': 'مايو 2026',
-  'f-2026-04': 'أبريل 2026',
-};
 
 function isAr() {
   return i18n.language === 'ar';
@@ -62,8 +56,9 @@ export function blockCategoryLabel(t: TFunction, c: AnalysisBlockCategory): stri
 
 export function frameName(t: TFunction, frameId: string | null | undefined): string {
   const id = frameId ?? 'live';
-  if (isAr()) return FRAME_LABELS_AR[id] ?? id;
-  return ANALYSIS_FRAMES.find((f) => f.id === id)?.label ?? id;
+  // Snapshot frames carry the name they were created with; only the live frame has a fixed label.
+  if (id === 'live') return t('analysis.frames.live', { defaultValue: 'Live frame' });
+  return frameLabelOf(id) ?? id;
 }
 
 // Human label for a dimension value; `short` drops long descriptions (chart axes).

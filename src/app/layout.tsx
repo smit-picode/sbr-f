@@ -4,6 +4,7 @@ import './globals.css';
 import { ReduxProvider } from '@/providers/ReduxProvider';
 import { Toaster } from '@/components/common/Toaster';
 import { LanguageProvider } from '@/i18n';
+import { withBasePath } from '@/utils/basePath';
 
 const cairo = localFont({
   src: './fonts/cairo-arabic-wght-normal.woff2',
@@ -23,9 +24,9 @@ export const metadata: Metadata = {
   title: 'SBR Portal — Statistical Business Register',
   description: 'Statistical Business Register — National Planning Council Qatar',
   icons: {
-    icon: '/sbr-logo.png',
-    shortcut: '/sbr-logo.png',
-    apple: '/sbr-logo.png',
+    icon: withBasePath('/sbr-logo.png'),
+    shortcut: withBasePath('/sbr-logo.png'),
+    apple: withBasePath('/sbr-logo.png'),
   },
 };
 

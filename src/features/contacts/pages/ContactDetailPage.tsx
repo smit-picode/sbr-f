@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/common/Loader';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EditContactModal } from '../components/EditContactModal';
+import { ContactTagsPanel } from '@/features/contactTags/components/ContactTagsPanel';
 import { useGetContactByIdQuery, useGetContactHistoryQuery } from '../api/contactsApi';
 import { FieldHistoryPopover } from '@/components/common/FieldHistoryPopover';
 import { PendingBadge } from '@/components/common/PendingBadge';
@@ -202,6 +203,7 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
 
   const contactFields = [
     { k: 'SBR_ID', label: lbl('SBR_ID'), value: String(c.SBR_ID), show: showField('SBR_ID', c.SBR_ID), mono: true },
+    { k: 'CONTACT_ID', label: lbl('CONTACT_ID'), value: c.CONTACT_ID != null ? String(c.CONTACT_ID) : nullableText(null), show: showField('CONTACT_ID', c.CONTACT_ID), mono: true },
     { k: 'SOURCE_CODE', label: lbl('SOURCE_CODE'), value: c.SOURCE_CODE, show: showField('SOURCE_CODE', c.SOURCE_CODE), mono: true },
   ].filter((f) => f.show);
 
@@ -215,7 +217,6 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
   ].filter((f) => f.show);
 
   const metaFields = [
-    { k: 'PRIORITY', label: lbl('PRIORITY'), value: c.PRIORITY != null ? String(c.PRIORITY) : nullableText(null), show: showField('PRIORITY', c.PRIORITY), mono: false },
     { k: 'VALID_FROM', label: lbl('VALID_FROM'), value: formatDate(c.VALID_FROM), show: showField('VALID_FROM', c.VALID_FROM), mono: false },
     { k: 'VALID_TO', label: lbl('VALID_TO'), value: formatDate(c.VALID_TO), show: showField('VALID_TO', c.VALID_TO), mono: false },
   ].filter((f) => f.show);
@@ -293,6 +294,8 @@ export function ContactDetailPage({ contactId }: { contactId: number }) {
           </DetailCard>
         )}
       </div>
+
+      {c.CONTACT_ID != null && <ContactTagsPanel sbrId={c.SBR_ID} contactId={c.CONTACT_ID} canViewHistory={canViewHistory} />}
 
       <EditContactModal
         contact={editOpen ? c : null}

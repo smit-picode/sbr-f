@@ -21,10 +21,11 @@ interface Props {
   request: CreateAnalysisRequest | null;
   onCancel: () => void;
   onConfirm: (name: string, description: string) => void;
+  busy?: boolean;
 }
 
 // Confirms every "create" so a repeated click can never spawn duplicate analyses.
-export function CreateAnalysisDialog({ request, onCancel, onConfirm }: Props) {
+export function CreateAnalysisDialog({ request, onCancel, onConfirm, busy = false }: Props) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -39,7 +40,7 @@ export function CreateAnalysisDialog({ request, onCancel, onConfirm }: Props) {
   }, [open]);
 
   const submit = () => {
-    if (!name.trim()) return;
+    if (!name.trim() || busy) return;
     onConfirm(name.trim(), description.trim());
   };
 
@@ -82,8 +83,8 @@ export function CreateAnalysisDialog({ request, onCancel, onConfirm }: Props) {
             <Input id="analysis-create-description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} className="focus:border-[#A29374]/40 focus:ring-[#A29374]/20" />
           </div>
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>{t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>{t('analysis.cancel', { defaultValue: 'Cancel' })}</Button>
+            <Button type="submit" disabled={!name.trim()} loading={busy}>
               {request?.kind === 'duplicate' ? t('analysis.create.duplicateConfirm', { defaultValue: 'Duplicate' }) : t('analysis.create.confirm', { defaultValue: 'Create analysis' })}
             </Button>
           </DialogFooter>

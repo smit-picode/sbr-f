@@ -13,38 +13,26 @@ export interface SourceRegulator {
   tables: { name: string; description: string | null }[];
 }
 
-// One regulator on GET /source-catalog/summary, with its stored counts.
-export interface SourceCatalogSummaryRecord {
-  SOURCE_NAME: string;
-  SOURCE_DESC: string | null;
-  TABLE_COUNT: number;
-  RECORD_COUNT: number | null;
-  COUNTS_REFRESHED_AT: string | null;
-}
-
-// One table on GET /source-catalog/:source, with its stored row and column counts.
-export interface SourceCatalogDetailRecord {
-  SOURCE_NAME: string;
-  TABLE_NAME: string;
-  TABLE_DESC: string | null;
-  RECORD_COUNT: number | null;
-  COLUMN_COUNT: number | null;
-  COUNTS_REFRESHED_AT: string | null;
-}
-
-export type SourceColumnKind = 'number' | 'date' | 'text';
-
-// One column the source table viewer shows.
+// A column the source table viewer shows; KIND decides its filter operators and how a cell is formatted.
 export interface SourceTableColumn {
   COLUMN_NAME: string;
-  KIND: SourceColumnKind;
+  KIND: 'number' | 'date' | 'text';
 }
 
-export type SourceTableRow = Record<string, string | number | null>;
+// A source table row: its shape is the table's own columns.
+export type SourceTableRow = Record<string, unknown>;
 
-export interface SourceTableFilters {
+export interface SourceTableParams {
+  table: string;
   page?: number;
   limit?: number;
+  columnFilters?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+// GET /source-catalog/counts: stored counts, null until the database has counted that source or table.
+export interface SourceCatalogCounts {
+  sources: { source: string; tableCount: number; recordCount: number | null; refreshedAt: string | null }[];
+  tables: { source: string; table: string; recordCount: number | null; columnCount: number | null; refreshedAt: string | null }[];
 }

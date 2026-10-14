@@ -40,6 +40,8 @@ export interface AuditLogFilters {
   approvedBy?: number;
   dateFrom?: string;
   dateTo?: string;
+  // Only the logged-in user's own rows: changes they submitted or decided.
+  mine?: boolean;
   columnFilters?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

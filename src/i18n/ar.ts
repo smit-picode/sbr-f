@@ -63,6 +63,7 @@ export const ar: Translations = {
     confirmSave: 'تأكيد وحفظ',
     saving: 'جاري الحفظ...',
     signOut: 'تسجيل الخروج',
+    signingOut: 'جارٍ تسجيل الخروج…',
     profile: 'الملف الشخصي',
   },
   comment: {

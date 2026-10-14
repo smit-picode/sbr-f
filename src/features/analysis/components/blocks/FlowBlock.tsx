@@ -19,7 +19,9 @@ const SANKEY_CATEGORIES = 8;
 
 export function FlowBlock({ block, query, height, mode }: BlockViewProps) {
   const { t, i18n } = useTranslation();
-  const req = useMemo(() => requestForBlock(block, query), [block, query]);
+  // A flow needs two different frames; with no snapshot yet there is nothing to compare against.
+  const hasBaseline = !!query.compareTo && query.compareTo !== query.frame;
+  const req = useMemo(() => (hasBaseline ? requestForBlock(block, query) : null), [block, query, hasBaseline]);
   const { data, isLoading, isFetching, isError } = useAnalysisResult<AnalysisFlowResult>(req);
   const animate = mode !== 'print';
   const dim = query.dimensions[0];
@@ -39,7 +41,9 @@ export function FlowBlock({ block, query, height, mode }: BlockViewProps) {
     }
     if (!dim) return null;
     const weight = new Map<string | null, number>();
-    for (const l of data.links) {
+    // Links below the disclosure threshold come back without a value for callers who cannot see them.
+    const visible = data.links.filter((l): l is typeof l & { value: number } => l.value != null);
+    for (const l of visible) {
       weight.set(l.from, (weight.get(l.from) ?? 0) + l.value);
       weight.set(l.to, (weight.get(l.to) ?? 0) + l.value);
     }
@@ -51,7 +55,7 @@ export function FlowBlock({ block, query, height, mode }: BlockViewProps) {
     const color = (k: string | null) =>
       k === FLOW_NEW ? CHART_COLOR.pos : k === FLOW_CEASED ? CHART_COLOR.neg : k === FLOW_OUTSIDE || k === ANALYSIS_OTHER_KEY ? ANALYSIS_OTHER_COLOR : colorFor(k, colorIdx.get(k) ?? 0);
     const merged = new Map<string, { from: string | null; to: string | null; value: number }>();
-    for (const l of data.links) {
+    for (const l of visible) {
       const a = fold(l.from);
       const b = fold(l.to);
       const id = `${a}|${b}`;
@@ -71,6 +75,7 @@ export function FlowBlock({ block, query, height, mode }: BlockViewProps) {
     return sankeyOption({ links, fromTitle: frameName(t, data.compareTo), toTitle: frameName(t, data.frame), animate });
   }, [data, block.type, dim, t, animate]);
 
+  if (!hasBaseline) return <BlockEmpty height={height} message={t('analysis.empty.needsSnapshot', { defaultValue: 'Comparing frames needs at least one snapshot. Create one under Frozen Frames.' })} />;
   if (isError) return <BlockError height={height} />;
   if (isLoading || !data) return <BlockSkeleton height={height} />;
   if (!option || (block.type === 'sankey' && !data.links.length)) return <BlockEmpty height={height} message={t('analysis.empty.noMovement', { defaultValue: 'No units moved between these frames.' })} />;
