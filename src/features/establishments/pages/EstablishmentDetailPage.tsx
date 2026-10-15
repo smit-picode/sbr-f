@@ -96,6 +96,7 @@ function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHi
           fieldLabel={label}
           isLoading={isLoading}
           isError={isError}
+          currentSource={source}
           onClose={() => setOpen(false)}
         />
       )}
@@ -114,11 +115,11 @@ function DetailCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-type StripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null; fieldKey: string };
+type StripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null; fieldKey: string; source?: string | null };
 
 // Same click-to-history behaviour as DetailField, styled to match the highlight-strip cell.
-function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pendingCount }: {
-  recordId: number; fieldKey: string; label: string; value: React.ReactNode; icon: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pendingCount, source }: {
+  recordId: number; fieldKey: string; label: string; value: React.ReactNode; icon: React.ReactNode; canViewHistory: boolean; pendingCount?: number; source?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -157,6 +158,7 @@ function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pe
           fieldLabel={label}
           isLoading={isLoading}
           isError={isError}
+          currentSource={source}
           onClose={() => setOpen(false)}
         />
       )}
@@ -181,6 +183,7 @@ function HighlightStrip({ recordId, items, canViewHistory, pendingFields }: {
           icon={it.icon}
           canViewHistory={canViewHistory}
           pendingCount={pendingFields[it.fieldKey]}
+          source={it.source}
         />
       ))}
     </div>
@@ -188,8 +191,8 @@ function HighlightStrip({ recordId, items, canViewHistory, pendingFields }: {
 }
 
 // Header maroon-band name field — same click-to-history behaviour, white-tinted icon for the dark band.
-function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount }: {
-  recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
+function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount, source }: {
+  recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number; source?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLSpanElement>(null);
@@ -224,6 +227,7 @@ function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, 
           fieldLabel={label}
           isLoading={isLoading}
           isError={isError}
+          currentSource={source}
           onClose={() => setOpen(false)}
         />
       )}
@@ -431,6 +435,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
               label={fl('NAME_ENU', 'Regulatory Name (EN)')}
               canViewHistory={canViewHistory}
               pendingCount={pendingFields.NAME_ENU}
+              source={e.NAME_ENU_SOURCE}
             >
               <span className="truncate">{title}</span>
             </HeaderNameField>
@@ -444,6 +449,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
               label={fl('NAME_ARA', 'Regulatory Name (AR)')}
               canViewHistory={canViewHistory}
               pendingCount={pendingFields.NAME_ARA}
+              source={e.NAME_ARA_SOURCE}
             >
               <span className="truncate">{e.NAME_ARA}</span>
             </HeaderNameField>
@@ -484,10 +490,10 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
         canViewHistory={canViewHistory}
         pendingFields={pendingFields}
         items={[
-          { fieldKey: 'SECTOR_ID', icon: <Briefcase className="h-4 w-4" />, label: fl('SECTOR_ID', 'Sector'), value: e.SECTOR_ID },
-          { fieldKey: 'LEGAL_TYPE', icon: <Landmark className="h-4 w-4" />, label: fl('LEGAL_TYPE', 'Legal Type'), value: e.LEGAL_TYPE },
-          { fieldKey: 'EMPLOYMENT_COUNT', icon: <Users className="h-4 w-4" />, label: fl('EMPLOYMENT_COUNT', 'Employees'), value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null },
-          { fieldKey: 'MAIN_BRANCH_FLG', icon: <GitBranch className="h-4 w-4" />, label: fl('MAIN_BRANCH_FLG', 'Main / Branch'), value: e.MAIN_BRANCH_FLG },
+          { fieldKey: 'SECTOR_ID', icon: <Briefcase className="h-4 w-4" />, label: fl('SECTOR_ID', 'Sector'), value: e.SECTOR_ID, source: e.SECTOR_ID_SOURCE },
+          { fieldKey: 'LEGAL_TYPE', icon: <Landmark className="h-4 w-4" />, label: fl('LEGAL_TYPE', 'Legal Type'), value: e.LEGAL_TYPE, source: e.LEGAL_TYPE_SOURCE },
+          { fieldKey: 'EMPLOYMENT_COUNT', icon: <Users className="h-4 w-4" />, label: fl('EMPLOYMENT_COUNT', 'Employees'), value: e.EMPLOYMENT_COUNT != null ? String(e.EMPLOYMENT_COUNT) : null, source: e.EMPLOYMENT_COUNT_SOURCE },
+          { fieldKey: 'MAIN_BRANCH_FLG', icon: <GitBranch className="h-4 w-4" />, label: fl('MAIN_BRANCH_FLG', 'Main / Branch'), value: e.MAIN_BRANCH_FLG, source: e.MAIN_BRANCH_FLG_SOURCE },
           { fieldKey: 'SOURCE_CODE', icon: <Database className="h-4 w-4" />, label: fl('SOURCE_CODE', 'Source'), value: e.SOURCE_CODE },
         ]}
       />

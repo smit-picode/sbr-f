@@ -14,6 +14,8 @@ interface FieldHistoryPopoverProps {
   fieldLabel: string;
   isLoading?: boolean;
   isError?: boolean;
+  // The attribute's source on the current record, from the detail data; history rows only carry the row level SOURCE_CODE.
+  currentSource?: string | null;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement | null>;
 }
@@ -21,7 +23,7 @@ interface FieldHistoryPopoverProps {
 const PANEL_WIDTH = 290;
 
 // Anchored attribute-history popover (tooltip-style) — replaces the full-screen drawer.
-export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, onClose, anchorRef }: FieldHistoryPopoverProps) {
+export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading, isError, currentSource, onClose, anchorRef }: FieldHistoryPopoverProps) {
   const { t } = useTranslation();
   const { isArabic } = useLanguage();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -90,6 +92,9 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
 
   const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
+  // The newest entry stands for the current value only while the newest version is still open.
+  const currentEntry = realVersions.length > 0 && !realVersions[0].VALID_TO ? changes[0] : undefined;
+  const shownSource = (v: HistoryVersion) => (currentSource && v === currentEntry ? currentSource : v.SOURCE_CODE);
   const isUserEdit = (v: HistoryVersion) => !!(v.audit && v.audit.columns.includes(fieldKey));
 
   // Single chronological timeline (newest first).
@@ -201,8 +206,8 @@ export function FieldHistoryPopover({ versions, fieldKey, fieldLabel, isLoading,
                             {t('fieldHistory.approved', { defaultValue: 'Approved' })}
                           </span>
                         ))
-                      : (v.SOURCE_CODE && (
-                          <span className="text-[11px] font-semibold text-adaam">{v.SOURCE_CODE}</span>
+                      : (shownSource(v) && (
+                          <span className="text-[11px] font-semibold text-adaam">{shownSource(v)}</span>
                         ))}
                   </div>
                   {userEdit ? (
