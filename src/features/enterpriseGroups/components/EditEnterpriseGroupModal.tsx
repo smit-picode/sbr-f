@@ -18,11 +18,14 @@ import {
   formatGroupCode,
 } from '../constants';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { useDebounce } from '@/hooks';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
+import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
 import { Search, Orbit, X, Star } from 'lucide-react';
 import type { SbrEnterpriseGroup, EnterpriseGroupMember } from '@/types';
@@ -131,6 +134,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     }
   }, [open, group, initialHeadId]);
 
+  const isPending = (field: string): boolean => !!group.PENDING_FIELDS?.[field];
+
   const set = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
@@ -235,7 +240,10 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       toast.success(t('editEnterpriseGroup.updateSuccess', { defaultValue: 'Enterprise group update submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
-    } catch {
+    } catch (error) {
+      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const pendingMessage = pendingChangeText(apiMessage, t);
+      if (pendingMessage) { toast.error(pendingMessage); return; }
       toast.error(t('editEnterpriseGroup.updateError', { defaultValue: 'Failed to submit enterprise group update. Please try again.' }));
     }
   };
@@ -256,26 +264,30 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
           </div>
         )}
 
+        <div className="px-6 pt-3 shrink-0 empty:hidden"><PendingFieldsHint pendingFields={group.PENDING_FIELDS} /></div>
+
         <div className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameEn', { defaultValue: 'Group name (EN)' })}<PendingFieldInfo pending={isPending('NAME_ENU')} /></Label>
               <Input
                 value={form.NAME_ENU}
                 onChange={(e) => set('NAME_ENU', e.target.value)}
+                disabled={isPending('NAME_ENU')}
                 maxLength={500}
-                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAMES ? 'border-red-400' : ''} ${isPending('NAME_ENU') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameAr', { defaultValue: 'Group name (AR)' })}</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.nameAr', { defaultValue: 'Group name (AR)' })}<PendingFieldInfo pending={isPending('NAME_ARA')} /></Label>
               <Input
                 value={form.NAME_ARA}
                 onChange={(e) => set('NAME_ARA', e.target.value)}
+                disabled={isPending('NAME_ARA')}
                 maxLength={500}
                 dir="rtl"
-                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAMES ? 'border-red-400' : ''}`}
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAMES ? 'border-red-400' : ''} ${isPending('NAME_ARA') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}
               />
             </div>
             {errors.NAMES && <p className="col-span-2 text-xs text-red-500 -mt-2">{errors.NAMES}</p>}
@@ -283,28 +295,29 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciName', { defaultValue: 'UCI name' })}<PendingFieldInfo pending={isPending('UCI_NAME')} /></Label>
               <Input
                 value={form.UCI_NAME}
                 onChange={(e) => set('UCI_NAME', e.target.value)}
+                disabled={isPending('UCI_NAME')}
                 maxLength={200}
-                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.UCI_NAME ? 'border-red-400' : ''}`}
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.UCI_NAME ? 'border-red-400' : ''} ${isPending('UCI_NAME') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}
               />
               {errors.UCI_NAME && <p className="text-xs text-red-500 mt-0.5">{errors.UCI_NAME}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}</Label>
-              <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}<PendingFieldInfo pending={isPending('UCI_TYPE')} /></Label>
+              <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)} disabled={isPending('UCI_TYPE')}>
+                <SelectTrigger className={`shadow-none ${isPending('UCI_TYPE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_TYPE_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciCountry', { defaultValue: 'UCI country' })}</Label>
-              <Select value={form.UCI_COUNTRY} onValueChange={(v) => set('UCI_COUNTRY', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectCountry', { defaultValue: 'Select country' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciCountry', { defaultValue: 'UCI country' })}<PendingFieldInfo pending={isPending('UCI_COUNTRY')} /></Label>
+              <Select value={form.UCI_COUNTRY} onValueChange={(v) => set('UCI_COUNTRY', v)} disabled={isPending('UCI_COUNTRY')}>
+                <SelectTrigger className={`shadow-none ${isPending('UCI_COUNTRY') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectCountry', { defaultValue: 'Select country' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_COUNTRY_OPTIONS.map((o) => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -313,46 +326,48 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
               </Select>
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}</Label>
-              <Input value={form.UCI_IDENTIFIER} onChange={(e) => set('UCI_IDENTIFIER', e.target.value)} maxLength={100} className="shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40" />
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}<PendingFieldInfo pending={isPending('UCI_IDENTIFIER')} /></Label>
+              <Input value={form.UCI_IDENTIFIER} onChange={(e) => set('UCI_IDENTIFIER', e.target.value)} maxLength={100} disabled={isPending('UCI_IDENTIFIER')} className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${isPending('UCI_IDENTIFIER') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.isicCode', { defaultValue: 'ISIC code (2-digit)' })}<PendingFieldInfo pending={isPending('PRINCIPAL_ISIC_2DIGIT')} /></Label>
               <IsicCodeSelect
                 value={form.PRINCIPAL_ISIC_2DIGIT}
                 onChange={(code) => set('PRINCIPAL_ISIC_2DIGIT', code)}
                 digitMode="lvl2"
+                disabled={isPending('PRINCIPAL_ISIC_2DIGIT')}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.holdingCompany', { defaultValue: 'Holding company' })}</Label>
-              <Select value={form.HOLDING_COMPANY_FLG} onValueChange={(v) => set('HOLDING_COMPANY_FLG', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.yesNoPlaceholder', { defaultValue: 'Yes / No' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.holdingCompany', { defaultValue: 'Holding company' })}<PendingFieldInfo pending={isPending('HOLDING_COMPANY_FLG')} /></Label>
+              <Select value={form.HOLDING_COMPANY_FLG} onValueChange={(v) => set('HOLDING_COMPANY_FLG', v)} disabled={isPending('HOLDING_COMPANY_FLG')}>
+                <SelectTrigger className={`shadow-none ${isPending('HOLDING_COMPANY_FLG') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.yesNoPlaceholder', { defaultValue: 'Yes / No' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_HOLDING_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.status', { defaultValue: 'Status' })}</Label>
-              <Select value={form.STATUS} onValueChange={(v) => set('STATUS', v)}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('editEnterpriseGroup.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.status', { defaultValue: 'Status' })}<PendingFieldInfo pending={isPending('STATUS')} /></Label>
+              <Select value={form.STATUS} onValueChange={(v) => set('STATUS', v)} disabled={isPending('STATUS')}>
+                <SelectTrigger className={`shadow-none ${isPending('STATUS') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
                 <SelectContent>
                   {STATUS_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.groupStartDate', { defaultValue: 'Group start date' })}</Label>
+              <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.groupStartDate', { defaultValue: 'Group start date' })}<PendingFieldInfo pending={isPending('GROUP_START_DATE')} /></Label>
               <Input
                 type="date"
                 value={form.GROUP_START_DATE}
                 max={todayISO()}
                 onChange={(e) => set('GROUP_START_DATE', e.target.value)}
-                className="shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40"
+                disabled={isPending('GROUP_START_DATE')}
+                className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${isPending('GROUP_START_DATE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}
               />
             </div>
           </div>

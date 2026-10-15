@@ -8,8 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateAddressMutation } from '../api/addressesApi';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
+import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import type { SbrAddress } from '@/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -69,6 +72,8 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
     }
   }, [address]);
 
+  const isPending = (field: string): boolean => !!address?.PENDING_FIELDS?.[field];
+
   const handleChange = (field: keyof SbrAddress, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
@@ -109,7 +114,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
 
     const editableErrors: Record<string, string> = {};
     for (const [field, msg] of Object.entries(e)) {
-      if (isAddressFieldEditable(field)) editableErrors[field] = msg;
+      if (isAddressFieldEditable(field) && !isPending(field)) editableErrors[field] = msg;
     }
 
     setErrors(editableErrors);
@@ -145,7 +150,7 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
   const handleConfirmWithComment = async (comment: string) => {
     if (!address) return;
     const editableData = Object.fromEntries(
-      Object.entries(form).filter(([key]) => isAddressFieldEditable(key))
+      Object.entries(form).filter(([key]) => isAddressFieldEditable(key) && !isPending(key))
     );
     try {
       const res = await updateAddress({ id: address.ID, data: { ...editableData, comment: comment } }).unwrap();
@@ -155,7 +160,8 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
       if (res?.data && typeof res.data === 'object' && 'SBR_ID' in (res.data as object)) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
-      const msg = (error as { data?: { message?: string } })?.data?.message
+      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const msg = pendingChangeText(apiMessage, t) ?? apiMessage
         ?? t('editAddress.updateError', { defaultValue: 'Failed to update address. Please try again.' });
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
@@ -169,14 +175,16 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
   };
 
   const err = (f: string) => errors[f];
-  const inp = (f: string) => err(f)
+  const inp = (f: string) => isPending(f)
+    ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
+    : err(f)
     ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
     : 'focus-visible:border-2 focus-visible:border-[#A29374]/40 focus-visible:ring-0';
 
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('editAddress.title')}</DialogTitle>
           </DialogHeader>
@@ -185,69 +193,71 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
             <ErrorSummary errors={errors} onErrorClick={scrollToField} fieldLabels={ADDRESS_FIELD_LABELS} />
           )}
 
-        <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
+          <PendingFieldsHint pendingFields={address?.PENDING_FIELDS} />
+
+        <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 min-h-0 flex-1 overflow-y-auto">
 
           <ReadOnlyField label={t('editAddress.fields.sbrId')} value={address?.SBR_ID} />
           <ReadOnlyField label={t('editAddress.fields.recordId')} value={address?.ID} />
 
           <div className="space-y-1" data-field="MUNICIPALITY_ID">
-            <Label>{t('editAddress.fields.municipalityId')}</Label>
-            <Input className={inp('MUNICIPALITY_ID')} value={form.MUNICIPALITY_ID ?? ''} onChange={(e) => handleChange('MUNICIPALITY_ID', e.target.value)} />
+            <Label>{t('editAddress.fields.municipalityId')}<PendingFieldInfo pending={isPending('MUNICIPALITY_ID')} /></Label>
+            <Input className={inp('MUNICIPALITY_ID')} disabled={isPending('MUNICIPALITY_ID')} value={form.MUNICIPALITY_ID ?? ''} onChange={(e) => handleChange('MUNICIPALITY_ID', e.target.value)} />
             <FieldErr msg={err('MUNICIPALITY_ID')} />
           </div>
           <div className="space-y-1" data-field="ZONE">
-            <Label>{t('editAddress.fields.zone')}</Label>
-            <Input className={inp('ZONE')} value={form.ZONE ?? ''} onChange={(e) => handleChange('ZONE', e.target.value)} />
+            <Label>{t('editAddress.fields.zone')}<PendingFieldInfo pending={isPending('ZONE')} /></Label>
+            <Input className={inp('ZONE')} disabled={isPending('ZONE')} value={form.ZONE ?? ''} onChange={(e) => handleChange('ZONE', e.target.value)} />
             <FieldErr msg={err('ZONE')} />
           </div>
           <div className="col-span-2 space-y-1" data-field="STREET">
-            <Label>{t('editAddress.fields.street')}</Label>
-            <Input className={inp('STREET')} value={form.STREET ?? ''} onChange={(e) => handleChange('STREET', e.target.value)} />
+            <Label>{t('editAddress.fields.street')}<PendingFieldInfo pending={isPending('STREET')} /></Label>
+            <Input className={inp('STREET')} disabled={isPending('STREET')} value={form.STREET ?? ''} onChange={(e) => handleChange('STREET', e.target.value)} />
             <FieldErr msg={err('STREET')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.buildingNo')}</Label>
-            <Input className={inp('BUILDING_NO')} value={form.BUILDING_NO ?? ''} onChange={(e) => handleChange('BUILDING_NO', e.target.value)} />
+            <Label>{t('editAddress.fields.buildingNo')}<PendingFieldInfo pending={isPending('BUILDING_NO')} /></Label>
+            <Input className={inp('BUILDING_NO')} disabled={isPending('BUILDING_NO')} value={form.BUILDING_NO ?? ''} onChange={(e) => handleChange('BUILDING_NO', e.target.value)} />
             <FieldErr msg={err('BUILDING_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.unitNo')}</Label>
-            <Input className={inp('UNIT_NO')} value={form.UNIT_NO ?? ''} onChange={(e) => handleChange('UNIT_NO', e.target.value)} />
+            <Label>{t('editAddress.fields.unitNo')}<PendingFieldInfo pending={isPending('UNIT_NO')} /></Label>
+            <Input className={inp('UNIT_NO')} disabled={isPending('UNIT_NO')} value={form.UNIT_NO ?? ''} onChange={(e) => handleChange('UNIT_NO', e.target.value)} />
             <FieldErr msg={err('UNIT_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.floorNo')}</Label>
-            <Input className={inp('FLOOR_NO')} value={form.FLOOR_NO ?? ''} onChange={(e) => handleChange('FLOOR_NO', e.target.value)} />
+            <Label>{t('editAddress.fields.floorNo')}<PendingFieldInfo pending={isPending('FLOOR_NO')} /></Label>
+            <Input className={inp('FLOOR_NO')} disabled={isPending('FLOOR_NO')} value={form.FLOOR_NO ?? ''} onChange={(e) => handleChange('FLOOR_NO', e.target.value)} />
             <FieldErr msg={err('FLOOR_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.qars')}</Label>
-            <Input className={inp('QARS')} value={form.QARS ?? ''} onChange={(e) => handleChange('QARS', e.target.value)} />
+            <Label>{t('editAddress.fields.qars')}<PendingFieldInfo pending={isPending('QARS')} /></Label>
+            <Input className={inp('QARS')} disabled={isPending('QARS')} value={form.QARS ?? ''} onChange={(e) => handleChange('QARS', e.target.value)} />
             <FieldErr msg={err('QARS')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.electricityNo')}</Label>
-            <Input className={inp('ELECTRICITY_NO')} value={form.ELECTRICITY_NO ?? ''} onChange={(e) => handleChange('ELECTRICITY_NO', e.target.value)} />
+            <Label>{t('editAddress.fields.electricityNo')}<PendingFieldInfo pending={isPending('ELECTRICITY_NO')} /></Label>
+            <Input className={inp('ELECTRICITY_NO')} disabled={isPending('ELECTRICITY_NO')} value={form.ELECTRICITY_NO ?? ''} onChange={(e) => handleChange('ELECTRICITY_NO', e.target.value)} />
             <FieldErr msg={err('ELECTRICITY_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.latitude')}</Label>
-            <Input className={inp('LATITUDE')} value={form.LATITUDE ?? ''} onChange={(e) => handleChange('LATITUDE', e.target.value)} />
+            <Label>{t('editAddress.fields.latitude')}<PendingFieldInfo pending={isPending('LATITUDE')} /></Label>
+            <Input className={inp('LATITUDE')} disabled={isPending('LATITUDE')} value={form.LATITUDE ?? ''} onChange={(e) => handleChange('LATITUDE', e.target.value)} />
             <FieldErr msg={err('LATITUDE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editAddress.fields.longitude')}</Label>
-            <Input className={inp('LONGITUDE')} value={form.LONGITUDE ?? ''} onChange={(e) => handleChange('LONGITUDE', e.target.value)} />
+            <Label>{t('editAddress.fields.longitude')}<PendingFieldInfo pending={isPending('LONGITUDE')} /></Label>
+            <Input className={inp('LONGITUDE')} disabled={isPending('LONGITUDE')} value={form.LONGITUDE ?? ''} onChange={(e) => handleChange('LONGITUDE', e.target.value)} />
             <FieldErr msg={err('LONGITUDE')} />
           </div>
           <div className="space-y-1" data-field="SOURCE_CODE">
-            <Label>{t('editAddress.fields.sourceCode')}</Label>
+            <Label>{t('editAddress.fields.sourceCode')}<PendingFieldInfo pending={isPending('SOURCE_CODE')} /></Label>
             <Select
               value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
               onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
-              disabled={!isAddressFieldEditable('SOURCE_CODE')}
+              disabled={!isAddressFieldEditable('SOURCE_CODE') || isPending('SOURCE_CODE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isAddressFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isAddressFieldEditable('SOURCE_CODE') || isPending('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -260,10 +270,11 @@ export function EditAddressModal({ address, open, onClose, onSaved }: Props) {
             <FieldErr msg={err('SOURCE_CODE')} />
           </div>
           <div className="space-y-1" data-field="PRIORITY">
-            <Label>{t('editAddress.fields.priority')}</Label>
+            <Label>{t('editAddress.fields.priority')}<PendingFieldInfo pending={isPending('PRIORITY')} /></Label>
             <Input
               type="number"
               className={inp('PRIORITY')}
+              disabled={isPending('PRIORITY')}
               value={form.PRIORITY ?? ''}
               onChange={(e) => {
                 setForm((p) => ({ ...p, PRIORITY: Number(e.target.value) }));

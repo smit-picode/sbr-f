@@ -41,6 +41,8 @@ export interface BulkChangeFieldDiff {
 }
 
 export interface BulkChangeRecordRow {
+  // The spreadsheet row this validation row belongs to, so it never depends on the order rows come back in.
+  rowNumber?: number;
   auditLogId: number;
   id: number;
   status: string;
@@ -86,7 +88,8 @@ export type BulkChangeValidationCode =
   | 'BELOW_MIN'
   | 'TOO_LONG'
   | 'NO_CHANGES'
-  | 'ROW_TOO_LARGE';
+  | 'ROW_TOO_LARGE'
+  | 'PENDING_CHANGE';
 
 export interface BulkChangeValidationIssue {
   rowNumber: number;

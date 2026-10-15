@@ -228,7 +228,11 @@
     "yes": "Yes",
     "no": "No",
     "noAccess": "You do not have access to this section.",
-    "pendingApprovalBanner": "This record has an edit request awaiting approval. You can still edit it.",
+    "pendingApprovalBanner": "This record has a change awaiting approval. The fields in that change can't be edited again until it is approved or rejected.",
+    "pendingFieldTooltip": "This field has a change waiting for approval. It can't be edited until that change is approved or rejected.",
+    "pendingFieldsHint": "Greyed fields already have a change waiting for approval and can't be edited until it is decided.",
+    "pendingChangeBlocked": "These fields are waiting for approval: {{fields}}. Changes can't be submitted until it is decided.",
+    "pendingChangeBlockedGeneric": "A change to this record is already waiting for approval. Changes can't be submitted until it is decided.",
     "noChangesDetected": "No changes detected.",
     "changeRequestSubmitted": "Change request submitted for approval.",
     "sessionExpired": "Your session has expired. Please log in again.",
@@ -1519,7 +1523,8 @@
           "BELOW_MIN": "Value is below the minimum allowed.",
           "TOO_LONG": "Value is too long.",
           "NO_CHANGES": "This row matches the stored record — nothing to change.",
-          "ROW_TOO_LARGE": "This row changes too much data to submit at once."
+          "ROW_TOO_LARGE": "This row changes too much data to submit at once.",
+          "PENDING_CHANGE": "This column already has a change waiting for approval."
         }
       },
       "confirm": {

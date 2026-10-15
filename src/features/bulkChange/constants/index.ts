@@ -83,4 +83,5 @@ export const BULK_CHANGE_VALIDATION_DEFAULTS: Record<string, string> = {
   TOO_LONG: 'Value is too long.',
   NO_CHANGES: 'This row matches the stored record — nothing to change.',
   ROW_TOO_LARGE: 'This row changes too much data to submit at once.',
+  PENDING_CHANGE: 'This column already has a change waiting for approval.',
 };

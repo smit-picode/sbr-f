@@ -229,6 +229,7 @@ const OPTIONAL_KEYS: Partial<Record<SnapshotEntity, Set<string>>> = {
 // Versioning columns the live Establishments list does not show, so the frozen copy leaves them out too.
 const EXTRA_HIDDEN: Partial<Record<SnapshotEntity, Set<string>>> = {
   establishments: new Set(['VALID_FROM', 'VALID_TO']),
+  addresses: new Set(['ADDRESS_TEXT']),
 };
 
 // Tabs that show exactly the live list's columns and nothing else from the frozen row.

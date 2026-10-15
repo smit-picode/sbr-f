@@ -7,6 +7,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { BulkChangeStepper } from '../components/BulkChangeStepper';
 import { BulkChangeSetupStep } from '../components/BulkChangeSetupStep';
 import { BulkChangeUploadStep } from '../components/BulkChangeUploadStep';
@@ -14,9 +15,9 @@ import { BulkChangeValidateStep } from '../components/BulkChangeValidateStep';
 import { BulkChangeConfirmStep } from '../components/BulkChangeConfirmStep';
 import { useSubmitBulkChangeMutation } from '../api/bulkChangeApi';
 import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE } from '../constants';
-import type { BulkChangeItemInput, BulkChangeSubmitFailure, BulkChangeSubmitResponse, BulkChangeValidationResult } from '../types';
+import { validationRowNumber } from '../utils/rowNumber';
+import type { BulkChangeItemInput, BulkChangeSubmitFailure, BulkChangeSubmitResponse, BulkChangeTableKey, BulkChangeValidationResult } from '../types';
 
-import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 const STEP_SETUP = 0;
 const STEP_UPLOAD = 1;
 const STEP_VALIDATE = 2;
@@ -62,7 +63,8 @@ export function NewBulkUpdatePage() {
 
   const handleSubmit = async () => {
     if (!validation || items.length === 0) return;
-    const validItems = items.filter((_, index) => validation.rows[index]?.status === 'VALID');
+    const validRowNumbers = new Set(validation.rows.flatMap((row, index) => (row.status === 'VALID' ? [validationRowNumber(row, index, items)] : [])));
+    const validItems = items.filter((item) => validRowNumbers.has(item.rowNumber));
     if (validItems.length === 0) return;
     setSubmitFailures([]);
     try {
@@ -95,7 +97,7 @@ export function NewBulkUpdatePage() {
       const failures = (body?.data?.items ?? []).filter((item) => item.status === 'FAILED');
       setSubmitFailures(failures.map((item) => ({
         rowNumber: item.rowNumber,
-        error: item.error ?? t('bulkChange.wizard.confirm.unknownFailure', { defaultValue: 'This row could not be submitted.' }),
+        error: pendingChangeText(item.error, t) ?? item.error ?? t('bulkChange.wizard.confirm.unknownFailure', { defaultValue: 'This row could not be submitted.' }),
       })));
       if ((error as { status?: number })?.status === 400) {
         toast.error(body?.message ?? t('common.somethingWentWrong', { defaultValue: 'Something went wrong. Please try again.' }));

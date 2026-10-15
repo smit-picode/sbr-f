@@ -8,8 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateEstablishmentMutation } from '../api/establishmentsApi';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
+import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import type { SbrEstablishment } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { useGetEstStatusCategoriesQuery, useGetLegalTypeValuesQuery, useGetSectorTypeValuesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
@@ -146,7 +149,8 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   }, [frame]);
 
   // Whether a field is user-editable (per the "Is Editable" spec)
-  const ed = (field: string): boolean => isEstablishmentFieldEditable(field);
+  const isPending = (field: string): boolean => !!frame?.PENDING_FIELDS?.[field];
+  const ed = (field: string): boolean => isEstablishmentFieldEditable(field) && !isPending(field);
 
   const set = (field: keyof FormState, value: string | number | null) => {
     if (!ed(field as string)) return;
@@ -284,7 +288,8 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
       onClose();
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
-      const msg = (error as { data?: { message?: string } })?.data?.message
+      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const msg = pendingChangeText(apiMessage, t) ?? apiMessage
         ?? t('editEstablishment.updateError', { defaultValue: 'Failed to update establishment. Please try again.' });
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
@@ -302,7 +307,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('editEstablishment.title')}</DialogTitle>
           </DialogHeader>
@@ -311,7 +316,9 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <ErrorSummary errors={errors} onErrorClick={scrollToField} fieldLabels={ESTABLISHMENTS_FIELD_LABELS} />
           )}
 
-          <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
+          <PendingFieldsHint pendingFields={frame?.PENDING_FIELDS} />
+
+          <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 min-h-0 flex-1 overflow-y-auto">
 
           <SectionDivider title={t('editEstablishment.sections.identifiers')} />
           <ReadOnlyField label={t('editEstablishment.fields.sbrId')} value={frame?.SBR_ID} />
@@ -319,72 +326,72 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
           <SectionDivider title={t('editEstablishment.sections.names')} />
           <div className="space-y-1" data-field={NAMES_FIELD}>
-            <Label>{t('editEstablishment.fields.nameEnu')}</Label>
+            <Label>{t('editEstablishment.fields.nameEnu')}<PendingFieldInfo pending={isPending('NAME_ENU')} /></Label>
             <Input className={inp('NAME_ENU')} value={sel('NAME_ENU')} onChange={(e) => set('NAME_ENU', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.nameAra')}</Label>
+            <Label>{t('editEstablishment.fields.nameAra')}<PendingFieldInfo pending={isPending('NAME_ARA')} /></Label>
             <Input dir="rtl" className={inp('NAME_ARA')} value={sel('NAME_ARA')} onChange={(e) => set('NAME_ARA', e.target.value)} />
           </div>
           {errors[NAMES_FIELD] && (
             <p className="col-span-2 -mt-2 text-xs text-red-500">{errors[NAMES_FIELD]}</p>
           )}
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.nameEnuSource')}</Label>
+            <Label>{t('editEstablishment.fields.nameEnuSource')}<PendingFieldInfo pending={isPending('NAME_ENU_SOURCE')} /></Label>
             <Input className={inp('NAME_ENU_SOURCE')} value={sel('NAME_ENU_SOURCE')} onChange={(e) => set('NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.nameAraSource')}</Label>
+            <Label>{t('editEstablishment.fields.nameAraSource')}<PendingFieldInfo pending={isPending('NAME_ARA_SOURCE')} /></Label>
             <Input className={inp('NAME_ARA_SOURCE')} value={sel('NAME_ARA_SOURCE')} onChange={(e) => set('NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('NAME_ARA_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.tradeNameEnu')}</Label>
+            <Label>{t('editEstablishment.fields.tradeNameEnu')}<PendingFieldInfo pending={isPending('TRADE_NAME_ENU')} /></Label>
             <Input className={inp('TRADE_NAME_ENU')} value={sel('TRADE_NAME_ENU')} onChange={(e) => set('TRADE_NAME_ENU', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ENU')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.tradeNameAra')}</Label>
+            <Label>{t('editEstablishment.fields.tradeNameAra')}<PendingFieldInfo pending={isPending('TRADE_NAME_ARA')} /></Label>
             <Input dir="rtl" className={inp('TRADE_NAME_ARA')} value={sel('TRADE_NAME_ARA')} onChange={(e) => set('TRADE_NAME_ARA', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ARA')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.tradeNameEnuSource')}</Label>
+            <Label>{t('editEstablishment.fields.tradeNameEnuSource')}<PendingFieldInfo pending={isPending('TRADE_NAME_ENU_SOURCE')} /></Label>
             <Input className={inp('TRADE_NAME_ENU_SOURCE')} value={sel('TRADE_NAME_ENU_SOURCE')} onChange={(e) => set('TRADE_NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.tradeNameAraSource')}</Label>
+            <Label>{t('editEstablishment.fields.tradeNameAraSource')}<PendingFieldInfo pending={isPending('TRADE_NAME_ARA_SOURCE')} /></Label>
             <Input className={inp('TRADE_NAME_ARA_SOURCE')} value={sel('TRADE_NAME_ARA_SOURCE')} onChange={(e) => set('TRADE_NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('TRADE_NAME_ARA_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.npcNameEnu')}</Label>
+            <Label>{t('editEstablishment.fields.npcNameEnu')}<PendingFieldInfo pending={isPending('NPC_NAME_ENU')} /></Label>
             <Input className={inp('NPC_NAME_ENU')} value={sel('NPC_NAME_ENU')} onChange={(e) => set('NPC_NAME_ENU', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ENU')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.npcNameAra')}</Label>
+            <Label>{t('editEstablishment.fields.npcNameAra')}<PendingFieldInfo pending={isPending('NPC_NAME_ARA')} /></Label>
             <Input dir="rtl" className={inp('NPC_NAME_ARA')} value={sel('NPC_NAME_ARA')} onChange={(e) => set('NPC_NAME_ARA', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ARA')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.npcNameEnuSource')}</Label>
+            <Label>{t('editEstablishment.fields.npcNameEnuSource')}<PendingFieldInfo pending={isPending('NPC_NAME_ENU_SOURCE')} /></Label>
             <Input className={inp('NPC_NAME_ENU_SOURCE')} value={sel('NPC_NAME_ENU_SOURCE')} onChange={(e) => set('NPC_NAME_ENU_SOURCE', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ENU_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.npcNameAraSource')}</Label>
+            <Label>{t('editEstablishment.fields.npcNameAraSource')}<PendingFieldInfo pending={isPending('NPC_NAME_ARA_SOURCE')} /></Label>
             <Input className={inp('NPC_NAME_ARA_SOURCE')} value={sel('NPC_NAME_ARA_SOURCE')} onChange={(e) => set('NPC_NAME_ARA_SOURCE', e.target.value)} />
             <FieldErr msg={err('NPC_NAME_ARA_SOURCE')} />
           </div>
 
           <SectionDivider title={t('editEstablishment.sections.statusClassification')} />
           <div className="space-y-1" data-field="EST_STATUS">
-            <Label>{t('editEstablishment.fields.estStatus')}</Label>
-            <Select value={sel('EST_STATUS') || '__none__'} onValueChange={(v) => setEstStatus(v === '__none__' ? '' : v)}>
-              <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS') ? 'border-red-400' : ''}`}>
+            <Label>{t('editEstablishment.fields.estStatus')}<PendingFieldInfo pending={isPending('EST_STATUS')} /></Label>
+            <Select value={sel('EST_STATUS') || '__none__'} onValueChange={(v) => setEstStatus(v === '__none__' ? '' : v)} disabled={isPending('EST_STATUS')}>
+              <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS') ? 'border-red-400' : ''} ${isPending('EST_STATUS') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -397,7 +404,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('EST_STATUS')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.estStatusSource')}</Label>
+            <Label>{t('editEstablishment.fields.estStatusSource')}<PendingFieldInfo pending={isPending('EST_STATUS_SOURCE')} /></Label>
             <Input className={inp('EST_STATUS_SOURCE')} value={sel('EST_STATUS_SOURCE')} onChange={(e) => set('EST_STATUS_SOURCE', e.target.value)} />
             <FieldErr msg={err('EST_STATUS_SOURCE')} />
           </div>
@@ -405,14 +412,14 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <>
               <div className="space-y-1" data-field="EST_STATUS_CATEGORY">
                 <Label>
-                  {t('editEstablishment.fields.estStatusCategory')} <span className="text-red-500">*</span>
+                  {t('editEstablishment.fields.estStatusCategory')} <span className="text-red-500">*</span><PendingFieldInfo pending={isPending('EST_STATUS_CATEGORY')} />
                 </Label>
                 <Select
                   value={sel('EST_STATUS_CATEGORY') || '__none__'}
                   onValueChange={(v) => set('EST_STATUS_CATEGORY', v === '__none__' ? '' : v)}
-                  disabled={isLoadingStatusCategories}
+                  disabled={isLoadingStatusCategories || isPending('EST_STATUS_CATEGORY')}
                 >
-                  <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS_CATEGORY') ? 'border-red-400' : ''}`}>
+                  <SelectTrigger className={`w-full shadow-none ${err('EST_STATUS_CATEGORY') ? 'border-red-400' : ''} ${isPending('EST_STATUS_CATEGORY') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                     <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -435,20 +442,20 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
                 <FieldErr msg={err('EST_STATUS_CATEGORY')} />
               </div>
               <div className="space-y-1">
-                <Label>{t('editEstablishment.fields.estStatusCategorySource')}</Label>
+                <Label>{t('editEstablishment.fields.estStatusCategorySource')}<PendingFieldInfo pending={isPending('EST_STATUS_CATEGORY_SOURCE')} /></Label>
                 <Input className={inp('EST_STATUS_CATEGORY_SOURCE')} value={sel('EST_STATUS_CATEGORY_SOURCE')} onChange={(e) => set('EST_STATUS_CATEGORY_SOURCE', e.target.value)} />
                 <FieldErr msg={err('EST_STATUS_CATEGORY_SOURCE')} />
               </div>
             </>
           )}
           <div className="space-y-1" data-field="LEGAL_TYPE">
-            <Label>{t('editEstablishment.fields.legalType')}</Label>
+            <Label>{t('editEstablishment.fields.legalType')}<PendingFieldInfo pending={isPending('LEGAL_TYPE')} /></Label>
             <Select
               value={sel('LEGAL_TYPE') || '__none__'}
               onValueChange={(v) => set('LEGAL_TYPE', v === '__none__' ? '' : v)}
               disabled={!ed('LEGAL_TYPE') || isLoadingLegalTypes}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('LEGAL_TYPE') ? 'border-red-400' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('LEGAL_TYPE') ? 'border-red-400' : ''} ${isPending('LEGAL_TYPE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -471,18 +478,18 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('LEGAL_TYPE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.legalTypeSource')}</Label>
+            <Label>{t('editEstablishment.fields.legalTypeSource')}<PendingFieldInfo pending={isPending('LEGAL_TYPE_SOURCE')} /></Label>
             <Input className={inp('LEGAL_TYPE_SOURCE')} value={sel('LEGAL_TYPE_SOURCE')} onChange={(e) => set('LEGAL_TYPE_SOURCE', e.target.value)} />
             <FieldErr msg={err('LEGAL_TYPE_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="SECTOR_ID">
-            <Label>{t('editEstablishment.fields.sector')}</Label>
+            <Label>{t('editEstablishment.fields.sector')}<PendingFieldInfo pending={isPending('SECTOR_ID')} /></Label>
             <Select
               value={sel('SECTOR_ID') || '__none__'}
               onValueChange={(v) => set('SECTOR_ID', v === '__none__' ? '' : v)}
-              disabled={isLoadingSectorTypes}
+              disabled={isLoadingSectorTypes || isPending('SECTOR_ID')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('SECTOR_ID') ? 'border-red-400' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('SECTOR_ID') ? 'border-red-400' : ''} ${isPending('SECTOR_ID') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -498,12 +505,12 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('SECTOR_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.sectorSource')}</Label>
+            <Label>{t('editEstablishment.fields.sectorSource')}<PendingFieldInfo pending={isPending('SECTOR_ID_SOURCE')} /></Label>
             <Input className={inp('SECTOR_ID_SOURCE')} value={sel('SECTOR_ID_SOURCE')} onChange={(e) => set('SECTOR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('SECTOR_ID_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="ISIC_CODE">
-            <Label>{t('editEstablishment.fields.isicCode')}</Label>
+            <Label>{t('editEstablishment.fields.isicCode')}<PendingFieldInfo pending={isPending('ISIC_CODE')} /></Label>
             <IsicCodeSelect
               value={sel('ISIC_CODE')}
               onChange={(code) => set('ISIC_CODE', code)}
@@ -513,22 +520,22 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('ISIC_CODE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.isicCodeSource')}</Label>
+            <Label>{t('editEstablishment.fields.isicCodeSource')}<PendingFieldInfo pending={isPending('ISIC_CODE_SOURCE')} /></Label>
             <Input className={inp('ISIC_CODE_SOURCE')} value={sel('ISIC_CODE_SOURCE')} onChange={(e) => set('ISIC_CODE_SOURCE', e.target.value)} />
             <FieldErr msg={err('ISIC_CODE_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="EMPLOYMENT_COUNT">
-            <Label>{t('editEstablishment.fields.employmentCount')}</Label>
+            <Label>{t('editEstablishment.fields.employmentCount')}<PendingFieldInfo pending={isPending('EMPLOYMENT_COUNT')} /></Label>
             <Input type="number" className={inp('EMPLOYMENT_COUNT')} value={form.EMPLOYMENT_COUNT ?? ''} onChange={(e) => set('EMPLOYMENT_COUNT', e.target.value ? Number(e.target.value) : null)} />
             <FieldErr msg={err('EMPLOYMENT_COUNT')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.employmentCountSource')}</Label>
+            <Label>{t('editEstablishment.fields.employmentCountSource')}<PendingFieldInfo pending={isPending('EMPLOYMENT_COUNT_SOURCE')} /></Label>
             <Input className={inp('EMPLOYMENT_COUNT_SOURCE')} value={sel('EMPLOYMENT_COUNT_SOURCE')} onChange={(e) => set('EMPLOYMENT_COUNT_SOURCE', e.target.value)} />
             <FieldErr msg={err('EMPLOYMENT_COUNT_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_FLG">
-            <Label>{t('editEstablishment.fields.mainBranchFlg')}</Label>
+            <Label>{t('editEstablishment.fields.mainBranchFlg')}<PendingFieldInfo pending={isPending('MAIN_BRANCH_FLG')} /></Label>
             <Select value={sel('MAIN_BRANCH_FLG') || '__none__'} onValueChange={(v) => set('MAIN_BRANCH_FLG', v === '__none__' ? '' : v)} disabled={!ed('MAIN_BRANCH_FLG')}>
               <SelectTrigger className={`w-full shadow-none ${err('MAIN_BRANCH_FLG') ? 'border-red-400' : ''} ${!ed('MAIN_BRANCH_FLG') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
@@ -542,7 +549,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('MAIN_BRANCH_FLG')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID">
-            <Label>{t('editEstablishment.fields.mainBranchSbrId')}</Label>
+            <Label>{t('editEstablishment.fields.mainBranchSbrId')}<PendingFieldInfo pending={isPending('MAIN_BRANCH_SBR_ID')} /></Label>
             <MainBranchSelect
               value={form.MAIN_BRANCH_SBR_ID ?? null}
               onChange={(sbrId) => set('MAIN_BRANCH_SBR_ID', sbrId)}
@@ -552,27 +559,27 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.mainBranchFlgSource')}</Label>
+            <Label>{t('editEstablishment.fields.mainBranchFlgSource')}<PendingFieldInfo pending={isPending('MAIN_BRANCH_FLG_SOURCE')} /></Label>
             <Input className={inp('MAIN_BRANCH_FLG_SOURCE')} value={sel('MAIN_BRANCH_FLG_SOURCE')} onChange={(e) => set('MAIN_BRANCH_FLG_SOURCE', e.target.value)} />
             <FieldErr msg={err('MAIN_BRANCH_FLG_SOURCE')} />
           </div>
           <div className="space-y-1" data-field="MAIN_BRANCH_SBR_ID_SOURCE">
-            <Label>{t('editEstablishment.fields.mainBranchSbrIdSource')}</Label>
+            <Label>{t('editEstablishment.fields.mainBranchSbrIdSource')}<PendingFieldInfo pending={isPending('MAIN_BRANCH_SBR_ID_SOURCE')} /></Label>
             <Input className={inp('MAIN_BRANCH_SBR_ID_SOURCE')} value={sel('MAIN_BRANCH_SBR_ID_SOURCE')} onChange={(e) => set('MAIN_BRANCH_SBR_ID_SOURCE', e.target.value)} />
             <FieldErr msg={err('MAIN_BRANCH_SBR_ID_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.holdingCompanyFlg')}</Label>
+            <Label>{t('editEstablishment.fields.holdingCompanyFlg')}<PendingFieldInfo pending={isPending('HOLDING_COMPANY_FLG')} /></Label>
             <Input className={inp('HOLDING_COMPANY_FLG')} value={sel('HOLDING_COMPANY_FLG')} onChange={(e) => set('HOLDING_COMPANY_FLG', e.target.value)} />
             <FieldErr msg={err('HOLDING_COMPANY_FLG')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.holdingCompanyFlgSource')}</Label>
+            <Label>{t('editEstablishment.fields.holdingCompanyFlgSource')}<PendingFieldInfo pending={isPending('HOLDING_COMPANY_FLG_SOURCE')} /></Label>
             <Input className={inp('HOLDING_COMPANY_FLG_SOURCE')} value={sel('HOLDING_COMPANY_FLG_SOURCE')} onChange={(e) => set('HOLDING_COMPANY_FLG_SOURCE', e.target.value)} />
             <FieldErr msg={err('HOLDING_COMPANY_FLG_SOURCE')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.sourceCode')}</Label>
+            <Label>{t('editEstablishment.fields.sourceCode')}<PendingFieldInfo pending={isPending('SOURCE_CODE')} /></Label>
             <Select value={sel('SOURCE_CODE') || '__none__'} onValueChange={(v) => set('SOURCE_CODE', v === '__none__' ? '' : v)} disabled={!ed('SOURCE_CODE')}>
               <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!ed('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
@@ -589,91 +596,91 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
 
           <SectionDivider title={t('editEstablishment.sections.registrationNumbers')} />
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.mociOrgId')}</Label>
+            <Label>{t('editEstablishment.fields.mociOrgId')}<PendingFieldInfo pending={isPending('MOCI_ORG_ID')} /></Label>
             <Input className={inp('MOCI_ORG_ID')} value={sel('MOCI_ORG_ID')} onChange={(e) => set('MOCI_ORG_ID', e.target.value)} />
             <FieldErr msg={err('MOCI_ORG_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.mociCrNum')}</Label>
+            <Label>{t('editEstablishment.fields.mociCrNum')}<PendingFieldInfo pending={isPending('MOCI_CR_NUM')} /></Label>
             <Input className={inp('MOCI_CR_NUM')} value={sel('MOCI_CR_NUM')} onChange={(e) => set('MOCI_CR_NUM', e.target.value)} />
             <FieldErr msg={err('MOCI_CR_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.mociCpNum')}</Label>
+            <Label>{t('editEstablishment.fields.mociCpNum')}<PendingFieldInfo pending={isPending('MOCI_CP_NUM')} /></Label>
             <Input className={inp('MOCI_CP_NUM')} value={sel('MOCI_CP_NUM')} onChange={(e) => set('MOCI_CP_NUM', e.target.value)} />
             <FieldErr msg={err('MOCI_CP_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.qfcNumber')}</Label>
+            <Label>{t('editEstablishment.fields.qfcNumber')}<PendingFieldInfo pending={isPending('QFC_NUMBER')} /></Label>
             <Input className={inp('QFC_NUMBER')} value={sel('QFC_NUMBER')} onChange={(e) => set('QFC_NUMBER', e.target.value)} />
             <FieldErr msg={err('QFC_NUMBER')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.qfzSourceId')}</Label>
+            <Label>{t('editEstablishment.fields.qfzSourceId')}<PendingFieldInfo pending={isPending('QFZ_SOURCE_ID')} /></Label>
             <Input className={inp('QFZ_SOURCE_ID')} value={sel('QFZ_SOURCE_ID')} onChange={(e) => set('QFZ_SOURCE_ID', e.target.value)} />
             <FieldErr msg={err('QFZ_SOURCE_ID')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.qstpRegNum')}</Label>
+            <Label>{t('editEstablishment.fields.qstpRegNum')}<PendingFieldInfo pending={isPending('QSTP_REG_NUM')} /></Label>
             <Input className={inp('QSTP_REG_NUM')} value={sel('QSTP_REG_NUM')} onChange={(e) => set('QSTP_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.qstpTaxRegNum')}</Label>
+            <Label>{t('editEstablishment.fields.qstpTaxRegNum')}<PendingFieldInfo pending={isPending('QSTP_TAX_REG_NUM')} /></Label>
             <Input className={inp('QSTP_TAX_REG_NUM')} value={sel('QSTP_TAX_REG_NUM')} onChange={(e) => set('QSTP_TAX_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_TAX_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.qstpParentRegNum')}</Label>
+            <Label>{t('editEstablishment.fields.qstpParentRegNum')}<PendingFieldInfo pending={isPending('QSTP_PARENT_REG_NUM')} /></Label>
             <Input className={inp('QSTP_PARENT_REG_NUM')} value={sel('QSTP_PARENT_REG_NUM')} onChange={(e) => set('QSTP_PARENT_REG_NUM', e.target.value)} />
             <FieldErr msg={err('QSTP_PARENT_REG_NUM')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.farmNo')}</Label>
+            <Label>{t('editEstablishment.fields.farmNo')}<PendingFieldInfo pending={isPending('FARM_NO')} /></Label>
             <Input className={inp('FARM_NO')} value={sel('FARM_NO')} onChange={(e) => set('FARM_NO', e.target.value)} />
             <FieldErr msg={err('FARM_NO')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.eid')}</Label>
+            <Label>{t('editEstablishment.fields.eid')}<PendingFieldInfo pending={isPending('EID')} /></Label>
             <Input className={inp('EID')} value={sel('EID')} onChange={(e) => set('EID', e.target.value)} />
             <FieldErr msg={err('EID')} />
           </div>
 
           <SectionDivider title={t('editEstablishment.sections.dates')} />
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.crIssueDate')}</Label>
+            <Label>{t('editEstablishment.fields.crIssueDate')}<PendingFieldInfo pending={isPending('CR_ISSUE_DATE')} /></Label>
             <Input type="date" className={inp('CR_ISSUE_DATE')} value={sel('CR_ISSUE_DATE').split('T')[0]} onChange={(e) => set('CR_ISSUE_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.crExpiryDate')}</Label>
+            <Label>{t('editEstablishment.fields.crExpiryDate')}<PendingFieldInfo pending={isPending('CR_EXPIRY_DATE')} /></Label>
             <Input type="date" className={inp('CR_EXPIRY_DATE')} value={sel('CR_EXPIRY_DATE').split('T')[0]} onChange={(e) => set('CR_EXPIRY_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.crCancelDate')}</Label>
+            <Label>{t('editEstablishment.fields.crCancelDate')}<PendingFieldInfo pending={isPending('CR_CANCEL_DATE')} /></Label>
             <Input type="date" className={inp('CR_CANCEL_DATE')} value={sel('CR_CANCEL_DATE').split('T')[0]} onChange={(e) => set('CR_CANCEL_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.cpIssueDate')}</Label>
+            <Label>{t('editEstablishment.fields.cpIssueDate')}<PendingFieldInfo pending={isPending('CP_ISSUE_DATE')} /></Label>
             <Input type="date" className={inp('CP_ISSUE_DATE')} value={sel('CP_ISSUE_DATE').split('T')[0]} onChange={(e) => set('CP_ISSUE_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.cpEndDate')}</Label>
+            <Label>{t('editEstablishment.fields.cpEndDate')}<PendingFieldInfo pending={isPending('CP_END_DATE')} /></Label>
             <Input type="date" className={inp('CP_END_DATE')} value={sel('CP_END_DATE').split('T')[0]} onChange={(e) => set('CP_END_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.cpCancelDate')}</Label>
+            <Label>{t('editEstablishment.fields.cpCancelDate')}<PendingFieldInfo pending={isPending('CP_CANCEL_DATE')} /></Label>
             <Input type="date" className={inp('CP_CANCEL_DATE')} value={sel('CP_CANCEL_DATE').split('T')[0]} onChange={(e) => set('CP_CANCEL_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.regDate')}</Label>
+            <Label>{t('editEstablishment.fields.regDate')}<PendingFieldInfo pending={isPending('REG_DATE')} /></Label>
             <Input type="date" className={inp('REG_DATE')} value={sel('REG_DATE').split('T')[0]} onChange={(e) => set('REG_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.regExpiryDate')}</Label>
+            <Label>{t('editEstablishment.fields.regExpiryDate')}<PendingFieldInfo pending={isPending('REG_EXPIRY_DATE')} /></Label>
             <Input type="date" className={inp('REG_EXPIRY_DATE')} value={sel('REG_EXPIRY_DATE').split('T')[0]} onChange={(e) => set('REG_EXPIRY_DATE', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editEstablishment.fields.regCancelDate')}</Label>
+            <Label>{t('editEstablishment.fields.regCancelDate')}<PendingFieldInfo pending={isPending('REG_CANCEL_DATE')} /></Label>
             <Input type="date" className={inp('REG_CANCEL_DATE')} value={sel('REG_CANCEL_DATE').split('T')[0]} onChange={(e) => set('REG_CANCEL_DATE', e.target.value)} />
           </div>
 

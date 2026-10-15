@@ -13,6 +13,7 @@ import { SECTOR_OPTIONS, EST_STATUS_OPTIONS } from '@/constants';
 import { ENTERPRISE_FIELD_LABELS } from '../constants';
 import { useDebounce } from '@/hooks';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -167,7 +168,10 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
       toast.success(t('common.changeRequestSubmitted', { defaultValue: 'Change request submitted for approval.' }));
       setShowCommentDialog(false);
       onClose();
-    } catch {
+    } catch (error) {
+      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const pendingMessage = pendingChangeText(apiMessage, t);
+      if (pendingMessage) { toast.error(pendingMessage); return; }
       toast.error(t('enterpriseEdit.updateError', { defaultValue: 'Failed to update enterprise. Please try again.' }));
     }
   };

@@ -9,7 +9,7 @@ export function PendingApprovalBanner() {
   return (
     <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[12px] font-medium text-amber-800">
       <Clock className="h-4 w-4 shrink-0" />
-      {t('common.pendingApprovalBanner', { defaultValue: 'This record has an edit request awaiting approval. You can still edit it.' })}
+      {t('common.pendingApprovalBanner', { defaultValue: "This record has a change awaiting approval. The fields in that change can't be edited again until it is approved or rejected." })}
     </div>
   );
 }

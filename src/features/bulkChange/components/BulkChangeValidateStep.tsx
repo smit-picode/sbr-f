@@ -11,9 +11,9 @@ import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '..
 import { parseWorkbookInWorker } from '../utils/parseWorkbookInWorker';
 import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
 import { BULK_CHANGE_MAX_ROWS, BULK_CHANGE_TABLES, BULK_CHANGE_VALIDATION_DEFAULTS, ENTITY_TYPE_BY_TABLE } from '../constants';
-import type { BulkChangeItemInput, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
+import { validationRowNumber } from '../utils/rowNumber';
+import type { BulkChangeItemInput, BulkChangeTableKey, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
-import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 // Best-effort text for a caught value that isn't an Error instance.
 function describeThrownValue(error: unknown): string | null {
   if (error === null || error === undefined) return null;
@@ -210,6 +210,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
   }
 
   const columns = result.columns;
+  const columnKeys = new Set(columns.map((col) => col.key));
   const pageStart = (page - 1) * limit;
   const pageRows = result.rows.slice(pageStart, pageStart + limit);
 
@@ -291,10 +292,10 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
             <tbody className="divide-y divide-slate-100">
               {pageRows.map((row, pageIndex) => {
                 const index = pageStart + pageIndex;
-                const rowNumber = parsedItems[index]?.rowNumber ?? index + 1;
+                const rowNumber = validationRowNumber(row, index, parsedItems);
                 const rowIssues = issuesByRow.get(rowNumber) ?? [];
                 const hasError = row.status === 'ERROR';
-                const generalIssues = rowIssues.filter((issue) => issue.field === null);
+                const generalIssues = rowIssues.filter((issue) => issue.field === null || !columnKeys.has(issue.field));
 
                 return (
                   <tr key={`${row.id}-${index}`} className={hasError ? 'bg-red-50/40' : 'hover:bg-slate-50 transition-colors'}>
@@ -330,8 +331,8 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                           <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
                             <XCircle className="h-3.5 w-3.5" /> {t('bulkChange.wizard.validate.errorLabel', { defaultValue: 'Error' })}
                           </span>
-                          {generalIssues.map((issue) => (
-                            <p key={issue.code} className="mt-0.5 text-xs text-red-600">
+                          {generalIssues.map((issue, issueIndex) => (
+                            <p key={`${issue.code}-${issueIndex}`} className="mt-0.5 text-xs text-red-600">
                               {issue.message?.trim()
                                 ? issue.message
                                 : t(`bulkChange.wizard.validate.codes.${issue.code}`, {
@@ -339,6 +340,11 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                                   })}
                             </p>
                           ))}
+                          {rowIssues.length === 0 && (
+                            <p className="mt-0.5 text-xs text-red-600">
+                              {t('bulkChange.wizard.validate.rowFailed', { defaultValue: 'This row did not pass validation.' })}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">

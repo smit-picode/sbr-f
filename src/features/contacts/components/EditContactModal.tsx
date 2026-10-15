@@ -9,8 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUpdateContactMutation } from '../api/contactsApi';
 import { ContactTagEditor } from '@/features/contactTags/components/TagControls';
 import { toast } from '@/utils/toast';
+import { pendingChangeText } from '@/utils/pendingChange';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
+import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import type { SbrContact } from '@/types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -68,6 +71,8 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     }
   }, [contact]);
 
+  const isPending = (field: string): boolean => !!contact?.PENDING_FIELDS?.[field];
+
   const handleChange = (field: keyof SbrContact, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
@@ -110,7 +115,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
 
     const editableErrors: Record<string, string> = {};
     for (const [field, msg] of Object.entries(e)) {
-      if (isContactFieldEditable(field)) editableErrors[field] = msg;
+      if (isContactFieldEditable(field) && !isPending(field)) editableErrors[field] = msg;
     }
 
     setErrors(editableErrors);
@@ -146,7 +151,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
   const handleConfirmWithComment = async (comment: string) => {
     if (!contact) return;
     const editableData = Object.fromEntries(
-      Object.entries(form).filter(([key]) => isContactFieldEditable(key))
+      Object.entries(form).filter(([key]) => isContactFieldEditable(key) && !isPending(key))
     );
     try {
       const res = await updateContact({ id: contact.ID, data: { ...editableData, comment } }).unwrap();
@@ -156,7 +161,8 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
       if (res?.data && typeof res.data === 'object' && 'SBR_ID' in (res.data as object)) onSaved?.(res.data);
     } catch (error) {
       if ((error as { status?: number })?.status === 403) return;
-      const msg = (error as { data?: { message?: string } })?.data?.message
+      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const msg = pendingChangeText(apiMessage, t) ?? apiMessage
         ?? t('editContact.updateError', { defaultValue: 'Failed to update contact. Please try again.' });
       const parts = msg.split(/[.;]/).map((s) => s.trim()).filter(Boolean);
       const newErrs: Record<string, string> = {};
@@ -170,14 +176,16 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
   };
 
   const err = (f: string) => errors[f];
-  const inp = (f: string) => err(f)
+  const inp = (f: string) => isPending(f)
+    ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
+    : err(f)
     ? 'border-red-400 focus-visible:border-2 focus-visible:border-red-500 focus-visible:ring-0'
     : 'focus-visible:border-2 focus-visible:border-[#A29374]/40 focus-visible:ring-0';
 
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('editContact.title')}</DialogTitle>
           </DialogHeader>
@@ -186,54 +194,56 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
             <ErrorSummary errors={errors} onErrorClick={scrollToField} fieldLabels={CONTACT_FIELD_LABELS} />
           )}
 
-        <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 max-h-[calc(90vh-180px)] overflow-y-auto">
+          <PendingFieldsHint pendingFields={contact?.PENDING_FIELDS} />
+
+        <div ref={scrollContainerRef} className="grid grid-cols-2 gap-4 py-2 pr-4 min-h-0 flex-1 overflow-y-auto">
 
           <ReadOnlyField label={t('editContact.fields.sbrId')} value={contact?.SBR_ID} />
           <ReadOnlyField label={t('editContact.fields.recordId')} value={contact?.ID} />
 
           <div className="col-span-2 space-y-1" data-field="CONTACT_NAME">
-            <Label>{t('editContact.fields.contactName')}</Label>
-            <Input className={inp('CONTACT_NAME')} value={form.CONTACT_NAME ?? ''} onChange={(e) => handleChange('CONTACT_NAME', e.target.value)} />
+            <Label>{t('editContact.fields.contactName')}<PendingFieldInfo pending={isPending('CONTACT_NAME')} /></Label>
+            <Input className={inp('CONTACT_NAME')} disabled={isPending('CONTACT_NAME')} value={form.CONTACT_NAME ?? ''} onChange={(e) => handleChange('CONTACT_NAME', e.target.value)} />
             <FieldErr msg={err('CONTACT_NAME')} />
           </div>
           <div className="space-y-1" data-field="PHONE">
-            <Label>{t('editContact.fields.phone')}</Label>
-            <Input className={inp('PHONE')} value={form.PHONE ?? ''} onChange={(e) => handleChange('PHONE', e.target.value)} />
+            <Label>{t('editContact.fields.phone')}<PendingFieldInfo pending={isPending('PHONE')} /></Label>
+            <Input className={inp('PHONE')} disabled={isPending('PHONE')} value={form.PHONE ?? ''} onChange={(e) => handleChange('PHONE', e.target.value)} />
             <FieldErr msg={err('PHONE')} />
           </div>
           <div className="space-y-1" data-field="MOBILE">
-            <Label>{t('editContact.fields.mobile')}</Label>
-            <Input className={inp('MOBILE')} value={form.MOBILE ?? ''} onChange={(e) => handleChange('MOBILE', e.target.value)} />
+            <Label>{t('editContact.fields.mobile')}<PendingFieldInfo pending={isPending('MOBILE')} /></Label>
+            <Input className={inp('MOBILE')} disabled={isPending('MOBILE')} value={form.MOBILE ?? ''} onChange={(e) => handleChange('MOBILE', e.target.value)} />
             <FieldErr msg={err('MOBILE')} />
           </div>
           <div className="col-span-2 space-y-1" data-field="EMAIL">
-            <Label>{t('editContact.fields.email')}</Label>
-            <Input type="email" className={inp('EMAIL')} value={form.EMAIL ?? ''} onChange={(e) => handleChange('EMAIL', e.target.value)} />
+            <Label>{t('editContact.fields.email')}<PendingFieldInfo pending={isPending('EMAIL')} /></Label>
+            <Input type="email" className={inp('EMAIL')} disabled={isPending('EMAIL')} value={form.EMAIL ?? ''} onChange={(e) => handleChange('EMAIL', e.target.value)} />
             <FieldErr msg={err('EMAIL')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.fax')}</Label>
-            <Input className={inp('FAX')} value={form.FAX ?? ''} onChange={(e) => handleChange('FAX', e.target.value)} />
+            <Label>{t('editContact.fields.fax')}<PendingFieldInfo pending={isPending('FAX')} /></Label>
+            <Input className={inp('FAX')} disabled={isPending('FAX')} value={form.FAX ?? ''} onChange={(e) => handleChange('FAX', e.target.value)} />
             <FieldErr msg={err('FAX')} />
           </div>
           <div className="space-y-1">
-            <Label>{t('editContact.fields.poBox')}</Label>
-            <Input className={inp('PO_BOX')} value={form.PO_BOX ?? ''} onChange={(e) => handleChange('PO_BOX', e.target.value)} />
+            <Label>{t('editContact.fields.poBox')}<PendingFieldInfo pending={isPending('PO_BOX')} /></Label>
+            <Input className={inp('PO_BOX')} disabled={isPending('PO_BOX')} value={form.PO_BOX ?? ''} onChange={(e) => handleChange('PO_BOX', e.target.value)} />
             <FieldErr msg={err('PO_BOX')} />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>{t('editContact.fields.website')}</Label>
-            <Input className={inp('WEBSITE')} value={form.WEBSITE ?? ''} onChange={(e) => handleChange('WEBSITE', e.target.value)} />
+            <Label>{t('editContact.fields.website')}<PendingFieldInfo pending={isPending('WEBSITE')} /></Label>
+            <Input className={inp('WEBSITE')} disabled={isPending('WEBSITE')} value={form.WEBSITE ?? ''} onChange={(e) => handleChange('WEBSITE', e.target.value)} />
             <FieldErr msg={err('WEBSITE')} />
           </div>
           <div className="space-y-1" data-field="ROLE">
-            <Label>{t('editContact.fields.role')}</Label>
+            <Label>{t('editContact.fields.role')}<PendingFieldInfo pending={isPending('ROLE')} /></Label>
             <Select
               value={form.ROLE ? String(form.ROLE) : '__none__'}
               onValueChange={(v) => handleChange('ROLE', v === '__none__' ? '' : v)}
-              disabled={!isContactFieldEditable('ROLE')}
+              disabled={!isContactFieldEditable('ROLE') || isPending('ROLE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''} ${!isContactFieldEditable('ROLE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('ROLE') ? 'border-red-400' : ''} ${!isContactFieldEditable('ROLE') || isPending('ROLE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -246,13 +256,13 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
             <FieldErr msg={err('ROLE')} />
           </div>
           <div className="space-y-1" data-field="SOURCE_CODE">
-            <Label>{t('editContact.fields.sourceCode')}</Label>
+            <Label>{t('editContact.fields.sourceCode')}<PendingFieldInfo pending={isPending('SOURCE_CODE')} /></Label>
             <Select
               value={form.SOURCE_CODE ? String(form.SOURCE_CODE) : '__none__'}
               onValueChange={(v) => handleChange('SOURCE_CODE', v === '__none__' ? '' : v)}
-              disabled={!isContactFieldEditable('SOURCE_CODE')}
+              disabled={!isContactFieldEditable('SOURCE_CODE') || isPending('SOURCE_CODE')}
             >
-              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isContactFieldEditable('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
+              <SelectTrigger className={`w-full shadow-none ${err('SOURCE_CODE') ? 'border-red-400' : ''} ${!isContactFieldEditable('SOURCE_CODE') || isPending('SOURCE_CODE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
