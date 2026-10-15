@@ -1,8 +1,9 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { DQ_AMBER_MIN, DQ_GREEN_MIN, DQ_NO_SCORE_COLOR, DQ_TIER_STYLE, type DqTier } from '../constants';
+import { DQ_AMBER_MIN, DQ_GREEN_MIN, DQ_NO_SCORE_COLOR, DQ_TIER_STYLE } from '../constants';
 
+import type { DqTier } from '@/types';
 export function TierBadge({ tier }: { tier: DqTier | null }) {
   const { t } = useTranslation();
   if (!tier) {

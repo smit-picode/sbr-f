@@ -8,30 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ValuePicker } from '@/components/common/ValuePicker';
 import { useGetFilterValuesQuery } from '@/services/filterValuesApi';
 
-export interface ColumnFilterRow {
-  id: string;
-  column: string;
-  operator: string;
-  value: string;
-  // The picked values of an in / not_in row; absent on rows saved before the list operators existed.
-  values?: string[];
-}
-
-export type ColumnFilterType = 'text' | 'number' | 'date';
-
-export interface ColumnFilterOption {
-  value: string;
-  label: string;
-  // Number and date columns get comparison operators and typed inputs; omitted means text.
-  type?: ColumnFilterType;
-  // A column of a few repeating values (status, sector...): with a values source its rows start as "is any of".
-  pick?: boolean;
-  // How a stored value reads in the picker (a code shown as its name); the stored value is still what is filtered on.
-  valueLabel?: (value: string, language: string) => string;
-}
-
-// Operators SBR_QUERY_PKG accepts — snake_case values must match the procedure's whitelist exactly,
-// or it raises ORA-20410. Comparisons apply to number and date columns only.
+import type { ColumnFilterItem, ColumnFilterOption, ColumnFilterRow, ColumnFilterType } from '@/types';
+// Operators SBR_QUERY_PKG accepts, matching its whitelist exactly (else ORA-20410); comparisons are for number and date columns only.
 const TEXT_OPERATORS = [
   'contains', 'not_contains', 'starts_with', 'ends_with',
   'equals', 'is_not', 'is_empty', 'is_not_empty',
@@ -79,12 +57,6 @@ export const NO_VALUE_OPERATORS = new Set(['is_empty', 'is_not_empty']);
 export const isActiveColumnFilterRow = (r: ColumnFilterRow): boolean =>
   !!r.column && (NO_VALUE_OPERATORS.has(r.operator)
     || (LIST_OPERATORS.has(r.operator) ? (r.values?.length ?? 0) > 0 : !!r.value.trim()));
-
-export interface ColumnFilterItem {
-  column: string;
-  operator: string;
-  value: string | string[];
-}
 
 // The active rows as the API's columnFilters entries: a list for in / not_in, the trimmed text otherwise.
 export const columnFilterItems = (rows: ColumnFilterRow[]): ColumnFilterItem[] =>

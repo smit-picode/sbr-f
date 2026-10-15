@@ -10,15 +10,10 @@ import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
 import { parseWorkbookInWorker } from '../utils/parseWorkbookInWorker';
 import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
-import {
-  BULK_CHANGE_MAX_ROWS,
-  BULK_CHANGE_TABLES,
-  BULK_CHANGE_VALIDATION_DEFAULTS,
-  ENTITY_TYPE_BY_TABLE,
-  type BulkChangeTableKey,
-} from '../constants';
+import { BULK_CHANGE_MAX_ROWS, BULK_CHANGE_TABLES, BULK_CHANGE_VALIDATION_DEFAULTS, ENTITY_TYPE_BY_TABLE } from '../constants';
 import type { BulkChangeItemInput, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
+import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 // Best-effort text for a caught value that isn't an Error instance.
 function describeThrownValue(error: unknown): string | null {
   if (error === null || error === undefined) return null;

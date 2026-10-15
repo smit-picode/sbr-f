@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { History, User, Landmark, X, ArrowRight } from 'lucide-react';
 import { formatDate } from '@/utils/format';
 import { useLanguage } from '@/i18n';
-import type { HistoryVersion } from './FieldHistoryModal';
 
+import type { HistoryVersion } from '@/types';
 interface FieldHistoryPopoverProps {
   versions: HistoryVersion[];
   fieldKey: string;

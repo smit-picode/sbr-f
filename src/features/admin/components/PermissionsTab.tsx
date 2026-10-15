@@ -2,9 +2,10 @@
 import { useState, useMemo } from 'react';
 import { ShieldCheck, ChevronRight, ChevronDown, Layers, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { PERMISSION_TREE, permissionLabel, type PermissionNode } from '@/constants/permissionTree';
+import { PERMISSION_TREE, permissionLabel } from '@/constants/permissionTree';
 import { useGetPermissionsListQuery } from '@/features/admin/api/adminApi';
 
+import type { PermissionNode } from '@/types';
 function countLeafPerms(node: PermissionNode): number {
   if (!node.children || node.children.length === 0) return 1;
   return node.children.reduce((sum, child) => sum + countLeafPerms(child), 0);

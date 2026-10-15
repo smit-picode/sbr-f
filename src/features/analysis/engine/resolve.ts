@@ -1,18 +1,6 @@
-import type {
-  Analysis,
-  AnalysisBlock,
-  AnalysisCrossFilter,
-  AnalysisFilter,
-  AnalysisRequest,
-  AnalysisResolvedQuery,
-} from '@/types';
+import type { Analysis, AnalysisBlock, AnalysisCrossFilter, AnalysisFilter, AnalysisRequest, AnalysisResolvedQuery, AnalysisDrillStep } from '@/types';
 import { ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_DRILL_PATHS, ANALYSIS_ENTITIES, ANALYSIS_FRAME_DIMENSION } from '../constants';
 import { frameChrono } from '../utils/frames';
-
-export interface AnalysisDrillStep {
-  field: string;
-  value: string | null;
-}
 
 export function effectiveCompare(block: AnalysisBlock, analysis: Pick<Analysis, 'compareTo'>): string | null {
   if (block.query.compareTo === 'none') return null;

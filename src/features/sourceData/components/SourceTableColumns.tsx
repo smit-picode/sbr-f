@@ -1,6 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
-import type { SourceTableColumn, SourceTableRow } from '@/types';
+import type { SourceTableColumn, SourceTableRow, ColumnFilterOption } from '@/types';
 import { formatDate, nullableText } from '@/utils/format';
 
 function SourceCell({ kind, value }: { kind: SourceTableColumn['KIND']; value: unknown }) {

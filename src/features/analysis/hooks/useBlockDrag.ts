@@ -2,14 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export interface BlockDragState {
-  id: string;
-  over: string | null;
-  after: boolean;
-  x: number;
-  y: number;
-}
-
+import type { BlockDragState } from '@/types';
 const EDGE_PX = 80;
 const SCROLL_STEP_PX = 14;
 

@@ -16,10 +16,7 @@ import { parseWorkbook, WorkbookParseError } from '@/features/bulkChange/utils/p
 import { useBulkTagMutation } from '../api/contactTagsApi';
 import type { BulkTagResult, BulkTagRow } from '@/types';
 
-// NPC-330: tag contacts from a file. One row per (establishment, tag, contact). CONTACT_ID or
-// EMAIL picks the contact; an EMAIL that matches no open contact creates one. The file is
-// checked first (dry run) and then applied all or nothing: if any row has an error, nothing
-// is written.
+// Tag contacts from a file (one row per establishment, tag, contact); checked first, then applied all or nothing.
 
 const ID_COLUMN = 'SBR_ID';
 const COLUMNS = ['TAG_CODE', 'CONTACT_ID', 'EMAIL', 'PHONE', 'CONTACT_NAME'];

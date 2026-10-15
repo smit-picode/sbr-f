@@ -1,16 +1,5 @@
-import type { AnalysisBlock, AnalysisFilter } from '@/types';
+import type { AnalysisBlock, AnalysisFilter, AnalysisTemplate } from '@/types';
 import { countMeasure, createBlock, uid } from '../utils/blocks';
-
-export interface AnalysisTemplate {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  // 'oldest' = the oldest snapshot when the analysis is created (none if no snapshot exists yet)
-  compareTo: 'oldest' | null;
-  filters: AnalysisFilter[];
-  build: () => AnalysisBlock[];
-}
 
 const sum = (field: string) => ({ id: uid('m'), agg: 'sum' as const, field });
 const avg = (field: string) => ({ id: uid('m'), agg: 'avg' as const, field });

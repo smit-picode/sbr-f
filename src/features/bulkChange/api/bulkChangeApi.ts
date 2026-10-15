@@ -16,15 +16,7 @@ import { BULK_VALIDATE_RETRY_DELAYS_MS } from '../constants';
 import { gzipJsonBody } from '../utils/gzipJsonBody';
 import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
 
-// One current record for the export-and-prefill flow
-export type BulkChangeExportRecord = Record<string, string | number | null>;
-
-export interface BulkChangeListFilters {
-  page?: number;
-  limit?: number;
-  entityType?: BulkChangeEntityType;
-}
-
+import type { BulkChangeExportRecord, BulkChangeListFilters } from '@/features/bulkChange/types';
 export const bulkChangeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBulkChangeList: builder.query<ApiResponse<BulkChangeTaskSummary[]>, BulkChangeListFilters>({

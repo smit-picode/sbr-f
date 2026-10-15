@@ -1,26 +1,9 @@
 import { isicSection } from './classify';
 import type { GvaAccounts, GvaMeasure, SurveyGvaApi } from '../types';
 
+import type { GvaView } from '@/features/surveys/types';
 const QUARTERS_PER_YEAR = 4;
 const MEASURES: GvaMeasure[] = ['valueAdded', 'production', 'intermediate'];
-
-export interface GvaView {
-  // Latest year with a complete AES return; null when the establishment never returned one.
-  referenceYear: number | null;
-  establishment: GvaAccounts | null;
-  // National totals for the reference year, only when all four quarters are in V_SVY_TOTAL_ECONOMY.
-  economy: GvaAccounts | null;
-  // Year the economy totals are for: the reference year, else the latest year with all four quarters.
-  economyYear: number | null;
-  shareOfEconomy: Record<GvaMeasure, number | null>;
-  // The establishment's ISIC section with what its sampled units reported that year; null without an ISIC code or any full return.
-  activity: { section: string; units: number; accounts: GvaAccounts } | null;
-  shareOfActivity: Record<GvaMeasure, number | null>;
-  // What the activity's sampled units reported, as a share of the national total.
-  activityShareOfEconomy: Record<GvaMeasure, number | null>;
-  trendYears: number[];
-  trend: Record<GvaMeasure, number[]>;
-}
 
 // Figures come straight from the views: production = AES turnover, and value added = production − intermediate consumption.
 export function buildGvaView(api: SurveyGvaApi): GvaView {

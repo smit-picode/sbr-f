@@ -81,3 +81,24 @@ export interface EnterpriseGroupDetail {
   memberEnterprises: EnterpriseGroupMember[];
   controlStructure: EnterpriseGroupControlStructure;
 }
+
+export interface CreateEnterpriseGroupPayload {
+  NAME_ENU?:              string | null;
+  NAME_ARA?:              string | null;
+  UCI_NAME?:              string | null;
+  UCI_TYPE?:              string | null;
+  UCI_COUNTRY?:           string | null;
+  UCI_IDENTIFIER?:        string | null;
+  PRINCIPAL_ISIC_2DIGIT?: string | null;
+  HOLDING_COMPANY_FLG?:   string | null;
+  STATUS?:                string | null;
+  GROUP_START_DATE?:      string | null;
+  GROUP_HEAD_ENTERPRISE_ID?: number | null;
+  memberEnterpriseIds?:   number[];
+  comment?:               string | null;
+}
+
+export interface UpdateEnterpriseGroupPayload extends CreateEnterpriseGroupPayload {
+  addMemberEnterpriseIds?:    number[];
+  removeMemberEnterpriseIds?: number[];
+}

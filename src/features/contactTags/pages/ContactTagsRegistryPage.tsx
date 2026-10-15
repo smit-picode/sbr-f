@@ -20,9 +20,7 @@ import { useHasPermission } from '@/hooks/usePermission';
 import { useGetContactTagsQuery, useSaveContactTagMutation } from '../api/contactTagsApi';
 import type { ContactTag, SaveContactTagInput } from '@/types';
 
-// NPC-330: the tag registry. A tag is created here before anyone can put it on a contact.
-// The code is permanent; names, the one-per rule and the active flag can change. Retiring a
-// tag (inactive) hides it everywhere but keeps its history.
+// The tag registry: the code is permanent, and retiring a tag hides it everywhere but keeps its history.
 
 const CODE_RE = /^[A-Za-z0-9_]{1,30}$/;
 

@@ -1,6 +1,5 @@
-import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
-// Field labels for the create/edit modals' validation summary. NAMES is the shared
-// "group name in EN or AR" rule that spans both name inputs.
+import type { ColumnFilterOption } from '@/types';
+// Field labels for the modals' validation summary; NAMES is the shared "group name in EN or AR" rule.
 export const ENTERPRISE_GROUP_FIELD_LABELS: Record<string, string> = {
   NAMES: 'Group Name',
   NAME_ENU: 'Group Name (EN)',

@@ -52,3 +52,11 @@ export interface IssuedSecret {
   secret: string;
   hint: string;
 }
+
+export interface SystemAccountForm {
+  name: string;
+  description: string;
+  roleId: string;
+  ttl: string;
+  tags: string[];
+}

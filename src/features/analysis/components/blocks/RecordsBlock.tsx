@@ -5,10 +5,10 @@ import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisRecordsResult } from '@/types';
 import { cn } from '@/lib/utils';
-import { useAnalysisResult } from '../../api/analysisService';
-import { ANALYSIS_FIELDS, ANALYSIS_RECORDS_PAGE_SIZE } from '../../constants';
-import { requestForBlock } from '../../engine/resolve';
-import { fieldLabel, recordValue } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { ANALYSIS_FIELDS, ANALYSIS_RECORDS_PAGE_SIZE } from '@/features/analysis/constants';
+import { requestForBlock } from '@/features/analysis/engine/resolve';
+import { fieldLabel, recordValue } from '@/features/analysis/utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 

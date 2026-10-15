@@ -29,7 +29,7 @@ export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, c
     enableSorting: true,
   },
   {
-    // NPC-330: the contact's permanent identity (ID changes with every version).
+    // The contact's permanent identity (ID changes with every version).
     accessorKey: 'CONTACT_ID',
     header: t('columns.CONTACT_ID'),
     cell: ({ getValue }) => {

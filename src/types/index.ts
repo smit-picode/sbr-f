@@ -18,3 +18,8 @@ export * from './dataQuality.types';
 export * from './sampling.types';
 export * from './filterValue.types';
 export * from './systemAccount.types';
+export * from './home.types';
+export * from './ui.types';
+export * from './changeRequest.types';
+export * from './navigation.types';
+export * from './chart.types';

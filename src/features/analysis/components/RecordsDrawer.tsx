@@ -3,19 +3,12 @@
 import { useMemo, useState } from 'react';
 import { FileSpreadsheet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AnalysisBlock, AnalysisFilter, AnalysisResolvedQuery } from '@/types';
+import type { AnalysisBlock, AnalysisResolvedQuery, RecordsTarget } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ANALYSIS_ENTITIES, ANALYSIS_FRAME_DIMENSION } from '../constants';
 import { entityLabel, frameName } from '../utils/labels';
 import { RecordsBlock } from './blocks/RecordsBlock';
 import { SidePanel } from './SidePanel';
-
-export interface RecordsTarget {
-  block: AnalysisBlock;
-  query: AnalysisResolvedQuery;
-  extra: AnalysisFilter[];
-  label: string;
-}
 
 export function recordsBlockFor(target: RecordsTarget): { block: AnalysisBlock; query: AnalysisResolvedQuery } {
   const entity = ANALYSIS_ENTITIES[target.query.entity];

@@ -7,16 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatRole } from '@/utils/format';
-import type { ContactTag, SystemAccountRole } from '@/types';
+import type { ContactTag, SystemAccountRole, SystemAccountForm } from '@/types';
 import { SYSTEM_ACCOUNT_MAX_TTL_MINUTES, SYSTEM_ACCOUNT_MIN_TTL_MINUTES } from '../constants';
-
-export interface SystemAccountForm {
-  name: string;
-  description: string;
-  roleId: string;
-  ttl: string;
-  tags: string[];
-}
 
 const SOFT_RING = 'focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
 

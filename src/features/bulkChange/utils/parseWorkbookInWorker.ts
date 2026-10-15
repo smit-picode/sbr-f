@@ -1,5 +1,6 @@
-import { parseWorkbook, type ParsedWorkbook } from './parseWorkbook';
+import { parseWorkbook } from './parseWorkbook';
 
+import type { ParsedWorkbook } from '@/features/bulkChange/types';
 // Reading a large workbook freezes the tab for seconds, so it runs in a worker
 export const parseWorkbookInWorker = (
   file: File,

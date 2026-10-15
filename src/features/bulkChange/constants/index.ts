@@ -1,15 +1,6 @@
 import type { BulkChangeEntityType } from '../types';
 
-export type BulkChangeTableKey = 'Establishments' | 'Contacts' | 'Addresses';
-
-export interface BulkChangeTableOption {
-  key: BulkChangeTableKey;
-  label: string;
-  entityType: BulkChangeEntityType;
-  navKey: string;
-  icon: 'Building2' | 'Users' | 'MapPin';
-}
-
+import type { BulkChangeFilterState, BulkChangeTableKey, BulkChangeTableOption } from '@/features/bulkChange/types';
 export const BULK_CHANGE_TABLES: BulkChangeTableOption[] = [
   { key: 'Establishments', label: 'Establishments', entityType: 'ESTABLISHMENT', navKey: 'nav.establishments', icon: 'Building2' },
   { key: 'Contacts', label: 'Contacts', entityType: 'CONTACT', navKey: 'nav.contacts', icon: 'Users' },
@@ -43,13 +34,6 @@ export const BULK_CHANGE_ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 export const BULK_VALIDATE_RETRY_DELAYS_MS: number[] = [5000, 10000];
 
 export const BULK_TRANSIENT_FAILURE_STATUSES: (string | number)[] = ['FETCH_ERROR', 'TIMEOUT_ERROR', 502, 503, 504];
-
-// Rows-per-page default for both bulk-change lists.
-export interface BulkChangeFilterState {
-  page: number;
-  limit: number;
-  entityType?: BulkChangeEntityType;
-}
 
 export const BULK_CHANGE_DEFAULT_FILTERS: BulkChangeFilterState = {
   page: 1,

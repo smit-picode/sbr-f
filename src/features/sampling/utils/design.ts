@@ -72,8 +72,7 @@ function fromV1(v1: DesignV1, ids: (n: SamplingNode) => SamplingNode): SamplingD
   };
 }
 
-// Any stored or loaded design as the current shape (always enterprises), or null when it is not a Sample Builder design.
-// Fresh node ids only for a loaded file: the stored design must keep its ids, or edits by id miss their node.
+// Any stored or loaded design as the current shape (or null); a loaded file gets fresh node ids, a stored design keeps its own.
 export function migrateDesign(raw: unknown, freshIds = false): SamplingDesign | null {
   const d = raw as Omit<Partial<SamplingDesign>, 'version'> & { version?: number };
   if (!d || typeof d !== 'object' || d.filter?.kind !== 'group') return null;

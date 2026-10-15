@@ -1,10 +1,6 @@
-import { NAV_GROUPS, type NavGroup, type NavItem } from '@/constants/navigation';
+import { NAV_GROUPS } from '@/constants/navigation';
 
-export interface NavAccess {
-  isSuperAdmin: boolean;
-  permissionNames: string[];
-}
-
+import type { NavAccess, NavGroup, NavItem } from '@/types';
 export const hasNavPermission = (key: string, { permissionNames }: NavAccess): boolean =>
   permissionNames.some((name) => name?.toLowerCase() === key.toLowerCase());
 

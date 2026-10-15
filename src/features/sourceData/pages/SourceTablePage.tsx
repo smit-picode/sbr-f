@@ -11,13 +11,14 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { NoData } from '@/components/common/NoData';
 import { TableLoader } from '@/components/common/Loader';
 import { DataTable } from '@/components/table/DataTable';
-import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
+import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { cleanParams } from '@/utils/query';
 import { formatNumber } from '@/utils/format';
 import { useGetSourceCatalogQuery, useGetSourceTableColumnsQuery, useGetSourceTableQuery } from '../api/sourceCatalogApi';
 import { getSourceTableColumns, getSourceTableFilterColumns } from '../components/SourceTableColumns';
 import { SOURCE_TABLE_DEFAULT_PAGE_SIZE, isBrowsableSourceTable } from '../constants';
 
+import type { ColumnFilterRow } from '@/types';
 // One regulator source table's rows, read-only: column filters, sorting and paging, no row action.
 export function SourceTablePage({ code, table }: { code: string; table: string }) {
   const { t } = useTranslation();

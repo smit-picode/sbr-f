@@ -6,12 +6,12 @@ import type { AnalysisFlowResult } from '@/types';
 import { cn } from '@/lib/utils';
 import { EChart } from '@/lib/charts';
 import { CHART_COLOR } from '@/lib/charts/theme';
-import { useAnalysisResult } from '../../api/analysisService';
-import { colorFor, sankeyOption, waterfallOption } from '../../charts/options';
-import { ANALYSIS_OTHER_KEY, FLOW_CEASED, FLOW_NEW, FLOW_OUTSIDE } from '../../constants';
-import { ANALYSIS_OTHER_COLOR } from '../../constants/palette';
-import { requestForBlock } from '../../engine/resolve';
-import { formatValue, frameName, valueLabel } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { colorFor, sankeyOption, waterfallOption } from '@/features/analysis/charts/options';
+import { ANALYSIS_OTHER_KEY, FLOW_CEASED, FLOW_NEW, FLOW_OUTSIDE } from '@/features/analysis/constants';
+import { ANALYSIS_OTHER_COLOR } from '@/features/analysis/constants/palette';
+import { requestForBlock } from '@/features/analysis/engine/resolve';
+import { formatValue, frameName, valueLabel } from '@/features/analysis/utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 

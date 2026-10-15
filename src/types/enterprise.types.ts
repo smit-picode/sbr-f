@@ -117,3 +117,13 @@ export interface EnterpriseDetail {
   changeHistory: EnterpriseChangeHistoryEntry[];
   profilingChanges: EnterpriseProfilingChange[];
 }
+
+export interface UpdateEnterprisePayload {
+  NAME_ENU?: string;
+  SECTOR_ID?: string;
+  STATUS?: string;
+  MAIN_ESTABLISHMENT_SBR_ID?: number;
+  addEstablishmentSbrIds?: number[];
+  removeEstablishmentSbrIds?: number[];
+  comment?: string;
+}

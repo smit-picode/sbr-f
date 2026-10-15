@@ -11,18 +11,14 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  useGetChangeRequestByIdQuery,
-  useApproveChangeRequestMutation,
-  useRejectChangeRequestMutation,
-  type ChangeRequestField,
-} from '../api/changeRequestsApi';
+import { useGetChangeRequestByIdQuery, useApproveChangeRequestMutation, useRejectChangeRequestMutation } from '../api/changeRequestsApi';
 import { usePermission } from '@/hooks';
 import { formatDate, formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { ROUTES } from '@/constants/routes';
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 
+import type { ChangeRequestField } from '@/types';
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
@@ -76,8 +72,7 @@ const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
       section: 'Metadata',
       fields: [
         { key: 'PO_BOX', label: 'PO Box' },
-        // Contacts have no PRIORITY since NPC-330 release 3. Kept here so a request made before
-        // that (still pending, or in history) still shows the change it asked for.
+        // Contacts no longer have a PRIORITY; kept so an older request still shows the change it asked for.
         { key: 'PRIORITY', label: 'Priority' },
         { key: 'VALID_FROM', label: 'Valid From' },
         { key: 'VALID_TO', label: 'Valid To' },

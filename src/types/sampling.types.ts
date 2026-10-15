@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 // Sample Builder: the /sampling endpoints (SBR_SAMPLING_API) and the design the page keeps.
 
 export type SamplingUnit = 'enterprise' | 'establishment';
@@ -236,4 +238,79 @@ export interface SamplePublishAccount {
   clientId: string;
   isActive: boolean;
   canRead: boolean;
+}
+
+export interface AllocationStratum {
+  key: string;
+  N: number;
+  mean: number | null;
+  sd: number | null;
+}
+
+export interface AllocationOptions {
+  method: SamplingAllocationMethod;
+  sampleSize: number;
+  minPerStratum: number;
+  reservePct: number;
+  overrides: Record<string, SamplingStratumOverride>;
+}
+
+export type AllocationWarning =
+  | 'fixedExceedSize'      // take-all and hand-set strata alone exceed the sample size
+  | 'minimumsExceedSize'   // the per-stratum minimums alone exceed what is left
+  | 'noVariance'           // Neyman had no spread to work with and fell back to proportional
+  | 'sizeAboveFrame';
+
+export interface StratumAllocation {
+  key: string;
+  N: number;
+  n: number;
+  reserve: number;
+  // Why n is what it is, when it is not the method's own share.
+  fixed: 'takeAll' | 'manual' | null;
+  bound: 'max' | 'min' | null;
+  sdUsed: number | null;
+  weight: number | null;
+}
+
+export interface Allocation {
+  strata: StratumAllocation[];
+  requested: number;
+  total: number;
+  reserveTotal: number;
+  population: number;
+  warnings: AllocationWarning[];
+}
+
+export interface Precision {
+  // Estimated total of the auxiliary field and its standard error / CV under the allocation.
+  total: number | null;
+  se: number | null;
+  cv: number | null;
+  // Strata with units but no sample: the total cannot be estimated without bias.
+  uncovered: number;
+}
+
+export interface SampleExportInput {
+  t: TFunction;
+  design: SamplingDesign;
+  fields: SamplingField[];
+  estFields: SamplingField[];
+  frameName: string;
+  strata: SamplingStratum[];
+  // Per group index: the random group's allocation and precision (census and manual groups have none).
+  allocations: Record<number, Allocation>;
+  precisions: Record<number, Precision>;
+  draw: SamplingTableResult;
+  establishments: SamplingTableResult | null;
+  contacts: SamplingRow[] | null;
+}
+
+export interface SamplingPlan {
+  allocations: Record<number, Allocation>;
+  precisions: Record<number, Precision>;
+  solved: Record<number, number | null>;
+  entries: SamplingAllocationEntry[];
+  main: number;
+  reserve: number;
 }

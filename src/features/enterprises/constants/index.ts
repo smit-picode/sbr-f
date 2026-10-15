@@ -1,4 +1,4 @@
-import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
+import type { ColumnFilterOption } from '@/types';
 // Field labels for the edit modal's validation summary.
 export const ENTERPRISE_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Enterprise Name',
@@ -14,8 +14,7 @@ export const ENTERPRISE_DEFAULT_FILTERS = {
   sectorId: '',
 } as const;
 
-// Columns offered in the dynamic "Column filters" builder. `value` must match a key in
-// the backend ENTERPRISE_FILTER_COLUMNS allow-list (enterprises.controller).
+// Columns offered in the Column filters builder; `value` must match the backend ENTERPRISE_FILTER_COLUMNS allow-list.
 export const ENTERPRISE_FILTER_COLUMNS: ColumnFilterOption[] = [
   { value: 'ENTERPRISE_ID', label: 'Enterprise ID', type: 'number' },
   { value: 'NAME_ENU', label: 'Name (EN)' },

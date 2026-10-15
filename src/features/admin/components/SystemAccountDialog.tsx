@@ -12,12 +12,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { formatDate, formatDateTime } from '@/utils/format';
 import { toast } from '@/utils/toast';
-import type { ContactTag, IssuedSecret, SystemAccount, SystemAccountCredential, SystemAccountInput, SystemAccountRole } from '@/types';
+import type { ContactTag, IssuedSecret, SystemAccount, SystemAccountCredential, SystemAccountInput, SystemAccountRole, SystemAccountForm } from '@/types';
 import {
   useGetSystemAccountQuery, useIssueSystemAccountSecretMutation, useRevokeSystemAccountSecretMutation, useUpdateSystemAccountMutation,
 } from '../api/systemAccountsApi';
 import { SYSTEM_ACCOUNT_MAX_LIVE_SECRETS, SYSTEM_ACCOUNT_SECRET_DEFAULT_MONTHS, SYSTEM_ACCOUNT_STATUS_VALUES } from '../constants';
-import { SystemAccountFields, SystemAccountForm, validateSystemAccountForm } from './SystemAccountFields';
+import { SystemAccountFields, validateSystemAccountForm } from './SystemAccountFields';
 
 const ACCENT = { background: 'linear-gradient(135deg, #A29374, #87795D)', border: 'none' };
 

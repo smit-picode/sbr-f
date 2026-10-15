@@ -2,8 +2,8 @@
 
 import { AlertCircle, Check, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AutosaveStatus } from '../hooks/useAnalysisAutosave';
 
+import type { AutosaveStatus } from '@/types';
 export function SaveStatus({ status }: { status: AutosaveStatus }) {
   const { t } = useTranslation();
   if (status === 'saving' || status === 'pending') {

@@ -11,12 +11,12 @@ import { useRouter } from '@/hooks/useAppRouter';
 import { useAppSelector, usePersistedState } from '@/hooks';
 import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
 import { getFirstAccessibleHref, hasAnyNavPermission, hasNavPermission } from '@/utils/navAccess';
-import type { UserPermission } from '@/types';
+import type { UserPermission, HomeScreen } from '@/types';
 import { ExecutiveHomePage } from './ExecutiveHomePage';
 import { ReviewerHomePage } from './ReviewerHomePage';
 import { StewardHomePage } from './StewardHomePage';
 import { HomeScreenSwitcher } from '../components/HomeScreenSwitcher';
-import { HOME_DASHBOARD_PERMISSIONS, HOME_SCREENS, type HomeScreen } from '../constants';
+import { HOME_DASHBOARD_PERMISSIONS, HOME_SCREENS } from '../constants';
 
 const toName = (p: UserPermission | string): string => (typeof p === 'string' ? p : p.permissionName);
 

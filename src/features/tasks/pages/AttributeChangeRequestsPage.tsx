@@ -12,12 +12,13 @@ import { DataTable } from '@/components/table/DataTable';
 import { NoData } from '@/components/common/NoData';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetChangeRequestsQuery, type ChangeRequestListItem, type ChangeRequestFilters } from '../api/changeRequestsApi';
+import { useGetChangeRequestsQuery } from '../api/changeRequestsApi';
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 import { cleanParams } from '@/utils/query';
 import { formatDate } from '@/utils/format';
 import { usePermission, usePersistedState } from '@/hooks';
 
+import type { ChangeRequestListItem, ChangeRequestFilters } from '@/types';
 const TABLE_VALUES = ['SBR_ESTABLISHMENTS', 'SBR_ENTERPRISES', 'SBR_ENTERPRISE_GROUPS', 'SBR_CONTACTS', 'SBR_ADDRESSES'];
 const TABLE_OPTIONS = [
   { value: '__all__', label: 'All Tables' },
@@ -39,8 +40,7 @@ export function AttributeChangeRequestsPage() {
   const router = useRouter();
   const { canView, canApprove } = usePermission('approvals');
   const canAccess = canView || canApprove;
-  // Restored from sessionStorage on mount so filters survive the unmount/remount that happens
-  // when a row navigates to its detail page and the user comes back.
+  // Restored from sessionStorage on mount so filters survive the trip to a detail page and back.
   const searchParams = useSearchParams();
   const [filters, setFilters] = usePersistedState<ChangeRequestFilters>('sbr:attributeChangeRequests:filters', DEFAULT_FILTERS, () => {
     // A link from the reviewer home opens the list on one table, over whatever was saved.

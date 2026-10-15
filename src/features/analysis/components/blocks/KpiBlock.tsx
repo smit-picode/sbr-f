@@ -5,10 +5,10 @@ import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisAggregateResult } from '@/types';
 import { cn } from '@/lib/utils';
-import { useAnalysisResult } from '../../api/analysisService';
-import { ANALYSIS_DISCLOSURE } from '../../constants';
-import { requestForBlock, trendRequestFor } from '../../engine/resolve';
-import { formatDelta, formatValue, frameName, measureLabel } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { ANALYSIS_DISCLOSURE } from '@/features/analysis/constants';
+import { requestForBlock, trendRequestFor } from '@/features/analysis/engine/resolve';
+import { formatDelta, formatValue, frameName, measureLabel } from '@/features/analysis/utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 

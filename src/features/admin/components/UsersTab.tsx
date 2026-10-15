@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InfoTooltip } from '@/components/common/InfoTooltip';
-import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { FilterChips } from '@/components/common/FilterChips';
 import { DataTable } from '@/components/table/DataTable';
 import { Eye, EyeOff, RefreshCw, Search, Shield, Calendar, IdCard, Check } from 'lucide-react';
 import {
@@ -24,7 +24,7 @@ import {
   ALL_ROLES_VALUE, ALL_STATUS_VALUE, USER_STATUS_FILTER_OPTIONS,
   NO_SCOPE_VALUE, REGULATOR_SCOPE_OPTIONS, GLOBAL_SCOPE_VALUE,
 } from '../constants';
-import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters } from '@/types';
+import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters, FilterChip } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';

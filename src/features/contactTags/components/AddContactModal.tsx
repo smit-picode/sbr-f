@@ -14,8 +14,7 @@ import { tagErrorMessage, tagLabel } from './TagControls';
 import { useCreateContactMutation } from '@/features/contacts/api/contactsApi';
 import type { CreateContactInput } from '@/types';
 
-// NPC-330: a contact typed in on an establishment's page. It is created immediately (no approval)
-// as a MANUAL contact, and the register gives it a permanent CONTACT_ID the caller can tag at once.
+// A contact typed in on an establishment's page: created at once as MANUAL, with a permanent CONTACT_ID the caller can tag.
 
 type Field = Exclude<keyof CreateContactInput, 'sbrId' | 'comment'>;
 

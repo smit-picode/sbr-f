@@ -2,9 +2,10 @@
 
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2 } from 'lucide-react';
-import { BULK_CHANGE_TABLES, type BulkChangeTableKey } from '../constants';
+import { BULK_CHANGE_TABLES } from '../constants';
 import type { BulkChangeSubmitFailure, BulkChangeValidationResult } from '../types';
 
+import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 interface BulkChangeConfirmStepProps {
   selectedTable: BulkChangeTableKey;
   fileName: string | undefined;

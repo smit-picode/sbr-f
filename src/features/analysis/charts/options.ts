@@ -1,12 +1,10 @@
-import type { EChartOption } from '@/lib/charts';
+import type { EChartOption } from '@/types';
 import { CHART_COLOR, CHART_GRAY, fmtNum, hexA, vGrad } from '@/lib/charts/theme';
 import { ANALYSIS_OTHER_KEY } from '../constants';
 import { ANALYSIS_OTHER_COLOR, ANALYSIS_PALETTE } from '../constants/palette';
 import { formatValue } from '../utils/labels';
 
-export interface ChartCategory { key: string | null; label: string }
-export interface ChartSeries { key: string | null; name: string; data: (number | null)[]; color?: string }
-
+import type { ChartCategory, ChartSeries } from '@/types';
 const G = CHART_GRAY;
 const TOOLTIP_BASE = { confine: true };
 

@@ -25,7 +25,7 @@ export const contactsApi = baseApi.injectEndpoints({
       query: ({ id, data }) => ({ url: `/contacts/${id}`, method: 'PUT', body: data }),
       invalidatesTags: ['Contacts', 'AuditLog', 'ChangeRequests'],
     }),
-    // NPC-330: created immediately (no approval), so every contact view refreshes at once.
+    // Created immediately (no approval), so every contact view refreshes at once.
     createContact: builder.mutation<ApiResponse<CreateContactResult>, CreateContactInput>({
       query: (body) => ({ url: '/contacts', method: 'POST', body }),
       invalidatesTags: ['Contacts', 'ContactTags', 'AuditLog'],

@@ -1,10 +1,4 @@
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
-
-export interface ToastPayload {
-  id: string;
-  message: string;
-  type: ToastType;
-}
+import type { ToastPayload, ToastType } from '@/types';
 
 function emit(message: string, type: ToastType) {
   if (typeof window === 'undefined') return;

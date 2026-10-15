@@ -142,3 +142,21 @@ export interface SurveyQuestion {
   label: string;
   unit: AnswerUnit;
 }
+
+export interface GvaView {
+  // Latest year with a complete AES return; null when the establishment never returned one.
+  referenceYear: number | null;
+  establishment: GvaAccounts | null;
+  // National totals for the reference year, only when all four quarters are in V_SVY_TOTAL_ECONOMY.
+  economy: GvaAccounts | null;
+  // Year the economy totals are for: the reference year, else the latest year with all four quarters.
+  economyYear: number | null;
+  shareOfEconomy: Record<GvaMeasure, number | null>;
+  // The establishment's ISIC section with what its sampled units reported that year; null without an ISIC code or any full return.
+  activity: { section: string; units: number; accounts: GvaAccounts } | null;
+  shareOfActivity: Record<GvaMeasure, number | null>;
+  // What the activity's sampled units reported, as a share of the national total.
+  activityShareOfEconomy: Record<GvaMeasure, number | null>;
+  trendYears: number[];
+  trend: Record<GvaMeasure, number[]>;
+}

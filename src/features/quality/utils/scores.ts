@@ -1,5 +1,5 @@
-import type { DqRule } from '@/types';
-import { DQ_AMBER_MIN, DQ_GREEN_MIN, type DqTier } from '../constants';
+import type { DqRule, DqColumnScore, DqTier } from '@/types';
+import { DQ_AMBER_MIN, DQ_GREEN_MIN } from '../constants';
 
 export function tierFor(pct: number | null | undefined): DqTier | null {
   if (pct == null) return null;
@@ -15,13 +15,6 @@ export function asTier(value: string | null | undefined): DqTier | null {
 // A rule can check several columns ("MOCI_CR_NUM, MOCI_CP_NUM"); it counts towards each of them.
 export function ruleColumns(rule: DqRule): string[] {
   return (rule.SBR_COLUMN ?? '').split(',').map((c) => c.trim()).filter(Boolean);
-}
-
-export interface DqColumnScore {
-  column: string;
-  fieldName: string | null;
-  rules: number;
-  pct: number | null;
 }
 
 // Same weighting as V_DQ_TABLE_SCORE: SUM(PASS_PCT x WEIGHT_VALUE) / SUM(WEIGHT_VALUE) over scored rules, worst first.

@@ -3,8 +3,8 @@
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import type { AnalysisRenderMode } from './types';
 
+import type { AnalysisRenderMode } from '@/types';
 // **bold** and *italic* only — rendered as React nodes, never as HTML.
 function inline(text: string): ReactNode[] {
   const out: ReactNode[] = [];

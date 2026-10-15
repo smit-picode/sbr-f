@@ -1,21 +1,8 @@
 'use client';
 
-import type { Analysis } from '@/types';
+import type { AnalysisAccess } from '@/types';
 import { useAppSelector } from '@/hooks';
 import { ANALYSIS_PERMISSIONS } from '../constants';
-
-export interface AnalysisAccess {
-  email: string;
-  isSuperAdmin: boolean;
-  canViewSection: boolean;
-  canCreate: boolean;
-  canExportUnsuppressed: boolean;
-  canEditAnalysis: (a: Analysis) => boolean;
-  // Delete and re-share are the owner's (or a super admin's), as SBR_ANALYSIS_API enforces.
-  canManage: (a: Analysis) => boolean;
-  isOwner: (a: Analysis) => boolean;
-  isSharedWithMe: (a: Analysis) => boolean;
-}
 
 // Per-analysis access comes from the server (`access`); the user's module permissions gate editing on top.
 export function useAnalysisAccess(): AnalysisAccess {

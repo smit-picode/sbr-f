@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAuditLogColumns, prettyTableName } from '../components/AuditLogColumns';
-import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
+import { FilterChips } from '@/components/common/FilterChips';
+import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { useGetAuditLogListQuery, useGetAuditLogUsersQuery, useGetAuditLogApproversQuery } from '../api/auditLogApi';
-import type { AuditLogActorOption, AuditLogFilters } from '@/types';
+import type { AuditLogActorOption, AuditLogFilters, FilterChip, ColumnFilterRow } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw, UserRound } from 'lucide-react';
@@ -35,8 +35,7 @@ function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
 }
 
-// RTK Query sets status: 'FETCH_ERROR' when a request is aborted/cancelled (e.g. superseded by a
-// newer query while the user is still typing). These are not real errors — suppress the toast.
+// An aborted or superseded request reports FETCH_ERROR; that is not a real error, so the toast is suppressed.
 function isFetchError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 'FETCH_ERROR';
 }
@@ -44,8 +43,7 @@ function isFetchError(error: unknown): boolean {
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
-  // Debounce column-filter changes so the API is only called 500 ms after the user stops typing,
-  // preventing a request (and cancelled-request error toast) on every keystroke.
+  // Debounce column-filter changes so the API is called 500 ms after typing stops, not on every keystroke.
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
   const [recordIdInput, setRecordIdInput] = useState<string>('');
   const debouncedRecordId = useDebounce(recordIdInput, 500);

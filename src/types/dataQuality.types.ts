@@ -109,3 +109,12 @@ export interface NpcCorrectionsParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export type DqTier = 'Green' | 'Amber' | 'Red';
+
+export interface DqColumnScore {
+  column: string;
+  fieldName: string | null;
+  rules: number;
+  pct: number | null;
+}

@@ -161,3 +161,36 @@ export interface BulkChangeTemplate {
   idColumn: string;
   columns: BulkChangeTemplateColumn[];
 }
+
+// One current record for the export-and-prefill flow
+export type BulkChangeExportRecord = Record<string, string | number | null>;
+
+export interface BulkChangeListFilters {
+  page?: number;
+  limit?: number;
+  entityType?: BulkChangeEntityType;
+}
+
+export type BulkChangeTableKey = 'Establishments' | 'Contacts' | 'Addresses';
+
+export interface BulkChangeTableOption {
+  key: BulkChangeTableKey;
+  label: string;
+  entityType: BulkChangeEntityType;
+  navKey: string;
+  icon: 'Building2' | 'Users' | 'MapPin';
+}
+
+// Rows-per-page default for both bulk-change lists.
+export interface BulkChangeFilterState {
+  page: number;
+  limit: number;
+  entityType?: BulkChangeEntityType;
+}
+
+export interface ParsedWorkbook {
+  headers: string[];
+  items: BulkChangeItemInput[];
+  unknownHeaders: string[];
+  missingIdColumn: boolean;
+}

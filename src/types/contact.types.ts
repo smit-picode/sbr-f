@@ -14,9 +14,9 @@ export interface SbrContact {
   VALID_TO: string | null;
   HAS_PENDING_REQUEST?: boolean;
   PENDING_FIELDS?: Record<string, number>;
-  // NPC-330: the contact's stable identity, shared by all its versions (ID changes on every edit).
+  // The contact's stable identity, shared by all its versions (ID changes on every edit).
   CONTACT_ID?: number | null;
-  // NPC-330: the contact's open tags, comma-separated (display only).
+  // The contact's open tags, comma-separated (display only).
   TAGS?: string | null;
 }
 
@@ -27,13 +27,13 @@ export interface ContactFilters {
   role?: string;
   sourceCode?: string;
   search?: string;
-  // NPC-330: only contacts carrying this tag
+  // Only contacts carrying this tag
   tagCode?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
 
-// NPC-330: a contact typed in on an establishment's page, created immediately (no approval).
+// A contact typed in on an establishment's page, created immediately (no approval).
 export interface CreateContactInput {
   sbrId: number;
   CONTACT_NAME?: string;

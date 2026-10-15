@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AnalysisBlockType, AnalysisEntity } from '@/types';
+import type { AnalysisBlockType, AnalysisEntity, AnalysisBlockCategory } from '@/types';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ANALYSIS_BLOCK_TYPES, ANALYSIS_ENTITIES, ANALYSIS_ENTITY_ORDER, type AnalysisBlockCategory } from '../constants';
+import { ANALYSIS_BLOCK_TYPES, ANALYSIS_ENTITIES, ANALYSIS_ENTITY_ORDER } from '../constants';
 import { blockCategoryLabel, blockTypeDescription, blockTypeLabel, entityLabel } from '../utils/labels';
 import { supportsType } from '../utils/blocks';
 import { AnalysisIcon } from './AnalysisIcon';

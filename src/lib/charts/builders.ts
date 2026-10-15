@@ -1,8 +1,8 @@
 import * as echarts from 'echarts';
-import type { EChartOption, EChartOptionInput } from './EChart';
 import { CHART_COLOR, CHART_GRAY as G, CHART_PALETTE, fmtNum, hexA, pct, sharesTo100, vGrad } from './theme';
 import { withBasePath } from '@/utils/basePath';
 
+import type { BubbleGridOptions, ColumnsOptions, DonutOptions, GaugeOptions, HBarsSingleOptions, HBarsStackedOptions, ParetoOptions, QatarMapOptions, SparkOptions, TargetColumnsOptions, TrendOptions, EChartOption, EChartOptionInput } from '@/types';
 const C = CHART_COLOR;
 
 const LEGEND_ROW_HEIGHT = 24;
@@ -20,24 +20,6 @@ function legendRows(names: string[], width: number): number {
     }
   }
   return rows;
-}
-
-// ---------- trend ----------
-export interface TrendSeries {
-  name: string;
-  data: (number | null)[];
-  color?: string;
-  area?: boolean;
-  dashed?: boolean;
-  endLabel?: boolean;
-}
-export interface TrendOptions {
-  categories: string[];
-  series: TrendSeries[];
-  yMin?: number;
-  yMax?: number;
-  unit?: string;
-  format?: (v: number) => string;
 }
 
 export function trend(o: TrendOptions): EChartOptionInput {
@@ -98,15 +80,6 @@ export function trend(o: TrendOptions): EChartOptionInput {
   }) as EChartOptionInput & { optionKey?: string };
   build.optionKey = JSON.stringify([o.categories, o.series, o.yMin, o.yMax, o.unit]);
   return build;
-}
-
-// ---------- donut ----------
-export interface DonutItem { name: string; value: number; color?: string; }
-export interface DonutOptions {
-  items: DonutItem[];
-  totalLabel?: string;
-  legendWidth?: number;
-  compact?: boolean;
 }
 
 export function donut(o: DonutOptions): EChartOptionInput {
@@ -216,18 +189,6 @@ export function donut(o: DonutOptions): EChartOptionInput {
   return build;
 }
 
-// ---------- columns (vertical bars) ----------
-export interface ColumnsSeries { name: string; data: number[]; color?: string; }
-export interface ColumnsOptions {
-  categories: string[];
-  series: ColumnsSeries[];
-  gradient?: boolean;
-  labels?: boolean;
-  right?: number;
-  xFontSize?: number;
-  greyIndex?: number;
-}
-
 export function columns(o: ColumnsOptions): EChartOption {
   const n = o.series.length;
   const series = o.series.map((s, si) => {
@@ -256,16 +217,6 @@ export function columns(o: ColumnsOptions): EChartOption {
   };
 }
 
-// ---------- spark (compact trend line; hollow points mark values that are not reported) ----------
-export interface SparkOptions {
-  data: number[];
-  categories: string[];
-  color?: string;
-  unit?: string;
-  format?: (v: number) => string;
-  solid?: boolean[];
-}
-
 export function spark(o: SparkOptions): EChartOption {
   const col = o.color || C.adaam;
   const last = o.data.length - 1;
@@ -289,18 +240,6 @@ export function spark(o: SparkOptions): EChartOption {
       lineStyle: { width: 2, color: col }, areaStyle: { color: vGrad(col, 0.3, 0) }, itemStyle: { color: col },
     }],
   };
-}
-
-// targetColumns: stacked columns with a target line, y max and unit.
-export interface TargetColumnsOptions {
-  categories: string[];
-  series: ColumnsSeries[];
-  stacked?: boolean;
-  gradient?: boolean;
-  labels?: boolean;
-  yMax?: number;
-  unit?: string;
-  refLines?: { value: number; label: string; color?: string }[];
 }
 
 export function targetColumns(o: TargetColumnsOptions): EChartOption {
@@ -347,16 +286,6 @@ export function targetColumns(o: TargetColumnsOptions): EChartOption {
   };
 }
 
-// ---------- gauge (ring 0..max) ----------
-export interface GaugeOptions {
-  value: number;
-  max?: number;
-  color?: string;
-  width?: number;
-  valueSize?: number;
-  format?: (v: number) => string;
-}
-
 export function gauge(o: GaugeOptions): EChartOption {
   const color = o.color || C.adaam;
   const width = o.width || 12;
@@ -389,22 +318,6 @@ export function gauge(o: GaugeOptions): EChartOption {
 // Diameter for a bubble of a given base; exported so a legend drawn outside the chart uses the same maths.
 export function bubbleSizeFor(base: number, max: number, maxBubble = 34): number {
   return 8 + Math.sqrt((base || 0) / (max || 1)) * maxBubble;
-}
-
-export interface BubbleAxisItem { key: string; label: string; sub?: string; }
-export interface BubbleCell { row: string; col: string; size: number; value: number; label?: string; tip?: string; }
-export interface BubbleGridOptions {
-  rows: BubbleAxisItem[];
-  cols: BubbleAxisItem[];
-  cells: BubbleCell[];
-  midpoint?: number;
-  min?: number;
-  max?: number;
-  lowColor?: string;
-  midColor?: string;
-  highColor?: string;
-  labelWidth?: number;
-  maxBubble?: number;
 }
 
 export function bubbleGrid(o: BubbleGridOptions): EChartOption {
@@ -462,19 +375,6 @@ export function bubbleGrid(o: BubbleGridOptions): EChartOption {
   };
 }
 
-// ---------- hbars (horizontal bars) ----------
-export interface HBarItem { name: string; value: number; color?: string; sub?: string; }
-export interface HBarsSingleOptions {
-  items: HBarItem[];
-  unit?: string;
-  max?: number;
-  barWidth?: number;
-  labelWidth?: number;
-  share?: boolean;
-  refLines?: { value: number; label: string; color?: string }[];
-  axis?: boolean;
-}
-
 export function hbars(o: HBarsSingleOptions): EChartOption {
   const cats = o.items.map((i) => i.name);
   const total = o.items.reduce((s, i) => s + (i.value || 0), 0);
@@ -521,13 +421,6 @@ export function hbars(o: HBarsSingleOptions): EChartOption {
   };
 }
 
-export interface HBarsStackedOptions {
-  categories: string[];
-  series: { name: string; data: number[]; color?: string }[];
-  barWidth?: number;
-  labelWidth?: number;
-}
-
 export function hbarsStacked(o: HBarsStackedOptions): EChartOptionInput {
   const series = o.series.map((s, si, arr) => ({
     name: s.name,
@@ -551,16 +444,6 @@ export function hbarsStacked(o: HBarsStackedOptions): EChartOptionInput {
   })) as EChartOptionInput & { optionKey?: string };
   build.optionKey = JSON.stringify([o.categories, o.series, o.barWidth, o.labelWidth]);
   return build;
-}
-
-// ---------- pareto ----------
-export interface ParetoItem { name: string; value: number; color?: string; }
-export interface ParetoOptions {
-  items: ParetoItem[];
-  valueLabel?: string;
-  cumLabel?: string;
-  rotate?: number;
-  labelWidth?: number;
 }
 
 export function pareto(o: ParetoOptions): EChartOption {
@@ -603,13 +486,6 @@ export function pareto(o: ParetoOptions): EChartOption {
 }
 
 let qatarGeoRegistered = false;
-export interface QatarMapOptions {
-  byMunicipality: Record<string, number>;
-  unitLabel?: string;
-  unitLabelOne?: string;
-  color?: string;
-  nameMap?: Record<string, string>;
-}
 
 // Registers the 'qatar' map once the GeoJSON
 export async function registerQatarMap(): Promise<void> {

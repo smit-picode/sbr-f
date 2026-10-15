@@ -1,0 +1,69 @@
+export interface ChangeRequestListItem {
+  ID: number;
+  REQUEST_CODE: string;
+  TABLE_NAME: string;
+  ROW_ID: number | null;
+  ENTITY: string | null;
+  CHANGE_COUNT: number;
+  REQUESTED_BY: string | null;
+  CREATED_AT: string;
+  STATUS: string;
+}
+
+export interface ChangeRequestField {
+  field: string;
+  old: unknown;
+  new: unknown;
+}
+
+export interface ChangeRequestMember {
+  id: number;
+  name: string | null;
+}
+
+export interface ChangeRequestRelatedEnterprise {
+  ENTERPRISE_ID: number;
+  NAME_ENU: string | null;
+  ESTABLISHMENT_COUNT: number;
+}
+
+export interface ChangeRequestRelatedMember {
+  SBR_ID: number;
+  NAME_ENU: string | null;
+  MOCI_CR_NUM: string | null;
+  MAIN_BRANCH_FLG: string | null;
+}
+
+export interface ChangeRequestRelated {
+  enterprise?: ChangeRequestRelatedEnterprise | null;
+  contactCount?: number;
+  addressCount?: number;
+  members?: ChangeRequestRelatedMember[];
+}
+
+export interface ChangeRequestDetail {
+  ID: number;
+  REQUEST_CODE: string;
+  TABLE_NAME: string;
+  ROW_ID: number | null;
+  ENTITY: string | null;
+  STATUS: string;
+  CHANGE_REASON: string | null;
+  APPROVAL_REASON: string | null;
+  REQUESTED_BY: string | null;
+  APPROVED_BY: string | null;
+  CREATED_AT: string;
+  APPROVAL_DATE: string | null;
+  fields: ChangeRequestField[];
+  addMembers: ChangeRequestMember[];
+  removeMembers: ChangeRequestMember[];
+  record: Record<string, unknown> | null;
+  related: ChangeRequestRelated | null;
+}
+
+export interface ChangeRequestFilters {
+  page?: number;
+  limit?: number;
+  tableName?: string;
+  status?: string;
+}

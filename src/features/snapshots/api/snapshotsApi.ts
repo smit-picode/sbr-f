@@ -1,13 +1,5 @@
 import { API_BASE_URL, baseApi } from '@/services/api';
-import type {
-  ApiResponse,
-  CreateSnapshotBody,
-  SnapshotListParams,
-  SnapshotLiveCounts,
-  SnapshotRow,
-  SnapshotSummary,
-  SnapshotTableParams,
-} from '@/types';
+import type { ApiResponse, CreateSnapshotBody, SnapshotListParams, SnapshotLiveCounts, SnapshotRow, SnapshotSummary, SnapshotTableParams, SnapshotExportRequest } from '@/types';
 
 export const snapshotsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -38,12 +30,6 @@ export const {
   useLazyGetSnapshotTableQuery,
   useCreateSnapshotMutation,
 } = snapshotsApi;
-
-export interface SnapshotExportRequest {
-  path: string;
-  params?: Record<string, string | undefined>;
-  fileName: string;
-}
 
 // Exports are binary streams of up to hundreds of MB, so they bypass RTK Query's cache; progress is bytes received.
 export async function downloadSnapshotExport(

@@ -1,13 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Analysis } from '@/types';
+import type { Analysis, AutosaveStatus } from '@/types';
 import { useAppDispatch } from '@/hooks';
 import { toDefinition, useUpdateAnalysisMutation } from '../api/analysisApi';
 import { ANALYSIS_AUTOSAVE_MS } from '../constants';
 import { markAnalysisSaved } from '../store/analysesSlice';
-
-export type AutosaveStatus = 'saved' | 'pending' | 'saving' | 'error' | 'conflict';
 
 const snapshotOf = (a: Analysis) => JSON.stringify({ name: a.name, description: a.description, definition: toDefinition(a) });
 

@@ -1,5 +1,4 @@
-// NPC-330 contact tags. A tag is a label a user puts on one contact of an establishment
-// (QES_PRIMARY, AES_2025_RESPONDENT, ...); the register attaches no meaning to it.
+// Contact tags: a label a user puts on one contact of an establishment, with no meaning attached by the register.
 
 export interface ContactTag {
   ID: number;
@@ -87,8 +86,7 @@ export interface BulkTagResultRow {
   TAG_CODE: string;
   CONTACT_ID: number | null;
   EMAIL: string | null;
-  // Dry run: TAG | CREATE_AND_TAG | ALREADY | ERROR.
-  // Applied: TAGGED | MOVED | ALREADY | CREATED_TAGGED | CREATED_MOVED | CREATED_ALREADY.
+  // Dry run: TAG | CREATE_AND_TAG | ALREADY | ERROR; applied: TAGGED | MOVED | ALREADY | CREATED_TAGGED | CREATED_MOVED | CREATED_ALREADY.
   action: string;
   message: string | null;
 }
@@ -99,8 +97,7 @@ export interface BulkTagResult {
   rows: BulkTagResultRow[];
 }
 
-// One tag version, as GET /establishments/:sbrId/contact-tags/history returns it (newest first).
-// An open row (VALID_TO null) is a tag currently on; a closed one was removed or moved.
+// One tag version from the history endpoint, newest first; an open row (VALID_TO null) is a tag currently on.
 export interface ContactTagHistoryRow {
   TAG_ROW_ID: number;
   TAG_CODE: string;

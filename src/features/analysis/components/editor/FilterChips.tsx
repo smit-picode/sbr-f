@@ -7,10 +7,10 @@ import type { AnalysisAggregateResult, AnalysisEntity, AnalysisFilter, AnalysisF
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useAnalysisResult } from '../../api/analysisService';
-import { ANALYSIS_ENTITIES, ANALYSIS_FIELDS, ANALYSIS_FILTER_OPS } from '../../constants';
-import { uid } from '../../utils/blocks';
-import { fieldLabel, valueLabel } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { ANALYSIS_ENTITIES, ANALYSIS_FIELDS, ANALYSIS_FILTER_OPS } from '@/features/analysis/constants';
+import { uid } from '@/features/analysis/utils/blocks';
+import { fieldLabel, valueLabel } from '@/features/analysis/utils/labels';
 import { FieldPicker } from './FieldPicker';
 
 function opsFor(field: string): AnalysisFilterOp[] {

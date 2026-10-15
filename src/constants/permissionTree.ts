@@ -1,19 +1,12 @@
 import type { TFunction } from 'i18next';
 
+import type { PermissionNode } from '@/types';
 // Labels live under admin.permLabels, keyed by the permission with dots as underscores; the tree label is the fallback.
 export function permissionLabel(key: string, fallback: string, t: TFunction): string {
   return t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fallback });
 }
 
-export interface PermissionNode {
-  key: string;
-  label: string;
-  children?: PermissionNode[];
-}
-
-// Parent keys (establishments, contacts, etc.) are UI-only group labels.
-// Only leaf nodes (with dots) exist in the DB.
-// The frontend uses this tree to render grouped permission sections.
+// Parent keys are UI-only group labels; only dotted leaf keys exist in the DB, and the tree drives the grouped permission sections.
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'home',
@@ -104,9 +97,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     children: [
       { key: 'admin_panel.view', label: 'View Admin Panel' },
       {
-        // UI-only group node: combines the Roles and Permissions sections into one
-        // "Roles & Permissions Tab" group, mirroring the merged admin tab.
-        // Leaf keys below are unchanged — all RBAC gating still works.
+        // UI-only group node merging the Roles and Permissions sections; the leaf keys below are unchanged.
         key: 'admin_panel.roles_permissions',
         label: 'Roles & Permissions Tab',
         children: [
@@ -197,7 +188,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
-    // NPC-330. Applying a tag needs contacts.tag (Contacts above); this is the registry itself.
+    // Applying a tag needs contacts.tag (Contacts above); this is the registry itself.
     key: 'contact_tags',
     label: 'Contact Tags',
     children: [
@@ -205,10 +196,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
-    // Module-level access to Bulk Change. These sit ON TOP of the per-entity permissions —
-    // granting them does not by itself allow editing any data. A bulk submit still requires
-    // the target table's Edit permission, and a bulk decision still requires
-    // "Approve / Reject Change Requests", both enforced by the API and the database.
+    // Module-level Bulk Change access on top of per-entity permissions; a submit still needs the table's Edit permission and a decision still needs Approve / Reject.
     key: 'bulk_change',
     label: 'Bulk Change',
     children: [

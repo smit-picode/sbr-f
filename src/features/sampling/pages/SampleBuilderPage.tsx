@@ -16,10 +16,7 @@ import { usePersistedState } from '@/hooks';
 import { useHasPermission } from '@/hooks/usePermission';
 import { toast } from '@/utils/toast';
 import { formatDate, formatNumber } from '@/utils/format';
-import type {
-  SamplingDesign, SamplingDrawRequest, SamplingNode, SamplingPublishRequest, SamplingRow, SamplingSelectionGroup,
-  SamplingStrataRequest, SamplingStratum, SamplingTableResult,
-} from '@/types';
+import type { SamplingDesign, SamplingDrawRequest, SamplingNode, SamplingPublishRequest, SamplingRow, SamplingSelectionGroup, SamplingStrataRequest, SamplingStratum, SamplingTableResult, Allocation, Precision } from '@/types';
 import {
   useGetSamplingContactTagsQuery, useGetSamplingFieldsQuery, useGetSamplingFramesQuery, useGetSamplingStrataQuery,
   useLazyDrawSampleQuery, useLazyGetSampleContactsQuery, useLazyGetSampleEstablishmentsQuery,
@@ -28,7 +25,6 @@ import {
   SAMPLING_DEFAULT_COLUMNS, SAMPLING_DEFAULT_EST_COLUMNS, SAMPLING_DESIGN_STORAGE_KEY, SAMPLING_MAX_CONDITIONS, SAMPLING_MAX_GROUPS,
   SAMPLING_HIDDEN_FIELDS, SAMPLING_MAX_SEED, SAMPLING_MAX_UNITS, SAMPLING_PUBLISH_PERMISSION, SAMPLING_UNIT_KEY,
 } from '../constants';
-import type { Allocation, Precision } from '../utils/allocation';
 import { planGroups } from '../utils/plan';
 import { addToGroup, countConditions, removeNode, toApiFilter, updateNode } from '../utils/filterTree';
 import { defaultDesign, migrateDesign, newSelectionGroup, parseIds, presetCensusLargePlusRandom, pruneDesign, requestFields, toApiGroups } from '../utils/design';

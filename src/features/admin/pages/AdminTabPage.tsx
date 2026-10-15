@@ -15,8 +15,7 @@ import { SYSTEM_ACCOUNTS_PERMISSION } from '../constants';
 import { useGetMyPermissionsQuery } from '@/features/auth/api/authApi';
 import { setPermissions, logout } from '@/features/auth/authSlice';
 
-export type AdminTab = 'permissions' | 'roles' | 'users' | 'system-accounts';
-
+import type { AdminTab } from '@/types';
 const TAB_DEFS: { id: AdminTab; href: string; labelKey: string; descKey: string; icon: React.ElementType; permKey: string }[] = [
   { id: 'users',       href: '/admin/users',       labelKey: 'admin.tabs.users',       descKey: 'admin.tabs.usersDesc',       icon: Users,  permKey: 'admin_panel.users.view'       },
   { id: 'roles',       href: '/admin/roles',       labelKey: 'admin.tabs.roles',       descKey: 'admin.tabs.rolesDesc',       icon: Shield, permKey: 'admin_panel.roles.view'       },

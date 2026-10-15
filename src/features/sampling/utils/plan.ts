@@ -1,17 +1,7 @@
-import type { SamplingAllocationEntry, SamplingSelectionGroup, SamplingStratum } from '@/types';
-import { allocate, precision, sizeForTargetCv, type Allocation, type AllocationStratum, type Precision } from './allocation';
+import type { SamplingAllocationEntry, SamplingSelectionGroup, SamplingStratum, SamplingPlan, Allocation, AllocationStratum, Precision } from '@/types';
+import { allocate, precision, sizeForTargetCv } from './allocation';
 
-export interface SamplingPlan {
-  allocations: Record<number, Allocation>;
-  precisions: Record<number, Precision>;
-  solved: Record<number, number | null>;
-  entries: SamplingAllocationEntry[];
-  main: number;
-  reserve: number;
-}
-
-// Per random group: its allocation, precision and (in CV mode) solved size; full and hand-picked groups take all.
-// sbr-backend draws ARM's samples with a copy of this and allocation.ts; its check-sampling-parity script compares them.
+// Per random group: its allocation, precision and solved size; sbr-backend keeps a copy checked by check-sampling-parity.
 export function planGroups(groups: Pick<SamplingSelectionGroup, 'method' | 'allocation'>[], rows: SamplingStratum[]): SamplingPlan {
   const allocations: Record<number, Allocation> = {};
   const precisions: Record<number, Precision> = {};

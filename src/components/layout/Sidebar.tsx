@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { NAV_GROUPS, type NavGroup, type NavItem } from '@/constants/navigation';
+import { NAV_GROUPS } from '@/constants/navigation';
 import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
@@ -54,6 +54,7 @@ import { formatRole } from '@/utils/format';
 import { isNavGroupVisible, isNavItemVisible } from '@/utils/navAccess';
 import { useGetChangeRequestCountQuery } from '@/features/tasks/api/changeRequestsApi';
 
+import type { NavGroup, NavItem } from '@/types';
 const ICON_MAP: Record<string, LucideIcon> = {
   Dices,
   Home,

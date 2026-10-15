@@ -1,9 +1,9 @@
 import type { TFunction } from 'i18next';
-import type { AnalysisAggregateResult, AnalysisBlock, AnalysisResultRow } from '@/types';
+import type { AnalysisAggregateResult, AnalysisBlock, AnalysisResultRow, CategorySeries, ChartSeries } from '@/types';
 import { ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../constants';
 import { frameOrder } from '../utils/frames';
 import { frameName, measureLabel, valueLabel } from '../utils/labels';
-import type { ChartCategory, ChartSeries, TreeNode } from './options';
+import type { TreeNode } from './options';
 
 export function cellValue(r: AnalysisResultRow, i: number, masked: boolean): number | null {
   if (masked && r.flag) return null;
@@ -29,13 +29,6 @@ function uniqueOrdered(rows: AnalysisResultRow[], axis: number, field: string): 
     if (field === 'reg_year') return a.localeCompare(b);
     return (totals.get(b) ?? 0) - (totals.get(a) ?? 0);
   });
-}
-
-export interface CategorySeries {
-  categories: ChartCategory[];
-  series: ChartSeries[];
-  percent: boolean;
-  compare: boolean;
 }
 
 // Shapes an aggregate result into categories × series for bar/column/line charts.

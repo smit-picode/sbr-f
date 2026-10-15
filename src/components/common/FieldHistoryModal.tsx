@@ -5,27 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Landmark, User, ArrowRight } from 'lucide-react';
 import { formatDate } from '@/utils/format';
 
-interface AuditMeta {
-  columns: string[];
-  reason: string | null;
-  changedBy: string | null;
-  approvedBy: string | null;
-  decidedAt: string | null;
-  approved: boolean;
-  operation: string | null;
-}
-
-// A version row carries VALID_FROM/VALID_TO/SOURCE_CODE plus the audited fields
-export interface HistoryVersion {
-  ID?: number;
-  VALID_FROM?: string | null;
-  VALID_TO?: string | null;
-  SOURCE_CODE?: string | null;
-  audit?: AuditMeta | null;
-  request?: boolean;
-  status?: string;
-  changes?: Record<string, { old: unknown; new: unknown }>;
-}
+import type { HistoryVersion } from '@/types';
 
 interface FieldHistoryModalProps {
   versions: HistoryVersion[];

@@ -6,7 +6,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
 import { SearchInput } from '@/components/common/SearchInput';
-import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
+import { FilterChips } from '@/components/common/FilterChips';
 import { getContactColumns } from '../components/ContactColumns';
 import { EditContactModal } from '../components/EditContactModal';
 import { useGetContactsListQuery } from '../api/contactsApi';
@@ -14,7 +14,7 @@ import { useGetContactTagsQuery } from '@/features/contactTags/api/contactTagsAp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/i18n';
 import { CONTACT_DEFAULT_FILTERS } from '../constants';
-import type { ContactFilters, SbrContact } from '@/types';
+import type { ContactFilters, SbrContact, FilterChip } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce, usePermission, usePersistedState } from '@/hooks';

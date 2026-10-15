@@ -214,3 +214,121 @@ export type AnalysisRequest =
   | { kind: 'records'; query: AnalysisResolvedQuery; page: number; pageSize: number; sortBy: string | null; sortDir: 'asc' | 'desc' }
   | { kind: 'completeness'; query: AnalysisResolvedQuery }
   | { kind: 'flow'; query: AnalysisResolvedQuery };
+
+export interface ChartCategory { key: string | null; label: string }
+
+export interface ChartSeries { key: string | null; name: string; data: (number | null)[]; color?: string }
+
+export interface CategorySeries {
+  categories: ChartCategory[];
+  series: ChartSeries[];
+  percent: boolean;
+  compare: boolean;
+}
+
+export type AnalysisRenderMode = 'screen' | 'print' | 'present';
+
+export interface AnalysisPointEvent {
+  keys: (string | null)[];
+  dims: string[];
+  clientX: number;
+  clientY: number;
+  value: number | null;
+}
+
+export interface CreateAnalysisRequest {
+  kind: 'blank' | 'template' | 'duplicate';
+  name: string;
+  description: string;
+  icon?: string;
+  blockCount: number;
+}
+
+export interface RecordsTarget {
+  block: AnalysisBlock;
+  query: AnalysisResolvedQuery;
+  extra: AnalysisFilter[];
+  label: string;
+}
+
+export type AnalysisFieldGroup = 'unit' | 'activity' | 'size' | 'location' | 'contact' | 'enterprise' | 'group';
+
+export interface AnalysisFieldDef {
+  id: string;
+  label: string;
+  type: AnalysisFieldType;
+  group: AnalysisFieldGroup;
+  order?: string[];
+}
+
+export interface AnalysisEntityDef {
+  id: AnalysisEntity;
+  label: string;
+  unitLabel: string;
+  icon: string;
+  idField: string;
+  fields: string[];
+  defaultColumns: string[];
+}
+
+export interface AnalysisAggDef {
+  id: AnalysisAgg;
+  label: string;
+  short: string;
+  numeric: boolean;
+}
+
+export type AnalysisBlockCategory = 'numbers' | 'charts' | 'tables' | 'geo' | 'comparison' | 'quality' | 'narrative';
+
+export interface AnalysisBlockTypeDef {
+  type: AnalysisBlockType;
+  label: string;
+  description: string;
+  icon: string;
+  category: AnalysisBlockCategory;
+  minDims: number;
+  maxDims: number;
+  needsCompare: boolean;
+  interactive: boolean;
+}
+
+export interface AnalysisTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  // 'oldest' = the oldest snapshot when the analysis is created (none if no snapshot exists yet)
+  compareTo: 'oldest' | null;
+  filters: AnalysisFilter[];
+  build: () => AnalysisBlock[];
+}
+
+export interface AnalysisDrillStep {
+  field: string;
+  value: string | null;
+}
+
+export interface AnalysisAccess {
+  email: string;
+  isSuperAdmin: boolean;
+  canViewSection: boolean;
+  canCreate: boolean;
+  canExportUnsuppressed: boolean;
+  canEditAnalysis: (a: Analysis) => boolean;
+  // Delete and re-share are the owner's (or a super admin's), as SBR_ANALYSIS_API enforces.
+  canManage: (a: Analysis) => boolean;
+  isOwner: (a: Analysis) => boolean;
+  isSharedWithMe: (a: Analysis) => boolean;
+}
+
+export type AutosaveStatus = 'saved' | 'pending' | 'saving' | 'error' | 'conflict';
+
+export interface BlockDragState {
+  id: string;
+  over: string | null;
+  after: boolean;
+  x: number;
+  y: number;
+}
+
+export type ExportProgress = (loaded: number, total: number) => void;

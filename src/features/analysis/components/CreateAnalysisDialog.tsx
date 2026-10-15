@@ -9,14 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AnalysisIcon } from './AnalysisIcon';
 
-export interface CreateAnalysisRequest {
-  kind: 'blank' | 'template' | 'duplicate';
-  name: string;
-  description: string;
-  icon?: string;
-  blockCount: number;
-}
-
+import type { CreateAnalysisRequest } from '@/types';
 interface Props {
   request: CreateAnalysisRequest | null;
   onCancel: () => void;

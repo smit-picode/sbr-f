@@ -1,13 +1,4 @@
-import type { SnapshotEntity, SnapshotLiveCounts } from '@/types';
-
-export interface SnapshotEntityDef {
-  entity: SnapshotEntity;
-  countKey: keyof SnapshotLiveCounts;
-  i18nKey: string;
-  label: string;
-  // Same per-entity hue the Create page has always used for its stat tiles.
-  tone: string;
-}
+import type { SnapshotEntityDef } from '@/types';
 
 export const SNAPSHOT_ENTITIES: SnapshotEntityDef[] = [
   { entity: 'establishments', countKey: 'ESTABLISHMENT_COUNT', i18nKey: 'nav.establishments', label: 'Establishments', tone: 'bg-red-50 text-red-600' },

@@ -25,7 +25,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCrossFilter, AnalysisFilter } from '@/types';
+import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCrossFilter, AnalysisFilter, AnalysisDrillStep, AnalysisPointEvent } from '@/types';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -36,11 +36,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAnalysisResult } from '../api/analysisService';
 import { ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_DISCLOSURE, ANALYSIS_DRILL_PATHS, ANALYSIS_ENTITIES, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../constants';
-import { requestForBlock, resolveBlockQuery, type AnalysisDrillStep } from '../engine/resolve';
+import { requestForBlock, resolveBlockQuery } from '../engine/resolve';
 import { blockTypeLabel, entityLabel, fieldLabel, frameName, valueLabel } from '../utils/labels';
 import { AnalysisIcon } from './AnalysisIcon';
 import { BlockContent, blockHeight } from './blocks/BlockContent';
-import type { AnalysisPointEvent } from './blocks/types';
 
 export interface BlockCardActions {
   onEdit: () => void;

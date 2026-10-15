@@ -2,16 +2,16 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AnalysisAggregateResult, AnalysisResultRow } from '@/types';
+import type { AnalysisAggregateResult, AnalysisResultRow, AnalysisPointEvent } from '@/types';
 import { cn } from '@/lib/utils';
-import { useAnalysisResult } from '../../api/analysisService';
-import { isAdditive } from '../../charts/transform';
-import { ANALYSIS_DISCLOSURE, ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../../constants';
-import { requestForBlock } from '../../engine/resolve';
-import { frameOrder } from '../../utils/frames';
-import { fieldLabel, formatDelta, formatValue, frameName, measureLabel, valueLabel } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { isAdditive } from '@/features/analysis/charts/transform';
+import { ANALYSIS_DISCLOSURE, ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '@/features/analysis/constants';
+import { requestForBlock } from '@/features/analysis/engine/resolve';
+import { frameOrder } from '@/features/analysis/utils/frames';
+import { fieldLabel, formatDelta, formatValue, frameName, measureLabel, valueLabel } from '@/features/analysis/utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
-import type { AnalysisPointEvent, BlockViewProps } from './types';
+import type { BlockViewProps } from './types';
 
 const HATCH = 'repeating-linear-gradient(135deg, color-mix(in srgb, var(--color-warn) 22%, transparent) 0 3px, transparent 3px 7px)';
 

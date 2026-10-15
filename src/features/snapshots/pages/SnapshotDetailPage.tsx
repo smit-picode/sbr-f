@@ -3,23 +3,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
-import { Building2, Orbit, Users, MapPin, Network, Calendar, User, FileDown } from 'lucide-react';
+import { Building2, CircleDot, Orbit, Users, MapPin, Network, Calendar, User, FileDown } from 'lucide-react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PageLoader } from '@/components/common/Loader';
 import { NoData } from '@/components/common/NoData';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DataTable } from '@/components/table/DataTable';
-import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
+import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { Button } from '@/components/ui/button';
 import { cleanParams } from '@/utils/query';
 import { usePermission } from '@/hooks';
-import { formatDateTime, formatNumber } from '@/utils/format';
-import type { SnapshotEntity, SnapshotRow } from '@/types';
+import { formatNumber } from '@/utils/format';
+import type { SnapshotEntity, SnapshotRow, ColumnFilterRow, SnapshotTableQueryState } from '@/types';
 import { useGetSnapshotsQuery, useGetSnapshotTableQuery } from '../api/snapshotsApi';
 import { getSnapshotColumns, getSnapshotFilterColumns } from '../components/SnapshotColumns';
-import { SnapshotExportDialog, type SnapshotTableQueryState } from '../components/SnapshotExportDialog';
+import { SnapshotExportDialog } from '../components/SnapshotExportDialog';
+import { formatFrozenAt } from '../utils/formatFrozenAt';
 import { SNAPSHOT_DEFAULT_PAGE_SIZE, SNAPSHOT_ENTITIES, SNAPSHOT_LOOKUP_LIMIT } from '../constants';
 
 const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
@@ -30,14 +30,13 @@ const ENTITY_ICON: Record<SnapshotEntity, typeof Building2> = {
   addresses: MapPin,
 };
 
-// Underline-tab look (plain text + a bottom border on the active tab), matching the reference design.
 const TAB_TRIGGER_CLASS =
-  'group gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-2.5 pt-0 text-sm font-medium text-slate-500 shadow-none ' +
-  'data-[state=active]:border-[#A29374] data-[state=active]:bg-transparent data-[state=active]:text-[#A29374] data-[state=active]:font-semibold data-[state=active]:shadow-none';
+  'group h-9 gap-2 rounded-full border-0 bg-transparent px-4 text-[12.5px] font-semibold text-slate-500 shadow-none hover:text-slate-700 ' +
+  'data-[state=active]:bg-dune data-[state=active]:text-white data-[state=active]:shadow-soft';
 
 const TAB_COUNT_CLASS =
-  'rounded-full px-1.5 text-xs font-normal text-slate-400 ' +
-  'group-data-[state=active]:bg-red-50 group-data-[state=active]:text-[#A29374] group-data-[state=active]:font-semibold';
+  'rounded-full bg-slate-200/70 px-2 py-0.5 text-[11px] font-semibold text-slate-500 ' +
+  'group-data-[state=active]:bg-white/25 group-data-[state=active]:text-white';
 
 // One tab's table; Radix unmounts inactive tabs, so only the visible entity is ever fetched.
 function SnapshotEntityTable({ id, entity, onQueryChange }: {
@@ -59,8 +58,7 @@ function SnapshotEntityTable({ id, entity, onQueryChange }: {
   const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotTableQuery({ id, entity, page, limit, ...cleanParams(query) });
   const rows = useMemo(() => data?.data ?? [], [data]);
 
-  // Columns follow what the frozen table holds. Keep the last non-empty page's shape, so a filter
-  // that matches nothing does not shrink the table (or the filter picker) to the known columns.
+  // Keep the last non-empty page's shape so a filter matching nothing does not shrink the table or filter picker.
   const sample = useRef<SnapshotRow[]>([]);
   if (rows.length) sample.current = rows;
   const keySig = sample.current[0] ? Object.keys(sample.current[0]).join(',') : '';
@@ -131,7 +129,7 @@ export function SnapshotDetailPage({ id }: { id: number }) {
             <span className="flex flex-wrap items-center gap-1.5 mt-1">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {t('snapshots.frozenOnAt', { date: formatDateTime(snapshot.CREATED_AT) })}
+                {t('snapshots.frozenOnAt', { date: formatFrozenAt(snapshot.CREATED_AT) })}
               </span>
               {snapshot.FROZEN_BY_NAME && (
                 <>
@@ -146,21 +144,22 @@ export function SnapshotDetailPage({ id }: { id: number }) {
           </>
         )}
         back={back}
+        chips={
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-bold text-white">
+            <CircleDot className="h-3 w-3" />
+            {t('snapshots.readOnlyBadge')}
+          </span>
+        }
         actions={
-          <>
-            <Badge variant="warning" className="rounded-full whitespace-nowrap">
-              {t('snapshots.readOnlyBadge')}
-            </Badge>
-            <Button size="sm" variant="outline" onClick={() => setExportOpen(true)}>
-              <FileDown className="h-3.5 w-3.5" />
-              {t('snapshots.export.button', { defaultValue: 'Export' })}
-            </Button>
-          </>
+          <Button size="sm" variant="outline" onClick={() => setExportOpen(true)}>
+            <FileDown className="h-3.5 w-3.5" />
+            {t('snapshots.export.button', { defaultValue: 'Export' })}
+          </Button>
         }
       />
 
       <Tabs value={activeEntity} onValueChange={(v) => setActiveEntity(v as SnapshotEntity)}>
-        <TabsList className="h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0">
+        <TabsList className="mb-3 h-auto max-w-full justify-start gap-1 overflow-x-auto rounded-full border border-slate-200 bg-slate-50 p-1">
           {SNAPSHOT_ENTITIES.map(({ entity, countKey, i18nKey, label }) => {
             const Icon = ENTITY_ICON[entity];
             return (

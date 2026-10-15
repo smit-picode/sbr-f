@@ -1,8 +1,7 @@
 import type ExcelJS from 'exceljs';
 import type { TFunction } from 'i18next';
-import type { SamplingDesign, SamplingField, SamplingRow, SamplingStratum, SamplingTableResult } from '@/types';
+import type { SamplingDesign, SamplingField, SampleExportInput } from '@/types';
 import { SAMPLING_CONTACT_COLUMNS, SAMPLING_UNIT_KEY } from '../constants';
-import type { Allocation, Precision } from './allocation';
 import { contactColumnLabel, describeRootFilter, fieldLabel, groupMethodLabel, unitLabel, valueLabel } from './labels';
 
 type ExcelJsModule = typeof import('exceljs');
@@ -36,21 +35,6 @@ function styleHeader(sheet: ExcelJS.Worksheet, widths: number[]) {
   sheet.views = [{ state: 'frozen', ySplit: 1 }];
   widths.forEach((w, i) => { sheet.getColumn(i + 1).width = w; });
   if (sheet.columnCount) sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: sheet.columnCount } };
-}
-
-export interface SampleExportInput {
-  t: TFunction;
-  design: SamplingDesign;
-  fields: SamplingField[];
-  estFields: SamplingField[];
-  frameName: string;
-  strata: SamplingStratum[];
-  // Per group index: the random group's allocation and precision (census and manual groups have none).
-  allocations: Record<number, Allocation>;
-  precisions: Record<number, Precision>;
-  draw: SamplingTableResult;
-  establishments: SamplingTableResult | null;
-  contacts: SamplingRow[] | null;
 }
 
 // "Field: value · Field: value" for a row's stratum in its group.

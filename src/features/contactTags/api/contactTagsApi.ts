@@ -3,8 +3,7 @@ import type {
   ApiResponse, BulkTagResult, BulkTagRow, ContactTag, ContactTagHistoryRow, EstablishmentContactsData, SaveContactTagInput, TagContactResult,
 } from '@/types';
 
-// NPC-330 contact tags. Writes need no approval: they apply immediately, so each one
-// refreshes every view that shows contacts or tags.
+// Contact tag writes need no approval and apply immediately, so each refreshes every view showing contacts or tags.
 export const contactTagsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getContactTags: builder.query<ApiResponse<ContactTag[]>, { includeInactive?: boolean } | void>({
@@ -13,7 +12,7 @@ export const contactTagsApi = baseApi.injectEndpoints({
     }),
     saveContactTag: builder.mutation<ApiResponse<{ ID: number; CODE: string; ACTION: string }>, SaveContactTagInput>({
       query: (body) => ({ url: '/contact-tags/registry', method: 'POST', body }),
-      invalidatesTags: ['ContactTags', 'Contacts'],
+      invalidatesTags: ['ContactTags', 'Contacts', 'AuditLog'],
     }),
     getEstablishmentContacts: builder.query<ApiResponse<EstablishmentContactsData>, number>({
       query: (sbrId) => ({ url: `/establishments/${sbrId}/contact-tags` }),

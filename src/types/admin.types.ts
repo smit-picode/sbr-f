@@ -81,3 +81,11 @@ export interface AdminUserFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface PermissionNode {
+  key: string;
+  label: string;
+  children?: PermissionNode[];
+}
+
+export type AdminTab = 'permissions' | 'roles' | 'users' | 'system-accounts';

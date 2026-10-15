@@ -3,12 +3,7 @@
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export interface FilterChip {
-  key: string;
-  label: string;
-  onRemove: () => void;
-}
-
+import type { FilterChip } from '@/types';
 interface FilterChipsProps {
   chips: FilterChip[];
   onClearAll: () => void;

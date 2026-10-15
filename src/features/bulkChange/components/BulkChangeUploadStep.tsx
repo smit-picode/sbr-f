@@ -4,8 +4,9 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UploadCloud, FileSpreadsheet, X } from 'lucide-react';
 import { toast } from '@/utils/toast';
-import { BULK_CHANGE_TABLES, BULK_CHANGE_MAX_FILE_SIZE_BYTES, type BulkChangeTableKey } from '../constants';
+import { BULK_CHANGE_TABLES, BULK_CHANGE_MAX_FILE_SIZE_BYTES } from '../constants';
 
+import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 const ACCEPTED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 const MAX_FILE_SIZE_LABEL = '500 MB';
 

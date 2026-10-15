@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisCompletenessResult } from '@/types';
 import { cn } from '@/lib/utils';
-import { useAnalysisResult } from '../../api/analysisService';
-import { requestForBlock } from '../../engine/resolve';
-import { fieldLabel, valueLabel } from '../../utils/labels';
+import { useAnalysisResult } from '@/features/analysis/api/analysisService';
+import { requestForBlock } from '@/features/analysis/engine/resolve';
+import { fieldLabel, valueLabel } from '@/features/analysis/utils/labels';
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 

@@ -1,5 +1,5 @@
-import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
 import { QATAR_MUNICIPALITY_NAME_AR } from '@/features/home/data/qatarMunicipalities';
+import type { ColumnFilterOption } from '@/types';
 // Field Labels for error messages and form display
 export const ESTABLISHMENTS_FIELD_LABELS: Record<string, string> = {
   NAME_ENU: 'Regulatory Name (English)',

@@ -3,11 +3,11 @@
 import { useMemo, useState } from 'react';
 import { Binary, Check, ChevronDown, Hash, Search, Tag, TextCursorInput, Fingerprint } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AnalysisFieldType } from '@/types';
+import type { AnalysisFieldType, AnalysisFieldGroup } from '@/types';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ANALYSIS_FIELD_GROUP_LABELS, ANALYSIS_FIELDS, type AnalysisFieldGroup } from '../../constants';
-import { fieldGroupLabel, fieldLabel } from '../../utils/labels';
+import { ANALYSIS_FIELD_GROUP_LABELS, ANALYSIS_FIELDS } from '@/features/analysis/constants';
+import { fieldGroupLabel, fieldLabel } from '@/features/analysis/utils/labels';
 
 const TYPE_ICON: Record<AnalysisFieldType, typeof Tag> = { category: Tag, number: Hash, boolean: Binary, text: TextCursorInput, id: Fingerprint };
 

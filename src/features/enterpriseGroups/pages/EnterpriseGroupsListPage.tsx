@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { DataTable } from '@/components/table/DataTable';
-import { FilterChips, type FilterChip } from '@/components/common/FilterChips';
-import { ColumnFilters, type ColumnFilterRow, columnFiltersParam } from '@/components/common/ColumnFilters';
+import { FilterChips } from '@/components/common/FilterChips';
+import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFilters';
 import { SearchInput } from '@/components/common/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ import {
   ENTERPRISE_GROUP_TYPE_OPTIONS,
   stripGroupCodePrefix,
 } from '../constants';
-import type { EnterpriseGroupFilters } from '@/types';
+import type { EnterpriseGroupFilters, FilterChip, ColumnFilterRow } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useDebounce, usePermission, usePersistedState } from '@/hooks';

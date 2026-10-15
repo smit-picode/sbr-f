@@ -12,8 +12,9 @@ import { useCreateSystemAccountMutation, useGetSystemAccountRolesQuery, useGetSy
 import { SYSTEM_ACCOUNT_DEFAULT_TTL_MINUTES } from '../constants';
 import { getSystemAccountColumns } from './SystemAccountsColumns';
 import { SystemAccountDialog } from './SystemAccountDialog';
-import { SystemAccountFields, SystemAccountForm, emptySystemAccountForm, validateSystemAccountForm } from './SystemAccountFields';
+import { SystemAccountFields, emptySystemAccountForm, validateSystemAccountForm } from './SystemAccountFields';
 
+import type { SystemAccountForm } from '@/types';
 // Machine accounts for the integration API: list, create, and one dialog per account for its settings and secrets.
 export function SystemAccountsTab({ onRegisterCreate }: { onRegisterCreate: (fn: () => void) => void }) {
   const { t } = useTranslation();

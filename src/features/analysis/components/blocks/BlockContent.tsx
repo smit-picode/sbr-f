@@ -1,6 +1,6 @@
 'use client';
 
-import type { AnalysisBlock } from '@/types';
+import type { AnalysisBlock, AnalysisRenderMode } from '@/types';
 import { ChartBlock } from './ChartBlock';
 import { CompletenessBlock } from './CompletenessBlock';
 import { FlowBlock } from './FlowBlock';
@@ -8,7 +8,7 @@ import { KpiBlock } from './KpiBlock';
 import { PivotBlock } from './PivotBlock';
 import { RecordsBlock } from './RecordsBlock';
 import { TextBlock } from './TextBlock';
-import type { AnalysisRenderMode, BlockViewProps } from './types';
+import type { BlockViewProps } from './types';
 
 export function blockHeight(block: AnalysisBlock, mode: AnalysisRenderMode): number {
   if (mode === 'present') return typeof window === 'undefined' ? 520 : Math.max(360, Math.round(window.innerHeight * 0.58));

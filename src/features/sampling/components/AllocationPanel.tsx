@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TablePagination } from '@/components/table/TablePagination';
 import { formatNumber } from '@/utils/format';
-import type { SamplingAllocationSettings, SamplingField, SamplingStratum, SamplingStratumField } from '@/types';
+import type { SamplingAllocationSettings, SamplingField, SamplingStratum, SamplingStratumField, Allocation, Precision } from '@/types';
 import { SAMPLING_METHODS } from '../constants';
-import type { Allocation, Precision } from '../utils/allocation';
 import { fieldLabel, valueLabel } from '../utils/labels';
 
 const INPUT_CLASS = 'h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20';

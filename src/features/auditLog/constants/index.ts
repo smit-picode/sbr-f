@@ -1,5 +1,4 @@
-import type { ColumnFilterOption } from '@/components/common/ColumnFilters';
-import type { AuditLogFilters } from '@/types';
+import type { AuditLogFilters, ColumnFilterOption } from '@/types';
 
 export const AUDIT_LOG_DEFAULT_FILTERS: AuditLogFilters = { page: 1, limit: 10 };
 

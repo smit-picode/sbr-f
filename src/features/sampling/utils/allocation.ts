@@ -1,47 +1,7 @@
 // sbr-backend keeps a copy of this file and plan.ts to draw samples for system accounts: run its check:sampling-parity after changing either.
-import type { SamplingAllocationMethod, SamplingStratumOverride } from '@/types';
+import type { Allocation, AllocationOptions, AllocationStratum, AllocationWarning, Precision, StratumAllocation } from '@/types';
 
-export interface AllocationStratum {
-  key: string;
-  N: number;
-  mean: number | null;
-  sd: number | null;
-}
-
-export interface AllocationOptions {
-  method: SamplingAllocationMethod;
-  sampleSize: number;
-  minPerStratum: number;
-  reservePct: number;
-  overrides: Record<string, SamplingStratumOverride>;
-}
-
-export type AllocationWarning =
-  | 'fixedExceedSize'      // take-all and hand-set strata alone exceed the sample size
-  | 'minimumsExceedSize'   // the per-stratum minimums alone exceed what is left
-  | 'noVariance'           // Neyman had no spread to work with and fell back to proportional
-  | 'sizeAboveFrame';      // more units asked for than the population holds
-
-export interface StratumAllocation {
-  key: string;
-  N: number;
-  n: number;
-  reserve: number;
-  // Why n is what it is, when it is not the method's own share.
-  fixed: 'takeAll' | 'manual' | null;
-  bound: 'max' | 'min' | null;
-  sdUsed: number | null;
-  weight: number | null;
-}
-
-export interface Allocation {
-  strata: StratumAllocation[];
-  requested: number;
-  total: number;
-  reserveTotal: number;
-  population: number;
-  warnings: AllocationWarning[];
-}
+      // more units asked for than the population holds
 
 const clampInt = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v)));
 
@@ -171,15 +131,6 @@ export function allocate(strata: AllocationStratum[], opts: AllocationOptions): 
     population,
     warnings,
   };
-}
-
-export interface Precision {
-  // Estimated total of the auxiliary field and its standard error / CV under the allocation.
-  total: number | null;
-  se: number | null;
-  cv: number | null;
-  // Strata with units but no sample: the total cannot be estimated without bias.
-  uncovered: number;
 }
 
 export function precision(strata: AllocationStratum[], alloc: Allocation): Precision {

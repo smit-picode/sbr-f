@@ -20,11 +20,11 @@ import {
   useAssignRolePermissionsMutation,
 } from '../api/adminApi';
 import { ADMIN_DEFAULT_FILTERS, ROLES_SORT_OPTIONS, ROLES_SORT_DEFAULT, ROLE_NO_CATEGORY_VALUE } from '../constants';
-import type { SbrRole, SbrPermission, RoleCategory } from '@/types';
+import type { SbrRole, SbrPermission, RoleCategory, PermissionNode } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
-import { PERMISSION_TREE, permissionLabel, type PermissionNode } from '@/constants/permissionTree';
+import { PERMISSION_TREE, permissionLabel } from '@/constants/permissionTree';
 import { HOME_DASHBOARD_PERMISSIONS, HOME_SCREENS } from '@/features/home/constants';
 
 // Select value for a role created without a home screen (Radix Select rejects an empty value).
@@ -293,18 +293,14 @@ export function RolesTab({
   const user        = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);
   const isSA        = user?.role === 'SUPER_ADMIN' || user?.role?.toUpperCase() === 'SUPER_ADMIN';
-  // The permission listing/matrix is gated SOLELY by permissions.view. roles.edit lets a
-  // user toggle & save a role's permissions, but only once they can already SEE the listing
-  // (permissions.view). roles.edit or roles.view alone never reveals the permission listing.
+  // The permission listing is gated solely by permissions.view; roles.edit only lets a user who can already see it toggle and save.
   const canFetchPerms = isSA || permissions.some(p =>
     p.permissionName === 'admin_panel.permissions.view'
   );
   // Whether the current user may use the permission search bar
   const canSearchPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.search');
 
-  // ── queries ──
-  // The chosen option carries sortBy/sortOrder; the Default option carries neither, so
-  // cleanParams drops them and the API falls back to its own ID ASC ordering.
+  // The chosen option carries sortBy/sortOrder; Default carries neither, so cleanParams drops them and the API orders by ID ASC.
   const activeRoleSort = ROLES_SORT_OPTIONS.find((o) => o.value === roleSort);
   const { data: rolesData, isLoading: isRolesLoading } = useGetRolesListQuery(
     cleanParams({
@@ -502,9 +498,7 @@ export function RolesTab({
     }
   };
 
-  // Toggling & saving the permission matrix is gated by permissions.edit (editing the
-  // permission listing) — NOT roles.edit (which only governs role-level actions like rename).
-  // SUPER_ADMIN's own permissions are never editable.
+  // Toggling and saving the permission matrix needs permissions.edit, not roles.edit; SUPER_ADMIN's own permissions are never editable.
   const canEditPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.edit');
   const canEditPermissions = canEditPerms && selectedRole?.ROLE_NAME !== 'SUPER_ADMIN';
 
@@ -548,9 +542,7 @@ export function RolesTab({
               const userCount  = role.USER_COUNT ?? 0;
               const isEditable = canEdit && role.ROLE_NAME !== 'SUPER_ADMIN';
               return (
-                // Row is a plain container holding two sibling buttons — select and edit —
-                // rather than an edit control nested inside the select button (invalid HTML,
-                // and it forced a stopPropagation to keep the two actions apart).
+                // A plain container with two sibling buttons (select and edit), not an edit control nested inside the select button.
                 <div
                   key={role.ID}
                   className={`flex items-center rounded-lg transition-colors ${

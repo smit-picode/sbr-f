@@ -1,15 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrEnterprise, EnterpriseFilters, EnterpriseDetail } from '@/types';
-
-export interface UpdateEnterprisePayload {
-  NAME_ENU?: string;
-  SECTOR_ID?: string;
-  STATUS?: string;
-  MAIN_ESTABLISHMENT_SBR_ID?: number;
-  addEstablishmentSbrIds?: number[];
-  removeEstablishmentSbrIds?: number[];
-  comment?: string;
-}
+import type { ApiResponse, SbrEnterprise, EnterpriseFilters, EnterpriseDetail, UpdateEnterprisePayload } from '@/types';
 
 export const enterprisesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

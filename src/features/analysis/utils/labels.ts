@@ -1,26 +1,8 @@
 import type { TFunction } from 'i18next';
 import i18n from '@/i18n/config';
-import type { AnalysisBlockType, AnalysisEntity, AnalysisMeasure } from '@/types';
+import type { AnalysisBlockType, AnalysisEntity, AnalysisMeasure, AnalysisBlockCategory, AnalysisFieldGroup } from '@/types';
 import { QATAR_MUNICIPALITY_NAME_AR } from '@/features/home/data/qatarMunicipalities';
-import {
-  ANALYSIS_AGGS,
-  ANALYSIS_BLOCK_CATEGORY_LABELS,
-  ANALYSIS_BLOCK_TYPE_MAP,
-  ANALYSIS_ENTITIES,
-  ANALYSIS_FIELD_GROUP_LABELS,
-  ANALYSIS_FIELDS,
-  ANALYSIS_FRAME_DIMENSION,
-  ANALYSIS_OTHER_KEY,
-  ANALYSIS_SIZE_CLASS_LABELS,
-  FLOW_CEASED,
-  FLOW_NEW,
-  FLOW_OUTSIDE,
-  ANALYSIS_SIZE_CLASS_LABELS_AR,
-  ISIC_SECTION_LABELS,
-  ISIC_SECTION_LABELS_AR,
-  type AnalysisBlockCategory,
-  type AnalysisFieldGroup,
-} from '../constants';
+import { ANALYSIS_AGGS, ANALYSIS_BLOCK_CATEGORY_LABELS, ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_ENTITIES, ANALYSIS_FIELD_GROUP_LABELS, ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY, ANALYSIS_SIZE_CLASS_LABELS, FLOW_CEASED, FLOW_NEW, FLOW_OUTSIDE, ANALYSIS_SIZE_CLASS_LABELS_AR, ISIC_SECTION_LABELS, ISIC_SECTION_LABELS_AR } from '../constants';
 import { ISIC_DIVISION_LABELS, ISIC_DIVISION_LABELS_AR } from '../constants/isicDivisions';
 import { frameLabelOf } from './frames';
 

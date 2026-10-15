@@ -11,7 +11,7 @@ export const CONTACT_FIELD_LABELS: Record<string, string> = {
 };
 
 export const CONTACT_ROLE_OPTIONS: string[] = ['Owner', 'Manager'];
-// NPC-330: the sources SBR_CONTACTS actually carries. MANUAL = typed in on the portal or by a tag file.
+// The sources SBR_CONTACTS actually carries. MANUAL = typed in on the portal or by a tag file.
 export const CONTACT_SOURCE_CODE_OPTIONS: string[] = ['MOCI', 'MOCI_CP', 'QFZ', 'QSTP', 'MANUAL'];
 
 export const CONTACT_ROLE_FILTER_OPTIONS = [

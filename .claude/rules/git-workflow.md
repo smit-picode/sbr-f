@@ -1,5 +1,9 @@
 # Git Workflow Rules
 
+## Staging, Commit & Push — USER ONLY (overrides everything below)
+
+NEVER run `git add`, `git commit`, `git push`, `git rm`, `git mv` or `git stash`, and never ask to. The user stages, commits and pushes themselves. Leave changes unstaged and report them with `git status` / `git diff --stat`. See `../../.claude/rules/no-git-stage-commit-push.md`.
+
 ## Push to GitHub — ALWAYS Confirm First
 
 NEVER run `git push` without explicit user confirmation. This is a hard rule with no exceptions.
@@ -17,11 +21,9 @@ Before any `git push`:
 This applies even if the user says "deploy", "publish", "send to GitHub", or similar phrasing.
 
 ## Commit Rules
-- Always show `git status` and `git diff --stat` before staging
-- Commit message format: `type: short description`
+- The user commits; Claude never does (see the rule above)
+- Commit message format when the user asks for a suggested message: `type: short description`
 - Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `style`
-- Never commit `.env` or any file with secrets
-- Never use `git add .` without reviewing what's being added
 
 ## Branch Rules
 - Never force push without explicit user instruction
@@ -29,4 +31,4 @@ This applies even if the user says "deploy", "publish", "send to GitHub", or sim
 - Warn if on `main` and asked to push
 
 ## Safe Commands (no confirmation needed)
-`git status`, `git diff`, `git log`, `git add <specific-file>`, `git commit`
+`git status`, `git diff`, `git log`, `git show` (read-only only)

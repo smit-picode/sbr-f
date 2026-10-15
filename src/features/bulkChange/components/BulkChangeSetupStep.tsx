@@ -9,11 +9,12 @@ import { usePermission } from '@/hooks';
 import { toast } from '@/utils/toast';
 import { useGetBulkChangeTemplateQuery, useLazyGetBulkChangeExportQuery } from '../api/bulkChangeApi';
 import { buildTemplateWorkbook } from '../utils/parseWorkbook';
-import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
+import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE } from '../constants';
 import { ESTABLISHMENTS_FIELD_LABELS } from '@/features/establishments/constants';
 import { CONTACT_FIELD_LABELS } from '@/features/contacts/constants';
 import { ADDRESS_FIELD_LABELS } from '@/features/addresses/constants';
 
+import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 const ID_COLUMN_LABELS: Record<BulkChangeTableKey, Record<string, string>> = {
   Establishments: { SBR_ID: 'Establishment ID' },
   Contacts: { ID: 'Contact ID' },
@@ -125,9 +126,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     ?? FIELD_LABELS_BY_TABLE[selectedTable][column.key]
     ?? humanizeColumnKey(column.key);
 
-  // Mandatory business fields beyond the row key itself (e.g. Contacts requires CONTACT_NAME,
-  // Addresses MUNICIPALITY_ID and PRIORITY), so the footer note below must call these out, not just claim the id column
-  // alone is required, or an operator following it hits a validation error on their first try.
+  // Mandatory fields beyond the row key (e.g. Contacts needs CONTACT_NAME), which the footer note must call out.
   const otherMandatoryColumns = useMemo(
     () => (template?.columns ?? []).filter((c) => c.mandatory && c.key !== template?.idColumn).map((c) => c.key),
     [template],

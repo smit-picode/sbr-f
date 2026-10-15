@@ -7,9 +7,21 @@
       "Bash(git status)",
       "Bash(git diff*)",
       "Bash(git log*)",
+      "Bash(curl http://localhost*)"
+    ],
+    "deny": [
       "Bash(git add*)",
       "Bash(git commit*)",
-      "Bash(curl http://localhost*)"
+      "Bash(git mv*)",
+      "Bash(git push*)",
+      "Bash(git rm*)",
+      "Bash(git stash*)",
+      "PowerShell(git add*)",
+      "PowerShell(git commit*)",
+      "PowerShell(git mv*)",
+      "PowerShell(git push*)",
+      "PowerShell(git rm*)",
+      "PowerShell(git stash*)"
     ]
   }
 }

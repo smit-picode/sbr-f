@@ -58,6 +58,10 @@ These rules apply to ALL code written in this repo. Claude must follow these wit
 ## TypeScript Rules
 - No `any` type — if unavoidable, add comment explaining why
 - Types always imported from `@/types` barrel — never from individual type files
+- ALWAYS define interfaces and shared type aliases (API response shapes, filters, entities) in `src/types/` and export them from the barrel — NEVER inside pages, components, hooks, API slices or utils
+- A component's own props interface may stay in the component file (rule below); it must not be exported for reuse
+- A type used only by one private helper inside a single file may stay local, but only if it is not exported
+- A feature that already has `features/{name}/types/` (bulkChange, surveys) keeps its types there
 - All props interfaces defined inline or in same file
 
 ## File & Naming Rules

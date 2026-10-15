@@ -1,8 +1,7 @@
+import type { HomeScreen } from '@/types';
 export const HOME_EXECUTIVE_PERMISSION = 'home_executive.view';
 export const HOME_REVIEWER_PERMISSION = 'home_reviewer.view';
 export const HOME_STEWARD_PERMISSION = 'home_steward.view';
-
-export type HomeScreen = 'executive' | 'reviewer' | 'steward';
 
 // One per role (a radio choice in the role editor); a user holding several through different roles gets the first here.
 export const HOME_SCREENS: { key: HomeScreen; permission: string; label: string }[] = [

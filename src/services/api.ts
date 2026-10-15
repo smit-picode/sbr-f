@@ -55,8 +55,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       return result;
     }
 
-    // A 403 refuses one request, it does not end the session: one small notification, the user stays where they are,
-    // and their permissions are refreshed so menus and buttons catch up if an administrator changed them.
+    // A 403 refuses one request without ending the session: show one notification and refresh permissions.
     if (status === 403) {
       const silent403 = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
       const errData = result.error.data as { message?: string } | undefined;
@@ -85,13 +84,7 @@ export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
   tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots', 'ContactTags', 'Analyses', 'PublishedSamples'],
-  // Tag invalidation only refreshes data changed inside THIS browser session. SBR is a
-  // multi-user portal: another user's edit turns a record PENDING in the DB without this
-  // session ever knowing, so cached list data goes stale the moment someone else saves.
-  // These three defaults re-fetch whenever the user could be looking at stale rows —
-  // remounting a page (sidebar navigation), returning to the tab, or coming back online.
-  // Cached data still paints immediately; the refetch runs in the background and swaps in,
-  // so navigation stays instant and no skeleton flashes.
+  // Refetch on remount, tab focus and reconnect, because other users' edits reach the DB without this session knowing.
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,

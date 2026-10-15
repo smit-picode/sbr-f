@@ -1,23 +1,4 @@
-import type {
-  AnalysisAgg,
-  AnalysisBlockDisplay,
-  AnalysisBlockType,
-  AnalysisEntity,
-  AnalysisFieldType,
-  AnalysisFilterOp,
-  AnalysisPercentMode,
-  AnalysisSort,
-} from '@/types';
-
-export type AnalysisFieldGroup = 'unit' | 'activity' | 'size' | 'location' | 'contact' | 'enterprise' | 'group';
-
-export interface AnalysisFieldDef {
-  id: string;
-  label: string;
-  type: AnalysisFieldType;
-  group: AnalysisFieldGroup;
-  order?: string[];
-}
+import type { AnalysisBlockDisplay, AnalysisBlockType, AnalysisEntity, AnalysisFilterOp, AnalysisPercentMode, AnalysisSort, AnalysisAggDef, AnalysisBlockCategory, AnalysisBlockTypeDef, AnalysisEntityDef, AnalysisFieldDef, AnalysisFieldGroup } from '@/types';
 
 export const ANALYSIS_FIELD_GROUP_LABELS: Record<AnalysisFieldGroup, string> = {
   unit: 'Unit',
@@ -88,16 +69,6 @@ export const ANALYSIS_FIELDS: Record<string, AnalysisFieldDef> = {
 };
 
 export const ANALYSIS_FRAME_DIMENSION = '__frame';
-
-export interface AnalysisEntityDef {
-  id: AnalysisEntity;
-  label: string;
-  unitLabel: string;
-  icon: string;
-  idField: string;
-  fields: string[];
-  defaultColumns: string[];
-}
 
 const EST_CORE = ['sbr_id', 'name', 'status', 'source', 'sector', 'legal_type', 'main_branch', 'reg_year', 'isic_section', 'isic_division', 'isic_group', 'isic_class', 'employment', 'size_class'];
 
@@ -180,13 +151,6 @@ export const ANALYSIS_DRILL_PATHS: Record<string, string> = {
   municipality: 'zone',
 };
 
-export interface AnalysisAggDef {
-  id: AnalysisAgg;
-  label: string;
-  short: string;
-  numeric: boolean;
-}
-
 export const ANALYSIS_AGGS: AnalysisAggDef[] = [
   { id: 'count', label: 'Count of units', short: 'Count', numeric: false },
   { id: 'count_distinct', label: 'Distinct count', short: 'Distinct', numeric: false },
@@ -222,8 +186,6 @@ export const ANALYSIS_PERCENT_OPTIONS: { value: AnalysisPercentMode; label: stri
   { value: 'column', label: '% of column' },
 ];
 
-export type AnalysisBlockCategory = 'numbers' | 'charts' | 'tables' | 'geo' | 'comparison' | 'quality' | 'narrative';
-
 export const ANALYSIS_BLOCK_CATEGORY_LABELS: Record<AnalysisBlockCategory, string> = {
   numbers: 'Numbers',
   charts: 'Charts',
@@ -233,18 +195,6 @@ export const ANALYSIS_BLOCK_CATEGORY_LABELS: Record<AnalysisBlockCategory, strin
   quality: 'Data quality',
   narrative: 'Narrative',
 };
-
-export interface AnalysisBlockTypeDef {
-  type: AnalysisBlockType;
-  label: string;
-  description: string;
-  icon: string;
-  category: AnalysisBlockCategory;
-  minDims: number;
-  maxDims: number;
-  needsCompare: boolean;
-  interactive: boolean;
-}
 
 export const ANALYSIS_BLOCK_TYPES: AnalysisBlockTypeDef[] = [
   { type: 'kpi', label: 'KPI', description: 'Headline numbers with change and trend', icon: 'Gauge', category: 'numbers', minDims: 0, maxDims: 0, needsCompare: false, interactive: false },

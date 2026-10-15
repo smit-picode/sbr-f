@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { ChartColumn, Copy, Plus, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Analysis } from '@/types';
+import type { Analysis, AnalysisTemplate, CreateAnalysisRequest } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
@@ -19,7 +19,7 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { Button } from '@/components/ui/button';
 import { ANALYSIS_LIST_HREF, ANALYSIS_LIST_LIMIT } from '../constants';
 import { toDefinition, useCreateAnalysisMutation, useDeleteAnalysisMutation, useDuplicateAnalysisMutation, useGetAnalysesQuery, useUpdateAnalysisMutation } from '../api/analysisApi';
-import { ANALYSIS_TEMPLATES, type AnalysisTemplate } from '../constants/templates';
+import { ANALYSIS_TEMPLATES } from '../constants/templates';
 import { useAnalysisAccess } from '../hooks/useAnalyses';
 import { useAnalysisFrames } from '../hooks/useAnalysisFrames';
 import { oldestFrozenFrame } from '../utils/frames';
@@ -27,7 +27,7 @@ import { frameName } from '../utils/labels';
 import { AnalysisIcon } from '../components/AnalysisIcon';
 import { AnalysisThumbnail } from '../components/AnalysisThumbnail';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
-import { CreateAnalysisDialog, type CreateAnalysisRequest } from '../components/CreateAnalysisDialog';
+import { CreateAnalysisDialog } from '../components/CreateAnalysisDialog';
 
 type Scope = 'all' | 'mine' | 'shared';
 

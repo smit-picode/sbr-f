@@ -9,15 +9,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatNumber } from '@/utils/format';
-import type { SnapshotEntity, SnapshotSummary } from '@/types';
+import type { SnapshotEntity, SnapshotSummary, SnapshotTableQueryState } from '@/types';
 import { downloadSnapshotExport } from '../api/snapshotsApi';
 import { SNAPSHOT_ENTITIES } from '../constants';
-
-export interface SnapshotTableQueryState {
-  columnFilters?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
 
 interface Props {
   open: boolean;

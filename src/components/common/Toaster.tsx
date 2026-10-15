@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ToastPayload, ToastType } from '@/utils/toast';
 
+import type { ToastPayload, ToastType } from '@/types';
 const DURATION = 4000;
 
 const STYLE: Record<ToastType, { container: string; icon: React.ElementType }> = {

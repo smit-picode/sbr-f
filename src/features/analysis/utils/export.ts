@@ -1,23 +1,13 @@
 import type ExcelJS from 'exceljs';
 import type { TFunction } from 'i18next';
 import * as echarts from 'echarts';
-import type {
-  Analysis,
-  AnalysisAggregateResult,
-  AnalysisBlock,
-  AnalysisCompletenessResult,
-  AnalysisCrossFilter,
-  AnalysisFlowResult,
-  AnalysisResolvedQuery,
-} from '@/types';
+import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCompletenessResult, AnalysisCrossFilter, AnalysisFlowResult, AnalysisResolvedQuery, ExportProgress } from '@/types';
 import { fetchRecordExtract, runAnalysis } from '../api/analysisService';
 import { ANALYSIS_DISCLOSURE, ANALYSIS_ENTITIES, ANALYSIS_EXPORT_ROW_LIMIT } from '../constants';
 import { requestForBlock, resolveBlockQuery } from '../engine/resolve';
 import { entityLabel, fieldLabel, frameName, measureLabel, recordValue, valueLabel } from './labels';
 
 type Cell = string | number | null;
-
-export type ExportProgress = (loaded: number, total: number) => void;
 
 interface BlockTable {
   title: string;

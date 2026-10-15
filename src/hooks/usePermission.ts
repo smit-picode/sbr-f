@@ -22,8 +22,7 @@ export function usePermission(baseKey: string) {
   };
 }
 
-// A single named permission, for the ones that do not fit the <section>.<verb> pattern above
-// (contacts.tag, contact_tags.manage). SUPER_ADMIN holds everything, as in usePermission.
+// A single named permission for keys outside the <section>.<verb> pattern; SUPER_ADMIN holds everything.
 export function useHasPermission(name: string): boolean {
   const user = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);

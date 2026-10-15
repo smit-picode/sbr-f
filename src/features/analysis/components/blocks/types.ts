@@ -1,14 +1,4 @@
-import type { AnalysisBlock, AnalysisResolvedQuery } from '@/types';
-
-export type AnalysisRenderMode = 'screen' | 'print' | 'present';
-
-export interface AnalysisPointEvent {
-  keys: (string | null)[];
-  dims: string[];
-  clientX: number;
-  clientY: number;
-  value: number | null;
-}
+import type { AnalysisBlock, AnalysisResolvedQuery, AnalysisPointEvent, AnalysisRenderMode } from '@/types';
 
 export interface BlockViewProps {
   block: AnalysisBlock;

@@ -1,6 +1,7 @@
 import type ExcelJS from 'exceljs';
 import type { BulkChangeItemInput } from '../types';
 
+import type { ParsedWorkbook } from '@/features/bulkChange/types';
 // Exceljs is ~250 kB and is only needed once the operator actually picks a file
 type ExcelJsModule = typeof import('exceljs');
 
@@ -8,13 +9,6 @@ const loadExcelJs = async (): Promise<ExcelJsModule> => {
   const mod = await import('exceljs');
   return (mod as unknown as { default?: ExcelJsModule }).default ?? mod;
 };
-
-export interface ParsedWorkbook {
-  headers: string[];
-  items: BulkChangeItemInput[];
-  unknownHeaders: string[];
-  missingIdColumn: boolean;
-}
 
 export class WorkbookParseError extends Error {
   constructor(message: string) {

@@ -4,10 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { CHART_ANIMATION, ensureChartTheme } from './theme';
 
-export type EChartOption = Record<string, unknown>;
-// A function option is used when the layout genuinely needs the container's measured size
-export type EChartOptionInput = EChartOption | ((width: number, height: number) => EChartOption);
-
+import type { EChartOptionInput } from '@/types';
 interface EChartProps {
   option: EChartOptionInput;
   height?: number | string;

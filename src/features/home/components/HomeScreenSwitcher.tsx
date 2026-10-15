@@ -2,8 +2,8 @@
 
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import type { HomeScreen } from '../constants';
 
+import type { HomeScreen } from '@/types';
 // Pills in the home banner, shown only to a user whose roles give them more than one home screen.
 export function HomeScreenSwitcher({ value, options, onChange }: {
   value: HomeScreen;

@@ -43,3 +43,24 @@ export interface CreateSnapshotBody {
 
 // A frozen row is the full base-table row plus SNAPSHOT_ID; its columns differ per entity.
 export type SnapshotRow = Record<string, unknown> & { SNAPSHOT_ID: number };
+
+export interface SnapshotExportRequest {
+  path: string;
+  params?: Record<string, string | undefined>;
+  fileName: string;
+}
+
+export interface SnapshotTableQueryState {
+  columnFilters?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface SnapshotEntityDef {
+  entity: SnapshotEntity;
+  countKey: keyof SnapshotLiveCounts;
+  i18nKey: string;
+  label: string;
+  // Same per-entity hue the Create page has always used for its stat tiles.
+  tone: string;
+}

@@ -1,6 +1,4 @@
-import type { DqTableScore } from '@/types';
-
-export type DqTier = 'Green' | 'Amber' | 'Red';
+import type { DqTableScore, DqTier } from '@/types';
 
 // The QDTI guide's thresholds, the same ones SBR_DQ_RUN uses for a rule's tier (docs/data-quality.md section 7).
 export const DQ_GREEN_MIN: number = 85;

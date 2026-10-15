@@ -13,8 +13,7 @@ import { AddTagButton, TagChip, tagErrorMessage } from './TagControls';
 import { AddContactModal } from './AddContactModal';
 import type { EstablishmentContact, EstablishmentContactTag } from '@/types';
 
-// NPC-330: the establishment's open contacts with their tags. The primary contact (the one with
-// the most tags) is listed first and starred. Tagging applies immediately, with no approval.
+// The establishment's open contacts with their tags; the one with the most tags is listed first and starred.
 
 export function EstablishmentContacts({ sbrId }: { sbrId: number }) {
   const { t } = useTranslation();

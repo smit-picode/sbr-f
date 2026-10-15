@@ -13,9 +13,10 @@ import { BulkChangeUploadStep } from '../components/BulkChangeUploadStep';
 import { BulkChangeValidateStep } from '../components/BulkChangeValidateStep';
 import { BulkChangeConfirmStep } from '../components/BulkChangeConfirmStep';
 import { useSubmitBulkChangeMutation } from '../api/bulkChangeApi';
-import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE, type BulkChangeTableKey } from '../constants';
+import { BULK_CHANGE_TABLES, ENTITY_TYPE_BY_TABLE } from '../constants';
 import type { BulkChangeItemInput, BulkChangeSubmitFailure, BulkChangeSubmitResponse, BulkChangeValidationResult } from '../types';
 
+import type { BulkChangeTableKey } from '@/features/bulkChange/types';
 const STEP_SETUP = 0;
 const STEP_UPLOAD = 1;
 const STEP_VALIDATE = 2;

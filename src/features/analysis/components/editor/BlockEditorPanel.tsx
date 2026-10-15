@@ -3,27 +3,14 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Analysis, AnalysisAgg, AnalysisBlock, AnalysisBlockType, AnalysisEntity, AnalysisMeasure, AnalysisQuery, AnalysisSort } from '@/types';
+import type { Analysis, AnalysisAgg, AnalysisBlock, AnalysisBlockType, AnalysisEntity, AnalysisMeasure, AnalysisQuery, AnalysisSort, AnalysisBlockCategory } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  ANALYSIS_AGGS,
-  ANALYSIS_BLOCK_CATEGORY_LABELS,
-  ANALYSIS_BLOCK_TYPE_MAP,
-  ANALYSIS_BLOCK_TYPES,
-  ANALYSIS_ENTITIES,
-  ANALYSIS_ENTITY_ORDER,
-  ANALYSIS_FIELDS,
-  ANALYSIS_LIMIT_OPTIONS,
-  ANALYSIS_MAX_MEASURES,
-  ANALYSIS_PERCENT_OPTIONS,
-  ANALYSIS_SORT_OPTIONS,
-  type AnalysisBlockCategory,
-} from '../../constants';
-import { useAnalysisFrames } from '../../hooks/useAnalysisFrames';
-import { changeEntity, convertBlock, firstNumericField, supportsType, uid } from '../../utils/blocks';
-import { aggLabel, blockCategoryLabel, blockTypeLabel, entityLabel, fieldLabel, frameName } from '../../utils/labels';
+import { ANALYSIS_AGGS, ANALYSIS_BLOCK_CATEGORY_LABELS, ANALYSIS_BLOCK_TYPE_MAP, ANALYSIS_BLOCK_TYPES, ANALYSIS_ENTITIES, ANALYSIS_ENTITY_ORDER, ANALYSIS_FIELDS, ANALYSIS_LIMIT_OPTIONS, ANALYSIS_MAX_MEASURES, ANALYSIS_PERCENT_OPTIONS, ANALYSIS_SORT_OPTIONS } from '@/features/analysis/constants';
+import { useAnalysisFrames } from '@/features/analysis/hooks/useAnalysisFrames';
+import { changeEntity, convertBlock, firstNumericField, supportsType, uid } from '@/features/analysis/utils/blocks';
+import { aggLabel, blockCategoryLabel, blockTypeLabel, entityLabel, fieldLabel, frameName } from '@/features/analysis/utils/labels';
 import { AnalysisIcon } from '../AnalysisIcon';
 import { SidePanel } from '../SidePanel';
 import { FieldPicker } from './FieldPicker';
