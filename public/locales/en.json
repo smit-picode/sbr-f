@@ -220,7 +220,8 @@
     "changedBy": "Changed by",
     "approvedBy": "Approved by",
     "dateFrom": "From",
-    "dateTo": "To"
+    "dateTo": "To",
+    "invalidDate": "Please enter a valid date"
   },
   "common": {
     "pending": "Pending",

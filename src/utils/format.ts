@@ -51,3 +51,10 @@ export function formatPermissionName(name: string | null | undefined): string {
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+// Today's date in the user's own time zone as YYYY-MM-DD, the format a date input expects.
+export function todayLocalISO(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}

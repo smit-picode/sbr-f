@@ -220,7 +220,8 @@
     "changedBy": "غيّره",
     "approvedBy": "وافق عليه",
     "dateFrom": "من",
-    "dateTo": "إلى"
+    "dateTo": "إلى",
+    "invalidDate": "الرجاء إدخال تاريخ صحيح"
   },
   "common": {
     "pending": "قيد الانتظار",

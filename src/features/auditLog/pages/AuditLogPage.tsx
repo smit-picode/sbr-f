@@ -13,6 +13,7 @@ import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFil
 import { useGetAuditLogListQuery, useGetAuditLogUsersQuery, useGetAuditLogApproversQuery } from '../api/auditLogApi';
 import type { AuditLogActorOption, AuditLogFilters, FilterChip, ColumnFilterRow } from '@/types';
 import { cleanParams } from '@/utils/query';
+import { todayLocalISO } from '@/utils/format';
 import { toast } from '@/utils/toast';
 import { ClipboardList, RotateCcw, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +47,9 @@ export function AuditLogPage() {
   // Debounce column-filter changes so the API is called 500 ms after typing stops, not on every keystroke.
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
   const [recordIdInput, setRecordIdInput] = useState<string>('');
+  // A typed date that does not exist (31-02-2025) reads as empty, so it is reported with a toast on blur.
+  const [dateErrors, setDateErrors] = useState<{ dateFrom: boolean; dateTo: boolean }>({ dateFrom: false, dateTo: false });
+  const [dateInputKey, setDateInputKey] = useState(0);
   const debouncedRecordId = useDebounce(recordIdInput, 500);
   const { t } = useTranslation();
 
@@ -88,6 +92,19 @@ export function AuditLogPage() {
   const handleFilterChange = useCallback((partial: Partial<AuditLogFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
   }, []);
+
+  // The audit log only holds past changes, so a typed or picked date after today is capped at today.
+  const today = todayLocalISO();
+  const handleDateChange = (key: 'dateFrom' | 'dateTo', input: HTMLInputElement) => {
+    const value = input.value;
+    if (value) setDateErrors((prev) => ({ ...prev, [key]: false }));
+    handleFilterChange({ [key]: value ? (value > today ? today : value) : undefined, page: 1 });
+  };
+  const handleDateBlur = (key: 'dateFrom' | 'dateTo', input: HTMLInputElement) => {
+    const invalid = input.validity.badInput;
+    setDateErrors((prev) => ({ ...prev, [key]: invalid }));
+    if (invalid) toast.error(t('filters.invalidDate', { defaultValue: 'Please enter a valid date' }));
+  };
 
   const handleColumnFiltersChange = useCallback((rows: ColumnFilterRow[]) => {
     setColumnFilters(rows);
@@ -150,7 +167,13 @@ export function AuditLogPage() {
       onRemove: () => handleFilterChange({ dateTo: undefined, page: 1 }),
     });
   }
-  const clearAllAudit = () => { setFilters(DEFAULT_FILTERS); setRecordIdInput(''); setColumnFilters([]); };
+  const clearAllAudit = () => {
+    setFilters(DEFAULT_FILTERS);
+    setRecordIdInput('');
+    setColumnFilters([]);
+    setDateErrors({ dateFrom: false, dateTo: false });
+    setDateInputKey((k) => k + 1);
+  };
 
   return (
     <PageContainer>
@@ -237,20 +260,28 @@ export function AuditLogPage() {
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-normal text-slate-500">{t('filters.dateFrom', { defaultValue: 'From' })}</span>
           <Input
+            key={`dateFrom-${dateInputKey}`}
             type="date"
-            className="w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className={`w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none ${dateErrors.dateFrom ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'focus:border-[#A29374]/40 focus:ring-[#A29374]/20'}`}
+            max={today}
             value={filters.dateFrom ?? ''}
-            onChange={(e) => handleFilterChange({ dateFrom: e.target.value || undefined, page: 1 })}
+            aria-invalid={dateErrors.dateFrom || undefined}
+            onChange={(e) => handleDateChange('dateFrom', e.target)}
+            onBlur={(e) => handleDateBlur('dateFrom', e.target)}
           />
         </div>
 
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-normal text-slate-500">{t('filters.dateTo', { defaultValue: 'To' })}</span>
           <Input
+            key={`dateTo-${dateInputKey}`}
             type="date"
-            className="w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className={`w-[160px] h-10 text-sm font-normal text-slate-800 shadow-none ${dateErrors.dateTo ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'focus:border-[#A29374]/40 focus:ring-[#A29374]/20'}`}
+            max={today}
             value={filters.dateTo ?? ''}
-            onChange={(e) => handleFilterChange({ dateTo: e.target.value || undefined, page: 1 })}
+            aria-invalid={dateErrors.dateTo || undefined}
+            onChange={(e) => handleDateChange('dateTo', e.target)}
+            onBlur={(e) => handleDateBlur('dateTo', e.target)}
           />
         </div>
 
@@ -277,7 +308,7 @@ export function AuditLogPage() {
         )}
 
         {(() => {
-          const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS) && columnFilters.length === 0;
+          const isDefault = JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS) && columnFilters.length === 0 && !dateErrors.dateFrom && !dateErrors.dateTo;
           return (
             <div className={isDefault ? 'cursor-not-allowed' : undefined}>
               <Button
