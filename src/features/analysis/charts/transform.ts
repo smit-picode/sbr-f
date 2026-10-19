@@ -1,9 +1,8 @@
 import type { TFunction } from 'i18next';
-import type { AnalysisAggregateResult, AnalysisBlock, AnalysisResultRow, CategorySeries, ChartSeries } from '@/types';
+import type { AnalysisAggregateResult, AnalysisBlock, AnalysisResultRow, CategorySeries, ChartSeries, ChartTreeNode } from '@/types';
 import { ANALYSIS_FIELDS, ANALYSIS_FRAME_DIMENSION, ANALYSIS_OTHER_KEY } from '../constants';
 import { frameOrder } from '../utils/frames';
 import { frameName, measureLabel, valueLabel } from '../utils/labels';
-import type { TreeNode } from './options';
 
 export function cellValue(r: AnalysisResultRow, i: number, masked: boolean): number | null {
   if (masked && r.flag) return null;
@@ -87,9 +86,9 @@ export function toCategorySeries(result: AnalysisAggregateResult, block: Analysi
   return { categories, series, percent, compare };
 }
 
-export function toTree(result: AnalysisAggregateResult, t: TFunction, masked: boolean): TreeNode[] {
+export function toTree(result: AnalysisAggregateResult, t: TFunction, masked: boolean): ChartTreeNode[] {
   const [d0, d1] = result.dimensions;
-  const top = new Map<string, TreeNode>();
+  const top = new Map<string, ChartTreeNode>();
   for (const r of result.rows) {
     const v = cellValue(r, 0, masked);
     if (v == null || v <= 0) continue;

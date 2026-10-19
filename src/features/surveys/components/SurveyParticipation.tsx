@@ -17,7 +17,7 @@ function StatusIcon({ status }: { status: ResponseStatus }) {
   return <Clock className="h-[11px] w-[11px]" />;
 }
 
-// Every survey period on record, with the ones this establishment was sampled in coloured by its response.
+// Every survey period on record, with the ones this establishment was sampled in by response.
 export function SurveyParticipation({ sbrId }: { sbrId: number }) {
   const { t } = useTranslation();
   const router = useRouter();

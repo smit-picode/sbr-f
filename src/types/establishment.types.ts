@@ -1,3 +1,5 @@
+import type { AuditMeta } from './ui.types';
+
 export interface SbrEstablishment {
   ID: number;
   SBR_ID: number;
@@ -92,3 +94,25 @@ export interface EstablishmentFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export type EstablishmentStripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null; fieldKey: string; source?: string | null };
+
+export type EstablishmentLegalUnitRef = { source: string; table: string; idValue: string; current: boolean };
+
+export interface EstablishmentFieldEntry {
+  k: string;
+  label: string;
+  value: React.ReactNode;
+  source: string | null;
+  mono: boolean;
+  show: boolean;
+}
+
+export type EstablishmentFormState = Omit<Partial<SbrEstablishment>, 'ID' | 'SBR_ID' | 'VALID_FROM' | 'VALID_TO'>;
+
+export type EstablishmentHistoryVersion = SbrEstablishment & {
+  audit?: AuditMeta | null;
+  request?: boolean;
+  status?: string;
+  changes?: Record<string, { old: unknown; new: unknown }>;
+};

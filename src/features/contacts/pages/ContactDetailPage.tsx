@@ -20,6 +20,7 @@ import { isContactFieldHistoryEnabled } from '../constants';
 import { usePermission } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { ChevronLeft, ChevronRight, Pencil, Phone, Database, History } from 'lucide-react';
+import type { DetailStripItem } from '@/types';
 
 function isEmpty(v: unknown): boolean {
   return v === null || v === undefined || v === '';
@@ -71,7 +72,7 @@ function DetailField({ recordId, fieldKey, label, value, mono, canViewHistory, p
   );
 }
 
-// Banner title with the same click-to-history behaviour as the card fields, white-tinted for the dark band.
+// Banner title with the same click to history behaviour as the card fields, tinted for the band.
 function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount }: {
   recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number;
 }) {
@@ -126,9 +127,7 @@ function DetailCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-type StripItem = { icon: React.ReactNode; label: string; value: string | null };
-
-function HighlightStrip({ items }: { items: StripItem[] }) {
+function HighlightStrip({ items }: { items: DetailStripItem[] }) {
   const visible = items.filter((i) => !isEmpty(i.value));
   if (!visible.length) return null;
   return (

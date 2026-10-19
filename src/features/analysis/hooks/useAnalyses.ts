@@ -4,7 +4,7 @@ import type { AnalysisAccess } from '@/types';
 import { useAppSelector } from '@/hooks';
 import { ANALYSIS_PERMISSIONS } from '../constants';
 
-// Per-analysis access comes from the server (`access`); the user's module permissions gate editing on top.
+// Per analysis access comes from the server; the user's module permissions gate editing.
 export function useAnalysisAccess(): AnalysisAccess {
   const user = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);

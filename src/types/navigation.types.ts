@@ -10,7 +10,7 @@ export type NavItem = {
   title: string;
   href: string;
   icon: string;
-  permKey: string | string[]; // The .view permission required to show this nav link ('' = always visible; array = visible if ANY key is held)
+  permKey: string | string[]; // The .view permission for this link; empty is always visible, an array means any key.
   i18nKey: string;       // Translation key for the link label (page header)
   sidebarLabel?: string; // Override label shown only in the sidebar
   breadcrumbLabel?: string; // Override label shown only in the breadcrumb
@@ -24,3 +24,5 @@ export interface NavAccess {
   isSuperAdmin: boolean;
   permissionNames: string[];
 }
+
+export type NavigationListener = (active: boolean) => void;

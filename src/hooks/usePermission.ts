@@ -22,7 +22,7 @@ export function usePermission(baseKey: string) {
   };
 }
 
-// A single named permission for keys outside the <section>.<verb> pattern; SUPER_ADMIN holds everything.
+// A single named permission for keys outside the section.verb pattern; SUPER_ADMIN has all.
 export function useHasPermission(name: string): boolean {
   const user = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);

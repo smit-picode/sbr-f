@@ -1,10 +1,5 @@
 import { parseWorkbook } from './parseWorkbook';
-
-interface ParseRequest {
-  file: File;
-  idColumn: string;
-  allowedColumns: string[];
-}
+import type { ParseRequest } from '@/features/bulkChange/types';
 
 self.onmessage = async (event: MessageEvent<ParseRequest>) => {
   const { file, idColumn, allowedColumns } = event.data;

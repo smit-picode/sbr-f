@@ -36,7 +36,7 @@ function CardHead({ title, sub, action }: { title: string; sub?: string; action?
   );
 }
 
-// One labelled score row: name, bar, percentage (or emptyText when unscored), and a trailing note unless noteColumn is off.
+// One labelled score row: name, bar, percentage or emptyText, and a note unless noteColumn is off.
 function ScoreRow({ label, pct, note, emptyText, noteColumn = true, onClick, active }: {
   label: string; pct: number | null; note?: string; emptyText?: string; noteColumn?: boolean; onClick?: () => void; active?: boolean;
 }) {

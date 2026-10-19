@@ -1,4 +1,4 @@
-// GET /data-quality/summary: SBR_DQ_API.GET_SUMMARY plus GET_TABLE_SCORES, all keyed on one scored run.
+// GET /data-quality/summary: GET_SUMMARY plus GET_TABLE_SCORES, all keyed on one scored run.
 export interface DqLastRun {
   DQ_RUN_ID: number;
   PIPELINE_RUN_ID: number | null;

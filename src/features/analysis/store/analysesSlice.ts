@@ -1,10 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { Analysis } from '@/types';
-
-// Working copies of opened analyses: edits and undo apply here instantly, autosave persists them.
-interface AnalysesState {
-  items: Analysis[];
-}
+import type { Analysis, AnalysesState } from '@/types';
 
 const initialState: AnalysesState = { items: [] };
 

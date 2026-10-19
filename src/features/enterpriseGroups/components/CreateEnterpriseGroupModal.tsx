@@ -23,27 +23,14 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
 import { Search, Building2, X, Star } from 'lucide-react';
-import type { SbrEnterprise } from '@/types';
+import type { SbrEnterprise, EnterpriseGroupFormState } from '@/types';
 
 interface CreateEnterpriseGroupModalProps {
   open:    boolean;
   onClose: () => void;
 }
 
-interface FormState {
-  NAME_ENU:              string;
-  NAME_ARA:              string;
-  UCI_NAME:              string;
-  UCI_TYPE:              string;
-  UCI_COUNTRY:           string;
-  UCI_IDENTIFIER:        string;
-  PRINCIPAL_ISIC_2DIGIT: string;
-  HOLDING_COMPANY_FLG:   string;
-  STATUS:                string;
-  GROUP_START_DATE:      string;
-}
-
-const EMPTY_FORM: FormState = {
+const EMPTY_FORM: EnterpriseGroupFormState = {
   NAME_ENU:              '',
   NAME_ARA:              '',
   UCI_NAME:              '',
@@ -63,7 +50,7 @@ const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
 export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGroupModalProps) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<EnterpriseGroupFormState>(EMPTY_FORM);
   const [memberSearch, setMemberSearch] = useState('');
   const [members, setMembers] = useState<SbrEnterprise[]>([]);
   const [headId, setHeadId] = useState<number | null>(null);
@@ -92,7 +79,7 @@ export function CreateEnterpriseGroupModal({ open, onClose }: CreateEnterpriseGr
     }
   }, [open]);
 
-  const set = (field: keyof FormState, value: string) => {
+  const set = (field: keyof EnterpriseGroupFormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
     if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });

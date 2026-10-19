@@ -1,12 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrEnterprise } from '@/types';
+import type { SbrEnterprise, TFunc } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { nullableText, formatDate } from '@/utils/format';
 import { Layers } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
-
-type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getEnterpriseColumns = (t: TFunc): ColumnDef<SbrEnterprise>[] => [
   {

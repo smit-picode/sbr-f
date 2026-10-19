@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableLoader } from '@/components/common/Loader';
 
-// Mirrors a survey sample's detail screen: header card with counts, distribution panels, filter bar, table.
+// Mirrors a survey sample's detail screen: header card, distribution panels, filter bar, table.
 export function SurveySampleDetailSkeleton() {
   return (
     <div className="space-y-4">

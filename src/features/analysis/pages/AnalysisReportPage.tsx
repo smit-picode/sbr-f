@@ -38,6 +38,7 @@ import { PresentationMode } from '../components/PresentationMode';
 import { PrintReport } from '../components/PrintReport';
 import { RecordsDrawer } from '../components/RecordsDrawer';
 import { ReportToolbar } from '../components/ReportToolbar';
+import { RequiredTextField } from '../components/RequiredTextField';
 import { ShareDialog } from '../components/ShareDialog';
 import { SaveStatus } from '../components/SaveStatus';
 
@@ -50,7 +51,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
   useAnalysisFrames({ skip: !access.canViewSection });
   const { data: loaded, error: loadError, isFetching: loadFetching, refetch } = useGetAnalysisQuery(id, { refetchOnFocus: false, skip: !access.canViewSection });
   const analysis = useAppSelector((st) => st.analyses.items.find((a) => a.id === id));
-  // The server copy becomes the working copy once per visit (and again after a conflict), never on a background refetch.
+  // The server copy becomes the working copy once per visit and after a conflict, never on refetch.
   const [ready, setReady] = useState(false);
   const reloadRequested = useRef(true);
   const canEdit = !!analysis && access.canEditAnalysis(analysis);
@@ -244,7 +245,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
     }
   };
 
-  // Every export leaves an audit line; unsuppressed is only possible with the permission (masking is locked otherwise).
+  // Every export is audited; unsuppressed needs the permission (masking is locked otherwise).
   function logged(format: string, rowCount: number, blockId?: string) {
     if (!analysis) return;
     void logExport({ analysisId: Number(analysis.id), unsuppressed: !masked, rowCount, detail: { format, ...(blockId ? { blockId } : {}) } });
@@ -258,19 +259,28 @@ export function AnalysisReportPage({ id }: { id: string }) {
       <PageContainer>
         <PageHeader
           title={canEdit ? (
-            <input
+            <RequiredTextField
+              wrap
               value={analysis.name}
-              onChange={(e) => change((a) => ({ ...a, name: e.target.value }), 'name')}
-              aria-label={t('analysis.name', { defaultValue: 'Analysis name' })}
-              className="w-full min-w-[280px] max-w-[760px] bg-transparent text-white font-extrabold outline-none border-b border-transparent hover:border-white/30 focus:border-white/60 transition-colors"
+              onCommit={(name) => change((a) => ({ ...a, name }), 'name')}
+              ariaLabel={t('analysis.name', { defaultValue: 'Analysis name' })}
+              requiredMessage={t('analysis.nameRequired', { defaultValue: 'Analysis name is required.' })}
+              maxLength={200}
+              className="w-full max-w-[760px] bg-transparent text-white font-extrabold leading-tight outline-none border-b border-transparent hover:border-white/30 focus:border-white/60 transition-colors"
+              invalidClassName="border-red-300 hover:border-red-300 focus:border-red-300"
             />
           ) : analysis.name}
           description={canEdit ? (
-            <input
+            <RequiredTextField
+              wrap
               value={analysis.description}
-              onChange={(e) => change((a) => ({ ...a, description: e.target.value }), 'description')}
+              onCommit={(description) => change((a) => ({ ...a, description }), 'description')}
+              ariaLabel={t('analysis.descriptionPlaceholder', { defaultValue: 'Add a short description…' })}
+              requiredMessage={t('analysis.descriptionRequired', { defaultValue: 'Description is required.' })}
               placeholder={t('analysis.descriptionPlaceholder', { defaultValue: 'Add a short description…' })}
+              maxLength={1000}
               className="w-full max-w-2xl bg-transparent text-white/80 placeholder:text-white/40 outline-none border-b border-transparent hover:border-white/20 focus:border-white/50 transition-colors"
+              invalidClassName="border-red-300 hover:border-red-300 focus:border-red-300"
             />
           ) : analysis.description}
           back={{ label: t('analysis.back', { defaultValue: 'All analyses' }), onClick: () => router.push(ANALYSIS_LIST_HREF) }}
@@ -368,13 +378,13 @@ export function AnalysisReportPage({ id }: { id: string }) {
             )}
           </div>
         ) : (
-          <div ref={canvasRef} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div ref={canvasRef} className={cn('grid grid-cols-1 gap-4', editing ? 'min-[1400px]:grid-cols-2' : 'lg:grid-cols-2')}>
             {analysis.blocks.map((b, i) => (
               <div
                 key={b.id}
                 data-block-slot={b.id}
                 data-full={b.width === 'full'}
-                className={cn('relative min-w-0', b.width === 'full' && 'lg:col-span-2', drag?.id === b.id && 'opacity-40')}
+                className={cn('relative min-w-0', b.width === 'full' && (editing ? 'min-[1400px]:col-span-2' : 'lg:col-span-2'), drag?.id === b.id && 'opacity-40')}
               >
                 {drag && drag.over === b.id && drag.id !== b.id && (
                   <div className={cn('pointer-events-none absolute z-10 rounded-full bg-adaam', b.width === 'full'
@@ -409,7 +419,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
               </div>
             ))}
             {canEdit && (
-              <div className="lg:col-span-2 no-print rounded-3xl border-2 border-dashed border-slate-200 bg-white/60 px-4 py-4 flex flex-wrap items-center justify-center gap-2">
+              <div className={cn(editing ? 'min-[1400px]:col-span-2' : 'lg:col-span-2', 'no-print rounded-3xl border-2 border-dashed border-slate-200 bg-white/60 px-4 py-4 flex flex-wrap items-center justify-center gap-2')}>
                 <span className="text-[12px] font-semibold text-slate-400 me-1">{t('analysis.add.quick', { defaultValue: 'Add' })}</span>
                 {ANALYSIS_QUICK_ADD.map((type) => (
                   <button key={type} type="button" onClick={() => addBlock(type, lastEntity, null)} className="inline-flex items-center gap-1.5 h-8 rounded-full border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-600 hover:border-adaam/50 hover:bg-adaam-tint/40 hover:text-adaam-deep">

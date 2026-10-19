@@ -5,7 +5,7 @@ import type { GvaView } from '@/features/surveys/types';
 const QUARTERS_PER_YEAR = 4;
 const MEASURES: GvaMeasure[] = ['valueAdded', 'production', 'intermediate'];
 
-// Figures come straight from the views: production = AES turnover, and value added = production − intermediate consumption.
+// Figures come from the views: production is AES turnover, value added is production minus use.
 export function buildGvaView(api: SurveyGvaApi): GvaView {
   const reported = new Map<number, GvaAccounts>();
   api.AES.forEach((r) => {

@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mirrors the Sample Builder: five numbered step cards, the first ones short, allocation the tallest.
+// Mirrors the Sample Builder: five numbered step cards, allocation the tallest.
 export function SampleBuilderSkeleton() {
   const heights = ['h-10', 'h-24', 'h-24', 'h-56', 'h-16'];
   return (

@@ -14,7 +14,7 @@ export const ENTERPRISE_DEFAULT_FILTERS = {
   sectorId: '',
 } as const;
 
-// Columns offered in the Column filters builder; `value` must match the backend ENTERPRISE_FILTER_COLUMNS allow-list.
+// Columns for the Column filters builder; each value must match the backend allow list.
 export const ENTERPRISE_FILTER_COLUMNS: ColumnFilterOption[] = [
   { value: 'ENTERPRISE_ID', label: 'Enterprise ID', type: 'number' },
   { value: 'NAME_ENU', label: 'Name (EN)' },

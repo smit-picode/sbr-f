@@ -5,7 +5,6 @@ import type {
   CrossTabCell,
   DistributionItem,
   ResponseStatus,
-  ResponseTally,
   SampleRow,
   SampleSummary,
   SizeBand,
@@ -14,6 +13,7 @@ import type {
   SurveySample,
   SurveySampleApiRow,
 } from '../types';
+import type { FrameKey, Tally } from '@/features/surveys/types';
 
 export function surveyById(id: string): Survey | undefined {
   return SURVEYS.find((s) => s.id === id);
@@ -72,7 +72,7 @@ export function summarize(rows: SampleRow[]): SampleSummary {
   return c;
 }
 
-// One row per establishment, keeping its first membership; the API returns rows oldest sample first.
+// One row per establishment keeping its first membership; the API returns oldest samples first.
 export function distinctRows(rows: SampleRow[]): SampleRow[] {
   const seen = new Set<number>();
   return rows.filter((r) => {
@@ -81,8 +81,6 @@ export function distinctRows(rows: SampleRow[]): SampleRow[] {
     return true;
   });
 }
-
-type FrameKey = 'SECTOR_ID' | 'SOURCE_CODE' | 'ISIC_CODE';
 
 export function distribution(rows: SampleRow[], key: FrameKey): DistributionItem[] {
   const m = new Map<string, number>();
@@ -99,7 +97,6 @@ export function statusDistribution(rows: SampleRow[]): { key: ResponseStatus; co
   return [...m.entries()].map(([key, count]) => ({ key, count }));
 }
 
-type Tally = Omit<ResponseTally, 'rate' | 'reliable'>;
 const blankTally = (): Tally => ({ base: 0, answered: 0, responded: 0, partial: 0, nonResponse: 0, pending: 0 });
 
 function tally(t: Tally, status: ResponseStatus) {

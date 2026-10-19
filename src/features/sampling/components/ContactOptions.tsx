@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { SamplingContactOptions, SamplingContactTag } from '@/types';
 
-// Which contacts go with the sample: none, every contact, or the tagged ones with a choice for establishments that have none.
+// Which contacts go with the sample: none, all, or tagged ones, with a choice for those without.
 export function ContactOptions({ value, tags, onChange }: {
   value: SamplingContactOptions;
   tags: SamplingContactTag[];

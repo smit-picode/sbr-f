@@ -1,13 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { PipelineRun } from '@/types';
+import type { PipelineRun, TFuncWithDefault } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { nullableText, formatDateTime } from '@/utils/format';
 import { PIPELINE_STATUS_BADGE } from '../constants';
 import { ChevronRight } from 'lucide-react';
 
-type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
-
-export const getPipelineRunsColumns = (onOpenRun: (runId: number) => void, t: TFunc): ColumnDef<PipelineRun>[] => [
+export const getPipelineRunsColumns = (onOpenRun: (runId: number) => void, t: TFuncWithDefault): ColumnDef<PipelineRun>[] => [
   {
     accessorKey: 'RUN_ID',
     header: t('columns.RUN_ID', { defaultValue: 'RUN ID' }),

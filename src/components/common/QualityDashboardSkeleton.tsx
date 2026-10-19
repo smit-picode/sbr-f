@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mirrors the Quality Dashboard: register gauge + dimensions, table cards, then the selected table's panels.
+// Mirrors the Quality Dashboard: gauge, dimensions, table cards, then the selected table's panels.
 export function QualityDashboardSkeleton() {
   return (
     <div className="space-y-4">

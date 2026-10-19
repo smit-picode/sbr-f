@@ -25,7 +25,7 @@ import { EstablishmentContacts } from '@/features/contactTags/components/Establi
 import { GvaContribution } from '@/features/surveys/components/GvaContribution';
 import { EMPLOYMENT_SIZE_BANDS, SHOW_ESTABLISHMENT_SURVEY_SECTIONS } from '../constants';
 import { useGetIsicValuesQuery } from '@/features/lookups/api/lookupsApi';
-import type { SbrEstablishment } from '@/types';
+import type { SbrEstablishment, EstablishmentStripItem, EstablishmentLegalUnitRef, EstablishmentFieldEntry } from '@/types';
 import { ChevronLeft, ChevronRight, Pencil, History, Orbit, Briefcase, Landmark, Users, GitBranch, Database, Table, ArrowRight, Activity } from 'lucide-react';
 
 function isEmpty(v: unknown): boolean {
@@ -44,17 +44,6 @@ const SRC_COLOR: Record<string, string> = {
 };
 
 const LIFECYCLE_DOT_COLORS: string[] = ['#A29374', '#B5742B', '#1a3a52', '#1F8A5B'];
-
-type LegalUnit = { source: string; table: string; idValue: string; current: boolean };
-
-interface FieldEntry {
-  k: string;
-  label: string;
-  value: React.ReactNode;
-  source: string | null;
-  mono: boolean;
-  show: boolean;
-}
 
 function DetailField({ recordId, fieldKey, label, value, source, mono, canViewHistory, pendingCount }: {
   recordId: number; fieldKey: string; label: string; value: React.ReactNode; source?: string | null; mono?: boolean; canViewHistory: boolean; pendingCount?: number;
@@ -115,8 +104,6 @@ function DetailCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-type StripItem = { icon: React.ReactNode; label: string; value: React.ReactNode | null; fieldKey: string; source?: string | null };
-
 // Same click-to-history behaviour as DetailField, styled to match the highlight-strip cell.
 function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pendingCount, source }: {
   recordId: number; fieldKey: string; label: string; value: React.ReactNode; icon: React.ReactNode; canViewHistory: boolean; pendingCount?: number; source?: string | null;
@@ -167,7 +154,7 @@ function StripField({ recordId, fieldKey, label, value, icon, canViewHistory, pe
 }
 
 function HighlightStrip({ recordId, items, canViewHistory, pendingFields }: {
-  recordId: number; items: StripItem[]; canViewHistory: boolean; pendingFields: Record<string, number | undefined>;
+  recordId: number; items: EstablishmentStripItem[]; canViewHistory: boolean; pendingFields: Record<string, number | undefined>;
 }) {
   const visible = items.filter((i) => !isEmpty(i.value));
   if (!visible.length) return null;
@@ -190,7 +177,7 @@ function HighlightStrip({ recordId, items, canViewHistory, pendingFields }: {
   );
 }
 
-// Header maroon-band name field — same click-to-history behaviour, white-tinted icon for the dark band.
+// Header band name field with the same click to history behaviour, white icon for the dark band.
 function HeaderNameField({ recordId, fieldKey, label, children, canViewHistory, pendingCount, source }: {
   recordId: number; fieldKey: string; label: string; children: React.ReactNode; canViewHistory: boolean; pendingCount?: number; source?: string | null;
 }) {
@@ -243,9 +230,9 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const [editOpen, setEditOpen] = useState(false);
   const { canEdit, canViewDetail, canViewHistory } = usePermission('establishments');
   const { canView: canViewContacts } = usePermission('contacts');
-  // The survey widgets read /surveys/*, which needs surveys.view: without it they are left out rather than refused.
+  // The survey widgets read /surveys/* and need surveys.view; without it they are left out.
   const canViewSurveys = useHasPermission('surveys.view');
-  // Opened from a survey sample's establishment list: Back returns there (only in-app sample paths are honoured).
+  // Opened from a survey sample's establishment list: Back returns there (in app sample paths only).
   const fromParam = searchParams.get('from');
   const fromSample = fromParam && /^\/surveys\/[^/?#]+$/.test(fromParam) ? fromParam : null;
   const back = fromSample
@@ -253,9 +240,9 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     : { label: t('establishmentDetail.allEstablishments'), onClick: () => router.push('/establishments') };
   const canOpenDetail = canViewDetail || canEdit;
   const { data, isLoading, isError, refetch } = useGetEstablishmentByIdQuery(sbrId, { skip: !canOpenDetail });
-  // The ISIC list is loaded once and shared with the ISIC picker; it names the code shown on this record.
+  // The ISIC list loads once and is shared with the ISIC picker; it names the code on this record.
   const isicLookup = useGetIsicValuesQuery(undefined, { skip: !canOpenDetail });
-  // The current row's VALID_FROM is when its latest version started, so entry into the register comes from the oldest version.
+  // The current row's VALID_FROM is its latest version start, so register entry uses the oldest.
   const { data: historyData } = useGetEstablishmentHistoryQuery(sbrId, { skip: !canOpenDetail || !canViewHistory });
 
   const BackLink = (
@@ -299,7 +286,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
   const pendingFields = e.PENDING_FIELDS ?? {};
   const title = e.NAME_ENU || e.NPC_NAME_ENU || `Establishment #${e.SBR_ID}`;
 
-  const legalUnits: LegalUnit[] = (() => {
+  const legalUnits: EstablishmentLegalUnitRef[] = (() => {
     const sc = e.SOURCE_CODE || 'MOCI';
     const m = SRC_MAP[sc] ?? SRC_MAP.MOCI;
     const idValue = m.value(e);
@@ -328,7 +315,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     k: keyof SbrEstablishment,
     label: string,
     o: { source?: keyof SbrEstablishment; mono?: boolean; date?: boolean; node?: React.ReactNode } = {},
-  ): FieldEntry => {
+  ): EstablishmentFieldEntry => {
     const raw = e[k];
     const value: React.ReactNode = o.node !== undefined
       ? o.node
@@ -405,7 +392,7 @@ export function EstablishmentDetailPage({ sbrId }: { sbrId: number }) {
     F('REG_DATE', fl('REG_DATE', 'Reg Date'), { date: true }),
   ].filter((f) => f.show);
 
-  const renderCard = (titleKey: string, fields: FieldEntry[]) =>
+  const renderCard = (titleKey: string, fields: EstablishmentFieldEntry[]) =>
     fields.length > 0 && (
       <DetailCard title={titleKey}>
         {fields.map((f) => (

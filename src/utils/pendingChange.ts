@@ -4,7 +4,7 @@ const PENDING_CHANGE_PREFIX = 'PENDING_CHANGE:';
 
 const columnLabel = (column: string): string => column.replace(/_/g, ' ').toLowerCase();
 
-// Turns the database's PENDING_CHANGE text into a plain sentence; returns null for any other message.
+// Turns the database's PENDING_CHANGE text into a plain sentence; null for any other message.
 export const pendingChangeText = (raw: string | undefined | null, t: TFunction): string | null => {
   if (!raw) return null;
   const start = raw.indexOf(PENDING_CHANGE_PREFIX);

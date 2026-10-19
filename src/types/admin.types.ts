@@ -89,3 +89,22 @@ export interface PermissionNode {
 }
 
 export type AdminTab = 'permissions' | 'roles' | 'users' | 'system-accounts';
+
+// ─── Tree helpers ────────────────────────────────────────────────────────────
+export type PermissionTreeNode = { perm: SbrPermission | null; node: PermissionNode; children: PermissionTreeNode[] };
+
+export type PermissionLeafEntry = { perm: SbrPermission; label: string; nodeKey: string };
+
+export interface UsersColumnsOptions {
+  t: (key: string, opts?: Record<string, unknown>) => string;
+  canViewDetail: boolean;
+  canEdit: boolean;
+  isUpdating: boolean;
+  onView: (user: SbrUser) => void;
+  onEdit: (user: SbrUser) => void;
+  onToggleLock: (user: SbrUser) => void;
+  isSelf: (user: SbrUser) => boolean;
+}
+
+// roleId -> expiry date (yyyy-mm-dd, '' = never expires); a key present means the role is assigned
+export type RoleSelection = Record<number, string>;

@@ -12,6 +12,7 @@ import { useAnalysisFrames } from '@/features/analysis/hooks/useAnalysisFrames';
 import { changeEntity, convertBlock, firstNumericField, supportsType, uid } from '@/features/analysis/utils/blocks';
 import { aggLabel, blockCategoryLabel, blockTypeLabel, entityLabel, fieldLabel, frameName } from '@/features/analysis/utils/labels';
 import { AnalysisIcon } from '../AnalysisIcon';
+import { RequiredTextField } from '../RequiredTextField';
 import { SidePanel } from '../SidePanel';
 import { FieldPicker } from './FieldPicker';
 import { FilterChips } from './FilterChips';
@@ -114,13 +115,24 @@ export function BlockEditorPanel({ block, analysis, onChange, onClose }: Props) 
       open
       onClose={onClose}
       title={
-        <input
-          value={isText ? blockTypeLabel(t, 'text') : block.title}
-          readOnly={isText}
-          onChange={(e) => onChange({ ...block, title: e.target.value })}
-          placeholder={t('analysis.editor.titlePlaceholder', { defaultValue: 'Block title' })}
-          className="w-full bg-transparent outline-none text-[15px] font-bold text-slate-900 placeholder:text-slate-300"
-        />
+        isText ? (
+          <input
+            value={blockTypeLabel(t, 'text')}
+            readOnly
+            placeholder={t('analysis.editor.titlePlaceholder', { defaultValue: 'Block title' })}
+            className="w-full bg-transparent outline-none text-[15px] font-bold text-slate-900 placeholder:text-slate-300"
+          />
+        ) : (
+          <RequiredTextField
+            value={block.title}
+            onCommit={(title) => onChange({ ...block, title })}
+            ariaLabel={t('analysis.editor.titlePlaceholder', { defaultValue: 'Block title' })}
+            requiredMessage={t('analysis.editor.titleRequired', { defaultValue: 'Block title is required.' })}
+            placeholder={t('analysis.editor.titlePlaceholder', { defaultValue: 'Block title' })}
+            className="w-full bg-transparent outline-none text-[15px] font-bold text-slate-900 placeholder:text-slate-300 border-b border-transparent"
+            invalidClassName="border-red-400"
+          />
+        )
       }
       subtitle={!isText && (
         <input

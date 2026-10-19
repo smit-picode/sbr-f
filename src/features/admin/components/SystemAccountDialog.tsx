@@ -34,7 +34,7 @@ const defaultExpiry = (): string => {
 const credentialState = (c: SystemAccountCredential): 'live' | 'revoked' | 'expired' =>
   c.IS_LIVE ? 'live' : c.REVOKED_AT ? 'revoked' : 'expired';
 
-// One system account: its settings, and its secrets (issue, rotate, revoke). A new secret is shown here once and never again.
+// One system account: settings and secrets (issue, rotate, revoke); a new secret is shown once.
 export function SystemAccountDialog({ accountId, roles, tags, onClose }: {
   accountId: number | null;
   roles: SystemAccountRole[];

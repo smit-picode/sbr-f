@@ -52,7 +52,7 @@ export interface SurveyParticipationApiRow {
   RESPONDED_ON: string | null;
 }
 
-// GET /surveys/establishments/:sbrId/gva: its AES accounts per year and the national totals per quarter.
+// GET /surveys/establishments/:sbrId/gva: its AES accounts per year and national totals.
 export interface SurveyGvaApi {
   ISIC_CODE: string | null;
   ACTIVITY: { SURVEY_YEAR: number; DIVISION: string; TOTAL_TURNOVER: number; INTERMEDIATE_CONSUMPTION: number; UNITS: number }[];
@@ -152,7 +152,7 @@ export interface GvaView {
   // Year the economy totals are for: the reference year, else the latest year with all four quarters.
   economyYear: number | null;
   shareOfEconomy: Record<GvaMeasure, number | null>;
-  // The establishment's ISIC section with what its sampled units reported that year; null without an ISIC code or any full return.
+  // The establishment's ISIC section with what its sampled units reported that year; null if none.
   activity: { section: string; units: number; accounts: GvaAccounts } | null;
   shareOfActivity: Record<GvaMeasure, number | null>;
   // What the activity's sampled units reported, as a share of the national total.
@@ -160,3 +160,7 @@ export interface GvaView {
   trendYears: number[];
   trend: Record<GvaMeasure, number[]>;
 }
+
+export type FrameKey = 'SECTOR_ID' | 'SOURCE_CODE' | 'ISIC_CODE';
+
+export type Tally = Omit<ResponseTally, 'rate' | 'reliable'>;

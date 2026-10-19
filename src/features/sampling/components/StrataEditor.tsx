@@ -10,7 +10,7 @@ import { FieldSelect } from './FilterGroupEditor';
 
 const INPUT_CLASS = 'h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
 
-// Band limits as typed ("10, 50, 250"): numbers, strictly increasing; anything else is an error to show.
+// Band limits as typed (10, 50, 250): strictly increasing numbers; anything else is an error.
 export function parseBreaks(text: string): { breaks: number[]; error: boolean } {
   const parts = text.split(/[,;\s]+/).map((p) => p.trim()).filter(Boolean);
   const breaks = parts.map(Number);

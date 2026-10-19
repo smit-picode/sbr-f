@@ -1,13 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrContact } from '@/types';
+import type { SbrContact, TFunc } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, Globe, Pencil, Tag } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import env from '@/config/env';
-
-type TFunc = (key: string, options?: { lng?: string }) => string;
 
 // tagName turns a tag code into its display name; without it the code is shown.
 export const getContactColumns = (onEdit: (row: SbrContact) => void, t: TFunc, canEdit = true, tagName: (code: string) => string = (code) => code): ColumnDef<SbrContact>[] => [

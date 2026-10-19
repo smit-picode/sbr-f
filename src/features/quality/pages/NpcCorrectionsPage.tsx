@@ -61,7 +61,7 @@ function Kpi({ value, label, sub }: { value: string; label: string; sub?: string
   );
 }
 
-// Where the register holds a value NPC approved that the regulator still sends differently, or not at all.
+// Where the register holds a value NPC approved that the regulator still sends differently.
 export function NpcCorrectionsPage() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -140,7 +140,7 @@ export function NpcCorrectionsPage() {
   const hasAny = kpis.valuesAhead > 0 || kpis.caughtUpSinceJan > 0 || summary.trend.some((p) => p.values > 0);
   const pct = (n: number) => (kpis.valuesAhead ? Math.round((n / kpis.valuesAhead) * 100) : 0);
 
-  // Months rebuilt from audit history before the first real build are drawn dashed; the solid line starts at the first real one.
+  // Months rebuilt from audit history are dashed; the solid line starts at the first real build.
   const firstReal = summary.trend.findIndex((p) => !p.reconstructed);
   const trendSeries = summary.trend.some((p) => p.reconstructed)
     ? [

@@ -1,6 +1,5 @@
-type Listener = (active: boolean) => void;
 
-const listeners = new Set<Listener>();
+import type { NavigationListener } from '@/types';const listeners = new Set<NavigationListener>();
 let active = false;
 
 function emit(next: boolean) {
@@ -13,13 +12,13 @@ export const navigationProgress = {
   start: () => emit(true),
   done: () => emit(false),
   isActive: () => active,
-  subscribe(listener: Listener): () => void {
+  subscribe(listener: NavigationListener): () => void {
     listeners.add(listener);
     return () => { listeners.delete(listener); };
   },
 };
 
-// True when `href` points somewhere other than the current page (so no progress bar for no-op navigations).
+// True when href points somewhere other than the current page, so no empty progress bar.
 export function isNavigationTo(href: string): boolean {
   if (typeof window === 'undefined') return false;
   try {

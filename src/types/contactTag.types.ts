@@ -1,4 +1,6 @@
-// Contact tags: a label a user puts on one contact of an establishment, with no meaning attached by the register.
+import type { CreateContactInput } from './contact.types';
+
+// Contact tags: a label a user puts on one contact, with no meaning attached by the register.
 
 export interface ContactTag {
   ID: number;
@@ -86,7 +88,7 @@ export interface BulkTagResultRow {
   TAG_CODE: string;
   CONTACT_ID: number | null;
   EMAIL: string | null;
-  // Dry run: TAG | CREATE_AND_TAG | ALREADY | ERROR; applied: TAGGED | MOVED | ALREADY | CREATED_TAGGED | CREATED_MOVED | CREATED_ALREADY.
+  // Dry run: TAG | CREATE_AND_TAG | ALREADY | ERROR; applied adds TAGGED, MOVED, CREATED_ forms.
   action: string;
   message: string | null;
 }
@@ -97,7 +99,7 @@ export interface BulkTagResult {
   rows: BulkTagResultRow[];
 }
 
-// One tag version from the history endpoint, newest first; an open row (VALID_TO null) is a tag currently on.
+// One tag version from the history endpoint, newest first; an open row is a tag currently on.
 export interface ContactTagHistoryRow {
   TAG_ROW_ID: number;
   TAG_CODE: string;
@@ -112,3 +114,6 @@ export interface ContactTagHistoryRow {
   TAGGED_BY: string | null;
   TAGGED_BY_EMAIL: string | null;
 }
+
+// A contact typed in on an establishment's page: created at once as MANUAL with a CONTACT_ID.
+export type AddContactField = Exclude<keyof CreateContactInput, 'sbrId' | 'comment'>;

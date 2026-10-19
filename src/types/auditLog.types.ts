@@ -46,3 +46,5 @@ export interface AuditLogFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface AuditMemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }

@@ -14,7 +14,7 @@ interface FieldHistoryPopoverProps {
   fieldLabel: string;
   isLoading?: boolean;
   isError?: boolean;
-  // The attribute's source on the current record, from the detail data; history rows only carry the row level SOURCE_CODE.
+  // The attribute's source on the current record, from the detail data; history has only SOURCE_CODE.
   currentSource?: string | null;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement | null>;

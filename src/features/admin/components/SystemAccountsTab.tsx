@@ -15,7 +15,7 @@ import { SystemAccountDialog } from './SystemAccountDialog';
 import { SystemAccountFields, emptySystemAccountForm, validateSystemAccountForm } from './SystemAccountFields';
 
 import type { SystemAccountForm } from '@/types';
-// Machine accounts for the integration API: list, create, and one dialog per account for its settings and secrets.
+// Machine accounts for the integration API: list, create, and a dialog per account.
 export function SystemAccountsTab({ onRegisterCreate }: { onRegisterCreate: (fn: () => void) => void }) {
   const { t } = useTranslation();
   const { data, isLoading, isFetching, isError, refetch } = useGetSystemAccountsQuery();

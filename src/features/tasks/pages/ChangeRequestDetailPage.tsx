@@ -18,7 +18,7 @@ import { toast } from '@/utils/toast';
 import { ROUTES } from '@/constants/routes';
 import { prettyTableName } from '@/features/auditLog/components/AuditLogColumns';
 
-import type { ChangeRequestField } from '@/types';
+import type { ChangeRequestField, ChangeRequestContextSection } from '@/types';
 const TABLE_BADGE: Record<string, string> = {
   SBR_ESTABLISHMENTS: 'bg-[#A29374]/10 text-[#A29374]',
   SBR_ENTERPRISES: 'bg-amber-50 text-amber-700',
@@ -43,11 +43,7 @@ function translateActionErrorMessage(t: (key: string, opts?: Record<string, unkn
   return raw;
 }
 
-// Curated fields shown in the "Record context" panel per table, organised into sections.
-type CtxField = { key: string; label: string; span?: 2; sourceKey?: string };
-type CtxSection = { section: string; fields: CtxField[] };
-
-const CONTEXT_SECTIONS: Record<string, CtxSection[]> = {
+const CONTEXT_SECTIONS: Record<string, ChangeRequestContextSection[]> = {
   SBR_CONTACTS: [
     {
       section: 'Contact',

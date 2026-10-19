@@ -24,7 +24,7 @@ import {
   ALL_ROLES_VALUE, ALL_STATUS_VALUE, USER_STATUS_FILTER_OPTIONS,
   NO_SCOPE_VALUE, REGULATOR_SCOPE_OPTIONS, GLOBAL_SCOPE_VALUE,
 } from '../constants';
-import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters, FilterChip } from '@/types';
+import type { SbrUser, SbrRole, UserRoleInput, AdminUserFilters, FilterChip, RoleSelection } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
@@ -51,9 +51,6 @@ const PASSWORD_RULES = [
   { key: 'lowercase',  label: 'At least one lowercase letter',  test: (p: string) => /[a-z]/.test(p) },
   { key: 'special',    label: 'At least one special character', test: (p: string) => /[!@#$%&*]/.test(p) },
 ];
-
-// roleId -> expiry date (yyyy-mm-dd, '' = never expires); a key present means the role is assigned
-type RoleSelection = Record<number, string>;
 
 const toDateInput = (iso: string | null | undefined): string => {
   if (!iso) return '';
@@ -155,7 +152,6 @@ export function UsersTab({
 
   useEffect(() => {
     onRegisterCreate?.(() => { resetDialogState(); setIsCreateOpen(true); });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onRegisterCreate]);
 
   const toggleRole = (roleId: number) => {

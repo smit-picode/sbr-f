@@ -55,7 +55,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       return result;
     }
 
-    // A 403 refuses one request without ending the session: show one notification and refresh permissions.
+    // A 403 refuses one request without ending the session: one notification, then refresh permissions.
     if (status === 403) {
       const silent403 = (extraOptions as { silentErrors?: boolean } | undefined)?.silentErrors === true;
       const errData = result.error.data as { message?: string } | undefined;
@@ -84,7 +84,7 @@ export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
   tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots', 'ContactTags', 'Analyses', 'PublishedSamples'],
-  // Refetch on remount, tab focus and reconnect, because other users' edits reach the DB without this session knowing.
+  // Refetch on remount, focus and reconnect, because other users' edits reach the DB unseen.
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,

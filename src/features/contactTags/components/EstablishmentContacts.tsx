@@ -13,7 +13,7 @@ import { AddTagButton, TagChip, tagErrorMessage } from './TagControls';
 import { AddContactModal } from './AddContactModal';
 import type { EstablishmentContact, EstablishmentContactTag } from '@/types';
 
-// The establishment's open contacts with their tags; the one with the most tags is listed first and starred.
+// The establishment's open contacts with tags; the one with the most tags is first and starred.
 
 export function EstablishmentContacts({ sbrId }: { sbrId: number }) {
   const { t } = useTranslation();

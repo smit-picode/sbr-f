@@ -30,7 +30,7 @@ function badge(key: string) {
 
 export function PermissionsTab() {
   const { t } = useTranslation();
-  const [search, setSearch] = useState('');
+  const [search] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const { data: permissionsData } = useGetPermissionsListQuery({ limit: 200 });
@@ -77,7 +77,8 @@ export function PermissionsTab() {
   const toggleExpand = (key: string) => {
     setExpanded(prev => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };

@@ -23,3 +23,4 @@ export * from './ui.types';
 export * from './changeRequest.types';
 export * from './navigation.types';
 export * from './chart.types';
+export * from './i18n.types';

@@ -1,4 +1,4 @@
-import type { Translations } from './en';
+import type { Translations } from '@/types';
 
 export const ar: Translations = {
   nav: {

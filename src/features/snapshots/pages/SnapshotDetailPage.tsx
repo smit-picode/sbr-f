@@ -58,7 +58,7 @@ function SnapshotEntityTable({ id, entity, onQueryChange }: {
   const { data, isLoading, isFetching, isError, refetch } = useGetSnapshotTableQuery({ id, entity, page, limit, ...cleanParams(query) });
   const rows = useMemo(() => data?.data ?? [], [data]);
 
-  // Keep the last non-empty page's shape so a filter matching nothing does not shrink the table or filter picker.
+  // Keeps the last non empty page's shape so an empty filter result does not shrink the table.
   const sample = useRef<SnapshotRow[]>([]);
   if (rows.length) sample.current = rows;
   const keySig = sample.current[0] ? Object.keys(sample.current[0]).join(',') : '';

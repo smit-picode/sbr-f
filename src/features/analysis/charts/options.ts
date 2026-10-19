@@ -4,7 +4,7 @@ import { ANALYSIS_OTHER_KEY } from '../constants';
 import { ANALYSIS_OTHER_COLOR, ANALYSIS_PALETTE } from '../constants/palette';
 import { formatValue } from '../utils/labels';
 
-import type { ChartCategory, ChartSeries } from '@/types';
+import type { ChartCategory, ChartSeries, BarOpts, ChartTreeNode } from '@/types';
 const G = CHART_GRAY;
 const TOOLTIP_BASE = { confine: true };
 
@@ -15,17 +15,6 @@ export function colorFor(key: string | null, index: number): string {
 
 function fmt(v: number | null | undefined, percent: boolean) {
   return v == null ? '—' : formatValue(v, { percent });
-}
-
-interface BarOpts {
-  categories: ChartCategory[];
-  series: ChartSeries[];
-  horizontal: boolean;
-  stacked: boolean;
-  percent: boolean;
-  showValues: boolean;
-  animate?: boolean;
-  compare?: boolean;
 }
 
 export function barOption(o: BarOpts): EChartOption {
@@ -125,9 +114,7 @@ export function lineOption(o: { categories: ChartCategory[]; series: ChartSeries
   };
 }
 
-interface TreeNode { key: string | null; name: string; value: number; children?: TreeNode[]; keys: (string | null)[] }
-
-export function treemapOption(o: { nodes: TreeNode[]; percent: boolean; total: number; animate?: boolean }): EChartOption {
+export function treemapOption(o: { nodes: ChartTreeNode[]; percent: boolean; total: number; animate?: boolean }): EChartOption {
   const colored = o.nodes.map((n, i) => ({ ...n, itemStyle: { color: colorFor(n.key, i) } }));
   return {
     animation: o.animate !== false,
@@ -160,7 +147,7 @@ export function treemapOption(o: { nodes: TreeNode[]; percent: boolean; total: n
   };
 }
 
-export function sunburstOption(o: { nodes: TreeNode[]; total: number; animate?: boolean }): EChartOption {
+export function sunburstOption(o: { nodes: ChartTreeNode[]; total: number; animate?: boolean }): EChartOption {
   const colored = o.nodes.map((n, i) => ({
     ...n,
     itemStyle: { color: colorFor(n.key, i) },
@@ -330,4 +317,3 @@ export function sankeyOption(o: {
   };
 }
 
-export type { TreeNode };

@@ -9,7 +9,7 @@ import { ValuePicker } from '@/components/common/ValuePicker';
 import { useGetFilterValuesQuery } from '@/services/filterValuesApi';
 
 import type { ColumnFilterItem, ColumnFilterOption, ColumnFilterRow, ColumnFilterType } from '@/types';
-// Operators SBR_QUERY_PKG accepts, matching its whitelist exactly (else ORA-20410); comparisons are for number and date columns only.
+// Operators SBR_QUERY_PKG accepts (else ORA 20410); comparisons only for number and date columns.
 const TEXT_OPERATORS = [
   'contains', 'not_contains', 'starts_with', 'ends_with',
   'equals', 'is_not', 'is_empty', 'is_not_empty',
@@ -58,7 +58,7 @@ export const isActiveColumnFilterRow = (r: ColumnFilterRow): boolean =>
   !!r.column && (NO_VALUE_OPERATORS.has(r.operator)
     || (LIST_OPERATORS.has(r.operator) ? (r.values?.length ?? 0) > 0 : !!r.value.trim()));
 
-// The active rows as the API's columnFilters entries: a list for in / not_in, the trimmed text otherwise.
+// The active rows as columnFilters entries: a list for in and not_in, trimmed text otherwise.
 export const columnFilterItems = (rows: ColumnFilterRow[]): ColumnFilterItem[] =>
   rows.filter(isActiveColumnFilterRow).map((r) => ({
     column: r.column,
@@ -72,7 +72,7 @@ export const columnFiltersParam = (rows: ColumnFilterRow[]): string | undefined 
   return items.length ? JSON.stringify(items) : undefined;
 };
 
-// Rows are persisted across visits, so a new id must be unique against the rows already there, not a per-mount counter.
+// Rows persist across visits, so a new id must be unique against the saved rows.
 const nextRowId = (rows: ColumnFilterRow[]): string => {
   const used = new Set(rows.map((r) => r.id));
   let n = rows.length + 1;
@@ -80,7 +80,7 @@ const nextRowId = (rows: ColumnFilterRow[]): string => {
   return `cf-${n}`;
 };
 
-// Gives every row after the first holder of an id a fresh one, repairing rows saved before ids were unique.
+// Gives every row after the first holder of an id a fresh one, repairing old saved rows.
 const withUniqueRowIds = (rows: ColumnFilterRow[]): ColumnFilterRow[] => {
   const seen = new Set<string>();
   return rows.reduce<ColumnFilterRow[]>((out, r) => {
@@ -95,7 +95,7 @@ interface ColumnFiltersProps {
   value: ColumnFilterRow[];
   onChange: (rows: ColumnFilterRow[]) => void;
   labelPrefix?: string;
-  // The table's /filter-values endpoint: text columns then pick their values from a list instead of typing them.
+  // The table's /filter-values endpoint: text columns pick values from a list.
   valuesUrl?: string;
 }
 
@@ -219,7 +219,7 @@ export function ColumnFilters({ columns, value, onChange, labelPrefix, valuesUrl
 
 const INPUT_CLASS = 'h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
 
-// The shared picker fed by the table's /filter-values endpoint, fetched only once the list is opened.
+// The shared picker fed by /filter-values, fetched only once the list is opened.
 function ColumnValuePicker({ url, column, multiple, values, onChange, valueLabel }: {
   url: string; column: string; multiple: boolean; values: string[]; onChange: (v: string[]) => void;
   valueLabel?: (value: string, language: string) => string;
@@ -240,7 +240,7 @@ function ColumnValuePicker({ url, column, multiple, values, onChange, valueLabel
   );
 }
 
-// One value box, or two for "between" (sent as "min,max"); number and date columns get typed inputs.
+// One value box, or two for between (sent as min,max); number and date columns get typed inputs.
 function ValueInput({ type, between, value, onChange }: { type: ColumnFilterType; between: boolean; value: string; onChange: (v: string) => void }) {
   const { t } = useTranslation();
   const inputType = type === 'number' ? 'number' : type === 'date' ? 'date' : 'text';

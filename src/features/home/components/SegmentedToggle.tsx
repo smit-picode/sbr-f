@@ -6,7 +6,7 @@ interface SegmentedToggleProps<T extends string> {
   options: { value: T; label: string }[];
 }
 
-// Small pill-group toggle used to switch a chart's breakdown (e.g. Total / By regulator / By sector)
+// Small pill group toggle for switching a chart's breakdown (Total, regulator, sector).
 export function SegmentedToggle<T extends string>({ value, onChange, options }: SegmentedToggleProps<T>) {
   return (
     <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1">

@@ -12,7 +12,7 @@ import { fieldLabel } from '../utils/labels';
 
 const INPUT_CLASS = 'h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
 
-// The fields exported with each row, in the order they were ticked; the row's id and the design columns always come first.
+// The fields exported with each row, in tick order; the row id and design columns come first.
 export function ColumnPicker({ fields, value, onChange, keyField, defaults, label }: {
   fields: SamplingField[];
   value: string[];

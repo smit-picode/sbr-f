@@ -16,7 +16,7 @@ import { SampleAccountPicker } from './SampleAccountPicker';
 
 const SOFT_RING = 'focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
 
-// Publishes the sample on screen: the server draws it again with the same request and keeps the result for the chosen accounts.
+// Publishes the on screen sample: the server redraws it and keeps it for the chosen accounts.
 export function PublishSampleDialog({ open, onClose, request, design, unitCount }: {
   open: boolean;
   onClose: () => void;

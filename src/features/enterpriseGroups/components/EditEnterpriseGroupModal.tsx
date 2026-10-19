@@ -28,33 +28,13 @@ import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
 import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import { IsicCodeSelect } from '@/components/common/IsicCodeSelect';
 import { Search, Orbit, X, Star } from 'lucide-react';
-import type { SbrEnterpriseGroup, EnterpriseGroupMember } from '@/types';
+import type { SbrEnterpriseGroup, EnterpriseGroupMember, EnterpriseGroupFormState, EnterpriseGroupMemberRow } from '@/types';
 
 interface EditEnterpriseGroupModalProps {
   group:            SbrEnterpriseGroup;
   currentMembers?:  EnterpriseGroupMember[];
   open:             boolean;
   onClose:          () => void;
-}
-
-interface FormState {
-  NAME_ENU:              string;
-  NAME_ARA:              string;
-  UCI_NAME:              string;
-  UCI_TYPE:              string;
-  UCI_COUNTRY:           string;
-  UCI_IDENTIFIER:        string;
-  PRINCIPAL_ISIC_2DIGIT: string;
-  HOLDING_COMPANY_FLG:   string;
-  STATUS:                string;
-  GROUP_START_DATE:      string;
-}
-
-interface MemberRow {
-  ENTERPRISE_ID:      number;
-  NAME_ENU:           string | null;
-  ESTABLISHMENT_COUNT: number;
-  STATUS:             string | null;
 }
 
 const STATUS_CHOICES = ENTERPRISE_GROUP_STATUS_OPTIONS.filter((o) => o.value);
@@ -64,14 +44,14 @@ const todayISO = (): string => new Date().toISOString().slice(0, 10);
 
 export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onClose }: EditEnterpriseGroupModalProps) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<FormState>({
+  const [form, setForm] = useState<EnterpriseGroupFormState>({
     NAME_ENU: '', NAME_ARA: '', UCI_NAME: '', UCI_TYPE: '',
     UCI_COUNTRY: '', UCI_IDENTIFIER: '', PRINCIPAL_ISIC_2DIGIT: '',
     HOLDING_COMPANY_FLG: '', STATUS: '', GROUP_START_DATE: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [memberSearch, setMemberSearch] = useState('');
-  const [addedMembers, setAddedMembers] = useState<MemberRow[]>([]);
+  const [addedMembers, setAddedMembers] = useState<EnterpriseGroupMemberRow[]>([]);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
   const [headId, setHeadId] = useState<number | null>(null);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
@@ -84,7 +64,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     [currentMembers, group]
   );
 
-  const currentRows: MemberRow[] = useMemo(() => {
+  const currentRows: EnterpriseGroupMemberRow[] = useMemo(() => {
     const kept = currentMembers
       .filter((m) => !removedIds.has(m.ENTERPRISE_ID))
       .map((m) => ({ ENTERPRISE_ID: m.ENTERPRISE_ID, NAME_ENU: m.NAME_ENU, ESTABLISHMENT_COUNT: m.ESTABLISHMENT_COUNT ?? 0, STATUS: m.STATUS }));
@@ -98,7 +78,7 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
     { skip: !open || !debouncedMemberSearch }
   );
 
-  const removedMemberSearchMatches: MemberRow[] = useMemo(() => {
+  const removedMemberSearchMatches: EnterpriseGroupMemberRow[] = useMemo(() => {
     const q = debouncedMemberSearch.trim().toUpperCase();
     if (!q) return [];
     return currentMembers
@@ -135,8 +115,10 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   }, [open, group, initialHeadId]);
 
   const isPending = (field: string): boolean => !!group.PENDING_FIELDS?.[field];
+  const uciDerived = group.MANUAL_OVERRIDE_FLAG !== 'Y';
+  const uciLocked = (field: string): boolean => uciDerived || isPending(field);
 
-  const set = (field: keyof FormState, value: string) => {
+  const set = (field: keyof EnterpriseGroupFormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     const key = (field === 'NAME_ENU' || field === 'NAME_ARA') ? 'NAMES' : field;
     if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
@@ -184,8 +166,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
   };
 
   // Only the fields the user actually touched — never the full form.
-  const changedFields = (): Partial<Record<keyof FormState, string | null>> => {
-    const out: Partial<Record<keyof FormState, string | null>> = {};
+  const changedFields = (): Partial<Record<keyof EnterpriseGroupFormState, string | null>> => {
+    const out: Partial<Record<keyof EnterpriseGroupFormState, string | null>> = {};
     if (normalize(form.NAME_ENU) !== normalize(group.NAME_ENU)) out.NAME_ENU = form.NAME_ENU.trim() || null;
     if (normalize(form.NAME_ARA) !== normalize(group.NAME_ARA)) out.NAME_ARA = form.NAME_ARA.trim() || null;
     if (normalize(form.UCI_NAME) !== normalize(group.UCI_NAME)) out.UCI_NAME = form.UCI_NAME.trim() || null;
@@ -241,9 +223,11 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
       setShowCommentDialog(false);
       onClose();
     } catch (error) {
-      const apiMessage = (error as { data?: { message?: string } })?.data?.message;
+      const { status, data } = error as { status?: number; data?: { message?: string } };
+      const apiMessage = data?.message;
       const pendingMessage = pendingChangeText(apiMessage, t);
       if (pendingMessage) { toast.error(pendingMessage); return; }
+      if (status === 400 && apiMessage) { toast.error(apiMessage); return; }
       toast.error(t('editEnterpriseGroup.updateError', { defaultValue: 'Failed to submit enterprise group update. Please try again.' }));
     }
   };
@@ -307,8 +291,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciType', { defaultValue: 'UCI type' })}<PendingFieldInfo pending={isPending('UCI_TYPE')} /></Label>
-              <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)} disabled={isPending('UCI_TYPE')}>
-                <SelectTrigger className={`shadow-none ${isPending('UCI_TYPE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
+              <Select value={form.UCI_TYPE} onValueChange={(v) => set('UCI_TYPE', v)} disabled={uciLocked('UCI_TYPE')}>
+                <SelectTrigger className={`shadow-none ${uciLocked('UCI_TYPE') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}><SelectValue placeholder={t('editEnterpriseGroup.selectType', { defaultValue: 'Select type' })} /></SelectTrigger>
                 <SelectContent>
                   {ENTERPRISE_GROUP_UCI_TYPE_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
@@ -327,7 +311,8 @@ export function EditEnterpriseGroupModal({ group, currentMembers = [], open, onC
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-slate-500">{t('editEnterpriseGroup.uciId', { defaultValue: 'UCI ID' })}<PendingFieldInfo pending={isPending('UCI_IDENTIFIER')} /></Label>
-              <Input value={form.UCI_IDENTIFIER} onChange={(e) => set('UCI_IDENTIFIER', e.target.value)} maxLength={100} disabled={isPending('UCI_IDENTIFIER')} className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${isPending('UCI_IDENTIFIER') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`} />
+              <Input value={form.UCI_IDENTIFIER} onChange={(e) => set('UCI_IDENTIFIER', e.target.value)} maxLength={100} disabled={uciLocked('UCI_IDENTIFIER')} className={`shadow-none focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${uciLocked('UCI_IDENTIFIER') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`} />
+              {uciDerived && <p className="text-xs text-slate-400">{t('editEnterpriseGroup.uciLocked', { defaultValue: 'UCI type and UCI ID come from ownership data for this group and cannot be changed.' })}</p>}
             </div>
           </div>
 

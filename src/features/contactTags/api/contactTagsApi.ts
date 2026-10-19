@@ -3,7 +3,7 @@ import type {
   ApiResponse, BulkTagResult, BulkTagRow, ContactTag, ContactTagHistoryRow, EstablishmentContactsData, SaveContactTagInput, TagContactResult,
 } from '@/types';
 
-// Contact tag writes need no approval and apply immediately, so each refreshes every view showing contacts or tags.
+// Contact tag writes need no approval and apply at once, so each refreshes contact and tag views.
 export const contactTagsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getContactTags: builder.query<ApiResponse<ContactTag[]>, { includeInactive?: boolean } | void>({

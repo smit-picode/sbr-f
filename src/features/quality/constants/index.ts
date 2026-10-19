@@ -1,6 +1,6 @@
 import type { DqTableScore, DqTier } from '@/types';
 
-// The QDTI guide's thresholds, the same ones SBR_DQ_RUN uses for a rule's tier (docs/data-quality.md section 7).
+// The QDTI guide's thresholds, the same ones SBR_DQ_RUN uses for a rule's tier.
 export const DQ_GREEN_MIN: number = 85;
 export const DQ_AMBER_MIN: number = 60;
 
@@ -11,7 +11,7 @@ export const DQ_TIER_STYLE: Record<DqTier, { bg: string; fg: string; dot: string
 };
 export const DQ_NO_SCORE_COLOR: string = '#CBD5E1';
 
-// The six Quality Dimensions, in the order the page lists them, with the V_DQ_TABLE_SCORE column for each.
+// The six Quality Dimensions in page order, with the V_DQ_TABLE_SCORE column for each.
 export const DQ_DIMENSIONS: { name: string; tableKey: keyof DqTableScore }[] = [
   { name: 'Completeness',          tableKey: 'COMPLETENESS_SCORE' },
   { name: 'Validity',              tableKey: 'VALIDITY_SCORE' },
@@ -37,7 +37,7 @@ export const NPC_CORRECTION_CHANNEL_LABEL: Record<string, string> = {
   SURVEY: 'Survey return',
 };
 
-// Regulator dot colours: each source code takes its regulator's colour (MOCI_CP and MOCI_PRI are MOCI's, MOM_FARM is MOM's).
+// Regulator dot colours: each source code takes its regulator's colour.
 export const NPC_CORRECTION_REGULATOR_COLOR: Record<string, string> = {
   MOCI: '#A29374',
   MOCI_CP: '#A29374',
@@ -57,7 +57,7 @@ export const NPC_CORRECTION_STATUS_OPTIONS: { value: 'AHEAD' | 'CAUGHT_UP' | 'AL
 
 export const NPC_CORRECTIONS_PAGE_SIZE: number = 20;
 
-// The indicator is rebuilt by every full pipeline run; older than this and the page says it may be out of date.
+// The indicator is rebuilt by every full pipeline run; older than this, the page warns it is stale.
 export const NPC_CORRECTIONS_STALE_DAYS: number = 3;
 
 // Columns the corrections table can sort on (SBR_DQ_API's corr_sort_expr keys).

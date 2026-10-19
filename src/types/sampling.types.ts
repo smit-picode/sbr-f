@@ -107,7 +107,7 @@ export interface SamplingContactOptions {
   fallback: 'ALL' | 'NONE';
 }
 
-// Everything that defines a sample; saved in the browser and in the export, and loadable from a file.
+// Everything that defines a sample; saved in the browser and export, loadable from a file.
 export interface SamplingDesign {
   version: 2;
   snapshotId: number | null;
@@ -298,7 +298,7 @@ export interface SampleExportInput {
   estFields: SamplingField[];
   frameName: string;
   strata: SamplingStratum[];
-  // Per group index: the random group's allocation and precision (census and manual groups have none).
+  // Per group index: allocation and precision of the random group (census and manual have none).
   allocations: Record<number, Allocation>;
   precisions: Record<number, Precision>;
   draw: SamplingTableResult;
@@ -313,4 +313,47 @@ export interface SamplingPlan {
   entries: SamplingAllocationEntry[];
   main: number;
   reserve: number;
+}
+
+export interface FilterEditorContext {
+  unit: SamplingUnit;
+  // The root group's lead-in, e.g. "Keep enterprises that match".
+  rootLabel: string;
+  // What an empty root means, e.g. "every enterprise in the frame".
+  emptyLabel: string;
+  fields: SamplingField[];
+  snapshotId: number | null;
+  onUpdate: (id: string, patch: (n: SamplingNode) => SamplingNode) => void;
+  onRemove: (id: string) => void;
+  onAdd: (groupId: string, child: SamplingNode) => void;
+}
+
+// What was drawn, frozen at draw time, so an export always matches the rows on screen.
+export interface DrawnSample {
+  request: string;
+  design: SamplingDesign;
+  strata: SamplingStratum[];
+  allocations: Record<number, Allocation>;
+  precisions: Record<number, Precision>;
+  units: SamplingTableResult;
+  establishments: SamplingTableResult | null;
+  contacts: SamplingRow[] | null;
+  publish: SamplingPublishRequest;
+}
+
+export interface DesignV1 {
+  version: 1;
+  snapshotId: number | null;
+  filter: SamplingGroup;
+  strata: SamplingStratumField[];
+  auxColumn: string | null;
+  method: SamplingDesign['groups'][number]['allocation']['method'];
+  sizeMode: 'size' | 'cv';
+  sampleSize: number;
+  targetCv: number;
+  minPerStratum: number;
+  reservePct: number;
+  overrides: Record<string, { takeAll?: boolean; n?: number | null }>;
+  seed: number;
+  columns: string[];
 }

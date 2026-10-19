@@ -1,22 +1,11 @@
 import type ExcelJS from 'exceljs';
 import type { TFunction } from 'i18next';
 import * as echarts from 'echarts';
-import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCompletenessResult, AnalysisCrossFilter, AnalysisFlowResult, AnalysisResolvedQuery, ExportProgress } from '@/types';
+import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCompletenessResult, AnalysisCrossFilter, AnalysisFlowResult, AnalysisResolvedQuery, ExportProgress, ExcelJsModule, ExportCell, ExportBlockTable } from '@/types';
 import { fetchRecordExtract, runAnalysis } from '../api/analysisService';
 import { ANALYSIS_DISCLOSURE, ANALYSIS_ENTITIES, ANALYSIS_EXPORT_ROW_LIMIT } from '../constants';
 import { requestForBlock, resolveBlockQuery } from '../engine/resolve';
 import { entityLabel, fieldLabel, frameName, measureLabel, recordValue, valueLabel } from './labels';
-
-type Cell = string | number | null;
-
-interface BlockTable {
-  title: string;
-  notes: string[];
-  header: string[];
-  rows: Cell[][];
-}
-
-type ExcelJsModule = typeof import('exceljs');
 
 // exceljs is large and only needed on export, so it loads on demand (same approach as bulk change).
 const loadExcelJs = async (): Promise<ExcelJsModule> => {
@@ -48,7 +37,7 @@ function describeQuery(t: TFunction, q: AnalysisResolvedQuery): string[] {
   return notes;
 }
 
-export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<BlockTable> {
+export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<ExportBlockTable> {
   const title = block.title || block.type;
   const notes = describeQuery(t, q);
   const req = requestForBlock(block, q);
@@ -81,7 +70,7 @@ export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQ
   if (result.kind === 'flow') {
     const r = result as AnalysisFlowResult;
     const dim = q.dimensions[0];
-    const rows: Cell[][] = [
+    const rows: ExportCell[][] = [
       [frameName(t, r.compareTo), r.start],
       [t('analysis.flow.births', { defaultValue: 'Births' }), r.births],
       [t('analysis.flow.deaths', { defaultValue: 'Deaths' }), -r.deaths],
@@ -98,7 +87,7 @@ export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQ
 
   const r = result as AnalysisAggregateResult;
   // A flagged cell the server already blanked (no unsuppressed access) exports as x too.
-  const show = (row: { flag?: string }, v: number | null): Cell => (row.flag && (suppress || v == null) ? 'x' : v);
+  const show = (row: { flag?: string }, v: number | null): ExportCell => (row.flag && (suppress || v == null) ? 'x' : v);
   const mLabels = r.measures.map((m) => measureLabel(t, m, q.entity));
   if (suppress && r.rows.some((x) => x.flag)) {
     notes.push(t('analysis.export.suppressionNote', { defaultValue: 'x = suppressed for confidentiality (fewer than {{min}} units, a dominant unit, or to protect such a cell).', min: ANALYSIS_DISCLOSURE.minCell }));
@@ -123,7 +112,7 @@ export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQ
     ...mLabels,
     ...(compare ? [`${mLabels[0]} — ${frameName(t, r.compareTo)}`, 'Δ', 'Δ %'] : []),
   ];
-  const rows: Cell[][] = r.rows.map((x) => {
+  const rows: ExportCell[][] = r.rows.map((x) => {
     const curr = x.values[0];
     const prev = x.prev?.[0] ?? null;
     return [
@@ -138,7 +127,7 @@ export async function buildBlockTable(block: AnalysisBlock, q: AnalysisResolvedQ
   return { title, notes, header, rows };
 }
 
-function addSheet(wb: ExcelJS.Workbook, name: string, table: BlockTable) {
+function addSheet(wb: ExcelJS.Workbook, name: string, table: ExportBlockTable) {
   const ws = wb.addWorksheet(name);
   ws.addRow([table.title]).font = { bold: true, size: 13 };
   for (const n of table.notes) ws.addRow([n]).font = { italic: true, color: { argb: 'FF64748B' } };
@@ -172,7 +161,7 @@ export async function exportBlockXlsx(block: AnalysisBlock, q: AnalysisResolvedQ
 
 export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQuery, t: TFunction, suppress: boolean, onProgress?: ExportProgress): Promise<number> {
   const table = await buildBlockTable(block, q, t, suppress, onProgress);
-  const esc = (v: Cell) => {
+  const esc = (v: ExportCell) => {
     let s = v == null ? '' : String(v);
     if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;

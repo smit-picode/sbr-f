@@ -126,7 +126,7 @@ export function BulkChangeSetupStep({ selectedTable, onSelectTable }: BulkChange
     ?? FIELD_LABELS_BY_TABLE[selectedTable][column.key]
     ?? humanizeColumnKey(column.key);
 
-  // Mandatory fields beyond the row key (e.g. Contacts needs CONTACT_NAME), which the footer note must call out.
+  // Mandatory fields beyond the row key (Contacts needs CONTACT_NAME); the footer note names them.
   const otherMandatoryColumns = useMemo(
     () => (template?.columns ?? []).filter((c) => c.mandatory && c.key !== template?.idColumn).map((c) => c.key),
     [template],

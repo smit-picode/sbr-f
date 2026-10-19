@@ -16,7 +16,7 @@ import { parseWorkbook, WorkbookParseError } from '@/features/bulkChange/utils/p
 import { useBulkTagMutation } from '../api/contactTagsApi';
 import type { BulkTagResult, BulkTagRow } from '@/types';
 
-// Tag contacts from a file (one row per establishment, tag, contact); checked first, then applied all or nothing.
+// Tags contacts from a file; checked first, then applied all or nothing.
 
 const ID_COLUMN = 'SBR_ID';
 const COLUMNS = ['TAG_CODE', 'CONTACT_ID', 'EMAIL', 'PHONE', 'CONTACT_NAME'];

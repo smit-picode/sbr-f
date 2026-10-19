@@ -103,7 +103,7 @@ export const EMPLOYMENT_SIZE_BANDS: Record<string, string> = {
   Large: '251+',
 };
 
-// Columns offered in the "Column filters" builder; each `value` must be in filter_expr of SBR_ESTABLISHMENTS_API (NPC_SBR).
+// Columns for the Column filters builder; each value must be in SBR_ESTABLISHMENTS_API filter_expr.
 export const ESTABLISHMENT_FILTER_COLUMNS: ColumnFilterOption[] = [
   { value: 'SBR_ID', label: 'SBR ID', type: 'number' },
   { value: 'NAME_ENU', label: 'Name (EN)' },
@@ -119,7 +119,7 @@ export const ESTABLISHMENT_FILTER_COLUMNS: ColumnFilterOption[] = [
   { value: 'ISIC_CODE', label: 'ISIC code', pick: true },
   { value: 'EMPLOYMENT_COUNT', label: 'Employment count', type: 'number' },
   { value: 'MAIN_BRANCH_FLG', label: 'Branch flag', pick: true },
-  // Matched on any of the establishment's open addresses (SBR_ESTABLISHMENTS_API address_filter_expr).
+  // Matched on any of the establishment's open addresses (address_filter_expr).
   { value: 'MUNICIPALITY_ID', label: 'Municipality', pick: true, valueLabel: municipalityLabel },
   { value: 'QARS', label: 'QARS' },
   { value: 'MAIN_BRANCH_SBR_ID', label: 'Main branch SBR ID', type: 'number' },

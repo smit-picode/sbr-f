@@ -224,7 +224,7 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
                     {task.COLUMNS.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);
                       const kind = BULK_CHANGE_MEMBER_KIND[`${row.memberTable}:${row.operation}`];
-                      // A new contact or tag change has no record id yet: the first cell says what it is, with the tag code.
+                      // A new contact or tag change has no record id yet; the first cell says what it is.
                       if (kind && col.key === task.COLUMNS[0].key) {
                         const tagCode = row.fields.find((f) => f.key === BULK_CHANGE_TAG_CODE_KEY)?.value;
                         return (

@@ -3,7 +3,7 @@ import { baseApi } from '@/services/api';
 import { setCredentials } from '@/features/auth/authSlice';
 import { rootReducer } from './rootReducer';
 
-// Cleared at sign-in so a new session never sees the last user's data (not at sign-out, where mounted queries would refetch tokenless).
+// Cleared at sign in so a new session never sees the last user's data.
 const sessionCache = createListenerMiddleware();
 sessionCache.startListening({
   actionCreator: setCredentials,

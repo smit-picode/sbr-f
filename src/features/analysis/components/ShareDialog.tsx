@@ -24,11 +24,15 @@ export function ShareDialog({ open, analysis, readOnly, saving, onClose, onSave 
   const { t } = useTranslation();
   const [shares, setShares] = useState<AnalysisShare[]>(analysis.shares);
   const [q, setQ] = useState('');
-  const search = useDebounce(q.trim(), 400);
+  const words = q.toLowerCase().split(/[\s_]+/).filter(Boolean);
+  const search = useDebounce(words.reduce((a, w) => (w.length > a.length ? w : a), ''), 400);
   const { data: directory } = useGetAnalysisShareDirectoryQuery(search, { skip: readOnly || !search });
   // The owner needs no share, and a principal already on the list is not offered again.
   const matches = search
-    ? (directory?.data ?? []).filter((d) => !shares.some((s) => s.kind === d.kind && s.id === d.id) && !(d.kind === 'user' && d.sub && d.sub === analysis.ownerEmail))
+    ? (directory?.data ?? []).filter((d) => {
+      const text = `${d.label} ${d.sub ?? ''}`.toLowerCase().replace(/_/g, ' ');
+      return words.every((w) => text.includes(w)) && !shares.some((s) => s.kind === d.kind && s.id === d.id) && !(d.kind === 'user' && d.sub && d.sub === analysis.ownerEmail);
+    })
     : [];
 
   const access = (a: AnalysisShare['access']) => (a === 'edit' ? t('analysis.share.canEdit', { defaultValue: 'Can edit' }) : t('analysis.share.canView', { defaultValue: 'Can view' }));
@@ -53,10 +57,10 @@ export function ShareDialog({ open, analysis, readOnly, saving, onClose, onSave 
               className="h-10 w-full rounded-full border border-slate-300 bg-white ps-10 pe-4 text-[13px] shadow-input outline-none focus:border-[#A29374]/40 focus:ring-2 focus:ring-[#A29374]/20"
             />
             {matches.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full rounded-2xl border border-slate-200 bg-white p-1 shadow-float">
+              <div className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1 shadow-float">
                 {matches.map((d) => (
                   <button
-                    key={d.id}
+                    key={`${d.kind}:${d.id}`}
                     type="button"
                     onClick={() => { setShares([...shares, { kind: d.kind, id: d.id, label: d.label, access: 'view' }]); setQ(''); }}
                     className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-start hover:bg-slate-100"

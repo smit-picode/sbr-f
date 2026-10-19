@@ -31,7 +31,7 @@ export const {
   useCreateSnapshotMutation,
 } = snapshotsApi;
 
-// Exports are binary streams of up to hundreds of MB, so they bypass RTK Query's cache; progress is bytes received.
+// Exports are large binary streams, so they bypass the RTK Query cache; progress is bytes received.
 export async function downloadSnapshotExport(
   { path, params, fileName }: SnapshotExportRequest,
   onProgress?: (bytes: number) => void,

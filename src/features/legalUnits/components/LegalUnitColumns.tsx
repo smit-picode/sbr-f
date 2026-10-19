@@ -1,13 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { LegalUnit } from '@/types';
+import type { LegalUnit, TFuncWithDefault } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { SOURCE_BADGE, SOURCE_BADGE_FALLBACK } from '@/constants/sourceBadges';
 import { ExternalLink } from 'lucide-react';
 
-type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
-
 // `onOpenEstablishment` is fired only from the ESTABLISHMENT cell (not the whole row)
-export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void, t: TFunc): ColumnDef<LegalUnit>[] => [
+export const getLegalUnitColumns = (onOpenEstablishment: (sbrId: number) => void, t: TFuncWithDefault): ColumnDef<LegalUnit>[] => [
   {
     accessorKey: 'LEGAL_UNIT_ID',
     header: t('columns.LEGAL_UNIT_ID', { defaultValue: 'LEGAL UNIT ID' }),

@@ -22,9 +22,9 @@ export interface ColumnFilterOption {
   label: string;
   // Number and date columns get comparison operators and typed inputs; omitted means text.
   type?: ColumnFilterType;
-  // A column of a few repeating values (status, sector...): with a values source its rows start as "is any of".
+  // A column of few repeating values: with a values source its rows start as 'is any of'.
   pick?: boolean;
-  // How a stored value reads in the picker (a code shown as its name); the stored value is still what is filtered on.
+  // How a stored value reads in the picker; the filter still uses the stored value.
   valueLabel?: (value: string, language: string) => string;
 }
 
@@ -61,3 +61,11 @@ export interface AuditMeta {
   approved: boolean;
   operation: string | null;
 }
+
+export type TFunc = (key: string, options?: { lng?: string }) => string;
+
+export type TFuncWithDefault = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
+
+export type ExcelJsModule = typeof import('exceljs');
+
+export type DetailStripItem = { icon: React.ReactNode; label: string; value: string | null };

@@ -1,12 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrAddress } from '@/types';
+import type { SbrAddress, TFunc } from '@/types';
 import { nullableText, formatDate } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import env from '@/config/env';
 
-type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getAddressColumns = (onEdit: (row: SbrAddress) => void, t: TFunc, canEdit = true): ColumnDef<SbrAddress>[] => [
   {

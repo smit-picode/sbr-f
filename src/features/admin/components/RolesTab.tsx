@@ -20,7 +20,7 @@ import {
   useAssignRolePermissionsMutation,
 } from '../api/adminApi';
 import { ADMIN_DEFAULT_FILTERS, ROLES_SORT_OPTIONS, ROLES_SORT_DEFAULT, ROLE_NO_CATEGORY_VALUE } from '../constants';
-import type { SbrRole, SbrPermission, RoleCategory, PermissionNode } from '@/types';
+import type { SbrRole, SbrPermission, RoleCategory, PermissionNode, PermissionTreeNode, PermissionLeafEntry } from '@/types';
 import { cleanParams } from '@/utils/query';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
@@ -38,12 +38,7 @@ function getApiError(err: unknown, fallback: string): string {
   return fallback;
 }
 
-// ─── Tree helpers ────────────────────────────────────────────────────────────
-
-type TreeNode  = { perm: SbrPermission | null; node: PermissionNode; children: TreeNode[] };
-type LeafEntry = { perm: SbrPermission; label: string; nodeKey: string };
-
-function buildTreeNode(node: PermissionNode, byName: Record<string, SbrPermission>): TreeNode {
+function buildTreeNode(node: PermissionNode, byName: Record<string, SbrPermission>): PermissionTreeNode {
   return {
     perm: byName[node.key] ?? null,
     node,
@@ -54,8 +49,8 @@ function buildTreeNode(node: PermissionNode, byName: Record<string, SbrPermissio
 const treeKeys = (nodes: PermissionNode[]): string[] => nodes.flatMap((n) => [n.key, ...treeKeys(n.children ?? [])]);
 const LISTED_KEYS = new Set(treeKeys(PERMISSION_TREE));
 
-// A permission the tree does not know yet goes in a trailing group, so every DB permission stays assignable.
-function buildTree(allPerms: SbrPermission[], otherLabel: string): TreeNode[] {
+// Unknown permissions go in a trailing group, so every DB permission stays assignable.
+function buildTree(allPerms: SbrPermission[], otherLabel: string): PermissionTreeNode[] {
   const byName = Object.fromEntries(allPerms.map(p => [p.PERMISSION_NAME, p]));
   const tree = PERMISSION_TREE.map(node => buildTreeNode(node, byName));
   const unlisted = allPerms.filter((p) => !LISTED_KEYS.has(p.PERMISSION_NAME));
@@ -66,8 +61,8 @@ function buildTree(allPerms: SbrPermission[], otherLabel: string): TreeNode[] {
   return tree;
 }
 
-function flatLeafEntries(items: TreeNode[]): LeafEntry[] {
-  const result: LeafEntry[] = [];
+function flatLeafEntries(items: PermissionTreeNode[]): PermissionLeafEntry[] {
+  const result: PermissionLeafEntry[] = [];
   for (const item of items) {
     if (item.children.length > 0) result.push(...flatLeafEntries(item.children));
     else if (item.perm) result.push({ perm: item.perm, label: item.node.label, nodeKey: item.node.key });
@@ -85,7 +80,7 @@ function displayRoleName(name: string): string {
 function PermissionGrid({
   entries, grantedIds, onToggle, canEdit,
 }: {
-  entries:    LeafEntry[];
+  entries:    PermissionLeafEntry[];
   grantedIds: Set<number>;
   onToggle:   (id: number, granted: boolean) => void;
   canEdit:    boolean;
@@ -150,7 +145,7 @@ function PermissionGrid({
 function PermSection({
   treeNode, grantedIds, onToggle, canEdit,
 }: {
-  treeNode:   TreeNode;
+  treeNode:   PermissionTreeNode;
   grantedIds: Set<number>;
   onToggle:   (id: number, granted: boolean) => void;
   canEdit:    boolean;
@@ -293,14 +288,14 @@ export function RolesTab({
   const user        = useAppSelector((s) => s.auth.user);
   const permissions = useAppSelector((s) => s.auth.permissions);
   const isSA        = user?.role === 'SUPER_ADMIN' || user?.role?.toUpperCase() === 'SUPER_ADMIN';
-  // The permission listing is gated solely by permissions.view; roles.edit only lets a user who can already see it toggle and save.
+  // The permission listing needs permissions.view; roles.edit only lets that viewer toggle and save.
   const canFetchPerms = isSA || permissions.some(p =>
     p.permissionName === 'admin_panel.permissions.view'
   );
   // Whether the current user may use the permission search bar
   const canSearchPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.search');
 
-  // The chosen option carries sortBy/sortOrder; Default carries neither, so cleanParams drops them and the API orders by ID ASC.
+  // The chosen option carries sortBy and sortOrder; Default carries neither, so the API orders by ID.
   const activeRoleSort = ROLES_SORT_OPTIONS.find((o) => o.value === roleSort);
   const { data: rolesData, isLoading: isRolesLoading } = useGetRolesListQuery(
     cleanParams({
@@ -363,12 +358,11 @@ export function RolesTab({
     }, {}),
   );
 
-  // Register the "open create dialog" callback with the parent page header (gated by the create permission)
+  // Registers the open create dialog callback with the parent page header (create permission).
   useEffect(() => {
     if (canCreate && onRegisterCreate) {
       onRegisterCreate(() => { setForm({ ROLE_NAME: '', CATEGORY: ROLE_NO_CATEGORY_VALUE }); setCreateHomeScreen(NO_HOME_SCREEN); setIsCreateOpen(true); });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canCreate, onRegisterCreate]);
 
   // Auto-select first role on load
@@ -498,7 +492,7 @@ export function RolesTab({
     }
   };
 
-  // Toggling and saving the permission matrix needs permissions.edit, not roles.edit; SUPER_ADMIN's own permissions are never editable.
+  // Toggling and saving the matrix needs permissions.edit; SUPER_ADMIN is never editable.
   const canEditPerms = isSA || permissions.some(p => p.permissionName === 'admin_panel.permissions.edit');
   const canEditPermissions = canEditPerms && selectedRole?.ROLE_NAME !== 'SUPER_ADMIN';
 
@@ -542,7 +536,7 @@ export function RolesTab({
               const userCount  = role.USER_COUNT ?? 0;
               const isEditable = canEdit && role.ROLE_NAME !== 'SUPER_ADMIN';
               return (
-                // A plain container with two sibling buttons (select and edit), not an edit control nested inside the select button.
+                // A plain container with two sibling buttons (select and edit), not a control nested in a button.
                 <div
                   key={role.ID}
                   className={`flex items-center rounded-lg transition-colors ${
@@ -559,8 +553,7 @@ export function RolesTab({
                       {role.ROLE_NAME}
                     </span>
 
-                    {/* Both counts sit together so they read as one line of metadata about
-                        this role; weight and tone separate them instead of distance. */}
+                    {/* Both counts read as one line of metadata about this role. */}
                     <span className="mt-1 flex items-center gap-1.5 text-[10.5px]" dir="auto">
                       <span className="font-medium tabular-nums text-slate-600">
                         {userCount} {userCount === 1

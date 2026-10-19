@@ -23,7 +23,7 @@ export interface HomeDecisionCounts {
   rejected: number;
 }
 
-// The caller's own change requests: 'manual' were made on a record page, 'bulk' came from a bulk change file.
+// The caller's own change requests: manual from a record page, bulk from a bulk change file.
 export interface StewardSummary {
   windowDays: number;
   counts: { manual: HomeDecisionCounts; bulk: HomeDecisionCounts };
@@ -77,3 +77,7 @@ export interface ReviewerSummary {
 }
 
 export type HomeScreen = 'executive' | 'reviewer' | 'steward';
+
+export type HomeGrowthMode = 'total' | 'source' | 'sector';
+
+export type HomeResponseMode = 'survey' | 'activity';

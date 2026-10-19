@@ -1,12 +1,12 @@
 'use client';
 
 import { skipToken } from '@reduxjs/toolkit/query';
-import type { AnalysisRequest, AnalysisResolvedQuery, AnalysisResult, AnalysisRecordsResult } from '@/types';
+import type { AnalysisRequest, AnalysisResolvedQuery, AnalysisResult, AnalysisRecordsResult, AnalysisResultState } from '@/types';
 import { store } from '@/store';
 import { ANALYSIS_EXPORT_CONCURRENCY, ANALYSIS_RECORDS_MAX_PAGE_SIZE } from '../constants';
 import { analysisApi, useRunAnalysisQueryQuery } from './analysisApi';
 
-// Imperative query (exports); shares RTK Query's cache with the blocks, so a block already on screen costs nothing.
+// Imperative query for exports; shares RTK Query's cache with blocks already on screen.
 export async function runAnalysis(req: AnalysisRequest): Promise<AnalysisResult> {
   const sub = store.dispatch(analysisApi.endpoints.runAnalysisQuery.initiate(req));
   try {
@@ -18,7 +18,7 @@ export async function runAnalysis(req: AnalysisRequest): Promise<AnalysisResult>
   }
 }
 
-// The API pages records at most 100 at a time, so an extract fetches pages a few at a time up to the cap.
+// The API pages 100 records at a time, so an extract fetches a few pages at once up to the cap.
 export async function fetchRecordExtract(
   query: AnalysisResolvedQuery,
   columns: string[],
@@ -50,15 +50,8 @@ export async function fetchRecordExtract(
   return { rows: byPage.flat().slice(0, wanted), total: first.total };
 }
 
-interface ResultState<T> {
-  data: T | undefined;
-  isLoading: boolean;
-  isFetching: boolean;
-  isError: boolean;
-}
-
-// Keeps the previous result while a changed request loads, so blocks never flash back to a skeleton.
-export function useAnalysisResult<T extends AnalysisResult>(req: AnalysisRequest | null): ResultState<T> {
+// Keeps the previous result while a changed request loads, so blocks never flash a skeleton.
+export function useAnalysisResult<T extends AnalysisResult>(req: AnalysisRequest | null): AnalysisResultState<T> {
   const { data, isLoading, isFetching, isError } = useRunAnalysisQueryQuery(req ?? skipToken, {
     refetchOnMountOrArgChange: false,
     refetchOnFocus: false,

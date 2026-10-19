@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrEstablishment } from '@/types';
+import type { SbrEstablishment, TFunc } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,8 +27,6 @@ function SourceCell({ value }: { value: string | null | undefined }) {
 function DateCell({ value }: { value: string | null | undefined }) {
   return <span className="text-sm text-slate-600">{formatDate(value ?? null)}</span>;
 }
-
-type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getEstablishmentsColumns = (onEdit: (row: SbrEstablishment) => void, t: TFunc, canEdit = true): ColumnDef<SbrEstablishment>[] => [
   {

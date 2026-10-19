@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrPermission, SbrRole, RoleCategory, SbrRoleWithPermissions, SbrUser, UserRoleInput, RolePermissionAssignment, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
+import type { ApiResponse, SbrPermission, SbrRole, RoleCategory, SbrRoleWithPermissions, SbrUser, UserRoleInput, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

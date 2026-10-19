@@ -1,7 +1,4 @@
-import type {
-  SamplingApiSelectionGroup, SamplingDesign, SamplingGroup, SamplingGroupMethod, SamplingSelectionGroup,
-  SamplingNode, SamplingStrataRequest, SamplingStratumField, SamplingUnit,
-} from '@/types';
+import type { SamplingApiSelectionGroup, SamplingDesign, SamplingGroup, SamplingGroupMethod, SamplingSelectionGroup, SamplingNode, SamplingStrataRequest, SamplingUnit, DesignV1 } from '@/types';
 import {
   SAMPLING_DEFAULT_ALLOCATION, SAMPLING_DEFAULT_AUX, SAMPLING_DEFAULT_COLUMNS, SAMPLING_DEFAULT_EST_COLUMNS,
   SAMPLING_DEFAULT_SEED, SAMPLING_EMPLOYMENT_BANDS,
@@ -37,24 +34,7 @@ export function defaultDesign(unit: SamplingUnit = 'enterprise', seed: number = 
   };
 }
 
-interface DesignV1 {
-  version: 1;
-  snapshotId: number | null;
-  filter: SamplingGroup;
-  strata: SamplingStratumField[];
-  auxColumn: string | null;
-  method: SamplingDesign['groups'][number]['allocation']['method'];
-  sizeMode: 'size' | 'cv';
-  sampleSize: number;
-  targetCv: number;
-  minPerStratum: number;
-  reservePct: number;
-  overrides: Record<string, { takeAll?: boolean; n?: number | null }>;
-  seed: number;
-  columns: string[];
-}
-
-// A design saved before selection groups existed: one establishment random group with its strata and allocation.
+// A design saved before selection groups existed: one establishment random group.
 function fromV1(v1: DesignV1, ids: (n: SamplingNode) => SamplingNode): SamplingDesign {
   const base = defaultDesign('enterprise', v1.seed);
   const group = newSelectionGroup('random', 'Random sample');
@@ -72,7 +52,7 @@ function fromV1(v1: DesignV1, ids: (n: SamplingNode) => SamplingNode): SamplingD
   };
 }
 
-// Any stored or loaded design as the current shape (or null); a loaded file gets fresh node ids, a stored design keeps its own.
+// Any stored or loaded design as the current shape or null; a loaded file gets fresh node ids.
 export function migrateDesign(raw: unknown, freshIds = false): SamplingDesign | null {
   const d = raw as Omit<Partial<SamplingDesign>, 'version'> & { version?: number };
   if (!d || typeof d !== 'object' || d.filter?.kind !== 'group') return null;
@@ -92,7 +72,7 @@ export function migrateDesign(raw: unknown, freshIds = false): SamplingDesign | 
   } as SamplingDesign;
 }
 
-// Ids as typed: numbers separated by commas, spaces, semicolons or new lines; anything else is reported back.
+// Ids as typed: separated by commas, spaces, semicolons or new lines; anything else is reported.
 export function parseIds(text: string): { ids: number[]; invalid: string[] } {
   const tokens = text.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
   const ids: number[] = [];
@@ -128,7 +108,7 @@ export function presetCensusLargePlusRandom(names: { census: string; random: str
   return [census, random];
 }
 
-// The design without conditions, strata, auxiliary field or output columns on fields the frame no longer offers.
+// The design without conditions, strata, aux field or columns the frame no longer offers.
 export function pruneDesign(design: SamplingDesign, known: Set<string>, estKnown: Set<string> | null): { design: SamplingDesign; removed: string[] } {
   const removed = new Set<string>();
   const keep = (set: Set<string>) => (c: string) => set.has(c) || !removed.add(c);
@@ -151,7 +131,7 @@ export function requestFields(req: SamplingStrataRequest): string[] {
   return out;
 }
 
-// An uploaded ids file as text for the hand-picked box, without a header line such as the template's ENTERPRISE_ID.
+// An uploaded ids file as text for the hand picked box, without a header line.
 export function idsFromFile(text: string): string {
   const lines = text.split(/\r?\n/);
   const first = lines.findIndex((l) => l.trim() !== '');

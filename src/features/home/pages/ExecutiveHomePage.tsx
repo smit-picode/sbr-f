@@ -26,11 +26,9 @@ import {
   SURVEY_RESPONSE_MIN_BASE,
   SURVEY_RESPONSE_BY_SURVEY,
 } from '../data/executiveDashboardDummy';
+import type { HomeGrowthMode, HomeResponseMode } from '@/types';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-type GrowthMode = 'total' | 'source' | 'sector';
-type ResponseMode = 'survey' | 'activity';
 
 function SectionHead({ title, sub }: { title: string; sub?: string }) {
   return (
@@ -50,8 +48,8 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
   const router = useRouter();
   const isSuperAdmin = user?.role?.toUpperCase() === 'SUPER_ADMIN';
   const [mapReady, setMapReady] = useState(false);
-  const [growthMode, setGrowthMode] = useState<GrowthMode>('total');
-  const [responseMode, setResponseMode] = useState<ResponseMode>('survey');
+  const [growthMode, setGrowthMode] = useState<HomeGrowthMode>('total');
+  const [responseMode, setResponseMode] = useState<HomeResponseMode>('survey');
 
   useEffect(() => {
     registerQatarMap()
@@ -110,7 +108,6 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
       })),
       yMin: 0,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [growthMode, registerGrowthByMonth, registerGrowthBySource, registerGrowthBySector, t]);
 
   const sizeClass = useMemo(() => {
@@ -147,7 +144,6 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
         totalLabel: t('home.exec.establishments', { defaultValue: 'Establishments' }),
         legendWidth: 96,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sectorBreakdown, t]
   );
 
@@ -166,7 +162,7 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
 
   const sourceSectorBreakdown = summary?.sourceSectorBreakdown ?? [];
   const contributionOption = useMemo(() => {
-    // Sources by their total, biggest on top; sectors likewise, so the stack and legend lead with the biggest.
+    // Sources by total, biggest on top; sectors likewise, so the legend leads with the biggest.
     const sourceTotal = new Map<string, number>();
     const sectorTotal = new Map<string | null, number>();
     sourceSectorBreakdown.forEach((s) => {
@@ -349,7 +345,7 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
                   : t('home.exec.growthBreakdownSub2', { defaultValue: 'Active establishments at each month end, split by the selected dimension.' })}
               </p>
             </div>
-            <SegmentedToggle<GrowthMode>
+            <SegmentedToggle<HomeGrowthMode>
               value={growthMode}
               onChange={setGrowthMode}
               options={[
@@ -395,7 +391,7 @@ export function ExecutiveHomePage({ switcher }: { switcher?: React.ReactNode }) 
                   : t('home.exec.responseByActivitySub', { defaultValue: 'By economic activity section' })}
               </p>
             </div>
-            <SegmentedToggle<ResponseMode>
+            <SegmentedToggle<HomeResponseMode>
               value={responseMode}
               onChange={setResponseMode}
               options={[

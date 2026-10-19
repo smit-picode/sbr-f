@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mirrors the steward and reviewer homes below their header: four KPI cards, a wide list beside a side card, then a full-width list.
+// Mirrors the steward and reviewer homes below their header: KPI cards and lists.
 export function RoleHomeSkeleton() {
   return (
     <div className="space-y-4">

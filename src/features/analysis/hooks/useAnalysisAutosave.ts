@@ -9,7 +9,7 @@ import { markAnalysisSaved } from '../store/analysesSlice';
 
 const snapshotOf = (a: Analysis) => JSON.stringify({ name: a.name, description: a.description, definition: toDefinition(a) });
 
-// Persists the working copy after a pause in editing; one save at a time so rowVersion is never stale.
+// Saves the working copy after a pause in editing, one at a time so rowVersion stays fresh.
 export function useAnalysisAutosave(analysis: Analysis | undefined, enabled: boolean, onConflict: () => void) {
   const dispatch = useAppDispatch();
   const [updateAnalysis] = useUpdateAnalysisMutation();
@@ -71,7 +71,7 @@ export function useAnalysisAutosave(analysis: Analysis | undefined, enabled: boo
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, [analysis, enabled, save, status]);
 
-  // Leaving the page must not drop the last edits: save what is pending right away, and warn on a tab close.
+  // Leaving must not drop the last edits: save pending changes now and warn on tab close.
   useEffect(() => {
     const dirty = () => !!latest.current && saved.current?.id === latest.current.id && snapshotOf(latest.current) !== saved.current.snapshot;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {

@@ -25,7 +25,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCrossFilter, AnalysisFilter, AnalysisDrillStep, AnalysisPointEvent } from '@/types';
+import type { Analysis, AnalysisAggregateResult, AnalysisBlock, AnalysisCrossFilter, AnalysisFilter, AnalysisDrillStep, AnalysisPointEvent, BlockCardActions, BlockMenuState } from '@/types';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -41,18 +41,6 @@ import { blockTypeLabel, entityLabel, fieldLabel, frameName, valueLabel } from '
 import { AnalysisIcon } from './AnalysisIcon';
 import { BlockContent, blockHeight } from './blocks/BlockContent';
 
-export interface BlockCardActions {
-  onEdit: () => void;
-  onChange: (patch: Partial<AnalysisBlock>) => void;
-  onDuplicate: () => void;
-  onInsertBelow: () => void;
-  onDelete: () => void;
-  onMove: (dir: -1 | 1) => void;
-  onCrossFilter: (f: AnalysisCrossFilter) => void;
-  onViewRecords: (block: AnalysisBlock, extra: AnalysisFilter[], label: string) => void;
-  onExport: (kind: 'xlsx' | 'csv' | 'png') => void;
-}
-
 interface BlockCardProps extends BlockCardActions {
   block: AnalysisBlock;
   analysis: Analysis;
@@ -65,10 +53,8 @@ interface BlockCardProps extends BlockCardActions {
   dragHandleProps: React.HTMLAttributes<HTMLButtonElement>;
 }
 
-interface MenuState extends AnalysisPointEvent { label: string }
-
 function PointMenu({ menu, block, onClose, onFilter, onDrill, onRecords }: {
-  menu: MenuState;
+  menu: BlockMenuState;
   block: AnalysisBlock;
   onClose: () => void;
   onFilter: (dimIndex: number) => void;
@@ -130,7 +116,7 @@ export function BlockCard(props: BlockCardProps) {
   const { block, analysis, cross, masked, canEdit, selected, isFirst, isLast, dragHandleProps } = props;
   const { t } = useTranslation();
   const [drill, setDrill] = useState<AnalysisDrillStep[]>([]);
-  const [menu, setMenu] = useState<MenuState | null>(null);
+  const [menu, setMenu] = useState<BlockMenuState | null>(null);
   const def = ANALYSIS_BLOCK_TYPE_MAP[block.type];
 
   const dimsKey = `${block.query.entity}|${block.query.dimensions.join(',')}|${block.type}`;
@@ -149,7 +135,7 @@ export function BlockCard(props: BlockCardProps) {
     setMenu({ ...e, label });
   } : undefined;
 
-  const pointFilters = (m: MenuState): AnalysisFilter[] =>
+  const pointFilters = (m: BlockMenuState): AnalysisFilter[] =>
     m.keys.map((k, i) => ({ id: `p${i}`, field: m.dims[i], op: 'in' as const, values: [k] })).filter((f) => f.field !== ANALYSIS_FRAME_DIMENSION);
 
   const drillFilters: AnalysisFilter[] = drill.map((s, i) => ({ id: `d${i}`, field: s.field, op: 'in', values: [s.value] }));

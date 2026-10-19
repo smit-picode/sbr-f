@@ -179,7 +179,7 @@ export function duplicateBlock(a: Analysis, id: string): Analysis {
   return insertBlock(a, copy, id);
 }
 
-// A saved analysis without the fields the portal no longer offers, so it never queries or shows them.
+// A saved analysis without fields the portal no longer offers, so it never queries them.
 export function withKnownFields(a: Analysis): Analysis {
   return { ...a, filters: a.filters.filter((f) => f.field in ANALYSIS_FIELDS), blocks: a.blocks.map((b) => changeEntity(b, b.query.entity)) };
 }

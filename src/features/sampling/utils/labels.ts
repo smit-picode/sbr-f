@@ -40,7 +40,7 @@ export function operatorLabel(t: TFunction, op: string): string {
   return t(`sampling.op.${op}`, { defaultValue: SAMPLING_OPERATOR_LABELS[op] ?? op });
 }
 
-// SBR_SAMPLING_API names number bands '< a', 'a to < b' and '>= a'; the page words them per language.
+// SBR_SAMPLING_API names bands '< a', 'a to < b' and '>= a'; the page words them per language.
 const BAND_LT = /^< (-?[\d.]+)$/;
 const BAND_RANGE = /^(-?[\d.]+) to < (-?[\d.]+)$/;
 const BAND_GE = /^>= (-?[\d.]+)$/;

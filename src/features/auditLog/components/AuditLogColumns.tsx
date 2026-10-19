@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { AuditLog, AuditUserRef } from '@/types';
+import type { AuditLog, AuditUserRef, TFunc, AuditMemberDetail } from '@/types';
 import { formatDate } from '@/utils/format';
 
 const TABLE_COLORS: Record<string, string> = {
@@ -48,8 +48,6 @@ function RecordIdCell({ value }: { value: number | null }) {
   return <span className="font-mono text-xs font-medium text-[#A29374]">{String(value)}</span>;
 }
 
-interface MemberDetail { ENTERPRISE_ID?: number; NAME?: string | null }
-
 const STRUCTURAL_CHANGE_DATA_KEYS = new Set(['memberAdd', 'memberRemove', 'memberAddDetails', 'memberRemoveDetails']);
 
 function formatColumnNames(value: string | null): string {
@@ -63,7 +61,7 @@ function formatColumnNames(value: string | null): string {
 
       const memberLabel = (details: unknown, fallbackCount: unknown, suffix: string): string[] => {
         if (Array.isArray(details) && details.length > 0) {
-          return (details as MemberDetail[]).map((m) => `${m.NAME || `ENT-${m.ENTERPRISE_ID}`} (${suffix})`);
+          return (details as AuditMemberDetail[]).map((m) => `${m.NAME || `ENT-${m.ENTERPRISE_ID}`} (${suffix})`);
         }
         if (Array.isArray(fallbackCount) && fallbackCount.length > 0) {
           return [`${fallbackCount.length} member${fallbackCount.length > 1 ? 's' : ''} ${suffix.toLowerCase()}`];
@@ -80,8 +78,6 @@ function formatColumnNames(value: string | null): string {
   }
   return value;
 }
-
-type TFunc = (key: string, options?: { lng?: string }) => string;
 
 export const getAuditLogColumns = (t: TFunc): ColumnDef<AuditLog>[] => [
   {

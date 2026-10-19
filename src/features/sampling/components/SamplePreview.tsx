@@ -10,7 +10,7 @@ import type { SamplingField, SamplingRow, SamplingSelectionGroup, SamplingTableR
 import { SAMPLING_UNIT_KEY } from '../constants';
 import { contactColumnLabel, fieldLabel, groupMethodLabel, valueLabel } from '../utils/labels';
 
-// DRAW_SAMPLE's own columns that the units table shows differently (group, stratum, badges) or not at all.
+// DRAW_SAMPLE's own columns that the units table shows differently or not at all.
 const UNIT_HIDDEN = new Set(['GROUP_NO', 'SELECTION_METHOD', 'STRATUM_KEY', 'S1', 'S2', 'S3', 'S4', 'STRATUM_POPULATION', 'STRATUM_SAMPLE']);
 const ID_COLUMNS = new Set(['UNIT_ID', 'SBR_ID', 'ENTERPRISE_ID', 'CONTACT_ID']);
 

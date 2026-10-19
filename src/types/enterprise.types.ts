@@ -35,6 +35,7 @@ export interface SbrEnterprise {
   LEGAL_TYPE: string | null;
   ESTABLISHMENT_COUNT: number;
   HAS_PENDING_REQUEST?: boolean | number;
+  PENDING_FIELDS?: Record<string, number>;
 }
 
 export interface EnterpriseFilters {
@@ -75,7 +76,7 @@ export interface EnterpriseSecondaryActivity {
   FROM_SBR_ID: number;
 }
 
-// Shape as SBR_ENTERPRISES_API.GET_DETAIL returns it — the API passes these rows through unmodified.
+// Shape as SBR_ENTERPRISES_API.GET_DETAIL returns it; the API passes these rows through unmodified.
 export interface EnterpriseLifecycleEvent {
   TYPE: string;
   TITLE: string;
@@ -126,4 +127,11 @@ export interface UpdateEnterprisePayload {
   addEstablishmentSbrIds?: number[];
   removeEstablishmentSbrIds?: number[];
   comment?: string;
+}
+
+export interface EnterpriseEstablishmentRow {
+  SBR_ID: number;
+  NAME_ENU: string | null;
+  MOCI_CR_NUM: string | null;
+  EST_STATUS: string | null;
 }

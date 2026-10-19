@@ -27,7 +27,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Profiling Runs',            href: '/tasks/profiling-runs',             icon: 'GitBranch',        permKey: '', i18nKey: 'nav.profilingRuns', hidden: true },
       // Module-level gate only: per-entity permissions are still enforced by the API and SBR_PORTAL_PKG.
       { title: 'Bulk Change',                href: '/tasks/bulk-change',                icon: 'Layers',           permKey: 'bulk_change.view', i18nKey: 'nav.bulkChange' },
-      // The registry is readable with contacts access (editing needs contact_tags.manage); the upload needs contacts.tag.
+      // The registry is readable with contacts access; editing needs contact_tags.manage.
       { title: 'Contact Tags',              href: '/tasks/contact-tags',               icon: 'Tag',              permKey: 'contacts.view', i18nKey: 'nav.contactTags' },
       { title: 'Tag Upload',                href: '/tasks/tag-upload',                 icon: 'Tags',             permKey: 'contacts.tag', i18nKey: 'nav.tagUpload' },
       { title: 'Tasks History',             href: '/tasks/tasks-history',              icon: 'CheckCheck',       permKey: '', i18nKey: 'nav.tasksHistory', hidden: true },

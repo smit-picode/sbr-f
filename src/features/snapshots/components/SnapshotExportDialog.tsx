@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatNumber } from '@/utils/format';
-import type { SnapshotEntity, SnapshotSummary, SnapshotTableQueryState } from '@/types';
+import type { SnapshotEntity, SnapshotSummary, SnapshotTableQueryState, SnapshotExportMode } from '@/types';
 import { downloadSnapshotExport } from '../api/snapshotsApi';
 import { SNAPSHOT_ENTITIES } from '../constants';
 
@@ -22,8 +22,6 @@ interface Props {
   query: SnapshotTableQueryState;
 }
 
-type Mode = 'table' | 'tables';
-
 const megabytes = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
 const fileStem = (snapshotId: number, name?: string) =>
   (name ? name.replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '_').slice(0, 60) : `snapshot-${snapshotId}`) || `snapshot-${snapshotId}`;
@@ -31,7 +29,7 @@ const fileStem = (snapshotId: number, name?: string) =>
 // One table (optionally with its filters) as CSV, or several whole tables as a ZIP of CSVs.
 export function SnapshotExportDialog({ open, onClose, snapshotId, snapshot, entity, query }: Props) {
   const { t } = useTranslation();
-  const [mode, setMode] = useState<Mode>('table');
+  const [mode, setMode] = useState<SnapshotExportMode>('table');
   const hasFilters = !!query.columnFilters;
   const [withFilters, setWithFilters] = useState(true);
   const [picked, setPicked] = useState<SnapshotEntity[]>(SNAPSHOT_ENTITIES.map((e) => e.entity));
@@ -86,7 +84,7 @@ export function SnapshotExportDialog({ open, onClose, snapshotId, snapshot, enti
     onClose();
   };
 
-  const modeButton = (m: Mode, icon: React.ReactNode, title: string, sub: string) => (
+  const modeButton = (m: SnapshotExportMode, icon: React.ReactNode, title: string, sub: string) => (
     <button
       type="button"
       onClick={() => setMode(m)}

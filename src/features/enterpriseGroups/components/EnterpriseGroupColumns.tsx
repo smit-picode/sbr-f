@@ -1,15 +1,12 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { SbrEnterpriseGroup } from '@/types';
+import type { SbrEnterpriseGroup, TFuncWithDefault } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { Badge } from '@/components/ui/badge';
 import { nullableText } from '@/utils/format';
 import { Users, MapPin, GitFork, Orbit } from 'lucide-react';
 import { PendingBadge } from '@/components/common/PendingBadge';
 import { formatGroupCode } from '../constants';
 
-type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
-
-export const getEnterpriseGroupColumns = (t: TFunc): ColumnDef<SbrEnterpriseGroup>[] => [
+export const getEnterpriseGroupColumns = (t: TFuncWithDefault): ColumnDef<SbrEnterpriseGroup>[] => [
   {
     accessorKey: 'ENTERPRISE_GROUP_ID',
     header: t('columns.GROUP', { defaultValue: 'GROUP' }),

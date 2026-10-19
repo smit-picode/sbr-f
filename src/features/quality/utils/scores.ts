@@ -17,7 +17,7 @@ export function ruleColumns(rule: DqRule): string[] {
   return (rule.SBR_COLUMN ?? '').split(',').map((c) => c.trim()).filter(Boolean);
 }
 
-// Same weighting as V_DQ_TABLE_SCORE: SUM(PASS_PCT x WEIGHT_VALUE) / SUM(WEIGHT_VALUE) over scored rules, worst first.
+// Same weighting as V_DQ_TABLE_SCORE: weighted pass percentage over scored rules, worst first.
 export function columnScores(rules: DqRule[]): DqColumnScore[] {
   const acc = new Map<string, { fieldName: string | null; rules: number; num: number; den: number }>();
   for (const rule of rules) {

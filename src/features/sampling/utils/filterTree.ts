@@ -12,7 +12,7 @@ export const newGroup = (op: 'and' | 'or' = 'and'): SamplingGroup => ({
   id: newNodeId(), kind: 'group', op, not: false, rules: [],
 });
 
-// A condition is sent once it can mean something: a column, and a value unless the operator needs none.
+// A condition is sent once it has a column, and a value unless the operator needs none.
 export function isComplete(c: SamplingCondition): boolean {
   if (!c.column) return false;
   if (SAMPLING_NO_VALUE_OPERATORS.includes(c.operator)) return true;

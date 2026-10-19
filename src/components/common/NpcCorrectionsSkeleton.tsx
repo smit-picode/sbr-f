@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mirrors the NPC corrections page below its header: KPI cards, the two breakdown charts, the trend, then the table.
+// Mirrors the NPC corrections page below its header: KPI cards, charts, trend, table.
 export function NpcCorrectionsSkeleton() {
   return (
     <div className="space-y-4">

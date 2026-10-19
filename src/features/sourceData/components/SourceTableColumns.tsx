@@ -10,7 +10,7 @@ function SourceCell({ kind, value }: { kind: SourceTableColumn['KIND']; value: u
   return <span className="block max-w-[320px] truncate text-sm text-slate-700" title={text}>{text}</span>;
 }
 
-// The source table's own columns, named as stored (these are raw regulator extracts), in table order.
+// The source table's own columns, as stored (raw regulator extracts), in table order.
 export function getSourceTableColumns(columns: SourceTableColumn[]): ColumnDef<SourceTableRow>[] {
   return columns.map((c) => ({
     id: c.COLUMN_NAME,
@@ -20,7 +20,7 @@ export function getSourceTableColumns(columns: SourceTableColumn[]): ColumnDef<S
   }));
 }
 
-// The same columns as filter options: numbers and dates get the comparison operators, text the value picker.
+// The same columns as filter options: numbers and dates get comparisons, text the value picker.
 export function getSourceTableFilterColumns(columns: SourceTableColumn[]): ColumnFilterOption[] {
   return columns.map((c) => ({ value: c.COLUMN_NAME, label: c.COLUMN_NAME, type: c.KIND }));
 }

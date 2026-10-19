@@ -1,4 +1,4 @@
-// An explicit URL wins; otherwise local dev reaches the backend directly and any other host calls its own /sbr/api (reverse proxy).
+// An explicit URL wins; local dev calls the backend directly, other hosts use their own /sbr/api.
 function resolveApiUrl(): string {
   const configured = (process.env.NEXT_PUBLIC_API_URL ?? '').trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
   if (configured) return configured;

@@ -237,7 +237,7 @@ export const ANALYSIS_QUICK_ADD: AnalysisBlockType[] = ['kpi', 'bar', 'map', 'pi
 export const ANALYSIS_RECORDS_PAGE_SIZE = 25;
 export const ANALYSIS_BAR_ROW_HEIGHT = 26;
 export const ANALYSIS_BAR_SCROLL_HEIGHT = 560;
-// Record exports page the API 100 rows at a time, so the cap keeps an extract to about half a minute.
+// Record exports page the API 100 rows at a time, so the cap keeps an extract near half a minute.
 export const ANALYSIS_EXPORT_ROW_LIMIT = 10000;
 export const ANALYSIS_RECORDS_MAX_PAGE_SIZE = 100;
 export const ANALYSIS_EXPORT_CONCURRENCY = 6;

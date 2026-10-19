@@ -16,7 +16,7 @@ import { usePersistedState } from '@/hooks';
 import { useHasPermission } from '@/hooks/usePermission';
 import { toast } from '@/utils/toast';
 import { formatDate, formatNumber } from '@/utils/format';
-import type { SamplingDesign, SamplingDrawRequest, SamplingNode, SamplingPublishRequest, SamplingRow, SamplingSelectionGroup, SamplingStrataRequest, SamplingStratum, SamplingTableResult, Allocation, Precision } from '@/types';
+import type { SamplingDesign, SamplingDrawRequest, SamplingNode, SamplingPublishRequest, SamplingRow, SamplingSelectionGroup, SamplingStrataRequest, SamplingTableResult, DrawnSample } from '@/types';
 import {
   useGetSamplingContactTagsQuery, useGetSamplingFieldsQuery, useGetSamplingFramesQuery, useGetSamplingStrataQuery,
   useLazyDrawSampleQuery, useLazyGetSampleContactsQuery, useLazyGetSampleEstablishmentsQuery,
@@ -77,19 +77,6 @@ function Kpi({ label, value }: { label: string; value: string }) {
   );
 }
 
-// What was drawn, frozen at draw time, so an export always matches the rows on screen.
-interface DrawnSample {
-  request: string;
-  design: SamplingDesign;
-  strata: SamplingStratum[];
-  allocations: Record<number, Allocation>;
-  precisions: Record<number, Precision>;
-  units: SamplingTableResult;
-  establishments: SamplingTableResult | null;
-  contacts: SamplingRow[] | null;
-  publish: SamplingPublishRequest;
-}
-
 const errorMessage = (e: unknown): string | null => (e as { data?: { message?: string } } | undefined)?.data?.message ?? null;
 
 export function SampleBuilderPage() {
@@ -132,7 +119,7 @@ export function SampleBuilderPage() {
   const [runEstablishments] = useLazyGetSampleEstablishmentsQuery();
   const [runContacts] = useLazyGetSampleContactsQuery();
 
-  // A design saved or loaded earlier can name fields the frame no longer offers (an empty field, a renamed one).
+  // A saved or loaded design can name fields the frame no longer offers (empty or renamed).
   useEffect(() => {
     if (!known) return;
     const { design: pruned, removed } = pruneDesign(design, known, estKnown);

@@ -49,7 +49,7 @@ export const BULK_CHANGE_STATUS_CLASSES: Record<string, string> = {
   FAILED: 'bg-slate-100 text-slate-600',
 };
 
-// Batches a system account submits through the integration API are labelled "API: <account> / <reference>".
+// Integration API batches are labelled with the system account and its reference.
 export const BULK_CHANGE_API_FILE_PREFIX: string = 'API: ';
 
 // Members that are not edits of an existing record, keyed "<MEMBER_TABLE>:<OPERATION>".

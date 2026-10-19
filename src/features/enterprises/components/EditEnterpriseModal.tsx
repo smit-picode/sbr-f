@@ -18,22 +18,17 @@ import { nullableText } from '@/utils/format';
 import { CommentDialog } from '@/components/common/CommentDialog';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
+import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
+import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
 import { Building2, X, Search, Unlink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { SbrEnterprise, EnterpriseEstablishment, AttachableEstablishment } from '@/types';
+import type { SbrEnterprise, EnterpriseEstablishment, AttachableEstablishment, EnterpriseEstablishmentRow } from '@/types';
 
 interface EditEnterpriseModalProps {
   enterprise: SbrEnterprise;
   establishments: EnterpriseEstablishment[];
   open: boolean;
   onClose: () => void;
-}
-
-interface EstabRow {
-  SBR_ID: number;
-  NAME_ENU: string | null;
-  MOCI_CR_NUM: string | null;
-  EST_STATUS: string | null;
 }
 
 const SECTOR_CHOICES = SECTOR_OPTIONS.filter((o) => o.value);
@@ -45,7 +40,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const [sector, setSector] = useState('');
   const [status, setStatus] = useState('');
   const [removed, setRemoved] = useState<Set<number>>(new Set());
-  const [added, setAdded] = useState<EstabRow[]>([]);
+  const [added, setAdded] = useState<EnterpriseEstablishmentRow[]>([]);
   const [search, setSearch] = useState('');
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<{ sbrId: number; name: string } | null>(null);
@@ -53,6 +48,8 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
   const [updateEnterprise, { isLoading }] = useUpdateEnterpriseMutation();
   const { t } = useTranslation();
   const initialHeadSbrId = enterprise.MAIN_ESTABLISHMENT_SBR_ID;
+  const isPending = (field: string): boolean => !!enterprise.PENDING_FIELDS?.[field];
+  const lockedClass = (field: string): string => (isPending(field) ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '');
 
   useEffect(() => {
     if (open) {
@@ -72,7 +69,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
     { skip: !open || !debouncedSearch }
   );
 
-  const currentRows: EstabRow[] = useMemo(() => {
+  const currentRows: EnterpriseEstablishmentRow[] = useMemo(() => {
     const kept = establishments
       .filter((e) => !removed.has(e.SBR_ID))
       .map((e) => ({ SBR_ID: e.SBR_ID, NAME_ENU: e.NAME_ENU, MOCI_CR_NUM: e.MOCI_CR_NUM, EST_STATUS: e.EST_STATUS }));
@@ -156,9 +153,9 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
       await updateEnterprise({
         enterpriseId: enterprise.ENTERPRISE_ID,
         data: {
-          NAME_ENU: name,
-          SECTOR_ID: sector,
-          STATUS: status,
+          ...(isPending('NAME_ENU') ? {} : { NAME_ENU: name }),
+          ...(isPending('SECTOR_ID') ? {} : { SECTOR_ID: sector }),
+          ...(isPending('STATUS') ? {} : { STATUS: status }),
           ...(headSbrId != null && headSbrId !== initialHeadSbrId ? { MAIN_ESTABLISHMENT_SBR_ID: headSbrId } : {}),
           addEstablishmentSbrIds: added.map((a) => a.SBR_ID),
           removeEstablishmentSbrIds: Array.from(removed),
@@ -191,6 +188,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
         )}
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <PendingFieldsHint pendingFields={enterprise.PENDING_FIELDS} />
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseId', { defaultValue: 'Enterprise ID' })}</Label>
@@ -203,7 +201,7 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}</Label>
+            <Label className="text-xs text-slate-500">{t('enterpriseEdit.enterpriseName', { defaultValue: 'Enterprise Name' })}<PendingFieldInfo pending={isPending('NAME_ENU')} /></Label>
             <Input
               value={name}
               onChange={(e) => {
@@ -211,25 +209,26 @@ export function EditEnterpriseModal({ enterprise, establishments, open, onClose 
                 if (errors.NAME_ENU) setErrors((prev) => { const n = { ...prev }; delete n.NAME_ENU; return n; });
               }}
               maxLength={500}
-              className={`focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAME_ENU ? 'border-red-400' : ''}`}
+              disabled={isPending('NAME_ENU')}
+              className={`focus:ring-1 focus:ring-[#A29374]/30 focus:border-[#A29374]/40 ${errors.NAME_ENU ? 'border-red-400' : ''} ${lockedClass('NAME_ENU')}`}
             />
             {errors.NAME_ENU && <p className="text-xs text-red-500 mt-0.5">{errors.NAME_ENU}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.sector', { defaultValue: 'Sector' })}</Label>
-              <Select value={sector} onValueChange={setSector}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectSector', { defaultValue: 'Select sector' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.sector', { defaultValue: 'Sector' })}<PendingFieldInfo pending={isPending('SECTOR_ID')} /></Label>
+              <Select value={sector} onValueChange={setSector} disabled={isPending('SECTOR_ID')}>
+                <SelectTrigger className={`shadow-none ${lockedClass('SECTOR_ID')}`}><SelectValue placeholder={t('enterpriseEdit.selectSector', { defaultValue: 'Select sector' })} /></SelectTrigger>
                 <SelectContent>
                   {SECTOR_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">{t('enterpriseEdit.status', { defaultValue: 'Status' })}</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="shadow-none"><SelectValue placeholder={t('enterpriseEdit.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
+              <Label className="text-xs text-slate-500">{t('enterpriseEdit.status', { defaultValue: 'Status' })}<PendingFieldInfo pending={isPending('STATUS')} /></Label>
+              <Select value={status} onValueChange={setStatus} disabled={isPending('STATUS')}>
+                <SelectTrigger className={`shadow-none ${lockedClass('STATUS')}`}><SelectValue placeholder={t('enterpriseEdit.selectStatus', { defaultValue: 'Select status' })} /></SelectTrigger>
                 <SelectContent>
                   {STATUS_CHOICES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </SelectContent>

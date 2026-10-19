@@ -846,7 +846,8 @@
     "markAsHead": "Mark as group head",
     "headRequired": "Mark one member enterprise as the group head.",
     "updateSuccess": "Enterprise group update submitted for approval.",
-    "updateError": "Failed to submit enterprise group update. Please try again."
+    "updateError": "Failed to submit enterprise group update. Please try again.",
+    "uciLocked": "UCI type and UCI ID come from ownership data for this group and cannot be changed."
   },
   "createEnterpriseGroup": {
     "title": "Create Enterprise Group",
@@ -1917,6 +1918,7 @@
       "categories": "Categories",
       "series": "Split into series",
       "titlePlaceholder": "Block title",
+      "titleRequired": "Block title is required.",
       "subtitlePlaceholder": "Add a subtitle (optional)",
       "liveHint": "Changes apply instantly · Ctrl+Z to undo",
       "done": "Done",
@@ -2166,6 +2168,8 @@
     "notFoundBody": "It may have been deleted, or it was never shared with you.",
     "name": "Analysis name",
     "descriptionPlaceholder": "Add a short description…",
+    "nameRequired": "Analysis name is required.",
+    "descriptionRequired": "Description is required.",
     "viewOnly": "You can view and explore this analysis. Duplicate it to make your own changes.",
     "emptyReport": {
       "title": "Start building your analysis",

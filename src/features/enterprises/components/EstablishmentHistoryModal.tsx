@@ -2,26 +2,10 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useGetEstablishmentHistoryQuery } from '@/features/establishments/api/establishmentsApi';
-import type { SbrEstablishment } from '@/types';
+import type { SbrEstablishment, EstablishmentHistoryVersion } from '@/types';
 import { formatDate } from '@/utils/format';
 import { useTranslation } from 'react-i18next';
 import { History, User, Landmark, X } from 'lucide-react';
-
-interface AuditMeta {
-  columns: string[];
-  reason: string | null;
-  changedBy: string | null;
-  approvedBy: string | null;
-  decidedAt: string | null;
-  approved: boolean;
-  operation: string | null;
-}
-type Version = SbrEstablishment & {
-  audit?: AuditMeta | null;
-  request?: boolean;
-  status?: string;
-  changes?: Record<string, { old: unknown; new: unknown }>;
-};
 
 interface EstablishmentHistoryPopoverProps {
   sbrId: number;
@@ -34,7 +18,7 @@ interface EstablishmentHistoryPopoverProps {
 export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose }: EstablishmentHistoryPopoverProps) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useGetEstablishmentHistoryQuery(sbrId);
-  const versions = (data?.data ?? []) as Version[];
+  const versions = (data?.data ?? []) as EstablishmentHistoryVersion[];
   const ref = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
 
@@ -45,13 +29,13 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
     setOpenUp(rect.bottom > window.innerHeight - 8 && rect.top - rect.height > 8);
   }, [versions, isLoading, isError]);
 
-  const valueOf = (v: Version | undefined) => {
+  const valueOf = (v: EstablishmentHistoryVersion | undefined) => {
     if (!v) return '—';
     const raw = v[field] as unknown;
     if (raw == null || raw === '') return '—';
     return typeof raw === 'number' ? raw.toLocaleString() : String(raw);
   };
-  const norm = (v: Version) => {
+  const norm = (v: EstablishmentHistoryVersion) => {
     const raw = v[field] as unknown;
     return raw == null || raw === '' ? '' : String(raw);
   };
@@ -63,7 +47,7 @@ export function EstablishmentHistoryPopover({ sbrId, field, fieldLabel, onClose 
 
   const changes = realVersions.filter((v, i) => i === realVersions.length - 1 || norm(v) !== norm(realVersions[i + 1]));
 
-  const isUserEdit = (v: Version) => !!(v.audit && v.audit.columns.includes(field as string));
+  const isUserEdit = (v: EstablishmentHistoryVersion) => !!(v.audit && v.audit.columns.includes(field as string));
 
   return (
     <div

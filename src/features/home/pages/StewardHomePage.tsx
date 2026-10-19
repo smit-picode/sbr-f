@@ -22,7 +22,7 @@ import { ExecStatCard } from '../components/ExecStatCard';
 import { HomeCard, HomeCardHead, HomeCardLink, HomeListRow, RequestStatusChip, TableChip } from '../components/RoleHomeParts';
 import { firstNameOf } from '../utils/greeting';
 
-// For whoever edits the register: their own change requests, by hand and from bulk files, what was decided, and the register's data quality.
+// For register editors: their change requests, decisions, and the register's data quality.
 export function StewardHomePage({ switcher }: { switcher?: React.ReactNode }) {
   const { t } = useTranslation();
   const router = useRouter();

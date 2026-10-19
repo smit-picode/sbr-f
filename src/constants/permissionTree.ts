@@ -1,12 +1,12 @@
 import type { TFunction } from 'i18next';
 
 import type { PermissionNode } from '@/types';
-// Labels live under admin.permLabels, keyed by the permission with dots as underscores; the tree label is the fallback.
+// Labels live under admin.permLabels keyed by permission; the tree label is the fallback.
 export function permissionLabel(key: string, fallback: string, t: TFunction): string {
   return t(`admin.permLabels.${key.replace(/\./g, '_')}`, { defaultValue: fallback });
 }
 
-// Parent keys are UI-only group labels; only dotted leaf keys exist in the DB, and the tree drives the grouped permission sections.
+// Parent keys are UI group labels; only dotted leaf keys exist in the DB.
 export const PERMISSION_TREE: PermissionNode[] = [
   {
     key: 'home',
@@ -155,7 +155,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
-    // Saved analyses are private unless shared; sharing and deleting stay with the owner (or a super admin).
+    // Saved analyses are private unless shared; only the owner or a super admin shares or deletes.
     key: 'analysis',
     label: 'Analysis',
     children: [
@@ -196,7 +196,7 @@ export const PERMISSION_TREE: PermissionNode[] = [
     ],
   },
   {
-    // Module-level Bulk Change access on top of per-entity permissions; a submit still needs the table's Edit permission and a decision still needs Approve / Reject.
+    // Module level Bulk Change access; submit and decisions still need the table's permissions.
     key: 'bulk_change',
     label: 'Bulk Change',
     children: [

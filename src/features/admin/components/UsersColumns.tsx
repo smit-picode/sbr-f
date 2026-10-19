@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/utils/format';
 import { cn } from '@/lib/utils';
-import type { SbrUser } from '@/types';
+import type { SbrUser, UsersColumnsOptions } from '@/types';
 
 // distinct role names a user holds (for chips + super-admin guard)
 export function userRoleNames(user: SbrUser): string[] {
@@ -55,17 +55,6 @@ export function RoleBadge({ name, label }: { name: string; label: string }) {
       {label}
     </span>
   );
-}
-
-interface UsersColumnsOptions {
-  t: (key: string, opts?: Record<string, unknown>) => string;
-  canViewDetail: boolean;
-  canEdit: boolean;
-  isUpdating: boolean;
-  onView: (user: SbrUser) => void;
-  onEdit: (user: SbrUser) => void;
-  onToggleLock: (user: SbrUser) => void;
-  isSelf: (user: SbrUser) => boolean;
 }
 
 export const getUsersColumns = ({

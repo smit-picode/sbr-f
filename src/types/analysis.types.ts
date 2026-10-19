@@ -197,7 +197,7 @@ export interface AnalysisFlowResult {
   movedOut: number;
   end: number;
   unchanged: number;
-  // value is null when the link is below the disclosure threshold and the caller cannot see unsuppressed figures
+  // value is null below the disclosure threshold unless the caller can see unsuppressed figures.
   links: { from: string | null; to: string | null; value: number | null }[];
 }
 
@@ -332,3 +332,44 @@ export interface BlockDragState {
 }
 
 export type ExportProgress = (loaded: number, total: number) => void;
+
+export type ExportCell = string | number | null;
+
+export interface ExportBlockTable {
+  title: string;
+  notes: string[];
+  header: string[];
+  rows: ExportCell[][];
+}
+
+export interface SaveAnalysisBody {
+  name: string;
+  description: string;
+  definition: AnalysisDefinition;
+}
+
+export interface AnalysisResultState<T> {
+  data: T | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+  isError: boolean;
+}
+
+export interface BlockCardActions {
+  onEdit: () => void;
+  onChange: (patch: Partial<AnalysisBlock>) => void;
+  onDuplicate: () => void;
+  onInsertBelow: () => void;
+  onDelete: () => void;
+  onMove: (dir: -1 | 1) => void;
+  onCrossFilter: (f: AnalysisCrossFilter) => void;
+  onViewRecords: (block: AnalysisBlock, extra: AnalysisFilter[], label: string) => void;
+  onExport: (kind: 'xlsx' | 'csv' | 'png') => void;
+}
+
+export interface BlockMenuState extends AnalysisPointEvent { label: string }
+
+// Working copies of opened analyses: edits and undo apply here instantly, autosave persists them.
+export interface AnalysesState {
+  items: Analysis[];
+}

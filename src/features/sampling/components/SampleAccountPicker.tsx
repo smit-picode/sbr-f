@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check } from 'lucide-react';
 import type { SamplePublishAccount } from '@/types';
 
-// The system accounts a published sample is shared with; an account whose role cannot read samples yet is flagged, not hidden.
+// The system accounts a sample is shared with; an account that cannot read samples yet is flagged.
 export function SampleAccountPicker({ accounts, value, onChange }: {
   accounts: SamplePublishAccount[];
   value: number[];

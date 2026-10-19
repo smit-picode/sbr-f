@@ -6,7 +6,7 @@ import type {
 } from '@/types';
 import { cleanParams } from '@/utils/query';
 
-// The draw endpoints are reads (their POSTs carry filter trees and id lists that do not fit a query string); publishing is the only write.
+// The draw endpoints are reads (POST bodies carry filter trees); publishing is the only write.
 export const samplingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSamplingFrames: builder.query<ApiResponse<SamplingFrame[]>, void>({

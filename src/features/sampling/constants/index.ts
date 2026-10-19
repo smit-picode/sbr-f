@@ -37,7 +37,7 @@ export const SAMPLING_OPERATOR_LABELS: Record<string, string> = {
   between: 'between',
 };
 
-// The package's own limits (SBR_SAMPLING_API), so the page stops a request before the API refuses it.
+// The package's own limits (SBR_SAMPLING_API), so the page stops a request early.
 export const SAMPLING_MAX_DEPTH: number = 5;
 export const SAMPLING_MAX_CONDITIONS: number = 200;
 export const SAMPLING_MAX_STRATA_FIELDS: number = 4;
@@ -48,7 +48,7 @@ export const SAMPLING_MAX_UNITS: number = 100000;
 export const SAMPLING_MAX_SEED: number = 999999999;
 export const SAMPLING_MAX_COLUMNS: number = 100;
 
-// SBR_SAMPLING_API's stratum key: group number, CHR(29), values joined with CHR(31), a missing value as CHR(30).
+// SBR_SAMPLING_API's stratum key: group, CHR(29), values joined with CHR(31), missing as CHR(30).
 export const SAMPLING_KEY_GROUP_SEPARATOR: string = '\u001d';
 export const SAMPLING_KEY_SEPARATOR: string = '\u001f';
 export const SAMPLING_KEY_NULL: string = '\u001e';
@@ -56,7 +56,7 @@ export const SAMPLING_KEY_NULL: string = '\u001e';
 export const SAMPLING_GROUP_METHODS: SamplingGroupMethod[] = ['random', 'census', 'manual'];
 export const SAMPLING_METHODS: SamplingAllocationMethod[] = ['neyman', 'proportional', 'equal'];
 
-// The register's own size bands (micro 1-10, small 11-50, medium 51-250, large 251+) as band limits.
+// The register's size bands (micro 1 to 10, small 11 to 50, medium 51 to 250, large 251 plus).
 export const SAMPLING_EMPLOYMENT_BANDS: number[] = [11, 51, 251];
 
 export const SAMPLING_DEFAULT_AUX: string = 'EMPLOYMENT';
@@ -100,7 +100,7 @@ export const SAMPLING_DEFAULT_SEED: number = 20261007;
 // Columns of the analysis views the portal never offers, whether or not they hold data.
 export const SAMPLING_HIDDEN_FIELDS: string[] = ['TURNOVER'];
 
-// Rows in the hand-picked ids template; its ids are made up (99 then seven digits, far above any real id).
+// Rows in the hand picked ids template; its ids are made up and far above any real id.
 export const SAMPLING_ID_TEMPLATE_ROWS: number = 5;
 
 // Publishing a drawn sample to system accounts; limits mirror SBR_PUBLISHED_SAMPLE_API.

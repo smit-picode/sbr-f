@@ -1,12 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { PipelineStepLog } from '@/types';
+import type { PipelineStepLog, TFuncWithDefault } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { nullableText, formatDateTime } from '@/utils/format';
 import { PIPELINE_STEP_EVENT_BADGE } from '../constants';
 
-type TFunc = (key: string, options?: { lng?: string; defaultValue?: string }) => string;
-
-export const getPipelineStepLogColumns = (t: TFunc): ColumnDef<PipelineStepLog>[] => [
+export const getPipelineStepLogColumns = (t: TFuncWithDefault): ColumnDef<PipelineStepLog>[] => [
   {
     accessorKey: 'STEP_NAME',
     header: t('columns.STEP_NAME', { defaultValue: 'STEP' }),

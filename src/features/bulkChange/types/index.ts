@@ -41,13 +41,13 @@ export interface BulkChangeFieldDiff {
 }
 
 export interface BulkChangeRecordRow {
-  // The spreadsheet row this validation row belongs to, so it never depends on the order rows come back in.
+  // The spreadsheet row of this validation row, so it never depends on the response order.
   rowNumber?: number;
   auditLogId: number;
   id: number;
   status: string;
   fields: BulkChangeFieldDiff[];
-  // UPDATE for an edit; INSERT / DELETE for the new contacts and tag changes an integration batch carries.
+  // UPDATE for an edit; INSERT or DELETE for new contacts and tag changes in an integration batch.
   operation?: string | null;
   memberTable?: string | null;
 }
@@ -68,7 +68,7 @@ export interface BulkChangeTaskDetail extends BulkChangeTaskSummary {
   FAILED_ITEMS: BulkChangeFailedItem[];
 }
 
-// Upload wizard ─────────────────────────────────────────────────────────── One parsed spreadsheet row
+// Upload wizard: one parsed spreadsheet row
 export interface BulkChangeItemInput {
   rowNumber: number;
   id: number;
@@ -196,4 +196,10 @@ export interface ParsedWorkbook {
   items: BulkChangeItemInput[];
   unknownHeaders: string[];
   missingIdColumn: boolean;
+}
+
+export interface ParseRequest {
+  file: File;
+  idColumn: string;
+  allowedColumns: string[];
 }

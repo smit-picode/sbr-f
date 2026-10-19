@@ -1,10 +1,8 @@
 import type ExcelJS from 'exceljs';
 import type { TFunction } from 'i18next';
-import type { SamplingDesign, SamplingField, SampleExportInput } from '@/types';
+import type { SamplingDesign, SamplingField, SampleExportInput, ExcelJsModule } from '@/types';
 import { SAMPLING_CONTACT_COLUMNS, SAMPLING_UNIT_KEY } from '../constants';
 import { contactColumnLabel, describeRootFilter, fieldLabel, groupMethodLabel, unitLabel, valueLabel } from './labels';
-
-type ExcelJsModule = typeof import('exceljs');
 
 // exceljs is large and only needed on export, so it loads on demand (as in the analysis export).
 const loadExcelJs = async (): Promise<ExcelJsModule> => {
@@ -12,7 +10,7 @@ const loadExcelJs = async (): Promise<ExcelJsModule> => {
   return (mod as unknown as { default?: ExcelJsModule }).default ?? mod;
 };
 
-// The columns DRAW_SAMPLE puts before the requested fields; the export rebuilds them as labelled columns.
+// The columns DRAW_SAMPLE puts before the requested fields; the export labels them.
 const DESIGN_COLUMNS = new Set(['GROUP_NO', 'SELECTION_METHOD', 'STRATUM_KEY', 'S1', 'S2', 'S3', 'S4', 'SAMPLE_ROLE', 'SELECTION_ORDER',
   'STRATUM_POPULATION', 'STRATUM_SAMPLE', 'DESIGN_WEIGHT', 'UNIT_ID']);
 // Excel refuses a cell longer than this.

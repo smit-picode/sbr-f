@@ -102,7 +102,7 @@ export function TagChip({ tag, onRemove, removing }: { tag: EstablishmentContact
   );
 }
 
-// One contact's open tags, editable in place when the user may tag; changes apply immediately (no approval).
+// One contact's open tags, editable in place when allowed; changes apply at once without approval.
 export function ContactTagEditor({ sbrId, contactId }: { sbrId: number; contactId: number }) {
   const { t } = useTranslation();
   const canTag = useHasPermission('contacts.tag');

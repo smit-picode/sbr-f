@@ -1,6 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { TFunction } from 'i18next';
-import type { SnapshotEntity, SnapshotRow, ColumnFilterOption } from '@/types';
+import type { SnapshotEntity, SnapshotRow, ColumnFilterOption, SnapshotColumnKind, SnapshotColumnSpec } from '@/types';
 import { Layers, Tag } from 'lucide-react';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Badge } from '@/components/ui/badge';
@@ -72,12 +72,7 @@ function DateCell({ value }: { value: unknown }) {
   return <span className="text-sm text-slate-600 whitespace-nowrap">{formatDate(value == null ? null : String(value))}</span>;
 }
 
-type Kind = 'id' | 'mono' | 'text' | 'number' | 'date' | 'status' | 'source' | 'enterpriseId' | 'badge' | 'mainFlag' | 'unitRef' | 'unitCount' | 'tags';
-
-// [row key, column label key, English fallback, cell kind] — rows are raw frozen base-table rows.
-type Spec = [string, string, string, Kind];
-
-const SPECS: Record<SnapshotEntity, Spec[]> = {
+const SPECS: Record<SnapshotEntity, SnapshotColumnSpec[]> = {
   establishments: [
     ['SBR_ID', 'columns.SBR_ID', 'SBR ID', 'id'],
     ['SOURCE_CODE', 'columns.SOURCE_CODE', 'Source code', 'mono'],
@@ -194,7 +189,7 @@ const SPECS: Record<SnapshotEntity, Spec[]> = {
   ],
 };
 
-function renderCell(kind: Kind, value: unknown, t: TFunction) {
+function renderCell(kind: SnapshotColumnKind, value: unknown, t: TFunction) {
   switch (kind) {
     case 'enterpriseId': return <EnterpriseIdCell value={value} />;
     case 'badge': return <BadgeCell value={value} />;
@@ -212,21 +207,21 @@ function renderCell(kind: Kind, value: unknown, t: TFunction) {
   }
 }
 
-// Every column a frozen row has: the known ones first, in their usual order and format, then the rest in table order.
+// Every column a frozen row has: known ones first in their usual order, then the rest.
 const HIDDEN = new Set(['SNAPSHOT_ID', 'ID', 'SCD2_NOTE', 'CREATED_AT', 'UPDATED_AT', 'PIPELINE_ID', 'SRC_HASH', 'ROW_HASH', 'ANNUAL_TURNOVER', 'TOTAL_TURNOVER']);
 const DATE_KEY = /(_DATE|_AT|^VALID_FROM|^VALID_TO)$/;
 const MONO_KEY = /(_SOURCE|_CODE|_NUM|_ID)$/;
 // Columns of a few repeating values, whose filter rows start as "is any of" with the value list.
 const PICK_KEY = /(_SOURCE|_FLG|_FLAG|STATUS|STATUS_CATEGORY|SECTOR_ID|LEGAL_TYPE|ISIC_CODE|_TYPE|_COUNTRY|CATEGORY|ROLE|MUNICIPALITY_ID|ZONE)$/;
 
-// Columns the procedure may not return yet: shown only once the rows carry them (until then the first page decides).
+// Columns the procedure may not return yet: shown only once the rows carry them.
 const OPTIONAL_KEYS: Partial<Record<SnapshotEntity, Set<string>>> = {
   enterprises: new Set(['MAIN_CR', 'ESTABLISHMENT_COUNT', 'LEGAL_TYPE']),
   contacts: new Set(['TAGS']),
   enterprise_groups: new Set(['TYPE', 'ENTERPRISE_COUNT', 'ESTABLISHMENT_COUNT', 'EMPLOYEE_COUNT']),
 };
 
-// Versioning columns the live Establishments list does not show, so the frozen copy leaves them out too.
+// Versioning columns the live Establishments list does not show, so the frozen copy omits them.
 const EXTRA_HIDDEN: Partial<Record<SnapshotEntity, Set<string>>> = {
   establishments: new Set(['VALID_FROM', 'VALID_TO']),
   addresses: new Set(['ADDRESS_TEXT']),
@@ -238,7 +233,7 @@ const EXACT_ENTITIES = new Set<SnapshotEntity>(['enterprises']);
 const isOptionalKey = (entity: SnapshotEntity, key: string) =>
   entity === 'establishments' ? key !== 'SBR_ID' : !!OPTIONAL_KEYS[entity]?.has(key);
 
-function inferKind(key: string, sample: unknown): Kind {
+function inferKind(key: string, sample: unknown): SnapshotColumnKind {
   if (DATE_KEY.test(key)) return 'date';
   if (typeof sample === 'number') return MONO_KEY.test(key) ? 'mono' : 'number';
   return MONO_KEY.test(key) ? 'mono' : 'text';
@@ -246,11 +241,11 @@ function inferKind(key: string, sample: unknown): Kind {
 
 const humanize = (key: string) => key.toLowerCase().split('_').map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
 
-function snapshotSpecs(entity: SnapshotEntity, rows: SnapshotRow[]): Spec[] {
+function snapshotSpecs(entity: SnapshotEntity, rows: SnapshotRow[]): SnapshotColumnSpec[] {
   const knownAll = SPECS[entity];
   const knownKeys = new Set(knownAll.map(([key]) => key));
   const known = rows.length ? knownAll.filter(([key]) => !isOptionalKey(entity, key) || key in rows[0]) : knownAll;
-  const extra: Spec[] = EXACT_ENTITIES.has(entity) ? [] : Object.keys(rows[0] ?? {})
+  const extra: SnapshotColumnSpec[] = EXACT_ENTITIES.has(entity) ? [] : Object.keys(rows[0] ?? {})
     .filter((key) => !knownKeys.has(key) && !HIDDEN.has(key) && !EXTRA_HIDDEN[entity]?.has(key))
     .map((key) => [key, `columns.${key}`, humanize(key), inferKind(key, rows.find((r) => r[key] != null)?.[key])]);
   return [...known, ...extra];
@@ -266,7 +261,7 @@ export function getSnapshotColumns(entity: SnapshotEntity, t: TFunction, rows: S
   }));
 }
 
-// Filter options for the same columns; numeric values come back as JSON numbers, so the sample decides number vs text.
+// Filter options for the same columns; numbers arrive as JSON numbers, so the sample decides.
 export function getSnapshotFilterColumns(entity: SnapshotEntity, t: TFunction, rows: SnapshotRow[] = []): ColumnFilterOption[] {
   return snapshotSpecs(entity, rows).map(([key, labelKey, fallback, kind]) => ({
     value: key,

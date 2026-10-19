@@ -1,4 +1,4 @@
-// Integration API system accounts: machine logins managed under Administration (backend SBR_SYSTEM_ACCOUNT_API).
+// Integration API system accounts: machine logins managed under Administration.
 export interface SystemAccount {
   ID: number;
   NAME: string;

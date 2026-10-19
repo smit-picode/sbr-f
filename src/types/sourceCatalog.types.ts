@@ -13,7 +13,7 @@ export interface SourceRegulator {
   tables: { name: string; description: string | null }[];
 }
 
-// A column the source table viewer shows; KIND decides its filter operators and how a cell is formatted.
+// A column the source viewer shows; KIND decides its filter operators and cell format.
 export interface SourceTableColumn {
   COLUMN_NAME: string;
   KIND: 'number' | 'date' | 'text';
@@ -31,7 +31,7 @@ export interface SourceTableParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-// GET /source-catalog/counts: stored counts, null until the database has counted that source or table.
+// GET /source-catalog/counts: stored counts, null until the database has counted that source.
 export interface SourceCatalogCounts {
   sources: { source: string; tableCount: number; recordCount: number | null; refreshedAt: string | null }[];
   tables: { source: string; table: string; recordCount: number | null; columnCount: number | null; refreshedAt: string | null }[];

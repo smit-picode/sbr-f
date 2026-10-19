@@ -1,4 +1,4 @@
-// next/link and the router add the base path themselves; redirects, public files, image src and CSS urls do not.
+// next/link and the router add the base path; redirects, public files, images and CSS urls do not.
 export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export function withBasePath(path: string): string {

@@ -12,6 +12,9 @@ import { formatDelta, formatValue, frameName, measureLabel } from '@/features/an
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 
+// Shrinks the figure to its box width so a long number never spills past the card.
+const fitFontSize = (text: string, maxPx: number): string => `min(${maxPx}px, ${(100 / (Math.max(text.length, 1) * 0.6)).toFixed(1)}cqw)`;
+
 function Sparkline({ values, big }: { values: number[]; big: boolean }) {
   const w = big ? 180 : 120;
   const h = big ? 44 : 30;
@@ -40,7 +43,7 @@ function Sparkline({ values, big }: { values: number[]; big: boolean }) {
 export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps) {
   const { t } = useTranslation();
   const req = useMemo(() => requestForBlock(block, query), [block, query]);
-  // A half-width box has no room for the trend line beside the number: it overflowed the box, worst with the editor open.
+  // A half width box has no room for the trend beside the number, so it overflowed.
   const showSparkline = !!block.display.sparkline && block.width !== 'half';
   const trendReq = useMemo(() => (showSparkline ? trendRequestFor(query) : null), [showSparkline, query]);
   const { data, isLoading, isError } = useAnalysisResult<AnalysisAggregateResult>(req);
@@ -53,9 +56,12 @@ export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps)
 
   const small = (n: number | undefined) => !!n && n < ANALYSIS_DISCLOSURE.minCell;
   const confidential = masked && (small(data.total.n) || small(data.total.prevN));
+  const shownAt = (i: number) => (confidential ? 'x' : formatValue(data.total.values[i], { compact: (data.total.values[i] ?? 0) >= 1e7 }));
+  const widest = data.measures.map((_, i) => shownAt(i)).reduce((a, s) => (s.length > a.length ? s : a), '');
 
   return (
-    <div className={cn('grid gap-x-6 gap-y-5', mode !== 'screen' ? ['grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4'][data.measures.length - 1] : data.measures.length === 1 ? 'grid-cols-1' : data.measures.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4', data.measures.length === 3 && 'xl:grid-cols-3')}>
+    <div className="@container">
+    <div className={cn('grid gap-x-6 gap-y-5', mode !== 'screen' ? ['grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4'][data.measures.length - 1] : data.measures.length === 1 ? 'grid-cols-1' : data.measures.length === 2 ? 'grid-cols-1 @md:grid-cols-2' : data.measures.length === 3 ? 'grid-cols-1 @md:grid-cols-2 @lg:grid-cols-3' : 'grid-cols-1 @md:grid-cols-2 @3xl:grid-cols-4')}>
       {data.measures.map((m, i) => {
         const v = confidential ? null : data.total.values[i];
         const prev = confidential ? null : data.total.prev?.[i] ?? null;
@@ -63,12 +69,15 @@ export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps)
         const up = (delta.abs ?? 0) > 0;
         const flat = delta.abs === 0;
         const series = trend.data?.rows.map((r) => r.values[i] ?? 0) ?? [];
+        const shown = shownAt(i);
         return (
-          <div key={m.id} className={cn('min-w-0', i > 0 && 'sm:border-s sm:border-slate-100 sm:ps-6')}>
+          <div key={m.id} className={cn('min-w-0', i > 0 && '@md:border-s @md:border-slate-100 @md:ps-6')}>
             <div className={cn('font-semibold text-slate-500 truncate', big ? 'text-base' : 'text-[12px]')}>{measureLabel(t, m, block.query.entity)}</div>
             <div className="mt-1.5 flex items-end justify-between gap-3">
-              <div className={cn('font-extrabold leading-none text-ink tabular-nums', big ? 'text-6xl' : 'text-[34px]')}>
-                {confidential ? 'x' : formatValue(v, { compact: (v ?? 0) >= 1e7 })}
+              <div className="min-w-0 flex-1" style={{ containerType: 'inline-size' }}>
+                <div className="font-extrabold leading-none text-ink tabular-nums whitespace-nowrap" style={{ fontSize: fitFontSize(widest, big ? 60 : 34) }}>
+                  {shown}
+                </div>
               </div>
               {showSparkline && series.length > 1 && <Sparkline values={series} big={big} />}
             </div>
@@ -89,6 +98,7 @@ export function KpiBlock({ block, query, masked, height, mode }: BlockViewProps)
           </div>
         );
       })}
+    </div>
     </div>
   );
 }

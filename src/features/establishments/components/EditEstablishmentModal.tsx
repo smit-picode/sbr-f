@@ -13,7 +13,7 @@ import { CommentDialog } from '@/components/common/CommentDialog';
 import { ErrorSummary } from '@/components/common/ErrorSummary';
 import { PendingFieldsHint } from '@/components/common/PendingFieldsHint';
 import { PendingFieldInfo } from '@/components/common/PendingFieldInfo';
-import type { SbrEstablishment } from '@/types';
+import type { SbrEstablishment, EstablishmentFormState } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { useGetEstStatusCategoriesQuery, useGetLegalTypeValuesQuery, useGetSectorTypeValuesQuery, useGetMainBranchValuesQuery } from '@/features/lookups/api/lookupsApi';
 import {
@@ -61,14 +61,12 @@ function SectionDivider({ title }: { title: string }) {
 }
 
 
-type FormState = Omit<Partial<SbrEstablishment>, 'ID' | 'SBR_ID' | 'VALID_FROM' | 'VALID_TO'>;
-
 const NAMES_FIELD = 'NAMES';
 const NAMES_PAIR = ['NAME_ENU', 'NAME_ARA'];
 
 export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<FormState>({});
+  const [form, setForm] = useState<EstablishmentFormState>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [updateEstablishment, { isLoading }] = useUpdateEstablishmentMutation();
@@ -152,7 +150,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const isPending = (field: string): boolean => !!frame?.PENDING_FIELDS?.[field];
   const ed = (field: string): boolean => isEstablishmentFieldEditable(field) && !isPending(field);
 
-  const set = (field: keyof FormState, value: string | number | null) => {
+  const set = (field: keyof EstablishmentFormState, value: string | number | null) => {
     if (!ed(field as string)) return;
     setForm((prev) => ({ ...prev, [field]: value }));
     const clearNames = NAMES_PAIR.includes(field as string) && !!errors[NAMES_FIELD];
@@ -182,7 +180,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     }
 
     Object.entries(ESTABLISHMENTS_MAX_LENGTHS).forEach(([field, max]) => {
-      if (str(form[field as keyof FormState]).length > max) {
+      if (str(form[field as keyof EstablishmentFormState]).length > max) {
         e[field] = `Max ${max} character${max === 1 ? '' : 's'} allowed`;
       }
     });
@@ -302,7 +300,7 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     }
   };
 
-  const sel = (field: keyof FormState) => String(form[field] ?? '');
+  const sel = (field: keyof EstablishmentFormState) => String(form[field] ?? '');
 
   return (
     <>

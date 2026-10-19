@@ -64,3 +64,10 @@ export interface SnapshotEntityDef {
   // Same per-entity hue the Create page has always used for its stat tiles.
   tone: string;
 }
+
+export type SnapshotColumnKind = 'id' | 'mono' | 'text' | 'number' | 'date' | 'status' | 'source' | 'enterpriseId' | 'badge' | 'mainFlag' | 'unitRef' | 'unitCount' | 'tags';
+
+// [row key, column label key, English fallback, cell kind] — rows are raw frozen base-table rows.
+export type SnapshotColumnSpec = [string, string, string, SnapshotColumnKind];
+
+export type SnapshotExportMode = 'table' | 'tables';

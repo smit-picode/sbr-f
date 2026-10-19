@@ -123,7 +123,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
 
     const radiusCap = innerRadiusPx != null ? Math.round(innerRadiusPx * 0.42) : 22;
 
-    const size = Math.max(9, Math.min(22, widthCap, radiusCap));
+    const size = Math.max(o.compact ? 7 : 9, Math.min(22, widthCap, radiusCap));
     const yNum = typeof cy === 'number' ? Math.round(cy + size * 0.11) : cy;
     const els: Record<string, unknown>[] = [
       { type: 'text', x: cx, y: yNum, silent: true, z: 20, style: { text, align: 'center', verticalAlign: 'middle', fontSize: size, fontWeight: 800, fill: G[900] } },
@@ -137,7 +137,7 @@ export function donut(o: DonutOptions): EChartOptionInput {
         const chordWidth = 2 * Math.sqrt(Math.max(0, innerRadiusPx ** 2 - capCenterOffset ** 2)) * 0.85;
         captionSize = Math.max(6, Math.min(10.5, Math.floor(chordWidth / (label.length * 0.55))));
       }
-      els.push({ type: 'text', x: cx, y: capY, silent: true, z: 20, style: { text: label, align: 'center', verticalAlign: 'top', fontSize: captionSize, fill: G[400] } });
+      if (!(o.compact && innerRadiusPx != null && captionSize < 8)) els.push({ type: 'text', x: cx, y: capY, silent: true, z: 20, style: { text: label, align: 'center', verticalAlign: 'top', fontSize: captionSize, fill: G[400] } });
     }
     return els;
   }
@@ -315,7 +315,7 @@ export function gauge(o: GaugeOptions): EChartOption {
   };
 }
 
-// Diameter for a bubble of a given base; exported so a legend drawn outside the chart uses the same maths.
+// Diameter for a bubble of a given base; exported so an outside legend uses the same maths.
 export function bubbleSizeFor(base: number, max: number, maxBubble = 34): number {
   return 8 + Math.sqrt((base || 0) / (max || 1)) * maxBubble;
 }

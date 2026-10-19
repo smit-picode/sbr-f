@@ -1,6 +1,6 @@
 import type { AnalysisFrame } from '@/types';
 
-// Pure helpers (sorting, labels, default comparison) need frames synchronously, so the API list is mirrored here.
+// Pure helpers need frames synchronously, so the API list is mirrored here.
 let frames: AnalysisFrame[] = [{ id: 'live', label: 'Live frame', asOf: '', kind: 'live' }];
 let chrono: string[] = ['live'];
 

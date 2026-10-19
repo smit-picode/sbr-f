@@ -1,7 +1,7 @@
 import type { SamplingAllocationEntry, SamplingSelectionGroup, SamplingStratum, SamplingPlan, Allocation, AllocationStratum, Precision } from '@/types';
 import { allocate, precision, sizeForTargetCv } from './allocation';
 
-// Per random group: its allocation, precision and solved size; sbr-backend keeps a copy checked by check-sampling-parity.
+// Per random group: allocation, precision and solved size; the backend keeps a copy (parity check).
 export function planGroups(groups: Pick<SamplingSelectionGroup, 'method' | 'allocation'>[], rows: SamplingStratum[]): SamplingPlan {
   const allocations: Record<number, Allocation> = {};
   const precisions: Record<number, Precision> = {};

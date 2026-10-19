@@ -72,7 +72,7 @@ export function ReportToolbar(p: Props) {
           </Select>
         </div>
         <span className="hidden md:block h-6 w-px bg-slate-200" />
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-[220px] flex-1 items-center gap-2">
           <Label>{t('analysis.toolbar.filters', { defaultValue: 'Filters' })}</Label>
           <FilterChips filters={analysis.filters} onChange={p.onFilters} entity="establishments" fields={allFields} readOnly={!canEdit} compact addLabel={t('analysis.toolbar.addReportFilter', { defaultValue: 'Filter all blocks' })} />
         </div>

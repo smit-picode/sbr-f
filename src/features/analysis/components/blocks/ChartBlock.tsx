@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { AnalysisAggregateResult } from '@/types';
 import { useLanguage } from '@/i18n';
 import { EChart, donut, qatarMap, registerQatarMap } from '@/lib/charts';
-import type { EChartOptionInput } from '@/types';
+import type { EChartOptionInput, ChartClickParams } from '@/types';
 import { QATAR_MUNICIPALITY_NAME_AR } from '@/features/home/data/qatarMunicipalities';
 import { useAnalysisResult } from '@/features/analysis/api/analysisService';
 import { barOption, colorFor, deltaOption, lineOption, sunburstOption, treemapOption } from '@/features/analysis/charts/options';
@@ -18,7 +18,7 @@ import { frameName, measureLabel, valueLabel } from '@/features/analysis/utils/l
 import { BlockEmpty, BlockError, BlockSkeleton } from './BlockState';
 import type { BlockViewProps } from './types';
 
-// Horizontal bars get a fixed row pitch, so long category lists grow the chart instead of squashing it.
+// Horizontal bars get a fixed row pitch, so long category lists grow the chart.
 function rankedChartHeight(block: BlockViewProps['block'], data: AnalysisAggregateResult): number | null {
   if (block.type !== 'bar' && block.type !== 'delta') return null;
   const categories = new Set(data.rows.map((r) => r.keys[0])).size;
@@ -26,13 +26,6 @@ function rankedChartHeight(block: BlockViewProps['block'], data: AnalysisAggrega
   const series = grouped ? (data.dimensions.length > 1 ? new Set(data.rows.map((r) => r.keys[1])).size : data.compareTo ? 2 : 1) : 1;
   const pitch = Math.min(ANALYSIS_BAR_ROW_HEIGHT + (series - 1) * 10, 64);
   return Math.max(200, categories * pitch + 60);
-}
-
-interface ClickParams {
-  name?: string;
-  data?: { keys?: (string | null)[]; value?: number | null } | null;
-  value?: number | null;
-  event?: { event?: MouseEvent };
 }
 
 export function ChartBlock({ block, query, masked, height, mode, onPoint }: BlockViewProps) {
@@ -104,7 +97,7 @@ export function ChartBlock({ block, query, masked, height, mode, onPoint }: Bloc
   const events = useMemo(
     () => ({
       click: (raw: unknown) => {
-        const p = raw as ClickParams;
+        const p = raw as ChartClickParams;
         const handler = onPointRef.current;
         if (!handler) return;
         let keys = p.data?.keys;

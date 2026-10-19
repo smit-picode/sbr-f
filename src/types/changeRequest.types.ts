@@ -67,3 +67,8 @@ export interface ChangeRequestFilters {
   tableName?: string;
   status?: string;
 }
+
+// Curated fields shown in the "Record context" panel per table, organised into sections.
+export type ChangeRequestContextField = { key: string; label: string; span?: 2; sourceKey?: string };
+
+export type ChangeRequestContextSection = { section: string; fields: ChangeRequestContextField[] };

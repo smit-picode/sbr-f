@@ -13,6 +13,6 @@ export const SOURCE_REGULATOR_FALLBACK_COLOR = '#64748B';
 
 export const SOURCE_TABLE_DEFAULT_PAGE_SIZE: number = 10;
 
-// Only regulator SRC_ tables open in the viewer: they carry the DBA's column masking, the STG_ working copies do not.
+// Only regulator SRC_ tables open in the viewer: they carry column masking, the STG_ copies do not.
 export const SOURCE_BROWSABLE_TABLE_PREFIX: string = 'SRC_';
 export const isBrowsableSourceTable = (table: string): boolean => table.toUpperCase().startsWith(SOURCE_BROWSABLE_TABLE_PREFIX);

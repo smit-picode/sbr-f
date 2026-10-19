@@ -21,7 +21,7 @@ interface Props {
 
 const MAX_WAIT_MS = 8000;
 
-// Off-screen landscape-A4 render; the print stylesheet shows only this root, so the PDF is just the report.
+// Off screen landscape A4 render; the print stylesheet shows only this root.
 export function PrintReport({ analysis, cross, masked, onDone }: Props) {
   const { t } = useTranslation();
   const { dir } = useLanguage();

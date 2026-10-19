@@ -39,7 +39,7 @@ interface AllocationPanelProps {
   onChange: (patch: Partial<SamplingAllocationSettings>) => void;
 }
 
-// One random group's allocation: method, size or target precision, bounds, reserve, and per-stratum overrides.
+// One random group's allocation: method, size or precision, bounds, reserve and stratum overrides.
 export function AllocationPanel({ settings, strataFields, auxColumn, fields, strata, allocation, precision, solvedSize, onChange }: AllocationPanelProps) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);

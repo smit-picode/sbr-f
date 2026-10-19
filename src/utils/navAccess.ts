@@ -21,7 +21,7 @@ export const isNavGroupVisible = (group: NavGroup, access: NavAccess): boolean =
   return group.items.some((item) => isNavItemVisible(item, access));
 };
 
-// First page the sidebar would show this user, so a user with no Home tab can still land somewhere usable.
+// First page the sidebar would show this user, so a user with no Home tab still lands somewhere.
 export const getFirstAccessibleHref = (access: NavAccess, excludeHref?: string): string | null => {
   for (const group of NAV_GROUPS) {
     if (!isNavGroupVisible(group, access)) continue;

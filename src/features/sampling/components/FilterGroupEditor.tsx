@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, FolderPlus, X, Ban } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SamplingCondition, SamplingField, SamplingGroup, SamplingNode, SamplingUnit } from '@/types';
+import type { SamplingCondition, SamplingField, SamplingGroup, FilterEditorContext } from '@/types';
 import {
   SAMPLING_LIST_OPERATORS, SAMPLING_MAX_DEPTH, SAMPLING_NO_VALUE_OPERATORS, SAMPLING_PICK_OPERATORS,
   samplingDefaultOperator, samplingOperatorsFor,
@@ -14,19 +14,6 @@ import { fieldLabel, operatorLabel } from '../utils/labels';
 import { ValuePicker } from './ValuePicker';
 
 const INPUT_CLASS = 'h-8 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20';
-
-interface EditorContext {
-  unit: SamplingUnit;
-  // The root group's lead-in, e.g. "Keep enterprises that match".
-  rootLabel: string;
-  // What an empty root means, e.g. "every enterprise in the frame".
-  emptyLabel: string;
-  fields: SamplingField[];
-  snapshotId: number | null;
-  onUpdate: (id: string, patch: (n: SamplingNode) => SamplingNode) => void;
-  onRemove: (id: string) => void;
-  onAdd: (groupId: string, child: SamplingNode) => void;
-}
 
 // Field select grouped by where the field comes from, filterable fields only.
 export function FieldSelect({ fields, value, onChange, className = 'w-56', kinds }: {
@@ -67,7 +54,7 @@ export function FieldSelect({ fields, value, onChange, className = 'w-56', kinds
   );
 }
 
-function ConditionEditor({ node, ctx }: { node: SamplingCondition; ctx: EditorContext }) {
+function ConditionEditor({ node, ctx }: { node: SamplingCondition; ctx: FilterEditorContext }) {
   const { t } = useTranslation();
   const kind = ctx.fields.find((f) => f.FIELD_NAME === node.column)?.KIND ?? 'text';
   const inputType = kind === 'number' ? 'number' : kind === 'date' ? 'date' : 'text';
@@ -140,7 +127,7 @@ function ConditionEditor({ node, ctx }: { node: SamplingCondition; ctx: EditorCo
   );
 }
 
-function GroupEditor({ group, ctx, depth, isRoot }: { group: SamplingGroup; ctx: EditorContext; depth: number; isRoot: boolean }) {
+function GroupEditor({ group, ctx, depth, isRoot }: { group: SamplingGroup; ctx: FilterEditorContext; depth: number; isRoot: boolean }) {
   const { t } = useTranslation();
   const first = ctx.fields[0];
   const addCondition = () => {
@@ -215,7 +202,7 @@ function GroupEditor({ group, ctx, depth, isRoot }: { group: SamplingGroup; ctx:
   );
 }
 
-interface FilterGroupEditorProps extends EditorContext {
+interface FilterGroupEditorProps extends FilterEditorContext {
   root: SamplingGroup;
 }
 

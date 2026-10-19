@@ -1,7 +1,7 @@
 import { ISIC_SECTIONS, SIZE_BANDS } from '../constants';
 import type { SizeBand } from '../types';
 
-// ISIC code -> Rev 4 section letter, via its 2-digit division; null when the code is missing or unmapped.
+// ISIC code to Rev 4 section letter via its 2 digit division; null when missing or unmapped.
 export function isicSection(code: string | null): string | null {
   if (code == null || code === '') return null;
   const d = parseInt(String(code).slice(0, 2), 10);

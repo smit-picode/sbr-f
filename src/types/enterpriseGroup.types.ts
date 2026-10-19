@@ -11,6 +11,7 @@ export interface SbrEnterpriseGroup {
   UCI_TYPE:                 string | null;
   UCI_COUNTRY:              string | null;
   UCI_IDENTIFIER:           string | null;
+  MANUAL_OVERRIDE_FLAG?:    string | null;
   FOREIGN_CONTROLLED_GROUP_FLG: string | null;
   MULTINATIONAL_GROUP_FLG:  string | null;
   PRINCIPAL_ISIC_2DIGIT:    string | null;
@@ -101,4 +102,24 @@ export interface CreateEnterpriseGroupPayload {
 export interface UpdateEnterpriseGroupPayload extends CreateEnterpriseGroupPayload {
   addMemberEnterpriseIds?:    number[];
   removeMemberEnterpriseIds?: number[];
+}
+
+export interface EnterpriseGroupFormState {
+  NAME_ENU:              string;
+  NAME_ARA:              string;
+  UCI_NAME:              string;
+  UCI_TYPE:              string;
+  UCI_COUNTRY:           string;
+  UCI_IDENTIFIER:        string;
+  PRINCIPAL_ISIC_2DIGIT: string;
+  HOLDING_COMPANY_FLG:   string;
+  STATUS:                string;
+  GROUP_START_DATE:      string;
+}
+
+export interface EnterpriseGroupMemberRow {
+  ENTERPRISE_ID:      number;
+  NAME_ENU:           string | null;
+  ESTABLISHMENT_COUNT: number;
+  STATUS:             string | null;
 }

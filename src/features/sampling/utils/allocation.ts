@@ -1,11 +1,11 @@
-// sbr-backend keeps a copy of this file and plan.ts to draw samples for system accounts: run its check:sampling-parity after changing either.
+// The backend keeps a copy of this file and plan.ts; run its parity check after changing either.
 import type { Allocation, AllocationOptions, AllocationStratum, AllocationWarning, Precision, StratumAllocation } from '@/types';
 
       // more units asked for than the population holds
 
 const clampInt = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v)));
 
-// Stand-in SD for a stratum without its own: the size-weighted mean of the others (see docs/sample-builder.md in NPC_SBR for why).
+// Stand in SD for a stratum without its own: the size weighted mean of the others.
 export function typicalSd(strata: AllocationStratum[]): number | null {
   let n = 0, sum = 0;
   for (const s of strata) {
@@ -16,7 +16,7 @@ export function typicalSd(strata: AllocationStratum[]): number | null {
   return n > 0 ? sum / n : null;
 }
 
-// Shares of `budget` in proportion to `w` within [lo, hi]; strata crossing a bound are fixed there and the rest re-shared.
+// Shares of budget in proportion to w within bounds; strata crossing a bound are fixed.
 function boundedShares(budget: number, w: number[], lo: number[], hi: number[]): { x: number[]; bound: ('max' | 'min' | null)[] } {
   const k = w.length;
   const x = new Array<number>(k).fill(0);
@@ -41,7 +41,7 @@ function boundedShares(budget: number, w: number[], lo: number[], hi: number[]):
   return { x, bound };
 }
 
-// Whole numbers that add up to `target`: floors, then +1 for the largest remainders that still fit under hi.
+// Whole numbers adding up to target: floors, then plus one for the largest remainders.
 function roundToTotal(x: number[], target: number, hi: number[]): number[] {
   const out = x.map((v) => Math.floor(v + 1e-9));
   let missing = target - out.reduce((a, b) => a + b, 0);
@@ -148,7 +148,7 @@ export function precision(strata: AllocationStratum[], alloc: Allocation): Preci
   return { total, se, cv: uncovered ? null : se / total, uncovered };
 }
 
-// Smallest n whose full allocation reaches the target CV (0.05 = 5%), by bisection; null when even a census misses it.
+// Smallest n reaching the target CV by bisection; null when even a census misses it.
 export function sizeForTargetCv(strata: AllocationStratum[], opts: AllocationOptions, targetCv: number): number | null {
   const population = strata.reduce((a, s) => a + s.N, 0);
   const cvAt = (n: number) => precision(strata, allocate(strata, { ...opts, sampleSize: n })).cv;

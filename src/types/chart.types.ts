@@ -1,3 +1,5 @@
+import type { ChartCategory, ChartSeries } from './analysis.types';
+
 // ---------- trend ----------
 export interface TrendSeries {
   name: string;
@@ -134,3 +136,23 @@ export type EChartOption = Record<string, unknown>;
 
 // A function option is used when the layout genuinely needs the container's measured size
 export type EChartOptionInput = EChartOption | ((width: number, height: number) => EChartOption);
+
+export interface BarOpts {
+  categories: ChartCategory[];
+  series: ChartSeries[];
+  horizontal: boolean;
+  stacked: boolean;
+  percent: boolean;
+  showValues: boolean;
+  animate?: boolean;
+  compare?: boolean;
+}
+
+export interface ChartTreeNode { key: string | null; name: string; value: number; children?: ChartTreeNode[]; keys: (string | null)[] }
+
+export interface ChartClickParams {
+  name?: string;
+  data?: { keys?: (string | null)[]; value?: number | null } | null;
+  value?: number | null;
+  event?: { event?: MouseEvent };
+}

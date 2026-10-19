@@ -1,23 +1,6 @@
 import { baseApi } from '@/services/api';
 import { withKnownFields } from '../utils/blocks';
-import type {
-  Analysis,
-  AnalysisDefinition,
-  AnalysisExportLog,
-  AnalysisFrame,
-  AnalysisListParams,
-  AnalysisRequest,
-  AnalysisResult,
-  AnalysisShare,
-  AnalysisShareDirectoryEntry,
-  ApiResponse,
-} from '@/types';
-
-interface SaveAnalysisBody {
-  name: string;
-  description: string;
-  definition: AnalysisDefinition;
-}
+import type { Analysis, AnalysisDefinition, AnalysisExportLog, AnalysisFrame, AnalysisListParams, AnalysisRequest, AnalysisResult, AnalysisShare, AnalysisShareDirectoryEntry, ApiResponse, SaveAnalysisBody } from '@/types';
 
 export const analysisApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

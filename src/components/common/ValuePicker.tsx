@@ -25,7 +25,7 @@ interface ValuePickerProps {
   className?: string;
 }
 
-// A searchable list of a column's values with counts; a typed value that is not listed can still be used.
+// A searchable list of a column's values with counts; an unlisted typed value can still be used.
 export function ValuePicker({
   options, loading = false, multiple, values, onChange, onOpenChange, labelFor = (v) => v, cap = 200, className = 'w-60',
 }: ValuePickerProps) {
@@ -43,7 +43,7 @@ export function ValuePicker({
     if (!o) setSearch('');
     onOpenChange?.(o);
   };
-  // Select all acts on the listed options (the search's matches when searching); values typed in by hand are kept.
+  // Select all acts on the listed options (search matches when searching); typed values are kept.
   const allShown = shown.length > 0 && shown.every((o) => values.includes(o.VALUE));
   const toggleAll = () => {
     const keys = new Set(shown.map((o) => o.VALUE));

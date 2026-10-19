@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { ChartColumn, Copy, Plus, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Analysis, AnalysisTemplate, CreateAnalysisRequest } from '@/types';
+import type { Analysis, AnalysisTemplate, CreateAnalysisRequest, AnalysisListScope } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 import { formatDate } from '@/utils/format';
@@ -29,14 +29,12 @@ import { AnalysisThumbnail } from '../components/AnalysisThumbnail';
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { CreateAnalysisDialog } from '../components/CreateAnalysisDialog';
 
-type Scope = 'all' | 'mine' | 'shared';
-
 export function AnalysisListPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const access = useAnalysisAccess();
   useAnalysisFrames({ skip: !access.canViewSection });
-  const [scope, setScope] = useState<Scope>('all');
+  const [scope, setScope] = useState<AnalysisListScope>('all');
   const [search, setSearch] = useState('');
   const debounced = useDebounce(search, 400);
   const [toDelete, setToDelete] = useState<Analysis | null>(null);
@@ -47,7 +45,7 @@ export function AnalysisListPage() {
   const [updateAnalysis, { isLoading: describing }] = useUpdateAnalysisMutation();
   const [deleteAnalysis, { isLoading: deleting }] = useDeleteAnalysisMutation();
 
-  // The server returns only analyses this user may see, newest first; scope tabs split them by access.
+  // The server returns only analyses this user may see, newest first; tabs split them by access.
   const visible = useMemo(() => data?.data ?? [], [data]);
   const filtered = useMemo(
     () => visible.filter((a) => (scope === 'mine' ? access.isOwner(a) : scope === 'shared' ? access.isSharedWithMe(a) : true)),
@@ -171,7 +169,7 @@ export function AnalysisListPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1">
-          {(['all', 'mine', 'shared'] as Scope[]).map((s) => (
+          {(['all', 'mine', 'shared'] as AnalysisListScope[]).map((s) => (
             <button key={s} type="button" onClick={() => setScope(s)} className={cn('h-7 rounded-full px-3 text-[11.5px] font-semibold transition-colors', scope === s ? 'bg-dune text-white shadow-soft' : 'text-slate-500 hover:text-slate-700')}>
               {s === 'all' ? t('analysis.scope.all', { defaultValue: 'All' }) : s === 'mine' ? t('analysis.scope.mine', { defaultValue: 'My analyses' }) : t('analysis.scope.shared', { defaultValue: 'Shared with me' })}
               <span className={cn('ms-1.5 tabular-nums', scope === s ? 'text-white/80' : 'text-slate-400')}>{counts[s]}</span>

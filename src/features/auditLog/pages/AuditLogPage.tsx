@@ -36,7 +36,7 @@ function is400(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 400;
 }
 
-// An aborted or superseded request reports FETCH_ERROR; that is not a real error, so the toast is suppressed.
+// An aborted or superseded request reports FETCH_ERROR, which is not a real error, so no toast.
 function isFetchError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 'FETCH_ERROR';
 }
@@ -44,10 +44,10 @@ function isFetchError(error: unknown): boolean {
 export function AuditLogPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
   const [columnFilters, setColumnFilters] = useState<ColumnFilterRow[]>([]);
-  // Debounce column-filter changes so the API is called 500 ms after typing stops, not on every keystroke.
+  // Debounce column filter changes so the API is called 500 ms after typing stops.
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
   const [recordIdInput, setRecordIdInput] = useState<string>('');
-  // A typed date that does not exist (31-02-2025) reads as empty, so it is reported with a toast on blur.
+  // A typed date that does not exist reads as empty, so a toast reports it on blur.
   const [dateErrors, setDateErrors] = useState<{ dateFrom: boolean; dateTo: boolean }>({ dateFrom: false, dateTo: false });
   const [dateInputKey, setDateInputKey] = useState(0);
   const debouncedRecordId = useDebounce(recordIdInput, 500);

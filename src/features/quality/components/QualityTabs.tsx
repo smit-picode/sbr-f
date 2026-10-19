@@ -11,7 +11,7 @@ const TABS = [
   { href: '/quality/corrections', icon: PenLine, key: 'dq.tabs.corrections', label: 'NPC corrections' },
 ];
 
-// Switch between the two Data Quality views; both read data_quality.view, so a viewer of one can open the other.
+// Switches between the two Data Quality views; both read data_quality.view.
 export function QualityTabs({ active }: { active: string }) {
   const { t } = useTranslation();
   const router = useRouter();

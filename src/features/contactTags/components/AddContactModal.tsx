@@ -12,13 +12,9 @@ import { useLanguage } from '@/i18n';
 import { useGetContactTagsQuery, useGetEstablishmentContactsQuery, useTagContactMutation } from '../api/contactTagsApi';
 import { tagErrorMessage, tagLabel } from './TagControls';
 import { useCreateContactMutation } from '@/features/contacts/api/contactsApi';
-import type { CreateContactInput } from '@/types';
+import type { CreateContactInput, AddContactField } from '@/types';
 
-// A contact typed in on an establishment's page: created at once as MANUAL, with a permanent CONTACT_ID the caller can tag.
-
-type Field = Exclude<keyof CreateContactInput, 'sbrId' | 'comment'>;
-
-const FIELDS: { key: Field; i18n: string; max: number; wide?: boolean; type?: string }[] = [
+const FIELDS: { key: AddContactField; i18n: string; max: number; wide?: boolean; type?: string }[] = [
   { key: 'CONTACT_NAME', i18n: 'contactName', max: 200, wide: true },
   { key: 'ROLE',         i18n: 'role',        max: 100, wide: true },
   { key: 'EMAIL',        i18n: 'email',       max: 200, wide: true, type: 'email' },
@@ -30,7 +26,7 @@ const FIELDS: { key: Field; i18n: string; max: number; wide?: boolean; type?: st
 ];
 
 // The register needs a way to reach the contact; a name or a role alone is not a contact.
-const REACHABLE: Field[] = ['PHONE', 'MOBILE', 'EMAIL', 'FAX', 'WEBSITE'];
+const REACHABLE: AddContactField[] = ['PHONE', 'MOBILE', 'EMAIL', 'FAX', 'WEBSITE'];
 
 interface Props {
   sbrId: number;
@@ -41,7 +37,7 @@ interface Props {
 
 export function AddContactModal({ sbrId, open, onClose, onCreated }: Props) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<Partial<Record<Field, string>>>({});
+  const [form, setForm] = useState<Partial<Record<AddContactField, string>>>({});
   const [comment, setComment] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [createContact, { isLoading: creating }] = useCreateContactMutation();
