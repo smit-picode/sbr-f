@@ -258,6 +258,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
     <div className={cn('transition-[padding] duration-200', editing && 'lg:pe-[452px]')}>
       <PageContainer>
         <PageHeader
+          fullWidthText
           title={canEdit ? (
             <RequiredTextField
               wrap
@@ -266,7 +267,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
               ariaLabel={t('analysis.name', { defaultValue: 'Analysis name' })}
               requiredMessage={t('analysis.nameRequired', { defaultValue: 'Analysis name is required.' })}
               maxLength={200}
-              className="w-full max-w-[760px] bg-transparent text-white font-extrabold leading-tight outline-none border-b border-transparent hover:border-white/30 focus:border-white/60 transition-colors"
+              className="w-full bg-transparent text-white font-extrabold leading-tight outline-none border-b border-transparent hover:border-white/30 focus:border-white/60 transition-colors"
               invalidClassName="border-red-300 hover:border-red-300 focus:border-red-300"
             />
           ) : analysis.name}
@@ -279,7 +280,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
               requiredMessage={t('analysis.descriptionRequired', { defaultValue: 'Description is required.' })}
               placeholder={t('analysis.descriptionPlaceholder', { defaultValue: 'Add a short description…' })}
               maxLength={1000}
-              className="w-full max-w-2xl bg-transparent text-white/80 placeholder:text-white/40 outline-none border-b border-transparent hover:border-white/20 focus:border-white/50 transition-colors"
+              className="w-full bg-transparent text-white/80 placeholder:text-white/40 outline-none border-b border-transparent hover:border-white/20 focus:border-white/50 transition-colors"
               invalidClassName="border-red-300 hover:border-red-300 focus:border-red-300"
             />
           ) : analysis.description}

@@ -15,6 +15,7 @@ interface PageHeaderProps {
   actions?: React.ReactNode;
   chips?: React.ReactNode;
   back?: { label: string; onClick: () => void };
+  fullWidthText?: boolean;
 }
 
 // route -> breadcrumb data for the current path — moved from the old Header.tsx unchanged.
@@ -40,7 +41,7 @@ function initialsOf(user: { email: string } | null): string {
   return user.email.slice(0, 2).toUpperCase();
 }
 
-export function PageHeader({ title, description, actions, chips, back }: PageHeaderProps) {
+export function PageHeader({ title, description, actions, chips, back, fullWidthText = false }: PageHeaderProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { toggleLanguage, isArabic } = useLanguage();
@@ -121,7 +122,7 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
 
       <div className="relative flex flex-col justify-end min-h-[inherit] px-7 pb-6 pt-[72px]">
         <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div className="min-w-0">
+          <div className={fullWidthText ? "min-w-0 flex-1 basis-[28rem]" : "min-w-0"}>
             <div className="text-[12px] font-medium text-white/75 flex items-center gap-2 flex-wrap">
               {t(crumb.groupKey, { defaultValue: crumb.groupTitle })}
               {'  ·  '}
@@ -129,7 +130,7 @@ export function PageHeader({ title, description, actions, chips, back }: PageHea
               {chips}
             </div>
             <h1 className="font-extrabold leading-tight mt-1 text-white text-[26px]">{title}</h1>
-            {description && <p className="text-[13px] text-white/80 mt-1 max-w-2xl">{description}</p>}
+            {description && <p className={`text-[13px] text-white/80 mt-1 ${fullWidthText ? "" : "max-w-2xl"}`}>{description}</p>}
           </div>
           {actions && <div className="banner-actions shrink-0 flex items-center gap-2">{actions}</div>}
         </div>

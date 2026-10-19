@@ -29,9 +29,16 @@ export function RequiredTextField({ value, onCommit, ariaLabel, requiredMessage,
   }, [value]);
 
   useLayoutEffect(() => {
-    if (!wrap || !area.current) return;
-    area.current.style.height = 'auto';
-    area.current.style.height = `${area.current.scrollHeight}px`;
+    const el = area.current;
+    if (!wrap || !el) return;
+    const fit = () => {
+      el.style.height = 'auto';
+      el.style.height = `${el.scrollHeight}px`;
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [draft, wrap]);
 
   const change = (next: string) => {
