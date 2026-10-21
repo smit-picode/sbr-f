@@ -1,4 +1,4 @@
-import type { AnalysisBlockDisplay, AnalysisBlockType, AnalysisEntity, AnalysisFilterOp, AnalysisPercentMode, AnalysisSort, AnalysisAggDef, AnalysisBlockCategory, AnalysisBlockTypeDef, AnalysisEntityDef, AnalysisFieldDef, AnalysisFieldGroup } from '@/types';
+import type { AnalysisBlockDisplay, AnalysisBlockType, AnalysisEntity, AnalysisFilterOp, AnalysisPercentMode, AnalysisSort, AnalysisAggDef, AnalysisBlockCategory, AnalysisBlockTypeDef, AnalysisEntityDef, AnalysisFieldDef, AnalysisFieldGroup, AnalysisScheduleFrequency } from '@/types';
 
 export const ANALYSIS_FIELD_GROUP_LABELS: Record<AnalysisFieldGroup, string> = {
   unit: 'Unit',
@@ -314,3 +314,35 @@ export const FLOW_NEW = '__new__';
 export const FLOW_CEASED = '__ceased__';
 export const FLOW_OUTSIDE = '__outside__';
 
+// The server-side render page: how long blocks must stay loaded before it reports ready, and the longest it waits.
+export const RENDER_SETTLE_MS: number = 800;
+export const RENDER_MAX_WAIT_MS: number = 90000;
+
+// Emailing an analysis; the limits match the backend's.
+export const ANALYSIS_MAIL_MAX_RECIPIENTS: number = 50;
+export const ANALYSIS_MAIL_SUBJECT_MAX_LENGTH: number = 200;
+export const ANALYSIS_MAIL_MESSAGE_MAX_LENGTH: number = 2000;
+export const ANALYSIS_RECIPIENT_SEARCH_DEBOUNCE_MS: number = 400;
+
+export const ANALYSIS_SCHEDULE_FREQUENCIES: AnalysisScheduleFrequency[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
+
+// ISO weekdays, 1 Monday to 7 Sunday, listed from Sunday as the Qatar week starts.
+export const ANALYSIS_SCHEDULE_WEEKDAYS: { value: number; key: string; label: string }[] = [
+  { value: 7, key: 'sun', label: 'Sunday' },
+  { value: 1, key: 'mon', label: 'Monday' },
+  { value: 2, key: 'tue', label: 'Tuesday' },
+  { value: 3, key: 'wed', label: 'Wednesday' },
+  { value: 4, key: 'thu', label: 'Thursday' },
+  { value: 5, key: 'fri', label: 'Friday' },
+  { value: 6, key: 'sat', label: 'Saturday' },
+];
+
+export const ANALYSIS_SCHEDULE_DEFAULT_TIME: string = '08:00';
+
+export const ANALYSIS_SCHEDULE_PAUSE_REASONS: Record<string, string> = {
+  PAUSED_BY_USER: 'Paused',
+  ANALYSIS_DELETED: 'Paused: the analysis was deleted',
+  OWNER_NO_ACCESS: 'Paused: its owner can no longer open the analysis',
+  NO_RECIPIENTS: 'Paused: none of the recipients can open the analysis',
+  FAILED_REPEATEDLY: 'Paused: sending failed three times in a row',
+};

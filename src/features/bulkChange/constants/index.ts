@@ -84,4 +84,14 @@ export const BULK_CHANGE_VALIDATION_DEFAULTS: Record<string, string> = {
   NO_CHANGES: 'This row matches the stored record — nothing to change.',
   ROW_TOO_LARGE: 'This row changes too much data to submit at once.',
   PENDING_CHANGE: 'This column already has a change waiting for approval.',
+  PENDING_APPLY: 'An approved change to this column is not applied yet, so the current value may be out of date.',
 };
+
+// Validation codes that inform without blocking the row; rendered amber instead of red.
+export const BULK_CHANGE_WARNING_CODES: string[] = ['PENDING_APPLY'];
+
+// How often the review page re-reads a batch while approved members are still being applied.
+export const BULK_APPLY_POLL_MS = 15000;
+
+// Distinct per-item failure reasons appended to the decide toast; more would not fit.
+export const MAX_TOAST_REASONS = 3;

@@ -38,6 +38,11 @@ const authSlice = createSlice({
         clearPersistedUiState();
       }
     },
+    // A password change ends the old session server-side; the new token keeps this one going.
+    replaceToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+      if (typeof window !== 'undefined') localStorage.setItem('sbr_token', action.payload);
+    },
     setPermissions: (state, action: PayloadAction<UserPermission[] | string[]>) => {
       const normalised: UserPermission[] = (action.payload as Array<unknown>).map((p) =>
         typeof p === 'string' ? { permissionName: p } : (p as UserPermission)
@@ -85,5 +90,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, setPermissions, logout, hydrateAuth } = authSlice.actions;
+export const { setCredentials, setPermissions, logout, hydrateAuth, replaceToken } = authSlice.actions;
 export default authSlice.reducer;

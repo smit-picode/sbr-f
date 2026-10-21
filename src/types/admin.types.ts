@@ -103,6 +103,7 @@ export interface UsersColumnsOptions {
   onView: (user: SbrUser) => void;
   onEdit: (user: SbrUser) => void;
   onToggleLock: (user: SbrUser) => void;
+  onSendLink: (user: SbrUser) => void;
   isSelf: (user: SbrUser) => boolean;
 }
 

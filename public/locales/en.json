@@ -1074,7 +1074,8 @@
         "desc": "User & role management, registry, logs"
       }
     },
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "forgotPassword": "Forgot your password?"
   },
   "admin": {
     "panel": {
@@ -1311,6 +1312,8 @@
       "assignedRolesHint": "A user can hold multiple roles; effective permissions follow the active role. Set an optional per-role expiry date.",
       "scopedBadge": "SCOPED",
       "expiryTitle": "Optional expiry date for this role",
+      "expiryPast": "Expiry date cannot be in the past.",
+      "expiryInvalid": "Enter a valid expiry date.",
       "noRoles": "No roles available",
       "nameRequired": "Name is required.",
       "emailRequired": "Email is required.",
@@ -1337,7 +1340,19 @@
       "unlockedSuccess": "User unlocked.",
       "lockFailed": "Failed to update the account. Please try again.",
       "loadDetailFailed": "Failed to load user details. Please try again.",
-      "statusSelfLocked": "You cannot deactivate your own account."
+      "statusSelfLocked": "You cannot deactivate your own account.",
+      "inviteNote": "The user is emailed an invitation to choose their own password. The link works for 3 days; you can send a new one from the user list.",
+      "createdInvited": "User created. An invitation was emailed to {{email}}.",
+      "createdInviteFailed": "User created, but the invitation email could not be sent. Use \"Email a password link\" to try again.",
+      "linkTitle": "Email a password link",
+      "linkBody": "{{name}} ({{email}}) gets an email with a link to choose a new password. You never see the password, and any earlier link stops working.",
+      "linkInviteHint": "Invitation: for someone who has not signed in yet. The link works for 3 days.",
+      "linkResetHint": "Password reset: for someone who forgot their password. The link works for 30 minutes.",
+      "sendInvite": "Send invitation",
+      "sendReset": "Send reset link",
+      "linkSent": "A link was emailed to {{email}}.",
+      "linkFailed": "The email could not be sent. Please try again.",
+      "linkLocked": "Unlock the account first"
     },
     "permissionsOther": "Other permissions",
     "systemAccounts": {
@@ -1526,7 +1541,8 @@
           "TOO_LONG": "Value is too long.",
           "NO_CHANGES": "This row matches the stored record — nothing to change.",
           "ROW_TOO_LARGE": "This row changes too much data to submit at once.",
-          "PENDING_CHANGE": "This column already has a change waiting for approval."
+          "PENDING_CHANGE": "This column already has a change waiting for approval.",
+          "PENDING_APPLY": "An approved change to this column is not applied yet, so the current value may be out of date."
         }
       },
       "confirm": {
@@ -1551,6 +1567,12 @@
       "FAILED": "Failed"
     },
     "decidedPartial": "{{succeeded}} of {{total}} changes {{decision}}; {{failed}} could not be applied.",
+    "decidedPendingApply": "{{succeeded}} of {{total}} changes {{decision}}; {{pending}} not yet applied to the register.",
+    "decidedQueued": "{{succeeded}} of {{total}} changes {{decision}}. They are being applied to the register in the background, which usually takes a few minutes.",
+    "applyPendingBanner": "{{count}} approved change(s) are still being applied to the register. This page refreshes on its own.",
+    "applyFailedBanner": "{{count}} approved change(s) could not be applied after repeated attempts. An administrator needs to look at them; the reason is shown on each row.",
+    "decideFailedTitle": "{{count}} change(s) could not be decided in the last attempt:",
+    "applyStates": { "APPLIED": "Applied", "PENDING_APPLY": "Being applied", "APPLY_FAILED": "Could not be applied", "PENDING": "Awaiting decision", "REJECTED": "Rejected" },
     "pendingCount": "{{count}} pending",
     "decisionBreakdown": "{{pending}} pending · {{approved}} approved · {{rejected}} rejected",
     "partlyDecidedHint": "{{decided}} of {{total}} records were already decided individually. Approve or Reject applies only to the {{pending}} still pending.",
@@ -2376,9 +2398,98 @@
       "failed": "Not saved — retrying on your next change",
       "reloaded": "Reloaded"
     },
-    "noViewPermission": "You do not have permission to view analyses."
+    "noViewPermission": "You do not have permission to view analyses.",
+    "email": {
+      "button": "Email",
+      "title": "Email “{{name}}”",
+      "description": "Send the report as a PDF and an Excel workbook to people it is shared with, now or on a schedule. Each email carries the data as it is when it is sent.",
+      "notConfigured": "Email is not configured on this server yet, so nothing can be sent.",
+      "tabSend": "Send now",
+      "tabSchedules": "Schedules",
+      "recipients": "Recipients",
+      "recipientsSearch": "Add people by name or email…",
+      "recipientsFull": "At most {{max}} recipients",
+      "noMatches": "No matching users.",
+      "noAccess": "Not shared",
+      "noAccessHint": "This analysis is not shared with them. Share it first.",
+      "lostAccess": "Can no longer open the analysis; skipped when sending.",
+      "removeRecipient": "Remove {{name}}",
+      "subject": "Subject",
+      "message": "Note (optional)",
+      "attachments": "Attach",
+      "pdf": "PDF of the report",
+      "xlsx": "Excel workbook",
+      "suppressionNote": "Attachments always have statistical disclosure control applied, whatever your own export rights.",
+      "send": "Send",
+      "queued": "The analysis is being prepared and will be emailed in a moment.",
+      "sendFailed": "The email could not be sent.",
+      "needRecipient": "Add at least one recipient.",
+      "needAttachment": "Attach the PDF, the Excel workbook or both.",
+      "history": "RECENT EMAILS",
+      "noHistory": "This analysis has not been emailed yet.",
+      "historyLine": "{{by}} to {{count}} recipient(s)",
+      "statusSent": "Sent",
+      "statusFailed": "Failed",
+      "statusPending": "Sending…",
+      "schedulesHint": "Times are Doha time. A schedule pauses itself if the analysis or its recipients lose access.",
+      "newSchedule": "New schedule",
+      "noSchedules": "No schedules yet.",
+      "scheduleMeta": "{{count}} recipient(s) · by {{owner}}",
+      "nextRun": "Next: {{when}}",
+      "lastSent": "last sent {{when}}",
+      "lastFailed": "last attempt failed {{when}}",
+      "someLostAccess": "Some recipients can no longer open the analysis and are skipped.",
+      "sendScheduleNow": "Send now",
+      "pause": "Pause",
+      "resume": "Resume",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete this schedule?",
+      "schedulePaused": "Schedule paused.",
+      "scheduleResumed": "Schedule resumed.",
+      "scheduleCreated": "Schedule created.",
+      "scheduleUpdated": "Schedule saved.",
+      "scheduleDeleted": "Schedule deleted.",
+      "scheduleFailed": "The schedule could not be saved.",
+      "scheduleDeleteFailed": "The schedule could not be deleted.",
+      "frequency": "Frequency",
+      "frequencies": {
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly"
+      },
+      "weekday": "Day",
+      "monthDay": "Day of the month",
+      "time": "Time (Doha)",
+      "badTime": "Choose a time.",
+      "lastDayNote": "In a month without day {{day}}, it is sent on the last day of the month.",
+      "saveSchedule": "Save schedule",
+      "createSchedule": "Create schedule",
+      "summaryDaily": "Every day at {{time}}",
+      "summaryWeekly": "Every {{day}} at {{time}}",
+      "summaryMonthly": "Monthly on day {{day}} at {{time}}",
+      "weekdays": {
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday"
+      },
+      "paused": {
+        "PAUSED_BY_USER": "Paused",
+        "ANALYSIS_DELETED": "Paused: the analysis was deleted",
+        "OWNER_NO_ACCESS": "Paused: its owner can no longer open the analysis",
+        "NO_RECIPIENTS": "Paused: none of the recipients can open the analysis",
+        "FAILED_REPEATEDLY": "Paused: sending failed three times in a row"
+      }
+    }
   },
   "sourceCatalog": {
+    "searchPlaceholder": "Search {{column}}...",
+    "searchIn": "in",
+    "searchColumn": "Column to search",
     "title": "Source Data Explorer",
     "description": "Browse the raw data feeds from each regulator — read-only.",
     "tables": "tables",
@@ -2457,6 +2568,8 @@
       "empty": "No tags yet",
       "emptyHint": "Create a tag before tagging contacts.",
       "badCode": "A tag code is 1 to 30 letters, digits or underscores.",
+      "digitsOnly": "{{field}} cannot be digits only.",
+      "arabicOnly": "{{field}} must be written in Arabic, with no English letters.",
       "needName": "Enter a name in English or Arabic.",
       "saved": "Tag saved.",
       "saveFailed": "Could not save the tag. Please try again."
@@ -2956,5 +3069,48 @@
   },
   "surveys": {
     "noViewPermission": "You do not have permission to view surveys."
+  },
+  "password": {
+    "newPassword": "New password",
+    "confirmPassword": "Confirm the new password",
+    "show": "Show password",
+    "hide": "Hide password",
+    "mismatch": "The two passwords do not match.",
+    "notAcceptable": "The password does not meet the rules below.",
+    "rules": {
+      "length": "At least {{min}} characters",
+      "letter": "At least one letter",
+      "digit": "At least one digit"
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter the email of your account and we will send you a link to choose a new password.",
+      "submit": "Send the link",
+      "invalidEmail": "Enter a valid email address.",
+      "sent": "If an active account uses {{email}}, we have emailed it a link to choose a new password. The link works for 30 minutes."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "Set a new password for {{email}}.",
+      "submit": "Save the new password",
+      "inviteTitle": "Welcome to the SBR Portal",
+      "inviteSubtitle": "Choose the password for {{email}}.",
+      "inviteSubmit": "Set my password",
+      "invalidTitle": "This link no longer works",
+      "invalidBody": "The link is invalid, already used or expired. Ask for a new one; an invitation can be sent again by your administrator.",
+      "requestNew": "Request a new link",
+      "doneTitle": "Your password is set",
+      "doneBody": "You can now sign in as {{email}} with your new password."
+    },
+    "change": {
+      "title": "Change password",
+      "current": "Current password",
+      "currentRequired": "Enter your current password.",
+      "same": "The new password is the same as the current one.",
+      "hint": "You stay signed in here; every other session is signed out, and you get a confirmation email.",
+      "submit": "Change password",
+      "done": "Your password was changed. Other sessions have been signed out.",
+      "failed": "The password could not be changed. Please try again."
+    }
   }
 }

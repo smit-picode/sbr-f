@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
-import { ChartColumn, Copy, Ellipsis, FileDown, FileSpreadsheet, Plus, Presentation, Share2, Trash2, Users } from 'lucide-react';
+import { ChartColumn, Copy, Ellipsis, FileDown, FileSpreadsheet, Mail, Plus, Presentation, Share2, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisBlock, AnalysisBlockType, AnalysisCrossFilter, AnalysisEntity, AnalysisFilter, AnalysisResolvedQuery, AnalysisShare, RecordsTarget } from '@/types';
 import { cn } from '@/lib/utils';
@@ -40,6 +40,7 @@ import { RecordsDrawer } from '../components/RecordsDrawer';
 import { ReportToolbar } from '../components/ReportToolbar';
 import { RequiredTextField } from '../components/RequiredTextField';
 import { ShareDialog } from '../components/ShareDialog';
+import { EmailAnalysisDialog } from '../components/email/EmailAnalysisDialog';
 import { SaveStatus } from '../components/SaveStatus';
 
 
@@ -86,6 +87,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
   const [presenting, setPresenting] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [emailing, setEmailing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -304,6 +306,10 @@ export function AnalysisReportPage({ id }: { id: string }) {
                 <Share2 className="h-3.5 w-3.5" />
                 {t('analysis.share.button', { defaultValue: 'Share' })}
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setEmailing(true)} disabled={!analysis.blocks.length}>
+                <Mail className="h-3.5 w-3.5" />
+                {t('analysis.email.button', { defaultValue: 'Email' })}
+              </Button>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" disabled={!analysis.blocks.length} loading={exporting || printing}>
@@ -451,6 +457,7 @@ export function AnalysisReportPage({ id }: { id: string }) {
         <AddBlockDialog open defaultEntity={lastEntity} onClose={() => setAdding(null)} onAdd={(type, entity) => addBlock(type, entity, adding.afterId)} />
       )}
       <RecordsDrawer target={records} onClose={() => setRecords(null)} onExport={exportRecordsBlock} />
+      {emailing && <EmailAnalysisDialog open analysis={analysis} onClose={() => setEmailing(false)} />}
       {sharing && (
         <ShareDialog
           open

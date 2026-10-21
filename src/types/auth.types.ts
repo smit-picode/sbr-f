@@ -28,3 +28,18 @@ export interface AuthState {
   permissions: UserPermission[];
   roles: AuthRole[];
 }
+
+// What an emailed password link is for: an invitation to a new account, or a reset.
+export type PasswordLinkPurpose = 'INVITE' | 'RESET';
+
+export interface PasswordLinkInfo {
+  purpose: PasswordLinkPurpose;
+  name: string;
+  email: string;
+  expiresAt: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

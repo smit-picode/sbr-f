@@ -1,7 +1,7 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Eye, Lock, LockOpen } from 'lucide-react';
+import { Pencil, Eye, Lock, LockOpen, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/utils/format';
@@ -65,6 +65,7 @@ export const getUsersColumns = ({
   onView,
   onEdit,
   onToggleLock,
+  onSendLink,
   isSelf,
 }: UsersColumnsOptions): ColumnDef<SbrUser>[] => {
   const columns: ColumnDef<SbrUser>[] = [
@@ -164,6 +165,23 @@ export const getUsersColumns = ({
                 className="h-8 w-8 p-0"
               >
                 {user.IS_ACTIVE ? <Lock className="h-3.5 w-3.5" /> : <LockOpen className="h-3.5 w-3.5" />}
+              </Button>
+            );
+          })()}
+          {canEdit && (() => {
+            const user = row.original;
+            const label = t('admin.users.linkTitle', { defaultValue: 'Email a password link' });
+            return (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onSendLink(user)}
+                disabled={!user.IS_ACTIVE || !!user.DELETED_AT}
+                title={user.IS_ACTIVE ? label : t('admin.users.linkLocked', { defaultValue: 'Unlock the account first' })}
+                aria-label={label}
+                className="h-8 w-8 p-0"
+              >
+                <KeyRound className="h-3.5 w-3.5" />
               </Button>
             );
           })()}

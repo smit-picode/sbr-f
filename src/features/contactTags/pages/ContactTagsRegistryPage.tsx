@@ -19,6 +19,7 @@ import { toast } from '@/utils/toast';
 import { useHasPermission } from '@/hooks/usePermission';
 import { useGetContactTagsQuery, useSaveContactTagMutation } from '../api/contactTagsApi';
 import type { ContactTag, SaveContactTagInput } from '@/types';
+import { TAG_TEXT_FIELDS, TAG_TEXT_PATTERN } from '../constants';
 
 // The tag registry: the code is permanent, and retiring a tag hides it but keeps its history.
 
@@ -52,9 +53,25 @@ function TagDialog({ tag, open, onClose }: { tag: ContactTag | null; open: boole
 
   const set = (patch: Partial<SaveContactTagInput>) => setForm((f) => ({ ...f, ...patch }));
 
+  // The first name or description that breaks a text rule, as the message to show.
+  const textError = (): string | null => {
+    for (const { field, arabic } of TAG_TEXT_FIELDS) {
+      const value = (form[field] ?? '').trim();
+      if (!value) continue;
+      const label = t(`contactTags.registry.${field}`);
+      if (TAG_TEXT_PATTERN.DIGITS_ONLY.test(value)) return t('contactTags.registry.digitsOnly', { field: label });
+      if (arabic && (TAG_TEXT_PATTERN.LATIN_LETTER.test(value) || !TAG_TEXT_PATTERN.ARABIC_LETTER.test(value))) {
+        return t('contactTags.registry.arabicOnly', { field: label });
+      }
+    }
+    return null;
+  };
+
   const submit = async () => {
     if (!CODE_RE.test(form.code)) { setError(t('contactTags.registry.badCode')); return; }
     if (!(form.nameEn ?? '').trim() && !(form.nameAr ?? '').trim()) { setError(t('contactTags.registry.needName')); return; }
+    const invalidText = textError();
+    if (invalidText) { setError(invalidText); return; }
     try {
       await saveTag({ ...form, code: form.code.toUpperCase() }).unwrap();
       toast.success(t('contactTags.registry.saved'));

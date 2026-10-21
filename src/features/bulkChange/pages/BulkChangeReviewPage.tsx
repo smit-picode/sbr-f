@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from '@/hooks/useAppRouter';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, User, X, XCircle } from 'lucide-react';
@@ -17,11 +17,29 @@ import { toast } from '@/utils/toast';
 import { useDecideBulkChangeMutation, useGetBulkChangeByIdQuery } from '../api/bulkChangeApi';
 import { BulkChangeStatusBadge } from '../components/BulkChangeStatusBadge';
 import {
-  BULK_CHANGE_API_FILE_PREFIX, BULK_CHANGE_MEMBER_KIND, BULK_CHANGE_STATUS_DEFAULTS, BULK_CHANGE_TAG_CODE_KEY, TABLE_BY_ENTITY_TYPE,
+  BULK_APPLY_POLL_MS, BULK_CHANGE_API_FILE_PREFIX, BULK_CHANGE_MEMBER_KIND, BULK_CHANGE_STATUS_DEFAULTS, BULK_CHANGE_TAG_CODE_KEY,
+  MAX_TOAST_REASONS, TABLE_BY_ENTITY_TYPE,
 } from '../constants';
-import type { BulkChangeDecision } from '../types';
+import type { BulkChangeDecision, BulkChangeRecordRow } from '../types';
 
 const STATUS_KEYS = new Set(['EST_STATUS']);
+
+type RowStateKey = 'APPLIED' | 'PENDING_APPLY' | 'APPLY_FAILED' | 'PENDING' | 'REJECTED';
+
+// A member's own decision first, then, once approved, whether the pipeline has applied it.
+const rowStateKey = (row: BulkChangeRecordRow): RowStateKey => {
+  if (row.status === 'REJECTED') return 'REJECTED';
+  if (row.status !== 'APPROVED') return 'PENDING';
+  return row.applyState ?? 'APPLIED';
+};
+
+function RowStateIcon({ state, label }: { state: RowStateKey; label: string }) {
+  if (state === 'REJECTED') return <XCircle className="h-4 w-4 text-red-500" aria-label={label} />;
+  if (state === 'APPLY_FAILED') return <AlertTriangle className="h-4 w-4 text-red-500" aria-label={label} />;
+  if (state === 'PENDING_APPLY') return <Clock className="h-4 w-4 text-blue-600" aria-label={label} />;
+  if (state === 'PENDING') return <Clock className="h-4 w-4 text-amber-500" aria-label={label} />;
+  return <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-label={label} />;
+}
 
 // Fields rendered via StatusBadge don't go through this — everything else falls back to '—'.
 const fmt = (v: string | number | null): string => (v == null || v === '' ? '—' : String(v));
@@ -34,7 +52,16 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
   const [note, setNote] = useState('');
 
   const batchId = Number(id);
-  const { data, isLoading, isError, refetch } = useGetBulkChangeByIdQuery(batchId, { skip: !Number.isInteger(batchId) });
+  const [pollMs, setPollMs] = useState(0);
+  const { data, isLoading, isError, refetch } = useGetBulkChangeByIdQuery(batchId, {
+    skip: !Number.isInteger(batchId),
+    pollingInterval: pollMs,
+  });
+  // Approved members are applied by a background job, so keep re-reading the batch until none are left waiting.
+  const pendingApplyCount = data?.data?.PENDING_APPLY_COUNT ?? 0;
+  useEffect(() => {
+    setPollMs(pendingApplyCount > 0 ? BULK_APPLY_POLL_MS : 0);
+  }, [pendingApplyCount]);
   const [decideBulkChange] = useDecideBulkChangeMutation();
   const approvals = usePermission('approvals');
   const bulkChange = usePermission('bulk_change');
@@ -74,13 +101,38 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
       const response = await decideBulkChange({ id: task.BATCH_ID, decision, reason: note.trim() }).unwrap();
       const result = response.data;
 
+      if (result?.queued && decision === 'APPROVED') {
+        const message = t('bulkChange.decidedQueued', {
+          defaultValue: '{{succeeded}} of {{total}} changes {{decision}}. They are being applied to the register in the background, which usually takes a few minutes.',
+          succeeded: result.succeeded,
+          total: result.total,
+          decision: decision.toLowerCase(),
+        });
+        if (result.failed > 0) toast.warning(message);
+        else toast.success(message);
+        // Stay on the page: it now shows each row's apply state and refreshes until they land.
+        setNote('');
+        refetch();
+        return;
+      }
       if (result && result.failed > 0) {
+        const reasons = Array.from(new Set(result.items.filter((item) => item.status === 'FAILED' && item.error).map((item) => item.error)));
         toast.warning(
           t('bulkChange.decidedPartial', {
             defaultValue: '{{succeeded}} of {{total}} changes {{decision}}; {{failed}} could not be applied.',
             succeeded: result.succeeded,
             total: result.total,
             failed: result.failed,
+            decision: decision.toLowerCase(),
+          }) + (reasons.length > 0 ? ` ${reasons.slice(0, MAX_TOAST_REASONS).join(' ')}` : '')
+        );
+      } else if (result && result.pendingApply > 0) {
+        toast.warning(
+          t('bulkChange.decidedPendingApply', {
+            defaultValue: '{{succeeded}} of {{total}} changes {{decision}}; {{pending}} not yet applied to the register.',
+            succeeded: result.succeeded,
+            total: result.total,
+            pending: result.pendingApply,
             decision: decision.toLowerCase(),
           })
         );
@@ -180,6 +232,49 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
         </div>
       )}
 
+      {task.PENDING_APPLY_COUNT > task.APPLY_FAILED_COUNT && (
+        <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-700">
+          <Clock className="h-4 w-4 shrink-0" />
+          <p>
+            {t('bulkChange.applyPendingBanner', {
+              defaultValue: '{{count}} approved change(s) are still being applied to the register. This page refreshes on its own.',
+              count: task.PENDING_APPLY_COUNT - task.APPLY_FAILED_COUNT,
+            })}
+          </p>
+        </div>
+      )}
+
+      {task.APPLY_FAILED_COUNT > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <p>
+            {t('bulkChange.applyFailedBanner', {
+              defaultValue: '{{count}} approved change(s) could not be applied after repeated attempts. An administrator needs to look at them; the reason is shown on each row.',
+              count: task.APPLY_FAILED_COUNT,
+            })}
+          </p>
+        </div>
+      )}
+
+      {isPending && task.DECIDE_FAILED_ITEMS.length > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div>
+            <p className="font-medium">
+              {t('bulkChange.decideFailedTitle', {
+                defaultValue: '{{count}} change(s) could not be decided in the last attempt:',
+                count: task.DECIDE_FAILED_ITEMS.length,
+              })}
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {task.DECIDE_FAILED_ITEMS.map((item, index) => (
+                <li key={item.audit_log_id ?? index}>{item.error ?? item.error_code}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-lg bg-white shadow-card">
         <div className="border-b border-slate-100 px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-slate-400">
           {t('bulkChange.reasonForChange', { defaultValue: 'Reason for Change' })}
@@ -205,21 +300,18 @@ export function BulkChangeReviewPage({ id }: { id: string }) {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {task.ROWS.map((row) => {
-                const rowRejected = row.status === 'REJECTED';
-                const rowPending = row.status === 'PENDING';
-                const rowStatusLabel = t(`bulkChange.status.${row.status}`, {
-                  defaultValue: BULK_CHANGE_STATUS_DEFAULTS[row.status] ?? row.status,
-                });
+                const rowState = rowStateKey(row);
+                // Undecided and rejected rows keep their decision label; approved rows say whether they are applied yet.
+                const rowStatusLabel = rowState === 'PENDING' || rowState === 'REJECTED'
+                  ? t(`bulkChange.status.${row.status}`, { defaultValue: BULK_CHANGE_STATUS_DEFAULTS[row.status] ?? row.status })
+                  : [
+                      t(`bulkChange.applyStates.${rowState}`, { defaultValue: rowState }),
+                      row.applyState === 'APPLY_FAILED' ? row.lastApplyError : null,
+                    ].filter(Boolean).join(': ');
                 return (
                   <tr key={row.auditLogId} className="hover:bg-slate-50 transition-colors">
                     <td className="px-3 py-3 align-top" title={rowStatusLabel}>
-                      {rowRejected ? (
-                        <XCircle className="h-4 w-4 text-red-500" aria-label={rowStatusLabel} />
-                      ) : rowPending ? (
-                        <Clock className="h-4 w-4 text-amber-500" aria-label={rowStatusLabel} />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-label={rowStatusLabel} />
-                      )}
+                      <RowStateIcon state={rowState} label={rowStatusLabel} />
                     </td>
                     {task.COLUMNS.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);

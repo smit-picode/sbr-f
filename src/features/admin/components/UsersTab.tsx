@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { InfoTooltip } from '@/components/common/InfoTooltip';
 import { FilterChips } from '@/components/common/FilterChips';
 import { DataTable } from '@/components/table/DataTable';
-import { Eye, EyeOff, RefreshCw, Search, Shield, Calendar, IdCard, Check } from 'lucide-react';
+import { Mail, Search, Shield, Calendar, IdCard, Check } from 'lucide-react';
 import {
   useGetUsersListQuery,
   useCreateUserMutation,
@@ -18,6 +18,7 @@ import {
   useGetRegulatorsQuery,
   useGetRolesListQuery,
 } from '../api/adminApi';
+import { PasswordLinkDialog } from './PasswordLinkDialog';
 import { getUsersColumns, userRoleNames, RoleBadge, isSuperAdminUser, UserStatusBadge } from './UsersColumns';
 import {
   ADMIN_MAX_LENGTHS, USERS_DEFAULT_FILTERS, USERS_SORTABLE_COLUMNS,
@@ -45,13 +46,6 @@ function toTitleCaseRole(roleName: string): string {
   return roleName.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const PASSWORD_RULES = [
-  { key: 'minLength',  label: 'At least 6 characters',         test: (p: string) => p.length >= 6 },
-  { key: 'uppercase',  label: 'At least one uppercase letter',  test: (p: string) => /[A-Z]/.test(p) },
-  { key: 'lowercase',  label: 'At least one lowercase letter',  test: (p: string) => /[a-z]/.test(p) },
-  { key: 'special',    label: 'At least one special character', test: (p: string) => /[!@#$%&*]/.test(p) },
-];
-
 const toDateInput = (iso: string | null | undefined): string => {
   if (!iso) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
@@ -63,7 +57,9 @@ const toDateInput = (iso: string | null | undefined): string => {
 
 const todayInput = (): string => toDateInput(new Date().toISOString());
 
-const EMPTY_FORM = { NAME: '', EMAIL: '', PASSWORD: '', IS_ACTIVE: 'Y' };
+const EXPIRY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const EMPTY_FORM = { NAME: '', EMAIL: '', IS_ACTIVE: 'Y' };
 
 export function UsersTab({
   canEdit = false,
@@ -90,28 +86,9 @@ export function UsersTab({
   const editTargetId = useRef<number | null>(null);
   const originalScopes = useRef<Record<number, string | null>>({});
   const initialScope = useRef<string>(NO_SCOPE_VALUE);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const generatePassword = () => {
-    const upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    const lower   = 'abcdefghjkmnpqrstuvwxyz';
-    const digits  = '23456789';
-    const special = '!@#$%&*';
-    const all     = upper + lower + digits + special;
-    const pool = [
-      upper.charAt(Math.floor(Math.random() * upper.length)),
-      lower.charAt(Math.floor(Math.random() * lower.length)),
-      digits.charAt(Math.floor(Math.random() * digits.length)),
-      special.charAt(Math.floor(Math.random() * special.length)),
-    ];
-    for (let i = pool.length; i < 12; i++) pool.push(all.charAt(Math.floor(Math.random() * all.length)));
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    setForm(p => ({ ...p, PASSWORD: pool.join('') }));
-    setShowPassword(true);
-  };
+  const originalExpiries = useRef<Record<number, string>>({});
+  const [unreadableExpiry, setUnreadableExpiry] = useState<Record<number, boolean>>({});
+  const [linkTarget, setLinkTarget] = useState<SbrUser | null>(null);
 
   const debouncedSearch = useDebounce(filters.search, 500);
 
@@ -143,11 +120,12 @@ export function UsersTab({
     setForm({ ...EMPTY_FORM });
     setSelectedRoles({});
     setRegulatorScope(NO_SCOPE_VALUE);
-    setShowPassword(false);
     setDetailLoading(false);
     editTargetId.current = null;
     originalScopes.current = {};
     initialScope.current = NO_SCOPE_VALUE;
+    originalExpiries.current = {};
+    setUnreadableExpiry({});
   };
 
   useEffect(() => {
@@ -155,6 +133,7 @@ export function UsersTab({
   }, [onRegisterCreate]);
 
   const toggleRole = (roleId: number) => {
+    setUnreadableExpiry((prev) => ({ ...prev, [roleId]: false }));
     setSelectedRoles((prev) => {
       const next = { ...prev };
       if (roleId in next) delete next[roleId]; else next[roleId] = '';
@@ -162,8 +141,26 @@ export function UsersTab({
     });
   };
 
-  const setRoleExpiry = (roleId: number, value: string) => {
+  const setRoleExpiry = (roleId: number, value: string, unreadable: boolean) => {
     setSelectedRoles((prev) => ({ ...prev, [roleId]: value }));
+    setUnreadableExpiry((prev) => ({ ...prev, [roleId]: unreadable }));
+  };
+
+  // A past date is refused only when changed, matching the DB, which keeps an unchanged held expiry
+  const isPastExpiry = (roleId: number, value: string): boolean =>
+    !!value && value < todayInput() && value !== originalExpiries.current[roleId];
+
+  const isInvalidExpiry = (roleId: number, value: string): boolean =>
+    !!unreadableExpiry[roleId] || (!!value && !EXPIRY_PATTERN.test(value));
+
+  // Returns the first expiry problem across the selected roles, or null when all are fine
+  const expiryError = (): string | null => {
+    for (const [id, value] of Object.entries(selectedRoles)) {
+      const roleId = Number(id);
+      if (isInvalidExpiry(roleId, value)) return t('admin.users.expiryInvalid', { defaultValue: 'Enter a valid expiry date.' });
+      if (isPastExpiry(roleId, value)) return t('admin.users.expiryPast', { defaultValue: 'Expiry date cannot be in the past.' });
+    }
+    return null;
   };
 
   // The regulator scope only applies to roles flagged scoped; every other assignment stays global.
@@ -192,30 +189,33 @@ export function UsersTab({
     roles: Object.entries(selectedRoles).sort(([a], [b]) => Number(a) - Number(b)),
   });
 
-  const validateForm = (requirePassword: boolean): boolean => {
+  const validateForm = (): boolean => {
     if (!form.NAME.trim()) { toast.error(t('admin.users.nameRequired', { defaultValue: 'Name is required.' })); return false; }
     if (!form.EMAIL.trim()) { toast.error(t('admin.users.emailRequired', { defaultValue: 'Email is required.' })); return false; }
-    if (requirePassword && !form.PASSWORD.trim()) { toast.error(t('admin.users.passwordRequired', { defaultValue: 'Password is required.' })); return false; }
-    if (requirePassword && PASSWORD_RULES.some((r) => !r.test(form.PASSWORD))) {
-      toast.error(t('admin.users.passwordCriteria', { defaultValue: 'Password does not meet the required criteria.' })); return false;
-    }
     if (form.NAME.length > ADMIN_MAX_LENGTHS.NAME) { toast.error(t('admin.users.nameMaxLength', { defaultValue: `Max ${ADMIN_MAX_LENGTHS.NAME} characters for name.`, max: ADMIN_MAX_LENGTHS.NAME })); return false; }
     if (form.EMAIL.length > ADMIN_MAX_LENGTHS.EMAIL) { toast.error(t('admin.users.emailMaxLength', { defaultValue: `Max ${ADMIN_MAX_LENGTHS.EMAIL} characters for email.`, max: ADMIN_MAX_LENGTHS.EMAIL })); return false; }
     return true;
   };
 
   const handleCreate = async () => {
-    if (!validateForm(true)) return;
+    if (!validateForm()) return;
+    const expiryProblem = expiryError();
+    if (expiryProblem) { toast.error(expiryProblem); return; }
     if (hasMissingScope()) { toast.error(t('admin.users.scopeRequired', { defaultValue: 'Select a regulator scope for scoped roles.' })); return; }
     try {
-      await createUser({
+      const res = await createUser({
         NAME: form.NAME,
         EMAIL: form.EMAIL,
-        PASSWORD: form.PASSWORD,
         IS_ACTIVE: form.IS_ACTIVE === 'Y',
         roles: buildRolesPayload(),
       }).unwrap();
-      toast.success(t('admin.users.createdSuccess', { defaultValue: 'User created successfully!' }));
+      if (res.data?.inviteSent) {
+        toast.success(t('admin.users.createdInvited', { defaultValue: 'User created. An invitation was emailed to {{email}}.', email: form.EMAIL.trim() }));
+      } else if (form.IS_ACTIVE === 'Y') {
+        toast.warning(t('admin.users.createdInviteFailed', { defaultValue: 'User created, but the invitation email could not be sent. Use "Email a password link" to try again.' }));
+      } else {
+        toast.success(t('admin.users.createdSuccess', { defaultValue: 'User created successfully!' }));
+      }
       resetDialogState();
       setIsCreateOpen(false);
       setFilters({ ...USERS_DEFAULT_FILTERS });
@@ -228,6 +228,8 @@ export function UsersTab({
     if (!editTarget) return;
     if (!form.NAME.trim()) { toast.error(t('admin.users.nameRequired', { defaultValue: 'Name is required.' })); return; }
     if (snapshotOf() === originalSnapshot.current) { toast.info('No changes detected.'); return; }
+    const expiryProblem = isEditingSelf ? null : expiryError();
+    if (expiryProblem) { toast.error(expiryProblem); return; }
     if (!isEditingSelf && hasMissingScope()) { toast.error(t('admin.users.scopeRequired', { defaultValue: 'Select a regulator scope for scoped roles.' })); return; }
     try {
       await updateUser({
@@ -252,7 +254,6 @@ export function UsersTab({
     setForm({
       NAME: user.NAME,
       EMAIL: user.EMAIL,
-      PASSWORD: '',
       IS_ACTIVE: user.IS_ACTIVE ? 'Y' : 'N',
     });
     editTargetId.current = user.ID;
@@ -263,6 +264,7 @@ export function UsersTab({
       const assignments = detail.data?.roleAssignments ?? [];
       const selection: RoleSelection = {};
       assignments.forEach((a) => { selection[a.ROLE_ID] = toDateInput(a.EXPIRES_AT); });
+      originalExpiries.current = { ...selection };
       const scope = assignments.find((a) => a.SCOPE && a.SCOPE !== GLOBAL_SCOPE_VALUE)?.SCOPE ?? NO_SCOPE_VALUE;
       originalScopes.current = Object.fromEntries(assignments.map((a) => [a.ROLE_ID, a.SCOPE ?? null]));
       initialScope.current = scope;
@@ -304,6 +306,7 @@ export function UsersTab({
     onView: setViewTarget,
     onEdit: openEdit,
     onToggleLock: handleToggleLock,
+    onSendLink: setLinkTarget,
     isSelf: (u) => !!signedInEmail && u.EMAIL.trim().toLowerCase() === signedInEmail,
   });
 
@@ -331,12 +334,14 @@ export function UsersTab({
           <Input
             type="date"
             min={todayInput()}
+            max="9999-12-31"
             value={selectedRoles[role.ID]}
             disabled={isEditingSelf}
-            onChange={(e) => setRoleExpiry(role.ID, e.target.value)}
+            aria-invalid={isInvalidExpiry(role.ID, selectedRoles[role.ID]) || isPastExpiry(role.ID, selectedRoles[role.ID])}
+            onChange={(e) => setRoleExpiry(role.ID, e.target.value, e.target.validity.badInput)}
             title={t('admin.users.expiryTitle')}
             aria-label={t('admin.users.expiryTitle')}
-            className="h-8 w-[140px] shrink-0 rounded-full px-2 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
+            className="h-8 w-[140px] shrink-0 rounded-full px-2 text-xs shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20 aria-[invalid=true]:border-red-400"
           />
         )}
       </div>
@@ -370,45 +375,10 @@ export function UsersTab({
       </div>
 
       {mode === 'create' && (
-        <div className="space-y-1">
-          <Label htmlFor="user-password">{t('admin.users.passwordLabel')}</Label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                id="user-password"
-                type={showPassword ? 'text' : 'password'}
-                value={form.PASSWORD}
-                onChange={(e) => setForm(p => ({ ...p, PASSWORD: e.target.value }))}
-                className="pr-9 shadow-none focus:border-[#A29374]/40 focus:ring-[#A29374]/20"
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(v => !v)}
-                tabIndex={-1}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            <Button type="button" variant="outline" onClick={generatePassword} title="Auto-generate password" className="h-9 px-3 shrink-0">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-          {form.PASSWORD.length > 0 && PASSWORD_RULES.some((r) => !r.test(form.PASSWORD)) && (
-            <ul className="mt-2 space-y-1">
-              {PASSWORD_RULES.map((rule) => {
-                const passed = rule.test(form.PASSWORD);
-                return (
-                  <li key={rule.key} className={`flex items-center gap-1.5 text-xs ${passed ? 'text-emerald-600' : 'text-red-500'}`}>
-                    <span className="font-bold">{passed ? '✓' : '✗'}</span>
-                    {rule.label}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
+        <p className="flex items-start gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          <Mail className="h-4 w-4 shrink-0 text-[#A29374]" />
+          {t('admin.users.inviteNote', { defaultValue: 'The user is emailed an invitation to choose their own password. The link works for 3 days; you can send a new one from the user list.' })}
+        </p>
       )}
 
       <div className="grid grid-cols-2 gap-4">
@@ -668,6 +638,7 @@ export function UsersTab({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <PasswordLinkDialog user={linkTarget} onClose={() => setLinkTarget(null)} />
     </>
   );
 }

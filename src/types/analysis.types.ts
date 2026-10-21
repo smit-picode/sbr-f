@@ -373,3 +373,71 @@ export interface BlockMenuState extends AnalysisPointEvent { label: string }
 export interface AnalysesState {
   items: Analysis[];
 }
+
+// Emailing an analysis: portal users only, each flagged with whether they can open the analysis.
+export interface AnalysisMailUser {
+  id: number;
+  name: string;
+  email: string;
+  hasAccess?: boolean;
+}
+
+export interface AnalysisRecipientDirectory {
+  recipients: AnalysisMailUser[];
+  mailEnabled: boolean;
+}
+
+export interface AnalysisEmailRequest {
+  recipients: number[];
+  subject?: string;
+  message?: string;
+  includePdf: boolean;
+  includeXlsx: boolean;
+}
+
+export type AnalysisScheduleFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+
+// Times are Doha wall-clock (HH:MM); dayOfWeek is ISO, 1 Monday to 7 Sunday.
+export interface AnalysisScheduleRequest extends AnalysisEmailRequest {
+  frequency: AnalysisScheduleFrequency;
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
+  sendTime: string;
+  isActive: boolean;
+}
+
+export interface AnalysisSchedule {
+  id: number;
+  analysisId: number;
+  owner: AnalysisMailUser;
+  canEdit: boolean;
+  frequency: AnalysisScheduleFrequency;
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
+  sendTime: string;
+  subject: string | null;
+  message: string | null;
+  includePdf: boolean;
+  includeXlsx: boolean;
+  isActive: boolean;
+  pausedReason: string | null;
+  nextRunAt: string | null;
+  lastRunAt: string | null;
+  lastStatus: 'SENT' | 'FAILED' | null;
+  lastError: string | null;
+  recipients: AnalysisMailUser[];
+}
+
+export type AnalysisSendStatus = 'PENDING' | 'SENT' | 'FAILED';
+
+export interface AnalysisSend {
+  id: number;
+  scheduleId: number | null;
+  sentBy: AnalysisMailUser;
+  subject: string | null;
+  recipients: AnalysisMailUser[];
+  status: AnalysisSendStatus;
+  error: string | null;
+  createdAt: string;
+  finishedAt: string | null;
+}

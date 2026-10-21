@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Eye } from 'lucide-react';
 import { useRouter } from '@/hooks/useAppRouter';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useHasPermission } from '@/hooks/usePermission';
 import { PageContainer } from '@/components/common/PageContainer';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -11,12 +12,14 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { NoData } from '@/components/common/NoData';
 import { TableLoader } from '@/components/common/Loader';
 import { DataTable } from '@/components/table/DataTable';
-import { ColumnFilters, columnFiltersParam } from '@/components/common/ColumnFilters';
+import { ColumnFilters, columnFilterItems } from '@/components/common/ColumnFilters';
 import { cleanParams } from '@/utils/query';
 import { formatNumber } from '@/utils/format';
 import { useGetSourceCatalogQuery, useGetSourceTableColumnsQuery, useGetSourceTableQuery } from '../api/sourceCatalogApi';
 import { getSourceTableColumns, getSourceTableFilterColumns } from '../components/SourceTableColumns';
-import { SOURCE_TABLE_DEFAULT_PAGE_SIZE, isBrowsableSourceTable } from '../constants';
+import { SourceTableSearch } from '../components/SourceTableSearch';
+import { SOURCE_TABLE_DEFAULT_PAGE_SIZE, SOURCE_TABLE_SEARCH_DEBOUNCE_MS, isBrowsableSourceTable } from '../constants';
+import { defaultSearchColumn, searchableColumns } from '../utils/searchColumn';
 
 import type { ColumnFilterRow } from '@/types';
 // One regulator source table's rows, read-only: column filters, sorting and paging, no row action.
@@ -29,6 +32,9 @@ export function SourceTablePage({ code, table }: { code: string; table: string }
   const [limit, setLimit] = useState(SOURCE_TABLE_DEFAULT_PAGE_SIZE);
   const [filterRows, setFilterRows] = useState<ColumnFilterRow[]>([]);
   const [sort, setSort] = useState<{ sortBy?: string; sortOrder?: 'asc' | 'desc' }>({});
+  const [search, setSearch] = useState('');
+  const [pickedColumn, setPickedColumn] = useState<string | undefined>();
+  const debouncedSearch = useDebounce(search.trim(), SOURCE_TABLE_SEARCH_DEBOUNCE_MS);
 
   const catalog = useGetSourceCatalogQuery(undefined, { skip: !canViewData });
   const description = catalog.data?.data?.find((r) => r.TABLE_NAME === table)?.TABLE_DESC ?? undefined;
@@ -36,8 +42,15 @@ export function SourceTablePage({ code, table }: { code: string; table: string }
   const sourceColumns = useMemo(() => columnsQuery.data?.data ?? [], [columnsQuery.data]);
   const columns = useMemo(() => getSourceTableColumns(sourceColumns), [sourceColumns]);
   const filterColumns = useMemo(() => getSourceTableFilterColumns(sourceColumns), [sourceColumns]);
+  const searchColumns = useMemo(() => searchableColumns(sourceColumns), [sourceColumns]);
+  const searchColumn = pickedColumn ?? defaultSearchColumn(sourceColumns, search);
 
-  const params = cleanParams({ columnFilters: columnFiltersParam(filterRows), ...sort });
+  // The search is one more contains filter, so it needs nothing the column filters do not already use.
+  const filterItems = [
+    ...columnFilterItems(filterRows),
+    ...(debouncedSearch && searchColumn ? [{ column: searchColumn, operator: 'contains', value: debouncedSearch }] : []),
+  ];
+  const params = cleanParams({ columnFilters: filterItems.length ? JSON.stringify(filterItems) : undefined, ...sort });
   const rowsQuery = useGetSourceTableQuery({ table, page, limit, ...params }, { skip: !canViewData || !browsable || !sourceColumns.length });
   const rows = rowsQuery.data?.data ?? [];
   const total = rowsQuery.data?.total ?? 0;
@@ -84,6 +97,16 @@ export function SourceTablePage({ code, table }: { code: string; table: string }
         </div>
       ) : (
         <div className="space-y-3">
+          {searchColumns.length > 0 && (
+            <SourceTableSearch
+              value={search}
+              onChange={(v) => { setSearch(v); setPage(1); }}
+              column={searchColumn}
+              columns={searchColumns}
+              onColumnChange={(c) => { setPickedColumn(c); setPage(1); }}
+              loading={rowsQuery.isFetching && !rowsQuery.isLoading && !!debouncedSearch}
+            />
+          )}
           <ColumnFilters
             columns={filterColumns}
             valuesUrl={`/source-catalog/tables/${encodeURIComponent(table)}/filter-values`}

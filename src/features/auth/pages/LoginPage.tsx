@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from '@/hooks/useAppRouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,12 +23,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { setCredentials, logout } from '../authSlice';
 import { useLoginMutation, useSwitchRoleMutation } from '../api/authApi';
-import { LOGIN_SELECTED_ROLE_KEY } from '../constants';
+import { FORGOT_PASSWORD_HREF, LOGIN_SELECTED_ROLE_KEY } from '../constants';
+import { AuthBrandPanel } from '../components/AuthBrandPanel';
 import { useAppDispatch } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n';
 import type { AuthRole } from '@/types';
-import { withBasePath } from '@/utils/basePath';
 
 const ROLE_CARD_ICONS: LucideIcon[] = [ShieldCheck, Building2, Eye, Landmark, UserCircle2];
 const ROLE_CARD_TINTS: { bg: string; color: string }[] = [
@@ -111,29 +111,7 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-white p-4 gap-4">
-      <div className="hidden md:flex md:w-[46%] relative overflow-hidden rounded-3xl text-white">
-        <div
-          className="absolute inset-0"
-          style={{ background: `#0E1A2B url('${withBasePath('/assets/login-skyline.jpg')}') center / cover no-repeat` }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(10,20,40,.15) 0%, rgba(10,20,40,.35) 60%, rgba(10,20,40,.85) 100%)' }}
-        />
-
-        <div className="relative flex flex-col justify-between w-full p-9">
-          <div className="flex flex-col items-start gap-3">
-            <Image src={withBasePath('/assets/npc-logo-primary-white.png')} alt="National Planning Council" width={257} height={90} className="h-16 w-auto object-contain -ms-2" priority />
-            <span className="text-[15px] font-bold ps-0.5">SBR Portal</span>
-          </div>
-
-          <div>
-            <h2 className="text-[40px] font-extrabold leading-[1.1] max-w-md">{t('login.branding')}</h2>
-            <p className="text-[15px] text-white/85 mt-4 max-w-md leading-relaxed">{t('login.brandingSub')} · {t('login.brandingCountry')}</p>
-            <p className="text-[12px] text-white/60 mt-6">© {new Date().getFullYear()} {t('login.copyright')}</p>
-          </div>
-        </div>
-      </div>
+      <AuthBrandPanel />
 
       <div className="w-full md:w-[54%] flex items-center justify-center p-6 md:p-12 lg:p-16 bg-white relative">
         <button
@@ -207,6 +185,11 @@ export function LoginPage() {
               {errors.password && (
                 <p className="text-xs text-red-600">{errors.password.message}</p>
               )}
+              <div className="flex justify-end">
+                <Link href={FORGOT_PASSWORD_HREF} className="text-xs font-semibold text-slate-500 hover:text-[#A29374] transition-colors">
+                  {t('login.forgotPassword', { defaultValue: 'Forgot your password?' })}
+                </Link>
+              </div>
             </div>
 
             <button

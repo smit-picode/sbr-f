@@ -83,7 +83,7 @@ const baseQueryWithErrorToast: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQueryWithErrorToast,
-  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots', 'ContactTags', 'Analyses', 'PublishedSamples'],
+  tagTypes: ['Establishments', 'Enterprises', 'EnterpriseGroups', 'Contacts', 'Addresses', 'Auth', 'AuditLog', 'Admin', 'ChangeRequests', 'LegalUnits', 'BulkChange', 'Lookups', 'Surveys', 'PipelineLogs', 'Snapshots', 'ContactTags', 'Analyses', 'PublishedSamples', 'AnalysisMail'],
   // Refetch on remount, focus and reconnect, because other users' edits reach the DB unseen.
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,

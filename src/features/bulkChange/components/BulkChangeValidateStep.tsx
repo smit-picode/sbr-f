@@ -10,7 +10,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants';
 import { useGetBulkChangeTemplateQuery, useValidateBulkChangeMutation } from '../api/bulkChangeApi';
 import { parseWorkbookInWorker } from '../utils/parseWorkbookInWorker';
 import { isTransientFailure, requestFailureStatus } from '../utils/requestFailure';
-import { BULK_CHANGE_MAX_ROWS, BULK_CHANGE_TABLES, BULK_CHANGE_VALIDATION_DEFAULTS, ENTITY_TYPE_BY_TABLE } from '../constants';
+import { BULK_CHANGE_MAX_ROWS, BULK_CHANGE_TABLES, BULK_CHANGE_VALIDATION_DEFAULTS, BULK_CHANGE_WARNING_CODES, ENTITY_TYPE_BY_TABLE } from '../constants';
 import { validationRowNumber } from '../utils/rowNumber';
 import type { BulkChangeItemInput, BulkChangeTableKey, BulkChangeValidationIssue, BulkChangeValidationResult } from '../types';
 
@@ -302,7 +302,10 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                     <td className="px-5 py-3 text-sm text-slate-500">{rowNumber}</td>
                     {columns.map((col) => {
                       const field = row.fields.find((f) => f.key === col.key);
-                      const fieldIssue = rowIssues.find((issue) => issue.field === col.key);
+                      // An error outranks a warning on the same cell; a warning never makes the row an error.
+                      const fieldIssue = rowIssues.find((issue) => issue.field === col.key && !BULK_CHANGE_WARNING_CODES.includes(issue.code))
+                        ?? rowIssues.find((issue) => issue.field === col.key);
+                      const isWarning = !!fieldIssue && BULK_CHANGE_WARNING_CODES.includes(fieldIssue.code);
                       return (
                         <td key={col.key} className="px-3 py-3 align-top">
                           <p className="text-sm text-slate-800">
@@ -314,7 +317,7 @@ export function BulkChangeValidateStep({ selectedTable, file, onValidated, onRun
                             </p>
                           )}
                           {fieldIssue && (
-                            <p className="mt-0.5 text-xs text-red-600">
+                            <p className={`mt-0.5 text-xs ${isWarning ? 'text-amber-600' : 'text-red-600'}`}>
                               {fieldIssue.message?.trim()
                                 ? fieldIssue.message
                                 : t(`bulkChange.wizard.validate.codes.${fieldIssue.code}`, {

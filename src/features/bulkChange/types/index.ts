@@ -11,6 +11,9 @@ export type BulkChangeStatus =
 
 export type BulkChangeDecision = 'APPROVED' | 'REJECTED';
 
+// Whether the pipeline has applied an approved member yet; null until the member is approved.
+export type BulkChangeApplyState = 'APPLIED' | 'PENDING_APPLY' | 'APPLY_FAILED';
+
 export interface BulkChangeTaskSummary {
   ID: string;
   BATCH_ID: number;
@@ -50,6 +53,11 @@ export interface BulkChangeRecordRow {
   // UPDATE for an edit; INSERT or DELETE for new contacts and tag changes in an integration batch.
   operation?: string | null;
   memberTable?: string | null;
+  // Review screen only.
+  applyState?: BulkChangeApplyState | null;
+  propagatedAt?: string | null;
+  applyAttempts?: number;
+  lastApplyError?: string | null;
 }
 
 // A row SUBMIT_BULK could not create at all.
@@ -66,6 +74,11 @@ export interface BulkChangeTaskDetail extends BulkChangeTaskSummary {
   COLUMNS: BulkChangeColumn[];
   ROWS: BulkChangeRecordRow[];
   FAILED_ITEMS: BulkChangeFailedItem[];
+  // Approved members the pipeline has not applied yet, and those of them stuck at the retry limit.
+  PENDING_APPLY_COUNT: number;
+  APPLY_FAILED_COUNT: number;
+  // The latest decision's items that could not be decided or applied.
+  DECIDE_FAILED_ITEMS: Array<{ audit_log_id?: number; status: string; error_code?: number; error?: string }>;
 }
 
 // Upload wizard: one parsed spreadsheet row
@@ -89,7 +102,9 @@ export type BulkChangeValidationCode =
   | 'TOO_LONG'
   | 'NO_CHANGES'
   | 'ROW_TOO_LARGE'
-  | 'PENDING_CHANGE';
+  | 'PENDING_CHANGE'
+  // A warning, not an error: an approved change to the same column is not applied yet.
+  | 'PENDING_APPLY';
 
 export interface BulkChangeValidationIssue {
   rowNumber: number;
@@ -138,12 +153,19 @@ export interface BulkChangeDecideResponse {
   total: number;
   succeeded: number;
   failed: number;
+  // Approved and committed, but not yet applied to the register by the pipeline.
+  pendingApply: number;
+  // True when approved items were handed to the background applier instead of applied in the request.
+  queued: boolean;
+  runs: number;
   items: Array<{
     audit_log_id?: number;
     index?: number;
     status: string;
     error_code?: number;
     error?: string;
+    applied?: boolean;
+    run_id?: number;
   }>;
 }
 

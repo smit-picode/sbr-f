@@ -1,5 +1,5 @@
 import { baseApi } from '@/services/api';
-import type { ApiResponse, SbrPermission, SbrRole, RoleCategory, SbrRoleWithPermissions, SbrUser, UserRoleInput, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
+import type { ApiResponse, PasswordLinkPurpose, SbrPermission, SbrRole, RoleCategory, SbrRoleWithPermissions, SbrUser, UserRoleInput, AdminPermissionFilters, AdminRoleFilters, AdminUserFilters } from '@/types';
 
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -75,7 +75,8 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => ({ url: '/admin/users/regulators' }),
       keepUnusedDataFor: 0,
     }),
-    createUser: builder.mutation<ApiResponse<SbrUser>, { NAME: string; EMAIL: string; PASSWORD: string; IS_ACTIVE?: boolean; roles?: UserRoleInput[] }>({
+    // Without PASSWORD the server emails the new user an invitation to choose one.
+    createUser: builder.mutation<ApiResponse<SbrUser & { inviteSent?: boolean }>, { NAME: string; EMAIL: string; PASSWORD?: string; IS_ACTIVE?: boolean; roles?: UserRoleInput[] }>({
       query: (data) => ({ url: '/admin/users', method: 'POST', body: data }),
       invalidatesTags: ['Admin', 'AuditLog'],
     }),
@@ -86,6 +87,11 @@ export const adminApi = baseApi.injectEndpoints({
     deleteUser: builder.mutation<ApiResponse<void>, number>({
       query: (id) => ({ url: `/admin/users/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Admin', 'AuditLog'],
+    }),
+    sendUserPasswordLink: builder.mutation<ApiResponse<{ email: string }>, { id: number; purpose: PasswordLinkPurpose }>({
+      query: ({ id, purpose }) => ({ url: `/admin/users/${id}/${purpose === 'INVITE' ? 'invite' : 'reset-link'}`, method: 'POST' }),
+      extraOptions: { silentErrors: true },
+      invalidatesTags: ['AuditLog'],
     }),
   }),
   overrideExisting: false,
@@ -111,4 +117,5 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useSendUserPasswordLinkMutation,
 } = adminApi;

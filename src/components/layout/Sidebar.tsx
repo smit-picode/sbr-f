@@ -50,6 +50,7 @@ import { NAV_GROUPS } from '@/constants/navigation';
 import { SIDEBAR_COLLAPSED_KEY, SIDEBAR_GROUPS_KEY } from '@/constants/storage';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logout } from '@/features/auth/authSlice';
+import { ChangePasswordDialog } from '@/features/auth/components/ChangePasswordDialog';
 import { formatRole } from '@/utils/format';
 import { isNavGroupVisible, isNavItemVisible } from '@/utils/navAccess';
 import { useGetChangeRequestCountQuery } from '@/features/tasks/api/changeRequestsApi';
@@ -225,6 +226,8 @@ export function Sidebar() {
     });
   };
 
+  const [changingPassword, setChangingPassword] = useState(false);
+
   // Cover the page first: clearing auth re-renders it as a guest until the login page arrives.
   function handleLogout() {
     if (signingOut) return;
@@ -399,6 +402,14 @@ export function Sidebar() {
               <p className="text-[10.5px] truncate text-gray-500">{formatRole(effectiveUser?.role)}</p>
             </div>
             <button
+              onClick={() => setChangingPassword(true)}
+              title={t('password.change.title', { defaultValue: 'Change password' })}
+              aria-label={t('password.change.title', { defaultValue: 'Change password' })}
+              className="h-7 w-7 flex items-center justify-center rounded-full text-gray-400 hover:text-adaam hover:bg-adaam-tint transition-colors"
+            >
+              <KeyRound className="h-[15px] w-[15px]" />
+            </button>
+            <button
               onClick={handleLogout}
               title={t('actions.signOut')}
               className="h-7 w-7 flex items-center justify-center rounded-full text-gray-400 hover:text-adaam hover:bg-adaam-tint transition-colors"
@@ -408,6 +419,7 @@ export function Sidebar() {
           </>
         )}
       </div>
+      <ChangePasswordDialog open={changingPassword} onClose={() => setChangingPassword(false)} />
       {signingOut && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center gap-2 bg-white text-sm text-slate-500">
           <LogOut className="h-4 w-4 rtl:rotate-180" />

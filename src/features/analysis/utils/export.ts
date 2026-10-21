@@ -171,7 +171,10 @@ export async function exportBlockCsv(block: AnalysisBlock, q: AnalysisResolvedQu
   return table.rows.length;
 }
 
-export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossFilter[], t: TFunction, suppress: boolean): Promise<number> {
+// The whole report as one workbook: a summary sheet, then one sheet per data block.
+export async function buildReportWorkbook(
+  analysis: Analysis, cross: AnalysisCrossFilter[], t: TFunction, suppress: boolean,
+): Promise<{ buffer: ArrayBuffer; rowCount: number }> {
   const ExcelJs = await loadExcelJs();
   const wb = new ExcelJs.Workbook();
   wb.creator = analysis.ownerName || analysis.ownerEmail;
@@ -194,8 +197,13 @@ export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossF
     rowCount += table.rows.length;
     addSheet(wb, name, table);
   }
-  const buf = await wb.xlsx.writeBuffer();
-  download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${safeFilename(analysis.name)}.xlsx`);
+  const buffer = (await wb.xlsx.writeBuffer()) as ArrayBuffer;
+  return { buffer, rowCount };
+}
+
+export async function exportReportXlsx(analysis: Analysis, cross: AnalysisCrossFilter[], t: TFunction, suppress: boolean): Promise<number> {
+  const { buffer, rowCount } = await buildReportWorkbook(analysis, cross, t, suppress);
+  download(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${safeFilename(analysis.name)}.xlsx`);
   return rowCount;
 }
 
