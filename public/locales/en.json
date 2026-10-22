@@ -972,7 +972,7 @@
     },
     "estStatusCategoryRequired": "Est. Status Category is required when Est. Status is Inactive",
     "estStatusCategoryUnavailable": "Status categories could not be loaded. Please refresh and try again.",
-    "legalTypeUnavailable": "Legal types could not be loaded. Please refresh and try again.",
+    "statusLinkedToEnterprise": "This establishment is currently linked to an enterprise. Please remove it from the enterprise before changing its status.",    "legalTypeUnavailable": "Legal types could not be loaded. Please refresh and try again.",
     "sectorRequired": "Sector is required",
     "fields": {
       "sbrId": "SBR ID",

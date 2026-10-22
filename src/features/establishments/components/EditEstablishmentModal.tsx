@@ -258,6 +258,11 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
     );
   };
 
+  // An active establishment still linked to an enterprise cannot be made inactive from here.
+  const isDeactivatingLinkedEstablishment = () =>
+    !!frame && frame.ASSOCIATED_ENTERPRISE_ID != null && ed('EST_STATUS')
+    && frame.EST_STATUS === EST_STATUS_VALUES.ACTIVE && form.EST_STATUS === EST_STATUS_VALUES.INACTIVE;
+
   // Both name inputs resolve to the shared NAMES error so each still gets the invalid border
   const err = (f: string) => errors[f] ?? (NAMES_PAIR.includes(f) ? errors[NAMES_FIELD] : undefined);
   const inp = (f: string) => {
@@ -270,6 +275,14 @@ export function EditEstablishmentModal({ frame, open, onClose }: Props) {
   const handleSubmit = () => {
     if (!frame) return;
     if (!hasChanges()) { toast.info(t('common.noChangesDetected', { defaultValue: 'No changes detected.' })); return; }
+    if (isDeactivatingLinkedEstablishment()) {
+      const linkedMsg = t('editEstablishment.statusLinkedToEnterprise', {
+        defaultValue: 'This establishment is currently linked to an enterprise. Please remove it from the enterprise before changing its status.',
+      });
+      setErrors((prev) => ({ ...prev, EST_STATUS: linkedMsg }));
+      toast.error(linkedMsg);
+      return;
+    }
     if (!validate()) return;
     setShowCommentDialog(true);
   };
