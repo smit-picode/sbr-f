@@ -21,7 +21,7 @@ export const CONTACT_ROLE_FILTER_OPTIONS = [
 ];
 
 export const CONTACT_EDITABLE_FIELDS: string[] = [
-  'CONTACT_NAME', 'PHONE', 'MOBILE', 'EMAIL', 'WEBSITE', 'FAX', 'PO_BOX',
+  'CONTACT_NAME', 'PHONE', 'MOBILE', 'EMAIL', 'WEBSITE', 'FAX', 'PO_BOX', 'ROLE',
 ];
 export const isContactFieldEditable = (field: string): boolean => CONTACT_EDITABLE_FIELDS.includes(field);
 
