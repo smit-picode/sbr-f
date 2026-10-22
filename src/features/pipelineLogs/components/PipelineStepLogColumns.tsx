@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { PipelineStepLog, TFuncWithDefault } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { nullableText, formatDateTime } from '@/utils/format';
+import { nullableText, formatDateTime, formatNumber } from '@/utils/format';
 import { PIPELINE_STEP_EVENT_BADGE } from '../constants';
 
 export const getPipelineStepLogColumns = (t: TFuncWithDefault): ColumnDef<PipelineStepLog>[] => [
@@ -22,6 +22,11 @@ export const getPipelineStepLogColumns = (t: TFuncWithDefault): ColumnDef<Pipeli
     accessorKey: 'EVENT_AT',
     header: t('columns.EVENT_AT', { defaultValue: 'EVENT AT' }),
     cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatDateTime(getValue<string>())}</span>,
+  },
+  {
+    accessorKey: 'ROWS_AFFECTED',
+    header: t('columns.ROWS_AFFECTED', { defaultValue: 'ROWS' }),
+    cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatNumber(getValue<number | null>())}</span>,
   },
   {
     accessorKey: 'MESSAGE',

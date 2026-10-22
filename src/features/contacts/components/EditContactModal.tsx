@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateContactMutation } from '../api/contactsApi';
+import { useGetContactRoleValuesQuery } from '@/features/lookups/api/lookupsApi';
 import { ContactTagEditor } from '@/features/contactTags/components/TagControls';
 import { toast } from '@/utils/toast';
 import { pendingChangeText } from '@/utils/pendingChange';
@@ -53,6 +54,12 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [updateContact, { isLoading }] = useUpdateContactMutation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const { data: roleRes } = useGetContactRoleValuesQuery(undefined, { skip: !open });
+  const lookupRoles = roleRes?.data?.map((r) => r.CODE) ?? [];
+  const baseRoles = lookupRoles.length > 0 ? lookupRoles : CONTACT_ROLE_OPTIONS;
+  // A stored role outside the list stays selectable so the field still shows it.
+  const roleOptions = contact?.ROLE && !baseRoles.includes(contact.ROLE) ? [...baseRoles, contact.ROLE] : baseRoles;
 
   useEffect(() => {
     if (contact) {
@@ -106,8 +113,8 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
     if (str(form.WEBSITE).length > 500) e.WEBSITE = 'Max 500 characters allowed';
 
     // Enum validations for select fields
-    if (form.ROLE !== null && form.ROLE !== undefined && form.ROLE !== '' && !CONTACT_ROLE_OPTIONS.includes(String(form.ROLE))) {
-      e.ROLE = `Must be one of [${CONTACT_ROLE_OPTIONS.join(', ')}, or empty]`;
+    if (form.ROLE !== null && form.ROLE !== undefined && form.ROLE !== '' && !roleOptions.includes(String(form.ROLE))) {
+      e.ROLE = `Must be one of [${roleOptions.join(', ')}, or empty]`;
     }
     if (form.SOURCE_CODE !== null && form.SOURCE_CODE !== undefined && form.SOURCE_CODE !== '' && !CONTACT_SOURCE_CODE_OPTIONS.includes(String(form.SOURCE_CODE))) {
       e.SOURCE_CODE = `Must be one of [${CONTACT_SOURCE_CODE_OPTIONS.join(', ')}, or empty]`;
@@ -248,7 +255,7 @@ export function EditContactModal({ contact, open, onClose, onSaved }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
-                {CONTACT_ROLE_OPTIONS.map((option) => (
+                {roleOptions.map((option) => (
                   <SelectItem key={option} value={option}>{option}</SelectItem>
                 ))}
               </SelectContent>

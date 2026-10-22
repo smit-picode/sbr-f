@@ -23,6 +23,11 @@ export const lookupsApi = baseApi.injectEndpoints({
       providesTags: ['Lookups'],
       keepUnusedDataFor: 3600,
     }),
+    getContactRoleValues: builder.query<ApiResponse<LookupValue[]>, void>({
+      query: () => '/lookups/contact-roles',
+      providesTags: ['Lookups'],
+      keepUnusedDataFor: 3600,
+    }),
     getSectorTypeValues: builder.query<ApiResponse<LookupValue[]>, void>({
       query: () => '/lookups/sector-types',
       providesTags: ['Lookups'],
@@ -42,6 +47,7 @@ export const {
   useGetIsicValuesQuery,
   useGetIsic2DigitValuesQuery,
   useGetLegalTypeValuesQuery,
+  useGetContactRoleValuesQuery,
   useGetSectorTypeValuesQuery,
   useGetMainBranchValuesQuery,
 } = lookupsApi;

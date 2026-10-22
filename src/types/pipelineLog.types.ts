@@ -9,6 +9,7 @@ export interface PipelineRun {
   NOTES:                    string | null;
   CURRENT_STEP:             string | null;
   CURRENT_STEP_STARTED_AT:  string | null;
+  ROWS_AFFECTED:            number | null;
 }
 
 export interface PipelineRunFilters {
@@ -24,4 +25,5 @@ export interface PipelineStepLog {
   EVENT:     string;
   EVENT_AT:  string;
   MESSAGE:   string | null;
+  ROWS_AFFECTED: number | null;
 }

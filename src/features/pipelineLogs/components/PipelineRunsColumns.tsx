@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { PipelineRun, TFuncWithDefault } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { nullableText, formatDateTime } from '@/utils/format';
+import { nullableText, formatDateTime, formatNumber } from '@/utils/format';
 import { PIPELINE_STATUS_BADGE } from '../constants';
 import { ChevronRight } from 'lucide-react';
 
@@ -42,6 +42,11 @@ export const getPipelineRunsColumns = (onOpenRun: (runId: number) => void, t: TF
       const seconds = totalSeconds % 60;
       return <span className="text-sm text-slate-600">{minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}</span>;
     },
+  },
+  {
+    accessorKey: 'ROWS_AFFECTED',
+    header: t('columns.ROWS_AFFECTED', { defaultValue: 'ROWS' }),
+    cell: ({ getValue }) => <span className="text-sm text-slate-600">{formatNumber(getValue<number | null>())}</span>,
   },
   {
     accessorKey: 'CURRENT_STEP',

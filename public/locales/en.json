@@ -798,6 +798,7 @@
     "STEP_NAME": "Step",
     "EVENT": "Event",
     "EVENT_AT": "Event at",
+    "ROWS_AFFECTED": "Rows",
     "MESSAGE": "Message",
     "ASSOCIATED_ENTERPRISE_ID": "Enterprise",
     "ENTERPRISE_GROUP_ID": "Enterprise group",

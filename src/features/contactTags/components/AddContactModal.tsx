@@ -6,12 +6,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/utils/toast';
 import { useHasPermission } from '@/hooks/usePermission';
 import { useLanguage } from '@/i18n';
 import { useGetContactTagsQuery, useGetEstablishmentContactsQuery, useTagContactMutation } from '../api/contactTagsApi';
 import { tagErrorMessage, tagLabel } from './TagControls';
 import { useCreateContactMutation } from '@/features/contacts/api/contactsApi';
+import { useGetContactRoleValuesQuery } from '@/features/lookups/api/lookupsApi';
+import { CONTACT_ROLE_OPTIONS } from '@/features/contacts/constants';
 import type { CreateContactInput, AddContactField } from '@/types';
 
 const FIELDS: { key: AddContactField; i18n: string; max: number; wide?: boolean; type?: string }[] = [
@@ -41,6 +44,9 @@ export function AddContactModal({ sbrId, open, onClose, onCreated }: Props) {
   const [comment, setComment] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [createContact, { isLoading: creating }] = useCreateContactMutation();
+  const { data: roleRes } = useGetContactRoleValuesQuery(undefined, { skip: !open });
+  const roleCodes = roleRes?.data?.map((r) => r.CODE) ?? [];
+  const roleOptions = roleCodes.length > 0 ? roleCodes : CONTACT_ROLE_OPTIONS;
   const { isArabic } = useLanguage();
   const canTag = useHasPermission('contacts.tag');
   const [tagCodes, setTagCodes] = useState<string[]>([]);
@@ -120,12 +126,29 @@ export function AddContactModal({ sbrId, open, onClose, onCreated }: Props) {
           {FIELDS.map((f) => (
             <div key={f.key} className={`space-y-1 ${f.wide ? 'col-span-2' : ''}`}>
               <Label>{t(`editContact.fields.${f.i18n}`)}</Label>
-              <Input
-                type={f.type ?? 'text'}
-                value={form[f.key] ?? ''}
-                className={errors[f.key] ? 'border-red-400' : ''}
-                onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-              />
+              {f.key === 'ROLE' ? (
+                <Select
+                  value={form.ROLE ? form.ROLE : '__none__'}
+                  onValueChange={(v) => setForm((p) => ({ ...p, ROLE: v === '__none__' ? '' : v }))}
+                >
+                  <SelectTrigger className={`w-full shadow-none ${errors.ROLE ? 'border-red-400' : ''}`}>
+                    <SelectValue placeholder={t('editEstablishment.selectPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t('editEstablishment.selectPlaceholder')}</SelectItem>
+                    {roleOptions.map((option) => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  type={f.type ?? 'text'}
+                  value={form[f.key] ?? ''}
+                  className={errors[f.key] ? 'border-red-400' : ''}
+                  onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                />
+              )}
               {errors[f.key] && <p className="text-xs text-red-500">{errors[f.key]}</p>}
             </div>
           ))}

@@ -798,6 +798,7 @@
     "STEP_NAME": "الخطوة",
     "EVENT": "الحدث",
     "EVENT_AT": "وقت الحدث",
+    "ROWS_AFFECTED": "الصفوف",
     "MESSAGE": "الرسالة",
     "ASSOCIATED_ENTERPRISE_ID": "المؤسسة",
     "ENTERPRISE_GROUP_ID": "مجموعة المؤسسات",
